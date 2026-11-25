@@ -568,4 +568,3 @@ macro_rules! map_syntax_node {
         }
     };
 }
-pub(crate) use map_syntax_node;

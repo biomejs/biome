@@ -7,7 +7,6 @@ use crate::{
     GritSyntaxElementChildren as SyntaxElementChildren,
     GritSyntaxKind::{self as SyntaxKind, *},
     GritSyntaxList as SyntaxList, GritSyntaxNode as SyntaxNode, GritSyntaxToken as SyntaxToken,
-    macros::map_syntax_node,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
@@ -5218,20 +5217,7 @@ impl AstNode for GritAddOperation {
 }
 impl std::fmt::Debug for GritAddOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritAddOperation")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field("plus_token", &support::DebugSyntaxResult(self.plus_token()))
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritAddOperation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritAddOperation> for SyntaxNode {
@@ -5267,21 +5253,7 @@ impl AstNode for GritAnnotation {
 }
 impl std::fmt::Debug for GritAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritAnnotation")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritAnnotation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritAnnotation> for SyntaxNode {
@@ -5317,20 +5289,7 @@ impl AstNode for GritAssignmentAsPattern {
 }
 impl std::fmt::Debug for GritAssignmentAsPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritAssignmentAsPattern")
-                .field("container", &support::DebugSyntaxResult(self.container()))
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritAssignmentAsPattern").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritAssignmentAsPattern> for SyntaxNode {
@@ -5366,21 +5325,7 @@ impl AstNode for GritBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBacktickSnippetLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritBacktickSnippetLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBacktickSnippetLiteral> for SyntaxNode {
@@ -5416,18 +5361,7 @@ impl AstNode for GritBooleanLiteral {
 }
 impl std::fmt::Debug for GritBooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBooleanLiteral")
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("GritBooleanLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBooleanLiteral> for SyntaxNode {
@@ -5463,26 +5397,7 @@ impl AstNode for GritBracketedPattern {
 }
 impl std::fmt::Debug for GritBracketedPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBracketedPattern")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritBracketedPattern").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBracketedPattern> for SyntaxNode {
@@ -5518,26 +5433,7 @@ impl AstNode for GritBracketedPredicate {
 }
 impl std::fmt::Debug for GritBracketedPredicate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBracketedPredicate")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritBracketedPredicate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBracketedPredicate> for SyntaxNode {
@@ -5573,23 +5469,7 @@ impl AstNode for GritBubble {
 }
 impl std::fmt::Debug for GritBubble {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBubble")
-                .field(
-                    "bubble_token",
-                    &support::DebugSyntaxResult(self.bubble_token()),
-                )
-                .field("scope", &support::DebugOptionalElement(self.scope()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritBubble").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBubble> for SyntaxNode {
@@ -5625,26 +5505,7 @@ impl AstNode for GritBubbleScope {
 }
 impl std::fmt::Debug for GritBubbleScope {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritBubbleScope")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("variables", &self.variables())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritBubbleScope").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBubbleScope> for SyntaxNode {
@@ -5680,18 +5541,7 @@ impl AstNode for GritCodeSnippet {
 }
 impl std::fmt::Debug for GritCodeSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritCodeSnippet")
-                .field("source", &support::DebugSyntaxResult(self.source()))
-                .finish()
-        } else {
-            f.debug_struct("GritCodeSnippet").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritCodeSnippet> for SyntaxNode {
@@ -5727,26 +5577,7 @@ impl AstNode for GritCurlyPattern {
 }
 impl std::fmt::Debug for GritCurlyPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritCurlyPattern")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritCurlyPattern").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritCurlyPattern> for SyntaxNode {
@@ -5782,23 +5613,7 @@ impl AstNode for GritDivOperation {
 }
 impl std::fmt::Debug for GritDivOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritDivOperation")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritDivOperation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritDivOperation> for SyntaxNode {
@@ -5834,18 +5649,7 @@ impl AstNode for GritDot {
 }
 impl std::fmt::Debug for GritDot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritDot")
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .finish()
-        } else {
-            f.debug_struct("GritDot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritDot> for SyntaxNode {
@@ -5881,22 +5685,7 @@ impl AstNode for GritDotdotdot {
 }
 impl std::fmt::Debug for GritDotdotdot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritDotdotdot")
-                .field(
-                    "dotdotdot_token",
-                    &support::DebugSyntaxResult(self.dotdotdot_token()),
-                )
-                .field("pattern", &support::DebugOptionalElement(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritDotdotdot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritDotdotdot> for SyntaxNode {
@@ -5932,21 +5721,7 @@ impl AstNode for GritDoubleLiteral {
 }
 impl std::fmt::Debug for GritDoubleLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritDoubleLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritDoubleLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritDoubleLiteral> for SyntaxNode {
@@ -5982,21 +5757,7 @@ impl AstNode for GritEngineName {
 }
 impl std::fmt::Debug for GritEngineName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritEngineName")
-                .field(
-                    "engine_kind",
-                    &support::DebugSyntaxResult(self.engine_kind()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritEngineName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritEngineName> for SyntaxNode {
@@ -6032,22 +5793,7 @@ impl AstNode for GritEvery {
 }
 impl std::fmt::Debug for GritEvery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritEvery")
-                .field(
-                    "every_token",
-                    &support::DebugSyntaxResult(self.every_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritEvery").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritEvery> for SyntaxNode {
@@ -6083,30 +5829,7 @@ impl AstNode for GritFiles {
 }
 impl std::fmt::Debug for GritFiles {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritFiles")
-                .field(
-                    "multifile_token",
-                    &support::DebugSyntaxResult(self.multifile_token()),
-                )
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("files", &self.files())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritFiles").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritFiles> for SyntaxNode {
@@ -6142,32 +5865,7 @@ impl AstNode for GritFunctionDefinition {
 }
 impl std::fmt::Debug for GritFunctionDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritFunctionDefinition")
-                .field(
-                    "function_token",
-                    &support::DebugSyntaxResult(self.function_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("args", &self.args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field("body", &support::DebugSyntaxResult(self.body()))
-                .finish()
-        } else {
-            f.debug_struct("GritFunctionDefinition").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritFunctionDefinition> for SyntaxNode {
@@ -6203,21 +5901,7 @@ impl AstNode for GritIntLiteral {
 }
 impl std::fmt::Debug for GritIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritIntLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritIntLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritIntLiteral> for SyntaxNode {
@@ -6253,21 +5937,7 @@ impl AstNode for GritJavascriptBodyWrapper {
 }
 impl std::fmt::Debug for GritJavascriptBodyWrapper {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritJavascriptBodyWrapper")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritJavascriptBodyWrapper").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritJavascriptBodyWrapper> for SyntaxNode {
@@ -6303,36 +5973,7 @@ impl AstNode for GritJavascriptFunctionDefinition {
 }
 impl std::fmt::Debug for GritJavascriptFunctionDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritJavascriptFunctionDefinition")
-                .field(
-                    "function_token",
-                    &support::DebugSyntaxResult(self.function_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("args", &self.args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field("js_token", &support::DebugSyntaxResult(self.js_token()))
-                .field(
-                    "grit_javascript_body_wrapper",
-                    &support::DebugSyntaxResult(self.grit_javascript_body_wrapper()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritJavascriptFunctionDefinition").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritJavascriptFunctionDefinition> for SyntaxNode {
@@ -6368,27 +6009,7 @@ impl AstNode for GritLanguageDeclaration {
 }
 impl std::fmt::Debug for GritLanguageDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLanguageDeclaration")
-                .field(
-                    "language_token",
-                    &support::DebugSyntaxResult(self.language_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field("flavor", &support::DebugOptionalElement(self.flavor()))
-                .field(
-                    "semicolon_token",
-                    &support::DebugOptionalElement(self.semicolon_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLanguageDeclaration").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLanguageDeclaration> for SyntaxNode {
@@ -6424,26 +6045,7 @@ impl AstNode for GritLanguageFlavor {
 }
 impl std::fmt::Debug for GritLanguageFlavor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLanguageFlavor")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("flavors", &self.flavors())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLanguageFlavor").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLanguageFlavor> for SyntaxNode {
@@ -6479,21 +6081,7 @@ impl AstNode for GritLanguageFlavorKind {
 }
 impl std::fmt::Debug for GritLanguageFlavorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLanguageFlavorKind")
-                .field(
-                    "flavor_kind",
-                    &support::DebugSyntaxResult(self.flavor_kind()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLanguageFlavorKind").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLanguageFlavorKind> for SyntaxNode {
@@ -6529,21 +6117,7 @@ impl AstNode for GritLanguageName {
 }
 impl std::fmt::Debug for GritLanguageName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLanguageName")
-                .field(
-                    "language_kind",
-                    &support::DebugSyntaxResult(self.language_kind()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLanguageName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLanguageName> for SyntaxNode {
@@ -6579,22 +6153,7 @@ impl AstNode for GritLanguageSpecificSnippet {
 }
 impl std::fmt::Debug for GritLanguageSpecificSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLanguageSpecificSnippet")
-                .field("language", &support::DebugSyntaxResult(self.language()))
-                .field(
-                    "snippet_token",
-                    &support::DebugSyntaxResult(self.snippet_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLanguageSpecificSnippet").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLanguageSpecificSnippet> for SyntaxNode {
@@ -6630,31 +6189,7 @@ impl AstNode for GritLike {
 }
 impl std::fmt::Debug for GritLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLike")
-                .field("like_token", &support::DebugSyntaxResult(self.like_token()))
-                .field(
-                    "threshold",
-                    &support::DebugOptionalElement(self.threshold()),
-                )
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("example", &support::DebugSyntaxResult(self.example()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLike").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLike> for SyntaxNode {
@@ -6690,26 +6225,7 @@ impl AstNode for GritLikeThreshold {
 }
 impl std::fmt::Debug for GritLikeThreshold {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritLikeThreshold")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("threshold", &support::DebugSyntaxResult(self.threshold()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritLikeThreshold").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritLikeThreshold> for SyntaxNode {
@@ -6745,27 +6261,7 @@ impl AstNode for GritList {
 }
 impl std::fmt::Debug for GritList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritList")
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritList").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritList> for SyntaxNode {
@@ -6801,27 +6297,7 @@ impl AstNode for GritListAccessor {
 }
 impl std::fmt::Debug for GritListAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritListAccessor")
-                .field("list", &support::DebugSyntaxResult(self.list()))
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("index", &support::DebugSyntaxResult(self.index()))
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritListAccessor").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritListAccessor> for SyntaxNode {
@@ -6857,26 +6333,7 @@ impl AstNode for GritMap {
 }
 impl std::fmt::Debug for GritMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritMap")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("elements", &self.elements())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritMap").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritMap> for SyntaxNode {
@@ -6912,20 +6369,7 @@ impl AstNode for GritMapAccessor {
 }
 impl std::fmt::Debug for GritMapAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritMapAccessor")
-                .field("map", &support::DebugSyntaxResult(self.map()))
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .field("key", &support::DebugSyntaxResult(self.key()))
-                .finish()
-        } else {
-            f.debug_struct("GritMapAccessor").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritMapAccessor> for SyntaxNode {
@@ -6961,23 +6405,7 @@ impl AstNode for GritMapElement {
 }
 impl std::fmt::Debug for GritMapElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritMapElement")
-                .field("key", &support::DebugSyntaxResult(self.key()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("GritMapElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritMapElement> for SyntaxNode {
@@ -7013,23 +6441,7 @@ impl AstNode for GritModOperation {
 }
 impl std::fmt::Debug for GritModOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritModOperation")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "remainder_token",
-                    &support::DebugSyntaxResult(self.remainder_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritModOperation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritModOperation> for SyntaxNode {
@@ -7065,20 +6477,7 @@ impl AstNode for GritMulOperation {
 }
 impl std::fmt::Debug for GritMulOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritMulOperation")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritMulOperation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritMulOperation> for SyntaxNode {
@@ -7114,21 +6513,7 @@ impl AstNode for GritName {
 }
 impl std::fmt::Debug for GritName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritName> for SyntaxNode {
@@ -7164,20 +6549,7 @@ impl AstNode for GritNamedArg {
 }
 impl std::fmt::Debug for GritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritNamedArg")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritNamedArg").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritNamedArg> for SyntaxNode {
@@ -7213,21 +6585,7 @@ impl AstNode for GritNegativeIntLiteral {
 }
 impl std::fmt::Debug for GritNegativeIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritNegativeIntLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritNegativeIntLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritNegativeIntLiteral> for SyntaxNode {
@@ -7263,27 +6621,7 @@ impl AstNode for GritNodeLike {
 }
 impl std::fmt::Debug for GritNodeLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritNodeLike")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("named_args", &self.named_args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritNodeLike").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritNodeLike> for SyntaxNode {
@@ -7319,18 +6657,7 @@ impl AstNode for GritNot {
 }
 impl std::fmt::Debug for GritNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritNot")
-                .field("token", &support::DebugSyntaxResult(self.token()))
-                .finish()
-        } else {
-            f.debug_struct("GritNot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritNot> for SyntaxNode {
@@ -7366,23 +6693,7 @@ impl AstNode for GritPatternAccumulate {
 }
 impl std::fmt::Debug for GritPatternAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternAccumulate")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "add_assign_token",
-                    &support::DebugSyntaxResult(self.add_assign_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternAccumulate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternAccumulate> for SyntaxNode {
@@ -7418,22 +6729,7 @@ impl AstNode for GritPatternAfter {
 }
 impl std::fmt::Debug for GritPatternAfter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternAfter")
-                .field(
-                    "after_token",
-                    &support::DebugSyntaxResult(self.after_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternAfter").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternAfter> for SyntaxNode {
@@ -7469,27 +6765,7 @@ impl AstNode for GritPatternAnd {
 }
 impl std::fmt::Debug for GritPatternAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternAnd")
-                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternAnd").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternAnd> for SyntaxNode {
@@ -7525,27 +6801,7 @@ impl AstNode for GritPatternAny {
 }
 impl std::fmt::Debug for GritPatternAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternAny")
-                .field("any_token", &support::DebugSyntaxResult(self.any_token()))
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternAny").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternAny> for SyntaxNode {
@@ -7581,20 +6837,7 @@ impl AstNode for GritPatternAs {
 }
 impl std::fmt::Debug for GritPatternAs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternAs")
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-                .field("variable", &support::DebugSyntaxResult(self.variable()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternAs").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternAs> for SyntaxNode {
@@ -7630,22 +6873,7 @@ impl AstNode for GritPatternBefore {
 }
 impl std::fmt::Debug for GritPatternBefore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternBefore")
-                .field(
-                    "before_token",
-                    &support::DebugSyntaxResult(self.before_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternBefore").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternBefore> for SyntaxNode {
@@ -7681,26 +6909,7 @@ impl AstNode for GritPatternContains {
 }
 impl std::fmt::Debug for GritPatternContains {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternContains")
-                .field(
-                    "contains_token",
-                    &support::DebugSyntaxResult(self.contains_token()),
-                )
-                .field("contains", &support::DebugSyntaxResult(self.contains()))
-                .field(
-                    "until_clause",
-                    &support::DebugOptionalElement(self.until_clause()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternContains").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternContains> for SyntaxNode {
@@ -7736,37 +6945,7 @@ impl AstNode for GritPatternDefinition {
 }
 impl std::fmt::Debug for GritPatternDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternDefinition")
-                .field(
-                    "visibility_token",
-                    &support::DebugOptionalElement(self.visibility_token()),
-                )
-                .field(
-                    "pattern_token",
-                    &support::DebugSyntaxResult(self.pattern_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("args", &self.args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field("language", &support::DebugOptionalElement(self.language()))
-                .field("body", &support::DebugSyntaxResult(self.body()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternDefinition").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternDefinition> for SyntaxNode {
@@ -7802,26 +6981,7 @@ impl AstNode for GritPatternDefinitionBody {
 }
 impl std::fmt::Debug for GritPatternDefinitionBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternDefinitionBody")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternDefinitionBody").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternDefinitionBody> for SyntaxNode {
@@ -7857,22 +7017,7 @@ impl AstNode for GritPatternElseClause {
 }
 impl std::fmt::Debug for GritPatternElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternElseClause")
-                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-                .field(
-                    "else_pattern",
-                    &support::DebugSyntaxResult(self.else_pattern()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternElseClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternElseClause> for SyntaxNode {
@@ -7908,38 +7053,7 @@ impl AstNode for GritPatternIfElse {
 }
 impl std::fmt::Debug for GritPatternIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternIfElse")
-                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field(
-                    "if_predicate",
-                    &support::DebugSyntaxResult(self.if_predicate()),
-                )
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field(
-                    "then_pattern",
-                    &support::DebugSyntaxResult(self.then_pattern()),
-                )
-                .field(
-                    "else_clause",
-                    &support::DebugOptionalElement(self.else_clause()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternIfElse").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternIfElse> for SyntaxNode {
@@ -7975,22 +7089,7 @@ impl AstNode for GritPatternIncludes {
 }
 impl std::fmt::Debug for GritPatternIncludes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternIncludes")
-                .field(
-                    "includes_token",
-                    &support::DebugSyntaxResult(self.includes_token()),
-                )
-                .field("includes", &support::DebugSyntaxResult(self.includes()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternIncludes").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternIncludes> for SyntaxNode {
@@ -8026,23 +7125,7 @@ impl AstNode for GritPatternLimit {
 }
 impl std::fmt::Debug for GritPatternLimit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternLimit")
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field(
-                    "limit_token",
-                    &support::DebugSyntaxResult(self.limit_token()),
-                )
-                .field("limit", &support::DebugSyntaxResult(self.limit()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternLimit").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternLimit> for SyntaxNode {
@@ -8078,22 +7161,7 @@ impl AstNode for GritPatternMaybe {
 }
 impl std::fmt::Debug for GritPatternMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternMaybe")
-                .field(
-                    "maybe_token",
-                    &support::DebugSyntaxResult(self.maybe_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternMaybe").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternMaybe> for SyntaxNode {
@@ -8129,19 +7197,7 @@ impl AstNode for GritPatternNot {
 }
 impl std::fmt::Debug for GritPatternNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternNot")
-                .field("not", &support::DebugSyntaxResult(self.not()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternNot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternNot> for SyntaxNode {
@@ -8177,27 +7233,7 @@ impl AstNode for GritPatternOr {
 }
 impl std::fmt::Debug for GritPatternOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternOr")
-                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternOr").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternOr> for SyntaxNode {
@@ -8233,30 +7269,7 @@ impl AstNode for GritPatternOrElse {
 }
 impl std::fmt::Debug for GritPatternOrElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternOrElse")
-                .field(
-                    "orelse_token",
-                    &support::DebugSyntaxResult(self.orelse_token()),
-                )
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("patterns", &self.patterns())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternOrElse").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternOrElse> for SyntaxNode {
@@ -8292,22 +7305,7 @@ impl AstNode for GritPatternUntilClause {
 }
 impl std::fmt::Debug for GritPatternUntilClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternUntilClause")
-                .field(
-                    "until_token",
-                    &support::DebugSyntaxResult(self.until_token()),
-                )
-                .field("until", &support::DebugSyntaxResult(self.until()))
-                .finish()
-        } else {
-            f.debug_struct("GritPatternUntilClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternUntilClause> for SyntaxNode {
@@ -8343,26 +7341,7 @@ impl AstNode for GritPatternWhere {
 }
 impl std::fmt::Debug for GritPatternWhere {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPatternWhere")
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field(
-                    "where_token",
-                    &support::DebugSyntaxResult(self.where_token()),
-                )
-                .field(
-                    "side_condition",
-                    &support::DebugSyntaxResult(self.side_condition()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPatternWhere").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPatternWhere> for SyntaxNode {
@@ -8398,23 +7377,7 @@ impl AstNode for GritPredicateAccumulate {
 }
 impl std::fmt::Debug for GritPredicateAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateAccumulate")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "add_assign_token",
-                    &support::DebugSyntaxResult(self.add_assign_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateAccumulate").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateAccumulate> for SyntaxNode {
@@ -8450,30 +7413,7 @@ impl AstNode for GritPredicateAnd {
 }
 impl std::fmt::Debug for GritPredicateAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateAnd")
-                .field(
-                    "and_token",
-                    &support::DebugOptionalElement(self.and_token()),
-                )
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("predicates", &self.predicates())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateAnd").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateAnd> for SyntaxNode {
@@ -8509,27 +7449,7 @@ impl AstNode for GritPredicateAny {
 }
 impl std::fmt::Debug for GritPredicateAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateAny")
-                .field("any_token", &support::DebugSyntaxResult(self.any_token()))
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("predicates", &self.predicates())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateAny").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateAny> for SyntaxNode {
@@ -8565,20 +7485,7 @@ impl AstNode for GritPredicateAssignment {
 }
 impl std::fmt::Debug for GritPredicateAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateAssignment")
-                .field("container", &support::DebugSyntaxResult(self.container()))
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateAssignment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateAssignment> for SyntaxNode {
@@ -8614,27 +7521,7 @@ impl AstNode for GritPredicateCall {
 }
 impl std::fmt::Debug for GritPredicateCall {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateCall")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("named_args", &self.named_args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateCall").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateCall> for SyntaxNode {
@@ -8670,26 +7557,7 @@ impl AstNode for GritPredicateCurly {
 }
 impl std::fmt::Debug for GritPredicateCurly {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateCurly")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("predicates", &self.predicates())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateCurly").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateCurly> for SyntaxNode {
@@ -8725,32 +7593,7 @@ impl AstNode for GritPredicateDefinition {
 }
 impl std::fmt::Debug for GritPredicateDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateDefinition")
-                .field(
-                    "predicate_token",
-                    &support::DebugSyntaxResult(self.predicate_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("args", &self.args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field("body", &support::DebugSyntaxResult(self.body()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateDefinition").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateDefinition> for SyntaxNode {
@@ -8786,22 +7629,7 @@ impl AstNode for GritPredicateElseClause {
 }
 impl std::fmt::Debug for GritPredicateElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateElseClause")
-                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-                .field(
-                    "else_predicate",
-                    &support::DebugSyntaxResult(self.else_predicate()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateElseClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateElseClause> for SyntaxNode {
@@ -8837,23 +7665,7 @@ impl AstNode for GritPredicateEqual {
 }
 impl std::fmt::Debug for GritPredicateEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateEqual")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "equality_token",
-                    &support::DebugSyntaxResult(self.equality_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateEqual").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateEqual> for SyntaxNode {
@@ -8889,23 +7701,7 @@ impl AstNode for GritPredicateGreater {
 }
 impl std::fmt::Debug for GritPredicateGreater {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateGreater")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateGreater").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateGreater> for SyntaxNode {
@@ -8941,23 +7737,7 @@ impl AstNode for GritPredicateGreaterEqual {
 }
 impl std::fmt::Debug for GritPredicateGreaterEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateGreaterEqual")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "greater_than_equal_token",
-                    &support::DebugSyntaxResult(self.greater_than_equal_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateGreaterEqual").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateGreaterEqual> for SyntaxNode {
@@ -8993,38 +7773,7 @@ impl AstNode for GritPredicateIfElse {
 }
 impl std::fmt::Debug for GritPredicateIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateIfElse")
-                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field(
-                    "if_predicate",
-                    &support::DebugSyntaxResult(self.if_predicate()),
-                )
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field(
-                    "then_predicate",
-                    &support::DebugSyntaxResult(self.then_predicate()),
-                )
-                .field(
-                    "else_clause",
-                    &support::DebugOptionalElement(self.else_clause()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateIfElse").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateIfElse> for SyntaxNode {
@@ -9060,23 +7809,7 @@ impl AstNode for GritPredicateLess {
 }
 impl std::fmt::Debug for GritPredicateLess {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateLess")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateLess").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateLess> for SyntaxNode {
@@ -9112,23 +7845,7 @@ impl AstNode for GritPredicateLessEqual {
 }
 impl std::fmt::Debug for GritPredicateLessEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateLessEqual")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "less_than_equal_token",
-                    &support::DebugSyntaxResult(self.less_than_equal_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateLessEqual").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateLessEqual> for SyntaxNode {
@@ -9164,23 +7881,7 @@ impl AstNode for GritPredicateMatch {
 }
 impl std::fmt::Debug for GritPredicateMatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateMatch")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "match_token",
-                    &support::DebugSyntaxResult(self.match_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateMatch").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateMatch> for SyntaxNode {
@@ -9216,22 +7917,7 @@ impl AstNode for GritPredicateMaybe {
 }
 impl std::fmt::Debug for GritPredicateMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateMaybe")
-                .field(
-                    "maybe_token",
-                    &support::DebugSyntaxResult(self.maybe_token()),
-                )
-                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateMaybe").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateMaybe> for SyntaxNode {
@@ -9267,19 +7953,7 @@ impl AstNode for GritPredicateNot {
 }
 impl std::fmt::Debug for GritPredicateNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateNot")
-                .field("not", &support::DebugSyntaxResult(self.not()))
-                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateNot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateNot> for SyntaxNode {
@@ -9315,23 +7989,7 @@ impl AstNode for GritPredicateNotEqual {
 }
 impl std::fmt::Debug for GritPredicateNotEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateNotEqual")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "inequality_token",
-                    &support::DebugSyntaxResult(self.inequality_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateNotEqual").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateNotEqual> for SyntaxNode {
@@ -9367,27 +8025,7 @@ impl AstNode for GritPredicateOr {
 }
 impl std::fmt::Debug for GritPredicateOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateOr")
-                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("predicates", &self.predicates())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateOr").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateOr> for SyntaxNode {
@@ -9423,22 +8061,7 @@ impl AstNode for GritPredicateReturn {
 }
 impl std::fmt::Debug for GritPredicateReturn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateReturn")
-                .field(
-                    "return_token",
-                    &support::DebugSyntaxResult(self.return_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateReturn").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateReturn> for SyntaxNode {
@@ -9474,27 +8097,7 @@ impl AstNode for GritPredicateRewrite {
 }
 impl std::fmt::Debug for GritPredicateRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritPredicateRewrite")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "annotation",
-                    &support::DebugOptionalElement(self.annotation()),
-                )
-                .field(
-                    "fat_arrow_token",
-                    &support::DebugSyntaxResult(self.fat_arrow_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritPredicateRewrite").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritPredicateRewrite> for SyntaxNode {
@@ -9530,21 +8133,7 @@ impl AstNode for GritRawBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritRawBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRawBacktickSnippetLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritRawBacktickSnippetLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRawBacktickSnippetLiteral> for SyntaxNode {
@@ -9580,21 +8169,7 @@ impl AstNode for GritRegexLiteral {
 }
 impl std::fmt::Debug for GritRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRegexLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritRegexLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRegexLiteral> for SyntaxNode {
@@ -9630,22 +8205,7 @@ impl AstNode for GritRegexPattern {
 }
 impl std::fmt::Debug for GritRegexPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRegexPattern")
-                .field("regex", &support::DebugSyntaxResult(self.regex()))
-                .field(
-                    "variables",
-                    &support::DebugOptionalElement(self.variables()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritRegexPattern").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRegexPattern> for SyntaxNode {
@@ -9681,26 +8241,7 @@ impl AstNode for GritRegexPatternVariables {
 }
 impl std::fmt::Debug for GritRegexPatternVariables {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRegexPatternVariables")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("args", &self.args())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritRegexPatternVariables").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRegexPatternVariables> for SyntaxNode {
@@ -9736,27 +8277,7 @@ impl AstNode for GritRewrite {
 }
 impl std::fmt::Debug for GritRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRewrite")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "annotation",
-                    &support::DebugOptionalElement(self.annotation()),
-                )
-                .field(
-                    "fat_arrow_token",
-                    &support::DebugSyntaxResult(self.fat_arrow_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritRewrite").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRewrite> for SyntaxNode {
@@ -9792,25 +8313,7 @@ impl AstNode for GritRoot {
 }
 impl std::fmt::Debug for GritRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritRoot")
-                .field(
-                    "bom_token",
-                    &support::DebugOptionalElement(self.bom_token()),
-                )
-                .field("version", &support::DebugOptionalElement(self.version()))
-                .field("language", &support::DebugOptionalElement(self.language()))
-                .field("definitions", &self.definitions())
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("GritRoot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritRoot> for SyntaxNode {
@@ -9846,30 +8349,7 @@ impl AstNode for GritSequential {
 }
 impl std::fmt::Debug for GritSequential {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritSequential")
-                .field(
-                    "sequential_token",
-                    &support::DebugSyntaxResult(self.sequential_token()),
-                )
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("sequential", &self.sequential())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritSequential").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritSequential> for SyntaxNode {
@@ -9905,21 +8385,7 @@ impl AstNode for GritSnippetRegexLiteral {
 }
 impl std::fmt::Debug for GritSnippetRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritSnippetRegexLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritSnippetRegexLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritSnippetRegexLiteral> for SyntaxNode {
@@ -9955,19 +8421,7 @@ impl AstNode for GritSome {
 }
 impl std::fmt::Debug for GritSome {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritSome")
-                .field("some_token", &support::DebugSyntaxResult(self.some_token()))
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .finish()
-        } else {
-            f.debug_struct("GritSome").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritSome> for SyntaxNode {
@@ -10003,21 +8457,7 @@ impl AstNode for GritStringLiteral {
 }
 impl std::fmt::Debug for GritStringLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritStringLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritStringLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritStringLiteral> for SyntaxNode {
@@ -10053,23 +8493,7 @@ impl AstNode for GritSubOperation {
 }
 impl std::fmt::Debug for GritSubOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritSubOperation")
-                .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "minus_token",
-                    &support::DebugSyntaxResult(self.minus_token()),
-                )
-                .field("right", &support::DebugSyntaxResult(self.right()))
-                .finish()
-        } else {
-            f.debug_struct("GritSubOperation").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritSubOperation> for SyntaxNode {
@@ -10105,21 +8529,7 @@ impl AstNode for GritUndefinedLiteral {
 }
 impl std::fmt::Debug for GritUndefinedLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritUndefinedLiteral")
-                .field(
-                    "token_token",
-                    &support::DebugSyntaxResult(self.token_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritUndefinedLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritUndefinedLiteral> for SyntaxNode {
@@ -10155,21 +8565,7 @@ impl AstNode for GritUnderscore {
 }
 impl std::fmt::Debug for GritUnderscore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritUnderscore")
-                .field(
-                    "token_token",
-                    &support::DebugSyntaxResult(self.token_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritUnderscore").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritUnderscore> for SyntaxNode {
@@ -10205,21 +8601,7 @@ impl AstNode for GritVariable {
 }
 impl std::fmt::Debug for GritVariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritVariable")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritVariable").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritVariable> for SyntaxNode {
@@ -10255,34 +8637,7 @@ impl AstNode for GritVersion {
 }
 impl std::fmt::Debug for GritVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritVersion")
-                .field(
-                    "engine_token",
-                    &support::DebugSyntaxResult(self.engine_token()),
-                )
-                .field(
-                    "engine_name",
-                    &support::DebugSyntaxResult(self.engine_name()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("version", &support::DebugSyntaxResult(self.version()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritVersion").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritVersion> for SyntaxNode {
@@ -10318,26 +8673,7 @@ impl AstNode for GritWithin {
 }
 impl std::fmt::Debug for GritWithin {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("GritWithin")
-                .field(
-                    "within_token",
-                    &support::DebugSyntaxResult(self.within_token()),
-                )
-                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-                .field(
-                    "until_clause",
-                    &support::DebugOptionalElement(self.until_clause()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("GritWithin").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritWithin> for SyntaxNode {
@@ -10410,11 +8746,7 @@ impl AstNode for AnyGritCodeSnippetSource {
 }
 impl std::fmt::Debug for AnyGritCodeSnippetSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBacktickSnippetLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritLanguageSpecificSnippet(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritRawBacktickSnippetLiteral(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritCodeSnippetSource> for SyntaxNode {
@@ -10493,12 +8825,7 @@ impl AstNode for AnyGritContainer {
 }
 impl std::fmt::Debug for AnyGritContainer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusContainer(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritListAccessor(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMapAccessor(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritVariable(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritContainer> for SyntaxNode {
@@ -10608,14 +8935,7 @@ impl AstNode for AnyGritDefinition {
 }
 impl std::fmt::Debug for AnyGritDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBogusDefinition(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritJavascriptFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternDefinition(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateDefinition(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritDefinition> for SyntaxNode {
@@ -10683,10 +9003,7 @@ impl AstNode for AnyGritLanguageDeclaration {
 }
 impl std::fmt::Debug for AnyGritLanguageDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusLanguageDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritLanguageDeclaration(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritLanguageDeclaration> for SyntaxNode {
@@ -10750,10 +9067,7 @@ impl AstNode for AnyGritLanguageFlavorKind {
 }
 impl std::fmt::Debug for AnyGritLanguageFlavorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusLanguageFlavorKind(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritLanguageFlavorKind(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritLanguageFlavorKind> for SyntaxNode {
@@ -10812,10 +9126,7 @@ impl AstNode for AnyGritLanguageName {
 }
 impl std::fmt::Debug for AnyGritLanguageName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusLanguageName(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritLanguageName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritLanguageName> for SyntaxNode {
@@ -10874,10 +9185,7 @@ impl AstNode for AnyGritListAccessorSubject {
 }
 impl std::fmt::Debug for AnyGritListAccessorSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritList(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritListAccessorSubject> for SyntaxNode {
@@ -10948,11 +9256,7 @@ impl AstNode for AnyGritListIndex {
 }
 impl std::fmt::Debug for AnyGritListIndex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritIntLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritNegativeIntLiteral(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritListIndex> for SyntaxNode {
@@ -11013,10 +9317,7 @@ impl AstNode for AnyGritListPattern {
 }
 impl std::fmt::Debug for AnyGritListPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritDotdotdot(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritListPattern> for SyntaxNode {
@@ -11147,17 +9448,7 @@ impl AstNode for AnyGritLiteral {
 }
 impl std::fmt::Debug for AnyGritLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBooleanLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritCodeSnippet(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritDoubleLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritIntLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritList(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMap(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritStringLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritUndefinedLiteral(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritLiteral> for SyntaxNode {
@@ -11223,10 +9514,7 @@ impl AstNode for AnyGritMapAccessorSubject {
 }
 impl std::fmt::Debug for AnyGritMapAccessorSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMap(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritMapAccessorSubject> for SyntaxNode {
@@ -11283,10 +9571,7 @@ impl AstNode for AnyGritMapElement {
 }
 impl std::fmt::Debug for AnyGritMapElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusMapElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMapElement(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritMapElement> for SyntaxNode {
@@ -11342,10 +9627,7 @@ impl AstNode for AnyGritMapKey {
 }
 impl std::fmt::Debug for AnyGritMapKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritName(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritVariable(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritMapKey> for SyntaxNode {
@@ -11405,10 +9687,7 @@ impl AstNode for AnyGritMaybeCurlyPattern {
 }
 impl std::fmt::Debug for AnyGritMaybeCurlyPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritCurlyPattern(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritMaybeCurlyPattern> for SyntaxNode {
@@ -11477,11 +9756,7 @@ impl AstNode for AnyGritMaybeNamedArg {
 }
 impl std::fmt::Debug for AnyGritMaybeNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBogusNamedArg(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritNamedArg(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritMaybeNamedArg> for SyntaxNode {
@@ -11916,47 +10191,7 @@ impl AstNode for AnyGritPattern {
 }
 impl std::fmt::Debug for AnyGritPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritAddOperation(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritAssignmentAsPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBogusPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBracketedPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBubble(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritDivOperation(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritDot(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritEvery(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritFiles(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritLike(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritListAccessor(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMapAccessor(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritModOperation(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritMulOperation(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritNodeLike(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternAccumulate(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternAfter(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternAnd(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternAny(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternAs(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternBefore(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternContains(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternIfElse(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternIncludes(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternLimit(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternMaybe(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternNot(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternOr(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternOrElse(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPatternWhere(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritRegexPattern(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritRewrite(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritSequential(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritSome(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritSubOperation(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritUnderscore(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritVariable(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritWithin(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritPattern> for SyntaxNode {
@@ -12256,29 +10491,7 @@ impl AstNode for AnyGritPredicate {
 }
 impl std::fmt::Debug for AnyGritPredicate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusPredicate(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBooleanLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritBracketedPredicate(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateAccumulate(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateAnd(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateAny(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateAssignment(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateCall(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateEqual(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateGreater(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateGreaterEqual(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateIfElse(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateLess(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateLessEqual(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateMatch(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateMaybe(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateNot(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateNotEqual(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateOr(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateReturn(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritPredicateRewrite(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritPredicate> for SyntaxNode {
@@ -12352,10 +10565,7 @@ impl AstNode for AnyGritPredicateMatchSubject {
 }
 impl std::fmt::Debug for AnyGritPredicateMatchSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyGritLiteral(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritPredicateMatchSubject> for SyntaxNode {
@@ -12414,10 +10624,7 @@ impl AstNode for AnyGritRegex {
 }
 impl std::fmt::Debug for AnyGritRegex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritRegexLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritSnippetRegexLiteral(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritRegex> for SyntaxNode {
@@ -12474,10 +10681,7 @@ impl AstNode for AnyGritVersion {
 }
 impl std::fmt::Debug for AnyGritVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::GritBogusVersion(it) => std::fmt::Debug::fmt(it, f),
-            Self::GritVersion(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyGritVersion> for SyntaxNode {
@@ -13120,9 +11324,7 @@ impl AstNode for GritBogus {
 }
 impl std::fmt::Debug for GritBogus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogus")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogus> for SyntaxNode {
@@ -13176,9 +11378,7 @@ impl AstNode for GritBogusContainer {
 }
 impl std::fmt::Debug for GritBogusContainer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusContainer")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusContainer> for SyntaxNode {
@@ -13232,9 +11432,7 @@ impl AstNode for GritBogusDefinition {
 }
 impl std::fmt::Debug for GritBogusDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusDefinition")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusDefinition> for SyntaxNode {
@@ -13288,9 +11486,7 @@ impl AstNode for GritBogusLanguageDeclaration {
 }
 impl std::fmt::Debug for GritBogusLanguageDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusLanguageDeclaration")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusLanguageDeclaration> for SyntaxNode {
@@ -13344,9 +11540,7 @@ impl AstNode for GritBogusLanguageFlavorKind {
 }
 impl std::fmt::Debug for GritBogusLanguageFlavorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusLanguageFlavorKind")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusLanguageFlavorKind> for SyntaxNode {
@@ -13400,9 +11594,7 @@ impl AstNode for GritBogusLanguageName {
 }
 impl std::fmt::Debug for GritBogusLanguageName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusLanguageName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusLanguageName> for SyntaxNode {
@@ -13456,9 +11648,7 @@ impl AstNode for GritBogusLiteral {
 }
 impl std::fmt::Debug for GritBogusLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusLiteral")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusLiteral> for SyntaxNode {
@@ -13512,9 +11702,7 @@ impl AstNode for GritBogusMapElement {
 }
 impl std::fmt::Debug for GritBogusMapElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusMapElement")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusMapElement> for SyntaxNode {
@@ -13568,9 +11756,7 @@ impl AstNode for GritBogusNamedArg {
 }
 impl std::fmt::Debug for GritBogusNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusNamedArg")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusNamedArg> for SyntaxNode {
@@ -13624,9 +11810,7 @@ impl AstNode for GritBogusPattern {
 }
 impl std::fmt::Debug for GritBogusPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusPattern")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusPattern> for SyntaxNode {
@@ -13680,9 +11864,7 @@ impl AstNode for GritBogusPredicate {
 }
 impl std::fmt::Debug for GritBogusPredicate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusPredicate")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusPredicate> for SyntaxNode {
@@ -13736,9 +11918,7 @@ impl AstNode for GritBogusVersion {
 }
 impl std::fmt::Debug for GritBogusVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusVersion")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<GritBogusVersion> for SyntaxNode {
@@ -13816,8 +11996,7 @@ impl AstSeparatedList for GritDefinitionList {
 }
 impl Debug for GritDefinitionList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritDefinitionList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritDefinitionList {
@@ -13898,8 +12077,7 @@ impl AstSeparatedList for GritLanguageFlavorList {
 }
 impl Debug for GritLanguageFlavorList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritLanguageFlavorList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritLanguageFlavorList {
@@ -13980,8 +12158,7 @@ impl AstSeparatedList for GritListPatternList {
 }
 impl Debug for GritListPatternList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritListPatternList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritListPatternList {
@@ -14062,8 +12239,7 @@ impl AstSeparatedList for GritMapElementList {
 }
 impl Debug for GritMapElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritMapElementList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritMapElementList {
@@ -14144,8 +12320,7 @@ impl AstSeparatedList for GritNamedArgList {
 }
 impl Debug for GritNamedArgList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritNamedArgList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritNamedArgList {
@@ -14226,8 +12401,7 @@ impl AstSeparatedList for GritPatternList {
 }
 impl Debug for GritPatternList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritPatternList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritPatternList {
@@ -14308,8 +12482,7 @@ impl AstSeparatedList for GritPredicateList {
 }
 impl Debug for GritPredicateList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritPredicateList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritPredicateList {
@@ -14390,8 +12563,7 @@ impl AstSeparatedList for GritVariableList {
 }
 impl Debug for GritVariableList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritVariableList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for GritVariableList {
@@ -14421,10 +12593,265 @@ struct DebugSyntaxElement(SyntaxElement);
 impl Debug for DebugSyntaxElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
-            SyntaxElement::Node(node) => {
-                map_syntax_node ! (node . clone () , node => std :: fmt :: Debug :: fmt (& node , f))
-            }
+            SyntaxElement::Node(node) => debug_syntax_node(node, f),
             SyntaxElement::Token(token) => Debug::fmt(token, f),
         }
     }
+}
+#[doc = r" Describes how the nodes of this language are printed."]
+struct DebugShapes;
+impl support::DebugNodeShapes for DebugShapes {
+    type Language = Language;
+    const SHAPES: &'static str = concat!(
+        "nGritAddOperation,left,plus_token,right\n",
+        "nGritAnnotation,value_token\n",
+        "nGritAssignmentAsPattern,container,eq_token,pattern\n",
+        "nGritBacktickSnippetLiteral,value_token\n",
+        "nGritBooleanLiteral,value\n",
+        "nGritBracketedPattern,l_paren_token,pattern,r_paren_token\n",
+        "nGritBracketedPredicate,l_paren_token,predicate,r_paren_token\n",
+        "nGritBubble,bubble_token,?scope,pattern\n",
+        "nGritBubbleScope,l_paren_token,variables,r_paren_token\n",
+        "nGritCodeSnippet,source\n",
+        "nGritCurlyPattern,l_curly_token,pattern,r_curly_token\n",
+        "nGritDivOperation,left,slash_token,right\n",
+        "nGritDot,dot_token\n",
+        "nGritDotdotdot,dotdotdot_token,?pattern\n",
+        "nGritDoubleLiteral,value_token\n",
+        "nGritEngineName,engine_kind\n",
+        "nGritEvery,every_token,pattern\n",
+        "nGritFiles,multifile_token,l_curly_token,files,r_curly_token\n",
+        "nGritFunctionDefinition,function_token,name,l_paren_token,args,r_paren_token,body\n",
+        "nGritIntLiteral,value_token\n",
+        "nGritJavascriptBodyWrapper,value_token\n",
+        "nGritJavascriptFunctionDefinition,function_token,name,l_paren_token,args,r_paren_token,js_token,grit_javascript_body_wrapper\n",
+        "nGritLanguageDeclaration,language_token,name,?flavor,?semicolon_token\n",
+        "nGritLanguageFlavor,l_paren_token,flavors,r_paren_token\n",
+        "nGritLanguageFlavorKind,flavor_kind\n",
+        "nGritLanguageName,language_kind\n",
+        "nGritLanguageSpecificSnippet,language,snippet_token\n",
+        "nGritLike,like_token,?threshold,l_curly_token,example,r_curly_token\n",
+        "nGritLikeThreshold,l_paren_token,threshold,r_paren_token\n",
+        "nGritList,?name,l_brack_token,patterns,r_brack_token\n",
+        "nGritListAccessor,list,l_brack_token,index,r_brack_token\n",
+        "nGritMap,l_curly_token,elements,r_curly_token\n",
+        "nGritMapAccessor,map,dot_token,key\n",
+        "nGritMapElement,key,colon_token,value\n",
+        "nGritModOperation,left,remainder_token,right\n",
+        "nGritMulOperation,left,star_token,right\n",
+        "nGritName,value_token\n",
+        "nGritNamedArg,name,eq_token,pattern\n",
+        "nGritNegativeIntLiteral,value_token\n",
+        "nGritNodeLike,name,l_paren_token,named_args,r_paren_token\n",
+        "nGritNot,token\n",
+        "nGritPatternAccumulate,left,add_assign_token,right\n",
+        "nGritPatternAfter,after_token,pattern\n",
+        "nGritPatternAnd,and_token,l_curly_token,patterns,r_curly_token\n",
+        "nGritPatternAny,any_token,l_curly_token,patterns,r_curly_token\n",
+        "nGritPatternAs,pattern,as_token,variable\n",
+        "nGritPatternBefore,before_token,pattern\n",
+        "nGritPatternContains,contains_token,contains,?until_clause\n",
+        "nGritPatternDefinition,?visibility_token,pattern_token,name,l_paren_token,args,r_paren_token,?language,body\n",
+        "nGritPatternDefinitionBody,l_curly_token,patterns,r_curly_token\n",
+        "nGritPatternElseClause,else_token,else_pattern\n",
+        "nGritPatternIfElse,if_token,l_paren_token,if_predicate,r_paren_token,then_pattern,?else_clause\n",
+        "nGritPatternIncludes,includes_token,includes\n",
+        "nGritPatternLimit,pattern,limit_token,limit\n",
+        "nGritPatternMaybe,maybe_token,pattern\n",
+        "nGritPatternNot,not,pattern\n",
+        "nGritPatternOr,or_token,l_curly_token,patterns,r_curly_token\n",
+        "nGritPatternOrElse,orelse_token,l_curly_token,patterns,r_curly_token\n",
+        "nGritPatternUntilClause,until_token,until\n",
+        "nGritPatternWhere,pattern,where_token,side_condition\n",
+        "nGritPredicateAccumulate,left,add_assign_token,right\n",
+        "nGritPredicateAnd,?and_token,l_curly_token,predicates,r_curly_token\n",
+        "nGritPredicateAny,any_token,l_curly_token,predicates,r_curly_token\n",
+        "nGritPredicateAssignment,container,eq_token,pattern\n",
+        "nGritPredicateCall,name,l_paren_token,named_args,r_paren_token\n",
+        "nGritPredicateCurly,l_curly_token,predicates,r_curly_token\n",
+        "nGritPredicateDefinition,predicate_token,name,l_paren_token,args,r_paren_token,body\n",
+        "nGritPredicateElseClause,else_token,else_predicate\n",
+        "nGritPredicateEqual,left,equality_token,right\n",
+        "nGritPredicateGreater,left,r_angle_token,right\n",
+        "nGritPredicateGreaterEqual,left,greater_than_equal_token,right\n",
+        "nGritPredicateIfElse,if_token,l_paren_token,if_predicate,r_paren_token,then_predicate,?else_clause\n",
+        "nGritPredicateLess,left,l_angle_token,right\n",
+        "nGritPredicateLessEqual,left,less_than_equal_token,right\n",
+        "nGritPredicateMatch,left,match_token,right\n",
+        "nGritPredicateMaybe,maybe_token,predicate\n",
+        "nGritPredicateNot,not,predicate\n",
+        "nGritPredicateNotEqual,left,inequality_token,right\n",
+        "nGritPredicateOr,or_token,l_curly_token,predicates,r_curly_token\n",
+        "nGritPredicateReturn,return_token,pattern\n",
+        "nGritPredicateRewrite,left,?annotation,fat_arrow_token,right\n",
+        "nGritRawBacktickSnippetLiteral,value_token\n",
+        "nGritRegexLiteral,value_token\n",
+        "nGritRegexPattern,regex,?variables\n",
+        "nGritRegexPatternVariables,l_paren_token,args,r_paren_token\n",
+        "nGritRewrite,left,?annotation,fat_arrow_token,right\n",
+        "nGritRoot,?bom_token,?version,?language,definitions,eof_token\n",
+        "nGritSequential,sequential_token,l_curly_token,sequential,r_curly_token\n",
+        "nGritSnippetRegexLiteral,value_token\n",
+        "nGritSome,some_token,pattern\n",
+        "nGritStringLiteral,value_token\n",
+        "nGritSubOperation,left,minus_token,right\n",
+        "nGritUndefinedLiteral,token_token\n",
+        "nGritUnderscore,token_token\n",
+        "nGritVariable,value_token\n",
+        "nGritVersion,engine_token,engine_name,l_paren_token,version,r_paren_token\n",
+        "nGritWithin,within_token,pattern,?until_clause\n",
+        "bGritBogus\n",
+        "bGritBogusContainer\n",
+        "bGritBogusDefinition\n",
+        "bGritBogusLanguageDeclaration\n",
+        "bGritBogusLanguageFlavorKind\n",
+        "bGritBogusLanguageName\n",
+        "bGritBogusLiteral\n",
+        "bGritBogusMapElement\n",
+        "bGritBogusNamedArg\n",
+        "bGritBogusPattern\n",
+        "bGritBogusPredicate\n",
+        "bGritBogusVersion\n",
+        "sGritDefinitionList\n",
+        "sGritLanguageFlavorList\n",
+        "sGritListPatternList\n",
+        "sGritMapElementList\n",
+        "sGritNamedArgList\n",
+        "sGritPatternList\n",
+        "sGritPredicateList\n",
+        "sGritVariableList\n"
+    );
+    fn shape_offset(kind: SyntaxKind) -> u32 {
+        match kind {
+            GRIT_ADD_OPERATION => 0u32,
+            GRIT_ANNOTATION => 40u32,
+            GRIT_ASSIGNMENT_AS_PATTERN => 68u32,
+            GRIT_BACKTICK_SNIPPET_LITERAL => 120u32,
+            GRIT_BOOLEAN_LITERAL => 160u32,
+            GRIT_BRACKETED_PATTERN => 186u32,
+            GRIT_BRACKETED_PREDICATE => 244u32,
+            GRIT_BUBBLE => 306u32,
+            GRIT_BUBBLE_SCOPE => 346u32,
+            GRIT_CODE_SNIPPET => 401u32,
+            GRIT_CURLY_PATTERN => 425u32,
+            GRIT_DIV_OPERATION => 479u32,
+            GRIT_DOT => 520u32,
+            GRIT_DOTDOTDOT => 539u32,
+            GRIT_DOUBLE_LITERAL => 579u32,
+            GRIT_ENGINE_NAME => 610u32,
+            GRIT_EVERY => 638u32,
+            GRIT_FILES => 669u32,
+            GRIT_FUNCTION_DEFINITION => 730u32,
+            GRIT_INT_LITERAL => 812u32,
+            GRIT_JAVASCRIPT_BODY_WRAPPER => 840u32,
+            GRIT_JAVASCRIPT_FUNCTION_DEFINITION => 879u32,
+            GRIT_LANGUAGE_DECLARATION => 1004u32,
+            GRIT_LANGUAGE_FLAVOR => 1074u32,
+            GRIT_LANGUAGE_FLAVOR_KIND => 1130u32,
+            GRIT_LANGUAGE_NAME => 1166u32,
+            GRIT_LANGUAGE_SPECIFIC_SNIPPET => 1198u32,
+            GRIT_LIKE => 1250u32,
+            GRIT_LIKE_THRESHOLD => 1318u32,
+            GRIT_LIST => 1375u32,
+            GRIT_LIST_ACCESSOR => 1428u32,
+            GRIT_MAP => 1485u32,
+            GRIT_MAP_ACCESSOR => 1531u32,
+            GRIT_MAP_ELEMENT => 1566u32,
+            GRIT_MOD_OPERATION => 1604u32,
+            GRIT_MUL_OPERATION => 1649u32,
+            GRIT_NAME => 1689u32,
+            GRIT_NAMED_ARG => 1711u32,
+            GRIT_NEGATIVE_INT_LITERAL => 1747u32,
+            GRIT_NODE_LIKE => 1783u32,
+            GRIT_NOT => 1841u32,
+            GRIT_PATTERN_ACCUMULATE => 1856u32,
+            GRIT_PATTERN_AFTER => 1907u32,
+            GRIT_PATTERN_AND => 1945u32,
+            GRIT_PATTERN_ANY => 2008u32,
+            GRIT_PATTERN_AS => 2071u32,
+            GRIT_PATTERN_BEFORE => 2112u32,
+            GRIT_PATTERN_CONTAINS => 2152u32,
+            GRIT_PATTERN_DEFINITION => 2211u32,
+            GRIT_PATTERN_DEFINITION_BODY => 2319u32,
+            GRIT_PATTERN_ELSE_CLAUSE => 2383u32,
+            GRIT_PATTERN_IF_ELSE => 2430u32,
+            GRIT_PATTERN_INCLUDES => 2525u32,
+            GRIT_PATTERN_LIMIT => 2570u32,
+            GRIT_PATTERN_MAYBE => 2614u32,
+            GRIT_PATTERN_NOT => 2652u32,
+            GRIT_PATTERN_OR => 2680u32,
+            GRIT_PATTERN_OR_ELSE => 2741u32,
+            GRIT_PATTERN_UNTIL_CLAUSE => 2810u32,
+            GRIT_PATTERN_WHERE => 2852u32,
+            GRIT_PREDICATE_ACCUMULATE => 2905u32,
+            GRIT_PREDICATE_AND => 2958u32,
+            GRIT_PREDICATE_ANY => 3026u32,
+            GRIT_PREDICATE_ASSIGNMENT => 3093u32,
+            GRIT_PREDICATE_CALL => 3145u32,
+            GRIT_PREDICATE_CURLY => 3208u32,
+            GRIT_PREDICATE_DEFINITION => 3267u32,
+            GRIT_PREDICATE_ELSE_CLAUSE => 3351u32,
+            GRIT_PREDICATE_EQUAL => 3402u32,
+            GRIT_PREDICATE_GREATER => 3448u32,
+            GRIT_PREDICATE_GREATER_EQUAL => 3495u32,
+            GRIT_PREDICATE_IF_ELSE => 3558u32,
+            GRIT_PREDICATE_LESS => 3657u32,
+            GRIT_PREDICATE_LESS_EQUAL => 3701u32,
+            GRIT_PREDICATE_MATCH => 3758u32,
+            GRIT_PREDICATE_MAYBE => 3801u32,
+            GRIT_PREDICATE_NOT => 3843u32,
+            GRIT_PREDICATE_NOT_EQUAL => 3875u32,
+            GRIT_PREDICATE_OR => 3926u32,
+            GRIT_PREDICATE_RETURN => 3991u32,
+            GRIT_PREDICATE_REWRITE => 4033u32,
+            GRIT_RAW_BACKTICK_SNIPPET_LITERAL => 4094u32,
+            GRIT_REGEX_LITERAL => 4137u32,
+            GRIT_REGEX_PATTERN => 4167u32,
+            GRIT_REGEX_PATTERN_VARIABLES => 4202u32,
+            GRIT_REWRITE => 4262u32,
+            GRIT_ROOT => 4314u32,
+            GRIT_SEQUENTIAL => 4376u32,
+            GRIT_SNIPPET_REGEX_LITERAL => 4448u32,
+            GRIT_SOME => 4485u32,
+            GRIT_STRING_LITERAL => 4514u32,
+            GRIT_SUB_OPERATION => 4545u32,
+            GRIT_UNDEFINED_LITERAL => 4586u32,
+            GRIT_UNDERSCORE => 4620u32,
+            GRIT_VARIABLE => 4648u32,
+            GRIT_VERSION => 4674u32,
+            GRIT_WITHIN => 4748u32,
+            GRIT_BOGUS => 4795u32,
+            GRIT_BOGUS_CONTAINER => 4806u32,
+            GRIT_BOGUS_DEFINITION => 4826u32,
+            GRIT_BOGUS_LANGUAGE_DECLARATION => 4847u32,
+            GRIT_BOGUS_LANGUAGE_FLAVOR_KIND => 4877u32,
+            GRIT_BOGUS_LANGUAGE_NAME => 4906u32,
+            GRIT_BOGUS_LITERAL => 4929u32,
+            GRIT_BOGUS_MAP_ELEMENT => 4947u32,
+            GRIT_BOGUS_NAMED_ARG => 4968u32,
+            GRIT_BOGUS_PATTERN => 4987u32,
+            GRIT_BOGUS_PREDICATE => 5005u32,
+            GRIT_BOGUS_VERSION => 5025u32,
+            GRIT_DEFINITION_LIST => 5043u32,
+            GRIT_LANGUAGE_FLAVOR_LIST => 5063u32,
+            GRIT_LIST_PATTERN_LIST => 5087u32,
+            GRIT_MAP_ELEMENT_LIST => 5108u32,
+            GRIT_NAMED_ARG_LIST => 5128u32,
+            GRIT_PATTERN_LIST => 5146u32,
+            GRIT_PREDICATE_LIST => 5163u32,
+            GRIT_VARIABLE_LIST => 5182u32,
+            _ => u32::MAX,
+        }
+    }
+    fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R {
+        thread_local! { static DEPTHS : [std :: cell :: Cell < u8 > ; SyntaxKind :: __LAST as usize] = const { [const { std :: cell :: Cell :: new (0) } ; SyntaxKind :: __LAST as usize] } ; }
+        DEPTHS.with(|depths| f(&depths[raw_kind]))
+    }
+    fn debug_unshaped(_: &SyntaxNode, _: &mut Formatter<'_>) -> std::fmt::Result {
+        unreachable!("every kind of node has a shape")
+    }
+}
+#[doc = r" Prints `node` the way the AST node of its kind is printed."]
+fn debug_syntax_node(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+    support::debug_any_node::<DebugShapes>(node, f)
 }

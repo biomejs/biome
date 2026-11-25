@@ -7,7 +7,6 @@ use crate::{
     HtmlSyntaxElementChildren as SyntaxElementChildren,
     HtmlSyntaxKind::{self as SyntaxKind, *},
     HtmlSyntaxList as SyntaxList, HtmlSyntaxNode as SyntaxNode, HtmlSyntaxToken as SyntaxToken,
-    macros::map_syntax_node,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
@@ -5971,21 +5970,7 @@ impl AstNode for AngularBindingName {
 }
 impl std::fmt::Debug for AngularBindingName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularBindingName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularBindingName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularBindingName> for SyntaxNode {
@@ -6021,30 +6006,7 @@ impl AstNode for AngularEventBinding {
 }
 impl std::fmt::Debug for AngularEventBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularEventBinding")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularEventBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularEventBinding> for SyntaxNode {
@@ -6080,30 +6042,7 @@ impl AstNode for AngularPropertyBinding {
 }
 impl std::fmt::Debug for AngularPropertyBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularPropertyBinding")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularPropertyBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularPropertyBinding> for SyntaxNode {
@@ -6139,23 +6078,7 @@ impl AstNode for AngularStructuralDirective {
 }
 impl std::fmt::Debug for AngularStructuralDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularStructuralDirective")
-                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularStructuralDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularStructuralDirective> for SyntaxNode {
@@ -6191,23 +6114,7 @@ impl AstNode for AngularTemplateRefVariable {
 }
 impl std::fmt::Debug for AngularTemplateRefVariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularTemplateRefVariable")
-                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularTemplateRefVariable").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularTemplateRefVariable> for SyntaxNode {
@@ -6243,30 +6150,7 @@ impl AstNode for AngularTwoWayBinding {
 }
 impl std::fmt::Debug for AngularTwoWayBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AngularTwoWayBinding")
-                .field(
-                    "l_bracket_paren_token",
-                    &support::DebugSyntaxResult(self.l_bracket_paren_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "r_bracket_paren_token",
-                    &support::DebugSyntaxResult(self.r_bracket_paren_token()),
-                )
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AngularTwoWayBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AngularTwoWayBinding> for SyntaxNode {
@@ -6302,22 +6186,7 @@ impl AstNode for AstroClassDirective {
 }
 impl std::fmt::Debug for AstroClassDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroClassDirective")
-                .field(
-                    "class_token",
-                    &support::DebugSyntaxResult(self.class_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroClassDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroClassDirective> for SyntaxNode {
@@ -6353,22 +6222,7 @@ impl AstNode for AstroClientDirective {
 }
 impl std::fmt::Debug for AstroClientDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroClientDirective")
-                .field(
-                    "client_token",
-                    &support::DebugSyntaxResult(self.client_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroClientDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroClientDirective> for SyntaxNode {
@@ -6404,29 +6258,7 @@ impl AstNode for AstroClosingFragment {
 }
 impl std::fmt::Debug for AstroClosingFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroClosingFragment")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field(
-                    "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
-                )
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroClosingFragment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroClosingFragment> for SyntaxNode {
@@ -6462,22 +6294,7 @@ impl AstNode for AstroDefineDirective {
 }
 impl std::fmt::Debug for AstroDefineDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroDefineDirective")
-                .field(
-                    "define_token",
-                    &support::DebugSyntaxResult(self.define_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroDefineDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroDefineDirective> for SyntaxNode {
@@ -6513,26 +6330,7 @@ impl AstNode for AstroDirectiveValue {
 }
 impl std::fmt::Debug for AstroDirectiveValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroDirectiveValue")
-                .field(
-                    "colon_token_token",
-                    &support::DebugSyntaxResult(self.colon_token_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroDirectiveValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroDirectiveValue> for SyntaxNode {
@@ -6568,21 +6366,7 @@ impl AstNode for AstroEmbeddedContent {
 }
 impl std::fmt::Debug for AstroEmbeddedContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroEmbeddedContent")
-                .field(
-                    "content_token",
-                    &support::DebugOptionalElement(self.content_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroEmbeddedContent").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroEmbeddedContent> for SyntaxNode {
@@ -6618,26 +6402,7 @@ impl AstNode for AstroFragment {
 }
 impl std::fmt::Debug for AstroFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroFragment")
-                .field(
-                    "opening_fragment",
-                    &support::DebugSyntaxResult(self.opening_fragment()),
-                )
-                .field("children", &self.children())
-                .field(
-                    "closing_fragment",
-                    &support::DebugSyntaxResult(self.closing_fragment()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroFragment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroFragment> for SyntaxNode {
@@ -6673,26 +6438,7 @@ impl AstNode for AstroFrontmatterElement {
 }
 impl std::fmt::Debug for AstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroFrontmatterElement")
-                .field(
-                    "l_fence_token",
-                    &support::DebugSyntaxResult(self.l_fence_token()),
-                )
-                .field("content", &support::DebugSyntaxResult(self.content()))
-                .field(
-                    "r_fence_token",
-                    &support::DebugSyntaxResult(self.r_fence_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroFrontmatterElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroFrontmatterElement> for SyntaxNode {
@@ -6728,19 +6474,7 @@ impl AstNode for AstroIsDirective {
 }
 impl std::fmt::Debug for AstroIsDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroIsDirective")
-                .field("is_token", &support::DebugSyntaxResult(self.is_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroIsDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroIsDirective> for SyntaxNode {
@@ -6776,25 +6510,7 @@ impl AstNode for AstroOpeningFragment {
 }
 impl std::fmt::Debug for AstroOpeningFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroOpeningFragment")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("AstroOpeningFragment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroOpeningFragment> for SyntaxNode {
@@ -6830,22 +6546,7 @@ impl AstNode for AstroServerDirective {
 }
 impl std::fmt::Debug for AstroServerDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroServerDirective")
-                .field(
-                    "server_token",
-                    &support::DebugSyntaxResult(self.server_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroServerDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroServerDirective> for SyntaxNode {
@@ -6881,19 +6582,7 @@ impl AstNode for AstroSetDirective {
 }
 impl std::fmt::Debug for AstroSetDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("AstroSetDirective")
-                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("AstroSetDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroSetDirective> for SyntaxNode {
@@ -6929,22 +6618,7 @@ impl AstNode for HtmlAttribute {
 }
 impl std::fmt::Debug for HtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAttribute")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlAttribute").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlAttribute> for SyntaxNode {
@@ -6980,26 +6654,7 @@ impl AstNode for HtmlAttributeDoubleTextExpression {
 }
 impl std::fmt::Debug for HtmlAttributeDoubleTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAttributeDoubleTextExpression")
-                .field(
-                    "l_double_curly_token",
-                    &support::DebugSyntaxResult(self.l_double_curly_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_double_curly_token",
-                    &support::DebugSyntaxResult(self.r_double_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlAttributeDoubleTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlAttributeDoubleTextExpression> for SyntaxNode {
@@ -7035,19 +6690,7 @@ impl AstNode for HtmlAttributeInitializerClause {
 }
 impl std::fmt::Debug for HtmlAttributeInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAttributeInitializerClause")
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("HtmlAttributeInitializerClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlAttributeInitializerClause> for SyntaxNode {
@@ -7083,21 +6726,7 @@ impl AstNode for HtmlAttributeName {
 }
 impl std::fmt::Debug for HtmlAttributeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAttributeName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlAttributeName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlAttributeName> for SyntaxNode {
@@ -7133,26 +6762,7 @@ impl AstNode for HtmlAttributeSingleTextExpression {
 }
 impl std::fmt::Debug for HtmlAttributeSingleTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlAttributeSingleTextExpression")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlAttributeSingleTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlAttributeSingleTextExpression> for SyntaxNode {
@@ -7188,29 +6798,7 @@ impl AstNode for HtmlCdataSection {
 }
 impl std::fmt::Debug for HtmlCdataSection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlCdataSection")
-                .field(
-                    "cdata_start_token",
-                    &support::DebugSyntaxResult(self.cdata_start_token()),
-                )
-                .field(
-                    "content_token",
-                    &support::DebugSyntaxResult(self.content_token()),
-                )
-                .field(
-                    "cdata_end_token",
-                    &support::DebugSyntaxResult(self.cdata_end_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlCdataSection").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlCdataSection> for SyntaxNode {
@@ -7246,30 +6834,7 @@ impl AstNode for HtmlClosingElement {
 }
 impl std::fmt::Debug for HtmlClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlClosingElement")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field(
-                    "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlClosingElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlClosingElement> for SyntaxNode {
@@ -7305,21 +6870,7 @@ impl AstNode for HtmlComponentName {
 }
 impl std::fmt::Debug for HtmlComponentName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlComponentName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlComponentName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlComponentName> for SyntaxNode {
@@ -7355,21 +6906,7 @@ impl AstNode for HtmlContent {
 }
 impl std::fmt::Debug for HtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlContent")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlContent").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlContent> for SyntaxNode {
@@ -7405,50 +6942,7 @@ impl AstNode for HtmlDirective {
 }
 impl std::fmt::Debug for HtmlDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlDirective")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-                .field(
-                    "doctype_token",
-                    &support::DebugSyntaxResult(self.doctype_token()),
-                )
-                .field(
-                    "name_token",
-                    &support::DebugOptionalElement(self.name_token()),
-                )
-                .field(
-                    "html_token",
-                    &support::DebugOptionalElement(self.html_token()),
-                )
-                .field(
-                    "quirk_token",
-                    &support::DebugOptionalElement(self.quirk_token()),
-                )
-                .field(
-                    "public_id_token",
-                    &support::DebugOptionalElement(self.public_id_token()),
-                )
-                .field(
-                    "system_id_token",
-                    &support::DebugOptionalElement(self.system_id_token()),
-                )
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlDirective> for SyntaxNode {
@@ -7484,26 +6978,7 @@ impl AstNode for HtmlDoubleTextExpression {
 }
 impl std::fmt::Debug for HtmlDoubleTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlDoubleTextExpression")
-                .field(
-                    "l_double_curly_token",
-                    &support::DebugSyntaxResult(self.l_double_curly_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_double_curly_token",
-                    &support::DebugSyntaxResult(self.r_double_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlDoubleTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlDoubleTextExpression> for SyntaxNode {
@@ -7539,26 +7014,7 @@ impl AstNode for HtmlElement {
 }
 impl std::fmt::Debug for HtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlElement")
-                .field(
-                    "opening_element",
-                    &support::DebugSyntaxResult(self.opening_element()),
-                )
-                .field("children", &self.children())
-                .field(
-                    "closing_element",
-                    &support::DebugSyntaxResult(self.closing_element()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlElement> for SyntaxNode {
@@ -7594,21 +7050,7 @@ impl AstNode for HtmlEmbeddedContent {
 }
 impl std::fmt::Debug for HtmlEmbeddedContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlEmbeddedContent")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlEmbeddedContent").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlEmbeddedContent> for SyntaxNode {
@@ -7644,20 +7086,7 @@ impl AstNode for HtmlMemberName {
 }
 impl std::fmt::Debug for HtmlMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlMemberName")
-                .field("object", &support::DebugSyntaxResult(self.object()))
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .field("member", &support::DebugSyntaxResult(self.member()))
-                .finish()
-        } else {
-            f.debug_struct("HtmlMemberName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlMemberName> for SyntaxNode {
@@ -7693,27 +7122,7 @@ impl AstNode for HtmlOpeningElement {
 }
 impl std::fmt::Debug for HtmlOpeningElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlOpeningElement")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field("attributes", &self.attributes())
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlOpeningElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlOpeningElement> for SyntaxNode {
@@ -7749,24 +7158,7 @@ impl AstNode for HtmlProcessingInstruction {
 }
 impl std::fmt::Debug for HtmlProcessingInstruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlProcessingInstruction")
-                .field(
-                    "start_token",
-                    &support::DebugSyntaxResult(self.start_token()),
-                )
-                .field("target", &support::DebugSyntaxResult(self.target()))
-                .field("attributes", &self.attributes())
-                .field("end_token", &support::DebugSyntaxResult(self.end_token()))
-                .finish()
-        } else {
-            f.debug_struct("HtmlProcessingInstruction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlProcessingInstruction> for SyntaxNode {
@@ -7802,27 +7194,7 @@ impl AstNode for HtmlRoot {
 }
 impl std::fmt::Debug for HtmlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlRoot")
-                .field(
-                    "bom_token",
-                    &support::DebugOptionalElement(self.bom_token()),
-                )
-                .field(
-                    "frontmatter",
-                    &support::DebugOptionalElement(self.frontmatter()),
-                )
-                .field("items", &self.items())
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("HtmlRoot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlRoot> for SyntaxNode {
@@ -7858,31 +7230,7 @@ impl AstNode for HtmlSelfClosingElement {
 }
 impl std::fmt::Debug for HtmlSelfClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlSelfClosingElement")
-                .field(
-                    "l_angle_token",
-                    &support::DebugSyntaxResult(self.l_angle_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field("attributes", &self.attributes())
-                .field(
-                    "slash_token",
-                    &support::DebugOptionalElement(self.slash_token()),
-                )
-                .field(
-                    "r_angle_token",
-                    &support::DebugSyntaxResult(self.r_angle_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlSelfClosingElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlSelfClosingElement> for SyntaxNode {
@@ -7918,29 +7266,7 @@ impl AstNode for HtmlSingleTextExpression {
 }
 impl std::fmt::Debug for HtmlSingleTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlSingleTextExpression")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field(
-                    "expression",
-                    &support::DebugOptionalElement(self.expression()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlSingleTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlSingleTextExpression> for SyntaxNode {
@@ -7976,30 +7302,7 @@ impl AstNode for HtmlSpreadAttribute {
 }
 impl std::fmt::Debug for HtmlSpreadAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlSpreadAttribute")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field(
-                    "dotdotdot_token",
-                    &support::DebugSyntaxResult(self.dotdotdot_token()),
-                )
-                .field("argument", &support::DebugSyntaxResult(self.argument()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlSpreadAttribute").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlSpreadAttribute> for SyntaxNode {
@@ -8035,21 +7338,7 @@ impl AstNode for HtmlString {
 }
 impl std::fmt::Debug for HtmlString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlString")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlString").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlString> for SyntaxNode {
@@ -8085,21 +7374,7 @@ impl AstNode for HtmlTagName {
 }
 impl std::fmt::Debug for HtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlTagName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlTagName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlTagName> for SyntaxNode {
@@ -8135,21 +7410,7 @@ impl AstNode for HtmlTextExpression {
 }
 impl std::fmt::Debug for HtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlTextExpression")
-                .field(
-                    "html_literal_token",
-                    &support::DebugSyntaxResult(self.html_literal_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlTextExpression").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlTextExpression> for SyntaxNode {
@@ -8185,22 +7446,7 @@ impl AstNode for SvelteAnimateDirective {
 }
 impl std::fmt::Debug for SvelteAnimateDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAnimateDirective")
-                .field(
-                    "animate_token",
-                    &support::DebugSyntaxResult(self.animate_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteAnimateDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAnimateDirective> for SyntaxNode {
@@ -8236,30 +7482,7 @@ impl AstNode for SvelteAttachAttribute {
 }
 impl std::fmt::Debug for SvelteAttachAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAttachAttribute")
-                .field(
-                    "sv_curly_at_token",
-                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
-                )
-                .field(
-                    "attach_token",
-                    &support::DebugSyntaxResult(self.attach_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteAttachAttribute").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAttachAttribute> for SyntaxNode {
@@ -8295,26 +7518,7 @@ impl AstNode for SvelteAwaitBlock {
 }
 impl std::fmt::Debug for SvelteAwaitBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitBlock")
-                .field(
-                    "opening_block",
-                    &support::DebugSyntaxResult(self.opening_block()),
-                )
-                .field("clauses", &self.clauses())
-                .field(
-                    "closing_block",
-                    &support::DebugSyntaxResult(self.closing_block()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitBlock> for SyntaxNode {
@@ -8350,31 +7554,7 @@ impl AstNode for SvelteAwaitCatchBlock {
 }
 impl std::fmt::Debug for SvelteAwaitCatchBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitCatchBlock")
-                .field(
-                    "sv_curly_colon_token",
-                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
-                )
-                .field(
-                    "catch_token",
-                    &support::DebugSyntaxResult(self.catch_token()),
-                )
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitCatchBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitCatchBlock> for SyntaxNode {
@@ -8410,22 +7590,7 @@ impl AstNode for SvelteAwaitCatchClause {
 }
 impl std::fmt::Debug for SvelteAwaitCatchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitCatchClause")
-                .field(
-                    "catch_token",
-                    &support::DebugSyntaxResult(self.catch_token()),
-                )
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitCatchClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitCatchClause> for SyntaxNode {
@@ -8461,29 +7626,7 @@ impl AstNode for SvelteAwaitClosingBlock {
 }
 impl std::fmt::Debug for SvelteAwaitClosingBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitClosingBlock")
-                .field(
-                    "sv_curly_slash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
-                )
-                .field(
-                    "await_token",
-                    &support::DebugSyntaxResult(self.await_token()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitClosingBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitClosingBlock> for SyntaxNode {
@@ -8519,39 +7662,7 @@ impl AstNode for SvelteAwaitOpeningBlock {
 }
 impl std::fmt::Debug for SvelteAwaitOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitOpeningBlock")
-                .field(
-                    "sv_curly_hash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
-                )
-                .field(
-                    "await_token",
-                    &support::DebugSyntaxResult(self.await_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "then_clause",
-                    &support::DebugOptionalElement(self.then_clause()),
-                )
-                .field(
-                    "catch_clause",
-                    &support::DebugOptionalElement(self.catch_clause()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitOpeningBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitOpeningBlock> for SyntaxNode {
@@ -8587,28 +7698,7 @@ impl AstNode for SvelteAwaitThenBlock {
 }
 impl std::fmt::Debug for SvelteAwaitThenBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitThenBlock")
-                .field(
-                    "sv_curly_colon_token",
-                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
-                )
-                .field("then_token", &support::DebugSyntaxResult(self.then_token()))
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitThenBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitThenBlock> for SyntaxNode {
@@ -8644,19 +7734,7 @@ impl AstNode for SvelteAwaitThenClause {
 }
 impl std::fmt::Debug for SvelteAwaitThenClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteAwaitThenClause")
-                .field("then_token", &support::DebugSyntaxResult(self.then_token()))
-                .field("name", &support::DebugOptionalElement(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteAwaitThenClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteAwaitThenClause> for SyntaxNode {
@@ -8692,19 +7770,7 @@ impl AstNode for SvelteBindDirective {
 }
 impl std::fmt::Debug for SvelteBindDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteBindDirective")
-                .field("bind_token", &support::DebugSyntaxResult(self.bind_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteBindDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteBindDirective> for SyntaxNode {
@@ -8741,32 +7807,7 @@ impl AstNode for SvelteBindFunctionBindingExpression {
 }
 impl std::fmt::Debug for SvelteBindFunctionBindingExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteBindFunctionBindingExpression")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("get", &support::DebugSyntaxResult(self.get()))
-                .field(
-                    "comma_token",
-                    &support::DebugSyntaxResult(self.comma_token()),
-                )
-                .field("set", &support::DebugSyntaxResult(self.set()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteBindFunctionBindingExpression")
-                .finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteBindFunctionBindingExpression> for SyntaxNode {
@@ -8803,20 +7844,7 @@ impl AstNode for SvelteBindFunctionBindingInitializerClause {
 }
 impl std::fmt::Debug for SvelteBindFunctionBindingInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteBindFunctionBindingInitializerClause")
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteBindFunctionBindingInitializerClause")
-                .finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteBindFunctionBindingInitializerClause> for SyntaxNode {
@@ -8852,22 +7880,7 @@ impl AstNode for SvelteClassDirective {
 }
 impl std::fmt::Debug for SvelteClassDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteClassDirective")
-                .field(
-                    "class_token",
-                    &support::DebugSyntaxResult(self.class_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteClassDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteClassDirective> for SyntaxNode {
@@ -8903,30 +7916,7 @@ impl AstNode for SvelteConstBlock {
 }
 impl std::fmt::Debug for SvelteConstBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteConstBlock")
-                .field(
-                    "sv_curly_at_token",
-                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
-                )
-                .field(
-                    "const_token",
-                    &support::DebugSyntaxResult(self.const_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteConstBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteConstBlock> for SyntaxNode {
@@ -8962,26 +7952,7 @@ impl AstNode for SvelteCurlyDestructuredName {
 }
 impl std::fmt::Debug for SvelteCurlyDestructuredName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteCurlyDestructuredName")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("names", &self.names())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteCurlyDestructuredName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteCurlyDestructuredName> for SyntaxNode {
@@ -9017,30 +7988,7 @@ impl AstNode for SvelteDebugBlock {
 }
 impl std::fmt::Debug for SvelteDebugBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteDebugBlock")
-                .field(
-                    "sv_curly_at_token",
-                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
-                )
-                .field(
-                    "debug_token",
-                    &support::DebugSyntaxResult(self.debug_token()),
-                )
-                .field("bindings", &self.bindings())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteDebugBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteDebugBlock> for SyntaxNode {
@@ -9076,29 +8024,7 @@ impl AstNode for SvelteDeclarationBlock {
 }
 impl std::fmt::Debug for SvelteDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteDeclarationBlock")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field(
-                    "declaration",
-                    &support::DebugSyntaxResult(self.declaration()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteDeclarationBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteDeclarationBlock> for SyntaxNode {
@@ -9134,22 +8060,7 @@ impl AstNode for SvelteDirectiveModifier {
 }
 impl std::fmt::Debug for SvelteDirectiveModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteDirectiveModifier")
-                .field(
-                    "bitwise_or_token",
-                    &support::DebugSyntaxResult(self.bitwise_or_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteDirectiveModifier").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteDirectiveModifier> for SyntaxNode {
@@ -9185,27 +8096,7 @@ impl AstNode for SvelteDirectiveValue {
 }
 impl std::fmt::Debug for SvelteDirectiveValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteDirectiveValue")
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("property", &support::DebugSyntaxResult(self.property()))
-                .field("modifiers", &self.modifiers())
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteDirectiveValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteDirectiveValue> for SyntaxNode {
@@ -9241,21 +8132,7 @@ impl AstNode for SvelteEachAsKeyedItem {
 }
 impl std::fmt::Debug for SvelteEachAsKeyedItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachAsKeyedItem")
-                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field("index", &support::DebugOptionalElement(self.index()))
-                .field("key", &support::DebugOptionalElement(self.key()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachAsKeyedItem").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachAsKeyedItem> for SyntaxNode {
@@ -9291,30 +8168,7 @@ impl AstNode for SvelteEachBlock {
 }
 impl std::fmt::Debug for SvelteEachBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachBlock")
-                .field(
-                    "opening_block",
-                    &support::DebugSyntaxResult(self.opening_block()),
-                )
-                .field("children", &self.children())
-                .field(
-                    "else_clause",
-                    &support::DebugOptionalElement(self.else_clause()),
-                )
-                .field(
-                    "closing_block",
-                    &support::DebugSyntaxResult(self.closing_block()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachBlock> for SyntaxNode {
@@ -9350,26 +8204,7 @@ impl AstNode for SvelteEachClosingBlock {
 }
 impl std::fmt::Debug for SvelteEachClosingBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachClosingBlock")
-                .field(
-                    "sv_curly_slash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
-                )
-                .field("each_token", &support::DebugSyntaxResult(self.each_token()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachClosingBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachClosingBlock> for SyntaxNode {
@@ -9405,22 +8240,7 @@ impl AstNode for SvelteEachIndex {
 }
 impl std::fmt::Debug for SvelteEachIndex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachIndex")
-                .field(
-                    "comma_token",
-                    &support::DebugSyntaxResult(self.comma_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachIndex").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachIndex> for SyntaxNode {
@@ -9456,26 +8276,7 @@ impl AstNode for SvelteEachKey {
 }
 impl std::fmt::Debug for SvelteEachKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachKey")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachKey").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachKey> for SyntaxNode {
@@ -9511,18 +8312,7 @@ impl AstNode for SvelteEachKeyedItem {
 }
 impl std::fmt::Debug for SvelteEachKeyedItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachKeyedItem")
-                .field("index", &support::DebugOptionalElement(self.index()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachKeyedItem").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachKeyedItem> for SyntaxNode {
@@ -9558,28 +8348,7 @@ impl AstNode for SvelteEachOpeningBlock {
 }
 impl std::fmt::Debug for SvelteEachOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteEachOpeningBlock")
-                .field(
-                    "sv_curly_hash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
-                )
-                .field("each_token", &support::DebugSyntaxResult(self.each_token()))
-                .field("list", &support::DebugSyntaxResult(self.list()))
-                .field("item", &support::DebugOptionalElement(self.item()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteEachOpeningBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteEachOpeningBlock> for SyntaxNode {
@@ -9615,27 +8384,7 @@ impl AstNode for SvelteElseClause {
 }
 impl std::fmt::Debug for SvelteElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteElseClause")
-                .field(
-                    "sv_curly_colon_token",
-                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
-                )
-                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteElseClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteElseClause> for SyntaxNode {
@@ -9671,29 +8420,7 @@ impl AstNode for SvelteElseIfClause {
 }
 impl std::fmt::Debug for SvelteElseIfClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteElseIfClause")
-                .field(
-                    "sv_curly_colon_token",
-                    &support::DebugSyntaxResult(self.sv_curly_colon_token()),
-                )
-                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteElseIfClause").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteElseIfClause> for SyntaxNode {
@@ -9729,27 +8456,7 @@ impl AstNode for SvelteHtmlBlock {
 }
 impl std::fmt::Debug for SvelteHtmlBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteHtmlBlock")
-                .field(
-                    "sv_curly_at_token",
-                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
-                )
-                .field("html_token", &support::DebugSyntaxResult(self.html_token()))
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteHtmlBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteHtmlBlock> for SyntaxNode {
@@ -9785,30 +8492,7 @@ impl AstNode for SvelteIfBlock {
 }
 impl std::fmt::Debug for SvelteIfBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteIfBlock")
-                .field(
-                    "opening_block",
-                    &support::DebugSyntaxResult(self.opening_block()),
-                )
-                .field("else_if_clauses", &self.else_if_clauses())
-                .field(
-                    "else_clause",
-                    &support::DebugOptionalElement(self.else_clause()),
-                )
-                .field(
-                    "closing_block",
-                    &support::DebugSyntaxResult(self.closing_block()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteIfBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteIfBlock> for SyntaxNode {
@@ -9844,26 +8528,7 @@ impl AstNode for SvelteIfClosingBlock {
 }
 impl std::fmt::Debug for SvelteIfClosingBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteIfClosingBlock")
-                .field(
-                    "sv_curly_slash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
-                )
-                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteIfClosingBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteIfClosingBlock> for SyntaxNode {
@@ -9899,28 +8564,7 @@ impl AstNode for SvelteIfOpeningBlock {
 }
 impl std::fmt::Debug for SvelteIfOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteIfOpeningBlock")
-                .field(
-                    "sv_curly_hash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
-                )
-                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteIfOpeningBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteIfOpeningBlock> for SyntaxNode {
@@ -9956,19 +8600,7 @@ impl AstNode for SvelteInDirective {
 }
 impl std::fmt::Debug for SvelteInDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteInDirective")
-                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteInDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteInDirective> for SyntaxNode {
@@ -10004,26 +8636,7 @@ impl AstNode for SvelteKeyBlock {
 }
 impl std::fmt::Debug for SvelteKeyBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteKeyBlock")
-                .field(
-                    "opening_block",
-                    &support::DebugSyntaxResult(self.opening_block()),
-                )
-                .field("children", &self.children())
-                .field(
-                    "closing_block",
-                    &support::DebugSyntaxResult(self.closing_block()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteKeyBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteKeyBlock> for SyntaxNode {
@@ -10059,26 +8672,7 @@ impl AstNode for SvelteKeyClosingBlock {
 }
 impl std::fmt::Debug for SvelteKeyClosingBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteKeyClosingBlock")
-                .field(
-                    "sv_curly_slash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
-                )
-                .field("key_token", &support::DebugSyntaxResult(self.key_token()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteKeyClosingBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteKeyClosingBlock> for SyntaxNode {
@@ -10114,27 +8708,7 @@ impl AstNode for SvelteKeyOpeningBlock {
 }
 impl std::fmt::Debug for SvelteKeyOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteKeyOpeningBlock")
-                .field(
-                    "sv_curly_hash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
-                )
-                .field("key_token", &support::DebugSyntaxResult(self.key_token()))
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteKeyOpeningBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteKeyOpeningBlock> for SyntaxNode {
@@ -10170,21 +8744,7 @@ impl AstNode for SvelteLiteral {
 }
 impl std::fmt::Debug for SvelteLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteLiteral")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteLiteral").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteLiteral> for SyntaxNode {
@@ -10220,20 +8780,7 @@ impl AstNode for SvelteMemberProperty {
 }
 impl std::fmt::Debug for SvelteMemberProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteMemberProperty")
-                .field("object", &support::DebugSyntaxResult(self.object()))
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .field("member", &support::DebugSyntaxResult(self.member()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteMemberProperty").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteMemberProperty> for SyntaxNode {
@@ -10269,21 +8816,7 @@ impl AstNode for SvelteName {
 }
 impl std::fmt::Debug for SvelteName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteName")
-                .field(
-                    "ident_token",
-                    &support::DebugSyntaxResult(self.ident_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteName> for SyntaxNode {
@@ -10319,19 +8852,7 @@ impl AstNode for SvelteOutDirective {
 }
 impl std::fmt::Debug for SvelteOutDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteOutDirective")
-                .field("out_token", &support::DebugSyntaxResult(self.out_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteOutDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteOutDirective> for SyntaxNode {
@@ -10367,23 +8888,7 @@ impl AstNode for SvelteRenameBinding {
 }
 impl std::fmt::Debug for SvelteRenameBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteRenameBinding")
-                .field("key", &support::DebugSyntaxResult(self.key()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteRenameBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteRenameBinding> for SyntaxNode {
@@ -10419,30 +8924,7 @@ impl AstNode for SvelteRenderBlock {
 }
 impl std::fmt::Debug for SvelteRenderBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteRenderBlock")
-                .field(
-                    "sv_curly_at_token",
-                    &support::DebugSyntaxResult(self.sv_curly_at_token()),
-                )
-                .field(
-                    "render_token",
-                    &support::DebugSyntaxResult(self.render_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteRenderBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteRenderBlock> for SyntaxNode {
@@ -10478,22 +8960,7 @@ impl AstNode for SvelteRestBinding {
 }
 impl std::fmt::Debug for SvelteRestBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteRestBinding")
-                .field(
-                    "dotdotdot_token",
-                    &support::DebugSyntaxResult(self.dotdotdot_token()),
-                )
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteRestBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteRestBinding> for SyntaxNode {
@@ -10529,25 +8996,7 @@ impl AstNode for SvelteSnippetBlock {
 }
 impl std::fmt::Debug for SvelteSnippetBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteSnippetBlock")
-                .field(
-                    "opening_block",
-                    &support::DebugSyntaxResult(self.opening_block()),
-                )
-                .field(
-                    "closing_block",
-                    &support::DebugSyntaxResult(self.closing_block()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteSnippetBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteSnippetBlock> for SyntaxNode {
@@ -10583,29 +9032,7 @@ impl AstNode for SvelteSnippetClosingBlock {
 }
 impl std::fmt::Debug for SvelteSnippetClosingBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteSnippetClosingBlock")
-                .field(
-                    "sv_curly_slash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_slash_token()),
-                )
-                .field(
-                    "snippet_token",
-                    &support::DebugSyntaxResult(self.snippet_token()),
-                )
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteSnippetClosingBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteSnippetClosingBlock> for SyntaxNode {
@@ -10641,31 +9068,7 @@ impl AstNode for SvelteSnippetOpeningBlock {
 }
 impl std::fmt::Debug for SvelteSnippetOpeningBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteSnippetOpeningBlock")
-                .field(
-                    "sv_curly_hash_token",
-                    &support::DebugSyntaxResult(self.sv_curly_hash_token()),
-                )
-                .field(
-                    "snippet_token",
-                    &support::DebugSyntaxResult(self.snippet_token()),
-                )
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .field("children", &self.children())
-                .finish()
-        } else {
-            f.debug_struct("SvelteSnippetOpeningBlock").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteSnippetOpeningBlock> for SyntaxNode {
@@ -10701,26 +9104,7 @@ impl AstNode for SvelteSquareDestructuredName {
 }
 impl std::fmt::Debug for SvelteSquareDestructuredName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteSquareDestructuredName")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("names", &self.names())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteSquareDestructuredName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteSquareDestructuredName> for SyntaxNode {
@@ -10756,22 +9140,7 @@ impl AstNode for SvelteStyleDirective {
 }
 impl std::fmt::Debug for SvelteStyleDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteStyleDirective")
-                .field(
-                    "style_token",
-                    &support::DebugSyntaxResult(self.style_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteStyleDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteStyleDirective> for SyntaxNode {
@@ -10807,20 +9176,7 @@ impl AstNode for SvelteTemplateAttributeValue {
 }
 impl std::fmt::Debug for SvelteTemplateAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteTemplateAttributeValue")
-                .field("l_quote", &support::DebugSyntaxResult(self.l_quote()))
-                .field("elements", &self.elements())
-                .field("r_quote", &support::DebugSyntaxResult(self.r_quote()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteTemplateAttributeValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteTemplateAttributeValue> for SyntaxNode {
@@ -10856,21 +9212,7 @@ impl AstNode for SvelteTemplateChunkElement {
 }
 impl std::fmt::Debug for SvelteTemplateChunkElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteTemplateChunkElement")
-                .field(
-                    "html_template_chunk_token",
-                    &support::DebugSyntaxResult(self.html_template_chunk_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("SvelteTemplateChunkElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteTemplateChunkElement> for SyntaxNode {
@@ -10906,22 +9248,7 @@ impl AstNode for SvelteTransitionDirective {
 }
 impl std::fmt::Debug for SvelteTransitionDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteTransitionDirective")
-                .field(
-                    "transition_token",
-                    &support::DebugSyntaxResult(self.transition_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteTransitionDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteTransitionDirective> for SyntaxNode {
@@ -10957,19 +9284,7 @@ impl AstNode for SvelteUseDirective {
 }
 impl std::fmt::Debug for SvelteUseDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("SvelteUseDirective")
-                .field("use_token", &support::DebugSyntaxResult(self.use_token()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("SvelteUseDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteUseDirective> for SyntaxNode {
@@ -11005,24 +9320,7 @@ impl AstNode for VueDirective {
 }
 impl std::fmt::Debug for VueDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueDirective")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-                .field("arg", &support::DebugOptionalElement(self.arg()))
-                .field("modifiers", &self.modifiers())
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueDirective> for SyntaxNode {
@@ -11058,22 +9356,7 @@ impl AstNode for VueDirectiveArgument {
 }
 impl std::fmt::Debug for VueDirectiveArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueDirectiveArgument")
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("arg", &support::DebugOptionalElement(self.arg()))
-                .finish()
-        } else {
-            f.debug_struct("VueDirectiveArgument").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueDirectiveArgument> for SyntaxNode {
@@ -11109,26 +9392,7 @@ impl AstNode for VueDynamicArgument {
 }
 impl std::fmt::Debug for VueDynamicArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueDynamicArgument")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueDynamicArgument").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueDynamicArgument> for SyntaxNode {
@@ -11164,22 +9428,7 @@ impl AstNode for VueModifier {
 }
 impl std::fmt::Debug for VueModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueModifier")
-                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-                .field(
-                    "modifier_token",
-                    &support::DebugSyntaxResult(self.modifier_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueModifier").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueModifier> for SyntaxNode {
@@ -11215,18 +9464,7 @@ impl AstNode for VueStaticArgument {
 }
 impl std::fmt::Debug for VueStaticArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueStaticArgument")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-                .finish()
-        } else {
-            f.debug_struct("VueStaticArgument").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueStaticArgument> for SyntaxNode {
@@ -11262,23 +9500,7 @@ impl AstNode for VueVBindShorthandDirective {
 }
 impl std::fmt::Debug for VueVBindShorthandDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVBindShorthandDirective")
-                .field("arg", &support::DebugSyntaxResult(self.arg()))
-                .field("modifiers", &self.modifiers())
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVBindShorthandDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVBindShorthandDirective> for SyntaxNode {
@@ -11314,26 +9536,7 @@ impl AstNode for VueVForArrayBinding {
 }
 impl std::fmt::Debug for VueVForArrayBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForArrayBinding")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("bindings", &self.bindings())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVForArrayBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForArrayBinding> for SyntaxNode {
@@ -11369,20 +9572,7 @@ impl AstNode for VueVForDefaultBinding {
 }
 impl std::fmt::Debug for VueVForDefaultBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForDefaultBinding")
-                .field("binding", &support::DebugSyntaxResult(self.binding()))
-                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-                .field("default", &support::DebugSyntaxResult(self.default()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForDefaultBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForDefaultBinding> for SyntaxNode {
@@ -11418,18 +9608,7 @@ impl AstNode for VueVForIdentifierBinding {
 }
 impl std::fmt::Debug for VueVForIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForIdentifierBinding")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForIdentifierBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForIdentifierBinding> for SyntaxNode {
@@ -11465,18 +9644,7 @@ impl AstNode for VueVForInOperator {
 }
 impl std::fmt::Debug for VueVForInOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForInOperator")
-                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForInOperator").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForInOperator> for SyntaxNode {
@@ -11512,26 +9680,7 @@ impl AstNode for VueVForObjectBinding {
 }
 impl std::fmt::Debug for VueVForObjectBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForObjectBinding")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("bindings", &self.bindings())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVForObjectBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForObjectBinding> for SyntaxNode {
@@ -11567,23 +9716,7 @@ impl AstNode for VueVForObjectPropertyBinding {
 }
 impl std::fmt::Debug for VueVForObjectPropertyBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForObjectPropertyBinding")
-                .field("property", &support::DebugSyntaxResult(self.property()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("binding", &support::DebugSyntaxResult(self.binding()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForObjectPropertyBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForObjectPropertyBinding> for SyntaxNode {
@@ -11619,18 +9752,7 @@ impl AstNode for VueVForOfOperator {
 }
 impl std::fmt::Debug for VueVForOfOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForOfOperator")
-                .field("of_token", &support::DebugSyntaxResult(self.of_token()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForOfOperator").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForOfOperator> for SyntaxNode {
@@ -11666,22 +9788,7 @@ impl AstNode for VueVForRestBinding {
 }
 impl std::fmt::Debug for VueVForRestBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForRestBinding")
-                .field(
-                    "dotdotdot_token",
-                    &support::DebugSyntaxResult(self.dotdotdot_token()),
-                )
-                .field("binding", &support::DebugSyntaxResult(self.binding()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForRestBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForRestBinding> for SyntaxNode {
@@ -11717,28 +9824,7 @@ impl AstNode for VueVForTupleBinding {
 }
 impl std::fmt::Debug for VueVForTupleBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForTupleBinding")
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .field("second", &support::DebugOptionalElement(self.second()))
-                .field("third", &support::DebugOptionalElement(self.third()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVForTupleBinding").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForTupleBinding> for SyntaxNode {
@@ -11774,22 +9860,7 @@ impl AstNode for VueVForTupleElement {
 }
 impl std::fmt::Debug for VueVForTupleElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForTupleElement")
-                .field(
-                    "comma_token",
-                    &support::DebugSyntaxResult(self.comma_token()),
-                )
-                .field("binding", &support::DebugSyntaxResult(self.binding()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForTupleElement").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForTupleElement> for SyntaxNode {
@@ -11825,22 +9896,7 @@ impl AstNode for VueVForValue {
 }
 impl std::fmt::Debug for VueVForValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVForValue")
-                .field("l_quote", &support::DebugSyntaxResult(self.l_quote()))
-                .field("binding", &support::DebugSyntaxResult(self.binding()))
-                .field("operator", &support::DebugSyntaxResult(self.operator()))
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
-                .field("r_quote", &support::DebugSyntaxResult(self.r_quote()))
-                .finish()
-        } else {
-            f.debug_struct("VueVForValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVForValue> for SyntaxNode {
@@ -11876,24 +9932,7 @@ impl AstNode for VueVOnShorthandDirective {
 }
 impl std::fmt::Debug for VueVOnShorthandDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVOnShorthandDirective")
-                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-                .field("arg", &support::DebugSyntaxResult(self.arg()))
-                .field("modifiers", &self.modifiers())
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVOnShorthandDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVOnShorthandDirective> for SyntaxNode {
@@ -11929,24 +9968,7 @@ impl AstNode for VueVSlotShorthandDirective {
 }
 impl std::fmt::Debug for VueVSlotShorthandDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("VueVSlotShorthandDirective")
-                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-                .field("arg", &support::DebugSyntaxResult(self.arg()))
-                .field("modifiers", &self.modifiers())
-                .field(
-                    "initializer",
-                    &support::DebugOptionalElement(self.initializer()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("VueVSlotShorthandDirective").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueVSlotShorthandDirective> for SyntaxNode {
@@ -12013,11 +10035,7 @@ impl AstNode for AnyAngularBinding {
 }
 impl std::fmt::Debug for AnyAngularBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AngularEventBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::AngularPropertyBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::AngularTwoWayBinding(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyAngularBinding> for SyntaxNode {
@@ -12119,14 +10137,7 @@ impl AstNode for AnyAstroDirective {
 }
 impl std::fmt::Debug for AnyAstroDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AstroClassDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroClientDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroDefineDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroIsDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroServerDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroSetDirective(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyAstroDirective> for SyntaxNode {
@@ -12191,10 +10202,7 @@ impl AstNode for AnyAstroFrontmatterElement {
 }
 impl std::fmt::Debug for AnyAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AstroBogusFrontmatter(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroFrontmatterElement(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyAstroFrontmatterElement> for SyntaxNode {
@@ -12368,20 +10376,7 @@ impl AstNode for AnyHtmlAttribute {
 }
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AngularStructuralDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AngularTemplateRefVariable(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyAngularBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyAstroDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnySvelteDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlAttributeDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteAttachAttribute(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlAttribute> for SyntaxNode {
@@ -12478,12 +10473,7 @@ impl AstNode for AnyHtmlAttributeInitializer {
 }
 impl std::fmt::Debug for AnyHtmlAttributeInitializer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlString(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteTemplateAttributeValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForValue(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlAttributeInitializer> for SyntaxNode {
@@ -12551,11 +10541,7 @@ impl AstNode for AnyHtmlComponentObjectName {
 }
 impl std::fmt::Debug for AnyHtmlComponentObjectName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlComponentName(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlMemberName(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlTagName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlComponentObjectName> for SyntaxNode {
@@ -12625,11 +10611,7 @@ impl AstNode for AnyHtmlContent {
 }
 impl std::fmt::Debug for AnyHtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyHtmlTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlEmbeddedContent(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlContent> for SyntaxNode {
@@ -12744,15 +10726,7 @@ impl AstNode for AnyHtmlElement {
 }
 impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyHtmlContent(it) => std::fmt::Debug::fmt(it, f),
-            Self::AstroFragment(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlProcessingInstruction(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlElement> for SyntaxNode {
@@ -12817,10 +10791,7 @@ impl AstNode for AnyHtmlRootItem {
 }
 impl std::fmt::Debug for AnyHtmlRootItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyHtmlElement(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlDirective(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlRootItem> for SyntaxNode {
@@ -12886,11 +10857,7 @@ impl AstNode for AnyHtmlTagName {
 }
 impl std::fmt::Debug for AnyHtmlTagName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlComponentName(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlMemberName(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlTagName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlTagName> for SyntaxNode {
@@ -12977,12 +10944,7 @@ impl AstNode for AnyHtmlTextExpression {
 }
 impl std::fmt::Debug for AnyHtmlTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnySvelteBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlBogusTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyHtmlTextExpression> for SyntaxNode {
@@ -13055,11 +11017,7 @@ impl AstNode for AnySvelteAwaitClauses {
 }
 impl std::fmt::Debug for AnySvelteAwaitClauses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteAwaitCatchBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteAwaitThenBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteAwaitClauses> for SyntaxNode {
@@ -13141,12 +11099,7 @@ impl AstNode for AnySvelteBindingAssignmentBinding {
 }
 impl std::fmt::Debug for AnySvelteBindingAssignmentBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnySvelteDestructuredName(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteRenameBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteRestBinding(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteBindingAssignmentBinding> for SyntaxNode {
@@ -13214,11 +11167,7 @@ impl AstNode for AnySvelteBindingProperty {
 }
 impl std::fmt::Debug for AnySvelteBindingProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteLiteral(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteMemberProperty(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteBindingProperty> for SyntaxNode {
@@ -13372,19 +11321,7 @@ impl AstNode for AnySvelteBlock {
 }
 impl std::fmt::Debug for AnySvelteBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteAwaitBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteBogusBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteConstBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteDebugBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteEachBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteIfBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteKeyBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteRenderBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteSnippetBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteBlock> for SyntaxNode {
@@ -13452,10 +11389,7 @@ impl AstNode for AnySvelteBlockItem {
 }
 impl std::fmt::Debug for AnySvelteBlockItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteEachAsKeyedItem(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteEachKeyedItem(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteBlockItem> for SyntaxNode {
@@ -13519,10 +11453,7 @@ impl AstNode for AnySvelteDestructuredName {
 }
 impl std::fmt::Debug for AnySvelteDestructuredName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteCurlyDestructuredName(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteSquareDestructuredName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteDestructuredName> for SyntaxNode {
@@ -13647,16 +11578,7 @@ impl AstNode for AnySvelteDirective {
 }
 impl std::fmt::Debug for AnySvelteDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteAnimateDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteBindDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteClassDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteInDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteOutDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteStyleDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteTransitionDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteUseDirective(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteDirective> for SyntaxNode {
@@ -13728,10 +11650,7 @@ impl AstNode for AnySvelteDirectiveInitializerClause {
 }
 impl std::fmt::Debug for AnySvelteDirectiveInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlAttributeInitializerClause(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteBindFunctionBindingInitializerClause(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteDirectiveInitializerClause> for SyntaxNode {
@@ -13807,11 +11726,7 @@ impl AstNode for AnySvelteEachName {
 }
 impl std::fmt::Debug for AnySvelteEachName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnySvelteDestructuredName(it) => std::fmt::Debug::fmt(it, f),
-            Self::HtmlTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteEachName> for SyntaxNode {
@@ -13869,10 +11784,7 @@ impl AstNode for AnySvelteMemberObject {
 }
 impl std::fmt::Debug for AnySvelteMemberObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::SvelteMemberProperty(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteMemberObject> for SyntaxNode {
@@ -13938,10 +11850,7 @@ impl AstNode for AnySvelteTemplateElement {
 }
 impl std::fmt::Debug for AnySvelteTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::HtmlAttributeSingleTextExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::SvelteTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnySvelteTemplateElement> for SyntaxNode {
@@ -14038,13 +11947,7 @@ impl AstNode for AnyVueDirective {
 }
 impl std::fmt::Debug for AnyVueDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::VueBogusDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVBindShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVOnShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVSlotShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueDirective> for SyntaxNode {
@@ -14118,11 +12021,7 @@ impl AstNode for AnyVueDirectiveArgument {
 }
 impl std::fmt::Debug for AnyVueDirectiveArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::VueBogusDirectiveArgument(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueDynamicArgument(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueStaticArgument(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueDirectiveArgument> for SyntaxNode {
@@ -14211,12 +12110,7 @@ impl AstNode for AnyVueVForBinding {
 }
 impl std::fmt::Debug for AnyVueVForBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyVueVForDestructuredBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForDefaultBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForTupleBinding(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueVForBinding> for SyntaxNode {
@@ -14318,13 +12212,7 @@ impl AstNode for AnyVueVForBindingListElement {
 }
 impl std::fmt::Debug for AnyVueVForBindingListElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AnyVueVForDestructuredBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForDefaultBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForObjectPropertyBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForRestBinding(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueVForBindingListElement> for SyntaxNode {
@@ -14384,10 +12272,7 @@ impl AstNode for AnyVueVForDestructuredBinding {
 }
 impl std::fmt::Debug for AnyVueVForDestructuredBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::VueVForArrayBinding(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForObjectBinding(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueVForDestructuredBinding> for SyntaxNode {
@@ -14444,10 +12329,7 @@ impl AstNode for AnyVueVForOperator {
 }
 impl std::fmt::Debug for AnyVueVForOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::VueVForInOperator(it) => std::fmt::Debug::fmt(it, f),
-            Self::VueVForOfOperator(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyVueVForOperator> for SyntaxNode {
@@ -15205,9 +13087,7 @@ impl AstNode for AstroBogusFrontmatter {
 }
 impl std::fmt::Debug for AstroBogusFrontmatter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AstroBogusFrontmatter")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<AstroBogusFrontmatter> for SyntaxNode {
@@ -15261,9 +13141,7 @@ impl AstNode for HtmlBogus {
 }
 impl std::fmt::Debug for HtmlBogus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlBogus")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlBogus> for SyntaxNode {
@@ -15317,9 +13195,7 @@ impl AstNode for HtmlBogusAttribute {
 }
 impl std::fmt::Debug for HtmlBogusAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlBogusAttribute")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlBogusAttribute> for SyntaxNode {
@@ -15373,9 +13249,7 @@ impl AstNode for HtmlBogusElement {
 }
 impl std::fmt::Debug for HtmlBogusElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlBogusElement")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlBogusElement> for SyntaxNode {
@@ -15429,9 +13303,7 @@ impl AstNode for HtmlBogusTextExpression {
 }
 impl std::fmt::Debug for HtmlBogusTextExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlBogusTextExpression")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<HtmlBogusTextExpression> for SyntaxNode {
@@ -15485,9 +13357,7 @@ impl AstNode for SvelteBogusBlock {
 }
 impl std::fmt::Debug for SvelteBogusBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SvelteBogusBlock")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<SvelteBogusBlock> for SyntaxNode {
@@ -15541,9 +13411,7 @@ impl AstNode for VueBogusDirective {
 }
 impl std::fmt::Debug for VueBogusDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("VueBogusDirective")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueBogusDirective> for SyntaxNode {
@@ -15597,9 +13465,7 @@ impl AstNode for VueBogusDirectiveArgument {
 }
 impl std::fmt::Debug for VueBogusDirectiveArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("VueBogusDirectiveArgument")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<VueBogusDirectiveArgument> for SyntaxNode {
@@ -15677,8 +13543,7 @@ impl AstNodeList for HtmlAttributeList {
 }
 impl Debug for HtmlAttributeList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("HtmlAttributeList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &HtmlAttributeList {
@@ -15759,8 +13624,7 @@ impl AstNodeList for HtmlElementList {
 }
 impl Debug for HtmlElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("HtmlElementList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &HtmlElementList {
@@ -15841,8 +13705,7 @@ impl AstNodeList for HtmlRootItemList {
 }
 impl Debug for HtmlRootItemList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("HtmlRootItemList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &HtmlRootItemList {
@@ -15923,8 +13786,7 @@ impl AstNodeList for SvelteAwaitClausesList {
 }
 impl Debug for SvelteAwaitClausesList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteAwaitClausesList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &SvelteAwaitClausesList {
@@ -16005,8 +13867,7 @@ impl AstSeparatedList for SvelteBindingAssignmentBindingList {
 }
 impl Debug for SvelteBindingAssignmentBindingList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteBindingAssignmentBindingList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for SvelteBindingAssignmentBindingList {
@@ -16087,8 +13948,7 @@ impl AstSeparatedList for SvelteBindingList {
 }
 impl Debug for SvelteBindingList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteBindingList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for SvelteBindingList {
@@ -16169,8 +14029,7 @@ impl AstNodeList for SvelteDirectiveModifierList {
 }
 impl Debug for SvelteDirectiveModifierList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteDirectiveModifierList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &SvelteDirectiveModifierList {
@@ -16251,8 +14110,7 @@ impl AstNodeList for SvelteElseIfClauseList {
 }
 impl Debug for SvelteElseIfClauseList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteElseIfClauseList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &SvelteElseIfClauseList {
@@ -16333,8 +14191,7 @@ impl AstNodeList for SvelteTemplateElementList {
 }
 impl Debug for SvelteTemplateElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SvelteTemplateElementList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &SvelteTemplateElementList {
@@ -16415,8 +14272,7 @@ impl AstNodeList for VueModifierList {
 }
 impl Debug for VueModifierList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("VueModifierList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for &VueModifierList {
@@ -16497,8 +14353,7 @@ impl AstSeparatedList for VueVForBindingList {
 }
 impl Debug for VueVForBindingList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("VueVForBindingList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for VueVForBindingList {
@@ -16528,10 +14383,293 @@ struct DebugSyntaxElement(SyntaxElement);
 impl Debug for DebugSyntaxElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
-            SyntaxElement::Node(node) => {
-                map_syntax_node ! (node . clone () , node => std :: fmt :: Debug :: fmt (& node , f))
-            }
+            SyntaxElement::Node(node) => debug_syntax_node(node, f),
             SyntaxElement::Token(token) => Debug::fmt(token, f),
         }
     }
+}
+#[doc = r" Describes how the nodes of this language are printed."]
+struct DebugShapes;
+impl support::DebugNodeShapes for DebugShapes {
+    type Language = Language;
+    const SHAPES: &'static str = concat!(
+        "nAngularBindingName,value_token\n",
+        "nAngularEventBinding,l_paren_token,name,r_paren_token,?initializer\n",
+        "nAngularPropertyBinding,l_brack_token,name,r_brack_token,?initializer\n",
+        "nAngularStructuralDirective,star_token,name,?initializer\n",
+        "nAngularTemplateRefVariable,hash_token,name,?initializer\n",
+        "nAngularTwoWayBinding,l_bracket_paren_token,name,r_bracket_paren_token,?initializer\n",
+        "nAstroClassDirective,class_token,value\n",
+        "nAstroClientDirective,client_token,value\n",
+        "nAstroClosingFragment,l_angle_token,slash_token,r_angle_token\n",
+        "nAstroDefineDirective,define_token,value\n",
+        "nAstroDirectiveValue,colon_token_token,name,?initializer\n",
+        "nAstroEmbeddedContent,?content_token\n",
+        "nAstroFragment,opening_fragment,children,closing_fragment\n",
+        "nAstroFrontmatterElement,l_fence_token,content,r_fence_token\n",
+        "nAstroIsDirective,is_token,value\n",
+        "nAstroOpeningFragment,l_angle_token,r_angle_token\n",
+        "nAstroServerDirective,server_token,value\n",
+        "nAstroSetDirective,set_token,value\n",
+        "nHtmlAttribute,name,?initializer\n",
+        "nHtmlAttributeDoubleTextExpression,l_double_curly_token,expression,r_double_curly_token\n",
+        "nHtmlAttributeInitializerClause,eq_token,value\n",
+        "nHtmlAttributeName,value_token\n",
+        "nHtmlAttributeSingleTextExpression,l_curly_token,expression,r_curly_token\n",
+        "nHtmlCdataSection,cdata_start_token,content_token,cdata_end_token\n",
+        "nHtmlClosingElement,l_angle_token,slash_token,name,r_angle_token\n",
+        "nHtmlComponentName,value_token\n",
+        "nHtmlContent,value_token\n",
+        "nHtmlDirective,l_angle_token,excl_token,doctype_token,?name_token,?html_token,?quirk_token,?public_id_token,?system_id_token,r_angle_token\n",
+        "nHtmlDoubleTextExpression,l_double_curly_token,expression,r_double_curly_token\n",
+        "nHtmlElement,opening_element,children,closing_element\n",
+        "nHtmlEmbeddedContent,value_token\n",
+        "nHtmlMemberName,object,dot_token,member\n",
+        "nHtmlOpeningElement,l_angle_token,name,attributes,r_angle_token\n",
+        "nHtmlProcessingInstruction,start_token,target,attributes,end_token\n",
+        "nHtmlRoot,?bom_token,?frontmatter,items,eof_token\n",
+        "nHtmlSelfClosingElement,l_angle_token,name,attributes,?slash_token,r_angle_token\n",
+        "nHtmlSingleTextExpression,l_curly_token,?expression,r_curly_token\n",
+        "nHtmlSpreadAttribute,l_curly_token,dotdotdot_token,argument,r_curly_token\n",
+        "nHtmlString,value_token\n",
+        "nHtmlTagName,value_token\n",
+        "nHtmlTextExpression,html_literal_token\n",
+        "nSvelteAnimateDirective,animate_token,value\n",
+        "nSvelteAttachAttribute,sv_curly_at_token,attach_token,expression,r_curly_token\n",
+        "nSvelteAwaitBlock,opening_block,clauses,closing_block\n",
+        "nSvelteAwaitCatchBlock,sv_curly_colon_token,catch_token,?name,r_curly_token,children\n",
+        "nSvelteAwaitCatchClause,catch_token,?name\n",
+        "nSvelteAwaitClosingBlock,sv_curly_slash_token,await_token,r_curly_token\n",
+        "nSvelteAwaitOpeningBlock,sv_curly_hash_token,await_token,expression,?then_clause,?catch_clause,r_curly_token,children\n",
+        "nSvelteAwaitThenBlock,sv_curly_colon_token,then_token,?name,r_curly_token,children\n",
+        "nSvelteAwaitThenClause,then_token,?name\n",
+        "nSvelteBindDirective,bind_token,value\n",
+        "nSvelteBindFunctionBindingExpression,l_curly_token,get,comma_token,set,r_curly_token\n",
+        "nSvelteBindFunctionBindingInitializerClause,eq_token,value\n",
+        "nSvelteClassDirective,class_token,value\n",
+        "nSvelteConstBlock,sv_curly_at_token,const_token,expression,r_curly_token\n",
+        "nSvelteCurlyDestructuredName,l_curly_token,names,r_curly_token\n",
+        "nSvelteDebugBlock,sv_curly_at_token,debug_token,bindings,r_curly_token\n",
+        "nSvelteDeclarationBlock,l_curly_token,declaration,r_curly_token\n",
+        "nSvelteDirectiveModifier,bitwise_or_token,name\n",
+        "nSvelteDirectiveValue,colon_token,property,modifiers,?initializer\n",
+        "nSvelteEachAsKeyedItem,as_token,name,?index,?key\n",
+        "nSvelteEachBlock,opening_block,children,?else_clause,closing_block\n",
+        "nSvelteEachClosingBlock,sv_curly_slash_token,each_token,r_curly_token\n",
+        "nSvelteEachIndex,comma_token,value\n",
+        "nSvelteEachKey,l_paren_token,expression,r_paren_token\n",
+        "nSvelteEachKeyedItem,?index\n",
+        "nSvelteEachOpeningBlock,sv_curly_hash_token,each_token,list,?item,r_curly_token\n",
+        "nSvelteElseClause,sv_curly_colon_token,else_token,r_curly_token,children\n",
+        "nSvelteElseIfClause,sv_curly_colon_token,else_token,if_token,expression,r_curly_token,children\n",
+        "nSvelteHtmlBlock,sv_curly_at_token,html_token,expression,r_curly_token\n",
+        "nSvelteIfBlock,opening_block,else_if_clauses,?else_clause,closing_block\n",
+        "nSvelteIfClosingBlock,sv_curly_slash_token,if_token,r_curly_token\n",
+        "nSvelteIfOpeningBlock,sv_curly_hash_token,if_token,expression,r_curly_token,children\n",
+        "nSvelteInDirective,in_token,value\n",
+        "nSvelteKeyBlock,opening_block,children,closing_block\n",
+        "nSvelteKeyClosingBlock,sv_curly_slash_token,key_token,r_curly_token\n",
+        "nSvelteKeyOpeningBlock,sv_curly_hash_token,key_token,expression,r_curly_token\n",
+        "nSvelteLiteral,value_token\n",
+        "nSvelteMemberProperty,object,dot_token,member\n",
+        "nSvelteName,ident_token\n",
+        "nSvelteOutDirective,out_token,value\n",
+        "nSvelteRenameBinding,key,colon_token,name\n",
+        "nSvelteRenderBlock,sv_curly_at_token,render_token,expression,r_curly_token\n",
+        "nSvelteRestBinding,dotdotdot_token,name\n",
+        "nSvelteSnippetBlock,opening_block,closing_block\n",
+        "nSvelteSnippetClosingBlock,sv_curly_slash_token,snippet_token,r_curly_token\n",
+        "nSvelteSnippetOpeningBlock,sv_curly_hash_token,snippet_token,expression,r_curly_token,children\n",
+        "nSvelteSquareDestructuredName,l_brack_token,names,r_brack_token\n",
+        "nSvelteStyleDirective,style_token,value\n",
+        "nSvelteTemplateAttributeValue,l_quote,elements,r_quote\n",
+        "nSvelteTemplateChunkElement,html_template_chunk_token\n",
+        "nSvelteTransitionDirective,transition_token,value\n",
+        "nSvelteUseDirective,use_token,value\n",
+        "nVueDirective,name_token,?arg,modifiers,?initializer\n",
+        "nVueDirectiveArgument,colon_token,?arg\n",
+        "nVueDynamicArgument,l_brack_token,name_token,r_brack_token\n",
+        "nVueModifier,dot_token,modifier_token\n",
+        "nVueStaticArgument,name_token\n",
+        "nVueVBindShorthandDirective,arg,modifiers,?initializer\n",
+        "nVueVForArrayBinding,l_brack_token,bindings,r_brack_token\n",
+        "nVueVForDefaultBinding,binding,eq_token,default\n",
+        "nVueVForIdentifierBinding,name_token\n",
+        "nVueVForInOperator,in_token\n",
+        "nVueVForObjectBinding,l_curly_token,bindings,r_curly_token\n",
+        "nVueVForObjectPropertyBinding,property,colon_token,binding\n",
+        "nVueVForOfOperator,of_token\n",
+        "nVueVForRestBinding,dotdotdot_token,binding\n",
+        "nVueVForTupleBinding,l_paren_token,value,?second,?third,r_paren_token\n",
+        "nVueVForTupleElement,comma_token,binding\n",
+        "nVueVForValue,l_quote,binding,operator,expression,r_quote\n",
+        "nVueVOnShorthandDirective,at_token,arg,modifiers,?initializer\n",
+        "nVueVSlotShorthandDirective,hash_token,arg,modifiers,?initializer\n",
+        "bAstroBogusFrontmatter\n",
+        "bHtmlBogus\n",
+        "bHtmlBogusAttribute\n",
+        "bHtmlBogusElement\n",
+        "bHtmlBogusTextExpression\n",
+        "bSvelteBogusBlock\n",
+        "bVueBogusDirective\n",
+        "bVueBogusDirectiveArgument\n",
+        "lHtmlAttributeList\n",
+        "lHtmlElementList\n",
+        "lHtmlRootItemList\n",
+        "lSvelteAwaitClausesList\n",
+        "sSvelteBindingAssignmentBindingList\n",
+        "sSvelteBindingList\n",
+        "lSvelteDirectiveModifierList\n",
+        "lSvelteElseIfClauseList\n",
+        "lSvelteTemplateElementList\n",
+        "lVueModifierList\n",
+        "sVueVForBindingList\n"
+    );
+    fn shape_offset(kind: SyntaxKind) -> u32 {
+        match kind {
+            ANGULAR_BINDING_NAME => 0u32,
+            ANGULAR_EVENT_BINDING => 32u32,
+            ANGULAR_PROPERTY_BINDING => 99u32,
+            ANGULAR_STRUCTURAL_DIRECTIVE => 169u32,
+            ANGULAR_TEMPLATE_REF_VARIABLE => 226u32,
+            ANGULAR_TWO_WAY_BINDING => 283u32,
+            ASTRO_CLASS_DIRECTIVE => 367u32,
+            ASTRO_CLIENT_DIRECTIVE => 406u32,
+            ASTRO_CLOSING_FRAGMENT => 447u32,
+            ASTRO_DEFINE_DIRECTIVE => 509u32,
+            ASTRO_DIRECTIVE_VALUE => 550u32,
+            ASTRO_EMBEDDED_CONTENT => 607u32,
+            ASTRO_FRAGMENT => 644u32,
+            ASTRO_FRONTMATTER_ELEMENT => 702u32,
+            ASTRO_IS_DIRECTIVE => 763u32,
+            ASTRO_OPENING_FRAGMENT => 796u32,
+            ASTRO_SERVER_DIRECTIVE => 846u32,
+            ASTRO_SET_DIRECTIVE => 887u32,
+            HTML_ATTRIBUTE => 922u32,
+            HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION => 955u32,
+            HTML_ATTRIBUTE_INITIALIZER_CLAUSE => 1043u32,
+            HTML_ATTRIBUTE_NAME => 1090u32,
+            HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION => 1121u32,
+            HTML_CDATA_SECTION => 1195u32,
+            HTML_CLOSING_ELEMENT => 1261u32,
+            HTML_COMPONENT_NAME => 1326u32,
+            HTML_CONTENT => 1357u32,
+            HTML_DIRECTIVE => 1382u32,
+            HTML_DOUBLE_TEXT_EXPRESSION => 1521u32,
+            HTML_ELEMENT => 1600u32,
+            HTML_EMBEDDED_CONTENT => 1654u32,
+            HTML_MEMBER_NAME => 1687u32,
+            HTML_OPENING_ELEMENT => 1727u32,
+            HTML_PROCESSING_INSTRUCTION => 1791u32,
+            HTML_ROOT => 1858u32,
+            HTML_SELF_CLOSING_ELEMENT => 1908u32,
+            HTML_SINGLE_TEXT_EXPRESSION => 1989u32,
+            HTML_SPREAD_ATTRIBUTE => 2055u32,
+            HTML_STRING => 2129u32,
+            HTML_TAG_NAME => 2153u32,
+            HTML_TEXT_EXPRESSION => 2178u32,
+            SVELTE_ANIMATE_DIRECTIVE => 2217u32,
+            SVELTE_ATTACH_ATTRIBUTE => 2261u32,
+            SVELTE_AWAIT_BLOCK => 2340u32,
+            SVELTE_AWAIT_CATCH_BLOCK => 2394u32,
+            SVELTE_AWAIT_CATCH_CLAUSE => 2479u32,
+            SVELTE_AWAIT_CLOSING_BLOCK => 2521u32,
+            SVELTE_AWAIT_OPENING_BLOCK => 2593u32,
+            SVELTE_AWAIT_THEN_BLOCK => 2711u32,
+            SVELTE_AWAIT_THEN_CLAUSE => 2794u32,
+            SVELTE_BIND_DIRECTIVE => 2834u32,
+            SVELTE_BIND_FUNCTION_BINDING_EXPRESSION => 2872u32,
+            SVELTE_BIND_FUNCTION_BINDING_INITIALIZER_CLAUSE => 2957u32,
+            SVELTE_CLASS_DIRECTIVE => 3016u32,
+            SVELTE_CONST_BLOCK => 3056u32,
+            SVELTE_CURLY_DESTRUCTURED_NAME => 3129u32,
+            SVELTE_DEBUG_BLOCK => 3192u32,
+            SVELTE_DECLARATION_BLOCK => 3263u32,
+            SVELTE_DIRECTIVE_MODIFIER => 3327u32,
+            SVELTE_DIRECTIVE_VALUE => 3374u32,
+            SVELTE_EACH_AS_KEYED_ITEM => 3440u32,
+            SVELTE_EACH_BLOCK => 3489u32,
+            SVELTE_EACH_CLOSING_BLOCK => 3556u32,
+            SVELTE_EACH_INDEX => 3626u32,
+            SVELTE_EACH_KEY => 3661u32,
+            SVELTE_EACH_KEYED_ITEM => 3715u32,
+            SVELTE_EACH_OPENING_BLOCK => 3743u32,
+            SVELTE_ELSE_CLAUSE => 3823u32,
+            SVELTE_ELSE_IF_CLAUSE => 3896u32,
+            SVELTE_HTML_BLOCK => 3991u32,
+            SVELTE_IF_BLOCK => 4062u32,
+            SVELTE_IF_CLOSING_BLOCK => 4134u32,
+            SVELTE_IF_OPENING_BLOCK => 4200u32,
+            SVELTE_IN_DIRECTIVE => 4285u32,
+            SVELTE_KEY_BLOCK => 4319u32,
+            SVELTE_KEY_CLOSING_BLOCK => 4372u32,
+            SVELTE_KEY_OPENING_BLOCK => 4440u32,
+            SVELTE_LITERAL => 4518u32,
+            SVELTE_MEMBER_PROPERTY => 4545u32,
+            SVELTE_NAME => 4591u32,
+            SVELTE_OUT_DIRECTIVE => 4615u32,
+            SVELTE_RENAME_BINDING => 4651u32,
+            SVELTE_RENDER_BLOCK => 4693u32,
+            SVELTE_REST_BINDING => 4768u32,
+            SVELTE_SNIPPET_BLOCK => 4808u32,
+            SVELTE_SNIPPET_CLOSING_BLOCK => 4856u32,
+            SVELTE_SNIPPET_OPENING_BLOCK => 4932u32,
+            SVELTE_SQUARE_DESTRUCTURED_NAME => 5027u32,
+            SVELTE_STYLE_DIRECTIVE => 5091u32,
+            SVELTE_TEMPLATE_ATTRIBUTE_VALUE => 5131u32,
+            SVELTE_TEMPLATE_CHUNK_ELEMENT => 5186u32,
+            SVELTE_TRANSITION_DIRECTIVE => 5240u32,
+            SVELTE_USE_DIRECTIVE => 5290u32,
+            VUE_DIRECTIVE => 5326u32,
+            VUE_DIRECTIVE_ARGUMENT => 5379u32,
+            VUE_DYNAMIC_ARGUMENT => 5418u32,
+            VUE_MODIFIER => 5477u32,
+            VUE_STATIC_ARGUMENT => 5515u32,
+            VUE_V_BIND_SHORTHAND_DIRECTIVE => 5545u32,
+            VUE_V_FOR_ARRAY_BINDING => 5600u32,
+            VUE_V_FOR_DEFAULT_BINDING => 5658u32,
+            VUE_V_FOR_IDENTIFIER_BINDING => 5706u32,
+            VUE_V_FOR_IN_OPERATOR => 5743u32,
+            VUE_V_FOR_OBJECT_BINDING => 5771u32,
+            VUE_V_FOR_OBJECT_PROPERTY_BINDING => 5830u32,
+            VUE_V_FOR_OF_OPERATOR => 5889u32,
+            VUE_V_FOR_REST_BINDING => 5917u32,
+            VUE_V_FOR_TUPLE_BINDING => 5961u32,
+            VUE_V_FOR_TUPLE_ELEMENT => 6031u32,
+            VUE_V_FOR_VALUE => 6072u32,
+            VUE_V_ON_SHORTHAND_DIRECTIVE => 6130u32,
+            VUE_V_SLOT_SHORTHAND_DIRECTIVE => 6192u32,
+            ASTRO_BOGUS_FRONTMATTER => 6258u32,
+            HTML_BOGUS => 6281u32,
+            HTML_BOGUS_ATTRIBUTE => 6292u32,
+            HTML_BOGUS_ELEMENT => 6312u32,
+            HTML_BOGUS_TEXT_EXPRESSION => 6330u32,
+            SVELTE_BOGUS_BLOCK => 6355u32,
+            VUE_BOGUS_DIRECTIVE => 6373u32,
+            VUE_BOGUS_DIRECTIVE_ARGUMENT => 6392u32,
+            HTML_ATTRIBUTE_LIST => 6419u32,
+            HTML_ELEMENT_LIST => 6438u32,
+            HTML_ROOT_ITEM_LIST => 6455u32,
+            SVELTE_AWAIT_CLAUSES_LIST => 6473u32,
+            SVELTE_BINDING_ASSIGNMENT_BINDING_LIST => 6497u32,
+            SVELTE_BINDING_LIST => 6533u32,
+            SVELTE_DIRECTIVE_MODIFIER_LIST => 6552u32,
+            SVELTE_ELSE_IF_CLAUSE_LIST => 6581u32,
+            SVELTE_TEMPLATE_ELEMENT_LIST => 6605u32,
+            VUE_MODIFIER_LIST => 6632u32,
+            VUE_V_FOR_BINDING_LIST => 6649u32,
+            _ => u32::MAX,
+        }
+    }
+    fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R {
+        thread_local! { static DEPTHS : [std :: cell :: Cell < u8 > ; SyntaxKind :: __LAST as usize] = const { [const { std :: cell :: Cell :: new (0) } ; SyntaxKind :: __LAST as usize] } ; }
+        DEPTHS.with(|depths| f(&depths[raw_kind]))
+    }
+    fn debug_unshaped(_: &SyntaxNode, _: &mut Formatter<'_>) -> std::fmt::Result {
+        unreachable!("every kind of node has a shape")
+    }
+}
+#[doc = r" Prints `node` the way the AST node of its kind is printed."]
+fn debug_syntax_node(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+    support::debug_any_node::<DebugShapes>(node, f)
 }
