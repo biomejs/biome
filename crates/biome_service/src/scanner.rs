@@ -1279,10 +1279,13 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
         folders.into_iter().map(Utf8Path::to_path_buf).collect()
     };
 
+    let scheduled = HashSet::new();
+
     rayon::scope(|s| {
         fn index_dependency<'a, W: WorkspaceScannerBridge>(
             s: &Scope<'a>,
             ctx: &'a ScanContext<'a, W>,
+            scheduled: &'a HashSet<Utf8PathBuf>,
             dependency_path: Utf8PathBuf,
         ) {
             let path = ctx.workspace.fs().biome_path(&dependency_path);
@@ -1303,8 +1306,8 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         None,
                     )
                     .unwrap_or(true);
-                if !is_ignored {
-                    s.spawn(move |s| index_dependency(s, ctx, dependency_path));
+                if !is_ignored && scheduled.pin().insert(dependency_path.clone()) {
+                    s.spawn(move |s| index_dependency(s, ctx, scheduled, dependency_path));
                 }
             }
         }
@@ -1320,8 +1323,8 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                     None,
                 )
                 .unwrap_or(true);
-            if !is_ignored {
-                s.spawn(|s| index_dependency(s, ctx, dependency_path));
+            if !is_ignored && scheduled.pin().insert(dependency_path.clone()) {
+                s.spawn(|s| index_dependency(s, ctx, &scheduled, dependency_path));
             }
         }
     });
