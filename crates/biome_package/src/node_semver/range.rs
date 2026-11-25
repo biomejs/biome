@@ -712,14 +712,22 @@ fn parse_operator(input: &str) -> (RangeOperator, &str) {
     }
 }
 
+fn set_is_satisfiable(set: &[Comparator]) -> bool {
+    set.iter()
+        .enumerate()
+        .all(|(i, comp)| set[i + 1..].iter().all(|other| comp.intersects(other)))
+}
+
 /// Tests whether two comparator sets intersect.
 ///
-/// Two sets intersect if every comparator in the first set intersects
-/// with every comparator in the second set (meaning there's a version
-/// that satisfies all comparators in both sets).
+/// Two sets intersect if both are internally satisfiable and every comparator
+/// in the first set intersects with every comparator in the second set.
 fn sets_intersect(set1: &[Comparator], set2: &[Comparator]) -> bool {
-    set1.iter()
-        .all(|comp1| set2.iter().all(|comp2| comp1.intersects(comp2)))
+    set_is_satisfiable(set1)
+        && set_is_satisfiable(set2)
+        && set1
+            .iter()
+            .all(|comp1| set2.iter().all(|comp2| comp1.intersects(comp2)))
 }
 
 /// Returns the next discrete version boundary after `version`: for a prerelease,

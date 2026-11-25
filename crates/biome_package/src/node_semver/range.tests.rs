@@ -90,6 +90,11 @@ fn test_caret_range_all_zeros() {
     let greater_than_zero = ">0.0.0".parse::<Range>().unwrap();
     assert!(!exact_zero.intersects(&greater_than_zero));
     assert!(!greater_than_zero.intersects(&exact_zero));
+
+    let contradictory = "^0.0.0 >0.0.0".parse::<Range>().unwrap();
+    let all_non_prerelease = ">=0.0.0".parse::<Range>().unwrap();
+    assert!(!contradictory.intersects(&all_non_prerelease));
+    assert!(!all_non_prerelease.intersects(&contradictory));
 }
 
 #[test]
