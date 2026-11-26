@@ -1670,6 +1670,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noTailwindConflictingClasses", TypeId::of::<biome_rule_options::no_tailwind_conflicting_classes::NoTailwindConflictingClassesOptions>()));
     result.push((
         "nursery",
+        "noTailwindLegacyImportant",
+        TypeId::of::<
+            biome_rule_options::no_tailwind_legacy_important::NoTailwindLegacyImportantOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noTailwindLegacyUtilities",
         TypeId::of::<
             biome_rule_options::no_tailwind_legacy_utilities::NoTailwindLegacyUtilitiesOptions,

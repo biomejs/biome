@@ -1,0 +1,189 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div class="!flex p-4 hover:!bg-red-500/50"></div>
+<div class='!-m-4 ![color:red]'></div>
+<div CLASS="md:focus:!text-lg"></div>
+<div title="é" class="
+  !underline"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:13 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="!flex p-4 hover:!bg-red-500/50"></div>
+      │             ^^^^^
+    3 │ <div class='!-m-4 ![color:red]'></div>
+    4 │ <div CLASS="md:focus:!text-lg"></div>
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <div·class="!flex·p-4·hover:!bg-red-500/50"></div>
+      2 │ + <div·class="flex!·p-4·hover:!bg-red-500/50"></div>
+    3 3 │   <div class='!-m-4 ![color:red]'></div>
+    4 4 │   <div CLASS="md:focus:!text-lg"></div>
+  
+
+```
+
+```
+invalid.html:2:23 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class hover:!bg-red-500/50 puts the important modifier ! before the utility name.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="!flex p-4 hover:!bg-red-500/50"></div>
+      │                       ^^^^^^^^^^^^^^^^^^^^
+    3 │ <div class='!-m-4 ![color:red]'></div>
+    4 │ <div CLASS="md:focus:!text-lg"></div>
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use hover:bg-red-500/50! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <div·class="!flex·p-4·hover:!bg-red-500/50"></div>
+      2 │ + <div·class="!flex·p-4·hover:bg-red-500/50!"></div>
+    3 3 │   <div class='!-m-4 ![color:red]'></div>
+    4 4 │   <div CLASS="md:focus:!text-lg"></div>
+  
+
+```
+
+```
+invalid.html:3:13 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !-m-4 puts the important modifier ! before the utility name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="!flex p-4 hover:!bg-red-500/50"></div>
+  > 3 │ <div class='!-m-4 ![color:red]'></div>
+      │             ^^^^^
+    4 │ <div CLASS="md:focus:!text-lg"></div>
+    5 │ <div title="é" class="
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use -m-4! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <div class="!flex p-4 hover:!bg-red-500/50"></div>
+    3   │ - <div·class='!-m-4·![color:red]'></div>
+      3 │ + <div·class='-m-4!·![color:red]'></div>
+    4 4 │   <div CLASS="md:focus:!text-lg"></div>
+    5 5 │   <div title="é" class="
+  
+
+```
+
+```
+invalid.html:3:19 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class ![color:red] puts the important modifier ! before the utility name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="!flex p-4 hover:!bg-red-500/50"></div>
+  > 3 │ <div class='!-m-4 ![color:red]'></div>
+      │                   ^^^^^^^^^^^^
+    4 │ <div CLASS="md:focus:!text-lg"></div>
+    5 │ <div title="é" class="
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use [color:red]! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <div class="!flex p-4 hover:!bg-red-500/50"></div>
+    3   │ - <div·class='!-m-4·![color:red]'></div>
+      3 │ + <div·class='!-m-4·[color:red]!'></div>
+    4 4 │   <div CLASS="md:focus:!text-lg"></div>
+    5 5 │   <div title="é" class="
+  
+
+```
+
+```
+invalid.html:4:13 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class md:focus:!text-lg puts the important modifier ! before the utility name.
+  
+    2 │ <div class="!flex p-4 hover:!bg-red-500/50"></div>
+    3 │ <div class='!-m-4 ![color:red]'></div>
+  > 4 │ <div CLASS="md:focus:!text-lg"></div>
+      │             ^^^^^^^^^^^^^^^^^
+    5 │ <div title="é" class="
+    6 │   !underline"></div>
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use md:focus:text-lg! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    2 2 │   <div class="!flex p-4 hover:!bg-red-500/50"></div>
+    3 3 │   <div class='!-m-4 ![color:red]'></div>
+    4   │ - <div·CLASS="md:focus:!text-lg"></div>
+      4 │ + <div·CLASS="md:focus:text-lg!"></div>
+    5 5 │   <div title="é" class="
+    6 6 │     !underline"></div>
+  
+
+```
+
+```
+invalid.html:6:3 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !underline puts the important modifier ! before the utility name.
+  
+    4 │ <div CLASS="md:focus:!text-lg"></div>
+    5 │ <div title="é" class="
+  > 6 │   !underline"></div>
+      │   ^^^^^^^^^^
+    7 │ 
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use underline! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    4 4 │   <div CLASS="md:focus:!text-lg"></div>
+    5 5 │   <div title="é" class="
+    6   │ - ··!underline"></div>
+      6 │ + ··underline!"></div>
+    7 7 │   
+  
+
+```

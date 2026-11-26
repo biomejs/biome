@@ -3564,6 +3564,11 @@ export interface Nursery {
 	 */
 	noTailwindConflictingClasses?: NoTailwindConflictingClassesConfiguration;
 	/**
+	 * Disallow the leading ! important modifier in Tailwind CSS classes.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-important
+	 */
+	noTailwindLegacyImportant?: NoTailwindLegacyImportantConfiguration;
+	/**
 	 * Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities
 	 */
@@ -7375,6 +7380,9 @@ export type NoTailwindArbitraryValueConfiguration =
 export type NoTailwindConflictingClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindConflictingClassesOptions;
+export type NoTailwindLegacyImportantConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindLegacyImportantOptions;
 export type NoTailwindLegacyUtilitiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindLegacyUtilitiesOptions;
@@ -10857,6 +10865,14 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 export interface RuleWithNoTailwindConflictingClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindConflictingClassesOptions;
+}
+export interface RuleWithNoTailwindLegacyImportantOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoTailwindLegacyImportantOptions;
 }
 export interface RuleWithNoTailwindLegacyUtilitiesOptions {
 	/**
@@ -14576,6 +14592,7 @@ export interface NoTailwindArbitraryValueOptions {
 	allowedClasses?: string[];
 }
 export type NoTailwindConflictingClassesOptions = {};
+export type NoTailwindLegacyImportantOptions = {};
 export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
@@ -17017,6 +17034,7 @@ export type Category =
 	| "lint/nursery/noSyncMethods"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindConflictingClasses"
+	| "lint/nursery/noTailwindLegacyImportant"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestrictedClasses"

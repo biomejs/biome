@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+<div class="!flex"></div>
+<div :class="['!grid', { '!underline': active }]"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:13 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <div class="!flex"></div>
+      │             ^^^^^
+    4 │ <div :class="['!grid', { '!underline': active }]"></div>
+    5 │ </template>
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - <div·class="!flex"></div>
+      3 │ + <div·class="flex!"></div>
+    4 4 │   <div :class="['!grid', { '!underline': active }]"></div>
+    5 5 │   </template>
+  
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !grid puts the important modifier ! before the utility name.
+  
+    2 │ <template>
+    3 │ <div class="!flex"></div>
+  > 4 │ <div :class="['!grid', { '!underline': active }]"></div>
+      │                ^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use grid! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+  - ['!grid',·{·'!underline':·active·}]
+  + ['grid!',·{·'!underline':·active·}]
+  
+
+```
+
+```
+invalid.vue:4:27 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !underline puts the important modifier ! before the utility name.
+  
+    2 │ <template>
+    3 │ <div class="!flex"></div>
+  > 4 │ <div :class="['!grid', { '!underline': active }]"></div>
+      │                           ^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use underline! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+  - ['!grid',·{·'!underline':·active·}]
+  + ['!grid',·{·'underline!':·active·}]
+  
+
+```
