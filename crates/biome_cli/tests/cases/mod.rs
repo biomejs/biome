@@ -11,6 +11,7 @@ mod css_parsing;
 mod cts_files;
 mod diagnostics;
 mod editorconfig;
+mod expand;
 mod format_with_errors;
 mod frameworks;
 mod graphql;

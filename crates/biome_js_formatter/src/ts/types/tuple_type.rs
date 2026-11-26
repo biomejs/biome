@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use biome_formatter::{Expand, write};
+use biome_formatter::write;
 use biome_js_syntax::{TsTupleType, TsTupleTypeFields};
 
 #[derive(Debug, Clone, Default)]
@@ -24,7 +24,10 @@ impl FormatNodeRule<TsTupleType> for FormatTsTupleType {
                 [format_dangling_comments(node.syntax()).with_block_indent()]
             )?;
         } else {
-            let should_expand = f.options().expand() == Expand::Always;
+            let should_expand = f
+                .options()
+                .expand()
+                .should_expand_for_length(elements.len());
 
             write!(
                 f,

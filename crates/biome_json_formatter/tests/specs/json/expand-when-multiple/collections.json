@@ -1,0 +1,18 @@
+{
+  "single": { "a": 1 },
+  "multiple": { "a": 1, "b": 2 },
+  "empty": {},
+  "expandedSingle": {
+    "a": 1
+  },
+  "nested": { "a": { "b": 1, "c": 2 } },
+  "singleArray": [1],
+  "multipleArray": [1, 2, 3],
+  "emptyArray": [],
+  "expandedSingleArray": [
+    1
+  ],
+  "nestedArray": [[1, 2], { "a": 1, "b": 2 }],
+  "singleNestedArray": [{ "a": 1 }],
+  "longSingle": { "value": "a value that is long enough to make this single-property object exceed the configured line width" }
+}

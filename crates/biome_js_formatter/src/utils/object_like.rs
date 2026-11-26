@@ -32,10 +32,10 @@ impl JsObjectLike {
         }
     }
 
-    fn members_are_empty(&self) -> bool {
+    fn members_len(&self) -> usize {
         match self {
-            Self::JsObjectExpression(oe) => oe.members().is_empty(),
-            Self::TsObjectType(ot) => ot.members().is_empty(),
+            Self::JsObjectExpression(oe) => oe.members().len(),
+            Self::TsObjectType(ot) => ot.members().len(),
         }
     }
 
@@ -57,7 +57,9 @@ impl Format<JsFormatContext> for JsObjectLike {
 
         write!(f, [self.l_curly_token().format(),])?;
 
-        if self.members_are_empty() {
+        let members_len = self.members_len();
+
+        if members_len == 0 {
             write!(
                 f,
                 [format_dangling_comments(self.syntax()).with_block_indent(),]
@@ -66,7 +68,7 @@ impl Format<JsFormatContext> for JsObjectLike {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             let should_expand = (f.options().expand() == Expand::Auto
                 && self.members_have_leading_newline())
-                || f.options().expand() == Expand::Always;
+                || f.options().expand().should_expand_for_length(members_len);
 
             // If the object type is the type annotation of the only parameter in a function,
             // try to hug the parameter; we don't create a group and inline the contents here.
@@ -86,7 +88,7 @@ impl Format<JsFormatContext> for JsObjectLike {
             let inner =
                 &soft_block_indent_with_maybe_space(&members, should_insert_space_around_brackets);
 
-            if should_hug {
+            if should_hug && !(f.options().expand() == Expand::WhenMultiple && should_expand) {
                 write!(f, [inner])?;
             } else {
                 write!(f, [group(inner).should_expand(should_expand)])?;
