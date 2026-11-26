@@ -162,6 +162,17 @@ one of its own variables or a path on its own `this`. Its parts live in
   TypeScript never narrows `s` through `isC(s.kind)`. The decomposed
   condition lists such objects apart from the subjects it mentions, so the
   builder knows which subjects only property guards narrow.
+  A runtime test of a `const` that holds a property adds the same property
+  guard, following TypeScript's `getCandidateDiscriminantPropertyAccess`:
+  `k === "c"` applies to `s` after `const k = s.kind` or
+  `const { kind: k } = s`. The `const` follows the rules of an aliased
+  condition below. Its initializer must be a member access, or a subject
+  when the `const` is an element of a destructuring pattern. Such an element
+  must have no default and must not be a rest element, and the pattern must
+  be the declarator's own binding, so `const { a: { kind } } = w` holds
+  nothing. For a destructuring element,
+  the decomposer adds the property's path, such as `s.kind`, to the subject
+  table, so that the write scan can find writes to it.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -174,8 +185,14 @@ one of its own variables or a path on its own `this`. Its parts live in
   once five aliased conditions enclose a test, where TypeScript stops too, so
   a deeper `const` tests only its own truthiness. When decomposition stops
   early, the subjects that inlined initializers read are mentioned too.
+  A property guard from a `const` that holds a property, or from a test
+  inside an inlined initializer, is marked as aliased: the `const` holds the
+  value that the property had where the `const` is declared, and a write can
+  change the property before the test.
 - `writes.rs` finds the property paths that a root may write. The graph has
-  no write points, so a written path does not narrow anywhere in its root.
+  no write points, so a written path does not narrow anywhere in its root,
+  and collection replaces an aliased property guard whose property the root
+  may write with `Keep`.
   The scan visits the root's own code, including function and arrow
   expressions called where they are defined and class static blocks, but not
   the bodies of other functions, methods, accessors, and constructors, which
@@ -199,7 +216,8 @@ declared in the root, never written, neither untyped nor annotated `any`, and
 not supplied by a destructuring default, which the declared type ignores. A
 property path can narrow when its variable can, or when it starts at a `this`
 that is a subject, and the write scan finds no write that cancels it; the scan
-runs only when the root reads a tested path.
+runs only when the root reads a tested path or has an aliased property guard
+on an object that can narrow.
 Those reads, plus the enclosing expressions that can use a narrowed operand,
 become candidates. A test inside a nested function never reaches reads in the
 enclosing one, and an array or object literal ends the chain of enclosing

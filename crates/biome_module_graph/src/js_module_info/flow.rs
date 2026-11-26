@@ -43,14 +43,16 @@ pub(crate) use scanner::FlowRootScanner;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    JsArrayBindingPatternElement, JsIdentifierBinding, JsObjectBindingPatternProperty,
+    JsArrayBindingPattern, JsArrayBindingPatternElement, JsArrayBindingPatternElementList,
+    JsArrayBindingPatternRestElement, JsIdentifierBinding, JsLanguage, JsObjectBindingPattern,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
     JsObjectBindingPatternShorthandProperty, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsThisExpression,
 };
 use biome_js_type_info::{
     RawTypeData, TypeReference, is_raw_narrowing_invariant, raw_may_be_object_union,
 };
-use biome_rowan::{AstNode, AstPtr, Text, TextRange};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange};
 use builder::{BuiltRoot, build_root};
 use guards::GuardFunctions;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -441,7 +443,7 @@ impl RootCollector<'_> {
         }
         let Some(BuiltRoot {
             nodes,
-            guards,
+            mut guards,
             subjects,
             mut mentions,
             mut property_only,
@@ -479,24 +481,63 @@ impl RootCollector<'_> {
                 Some(FlowSubject::Member { .. })
             )
         };
+        // The table stores `this` only when it can narrow.
+        let root_can_narrow = |subject: FlowSubjectId| {
+            subject_root(subjects.as_slice(), subject).is_some_and(|root| match root {
+                FlowSubject::Binding(binding) => eligible.contains(binding),
+                FlowSubject::This => true,
+                FlowSubject::Member { .. } => false,
+            })
+        };
+        let has_aliased_property = guards.iter().any(|guard| {
+            matches!(
+                guard,
+                FlowGuard::Property { object, aliased: true, .. }
+                    if tested.contains(object) && root_can_narrow(*object)
+            )
+        });
         // Scanning for writes visits the whole root, so it runs only when a
-        // path could narrow.
-        let written = reads
-            .iter()
-            .any(|read| tested.contains(&read.subject) && is_path(read.subject))
-            .then(|| WrittenPaths::new(root, self.model, &subjects));
+        // path could narrow or an aliased property guard could narrow its
+        // object.
+        let written = (has_aliased_property
+            || reads
+                .iter()
+                .any(|read| tested.contains(&read.subject) && is_path(read.subject)))
+        .then(|| WrittenPaths::new(root, self.model, &subjects));
+        // A `const` keeps the value that the property had at its declaration,
+        // and a write to the property before the test can make the object
+        // differ from that value, as in
+        // `const k = s.kind; s.kind = "s"; if (k === "c")`. An aliased property
+        // guard therefore narrows nothing when a write in the root may change
+        // its property.
+        if has_aliased_property && let Some(written) = &written {
+            for guard in &mut guards {
+                let FlowGuard::Property {
+                    object,
+                    key,
+                    aliased: true,
+                    ..
+                } = guard
+                else {
+                    continue;
+                };
+                let property = subjects.get(&FlowSubject::Member {
+                    object: *object,
+                    key: key.clone(),
+                });
+                if property.is_none_or(|property| written.cancels(subjects.as_slice(), property)) {
+                    *guard = FlowGuard::Keep;
+                }
+            }
+        }
         let narrowable: FxHashSet<FlowSubjectId> = tested
             .iter()
             .copied()
             .filter(|subject| {
-                // The table stores `this` only when it can narrow.
-                subject_root(subjects.as_slice(), *subject).is_some_and(|root| match root {
-                    FlowSubject::Binding(binding) => eligible.contains(binding),
-                    FlowSubject::This => true,
-                    FlowSubject::Member { .. } => false,
-                }) && written
-                    .as_ref()
-                    .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
+                root_can_narrow(*subject)
+                    && written
+                        .as_ref()
+                        .is_none_or(|written| !written.cancels(subjects.as_slice(), *subject))
             })
             .collect();
         let reads: Vec<_> = reads
@@ -671,6 +712,17 @@ impl RootCollector<'_> {
     }
 }
 
+/// Binding patterns, with their elements and lists, which can enclose a binding.
+const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPattern::KIND_SET
+    .union(JsArrayBindingPatternElement::KIND_SET)
+    .union(JsArrayBindingPatternElementList::KIND_SET)
+    .union(JsArrayBindingPatternRestElement::KIND_SET)
+    .union(JsObjectBindingPattern::KIND_SET)
+    .union(JsObjectBindingPatternProperty::KIND_SET)
+    .union(JsObjectBindingPatternPropertyList::KIND_SET)
+    .union(JsObjectBindingPatternRest::KIND_SET)
+    .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
+
 /// Returns whether a destructuring default can supply the value of `binding`,
 /// either its own default, as in `{ a = 1 }`, or the default of an enclosing
 /// pattern, as in `{ pair: [a] = [1] }`.
@@ -679,20 +731,7 @@ fn has_destructuring_default(binding: &JsIdentifierBinding) -> bool {
         .syntax()
         .ancestors()
         .skip(1)
-        .take_while(|node| {
-            matches!(
-                node.kind(),
-                JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-                    | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
-            )
-        })
+        .take_while(|node| BINDING_PATTERN_KINDS.matches(node.kind()))
         .any(|node| {
             JsArrayBindingPatternElement::cast_ref(&node)
                 .is_some_and(|element| element.init().is_some())
@@ -966,6 +1005,59 @@ mod tests {
                 "{marker}"
             );
         }
+    }
+
+    #[test]
+    fn objects_of_held_properties_are_property_only_subjects() {
+        const SOURCE: &str = r#"
+            function f(s: { k: "a" } | { k: "b" }, o: { v: string | null }) {
+                const { k } = s;
+                const v = o.v;
+                if (k === "a" && v) { /*s*/s; /*o*/o; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "s", "s")).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        assert!(root.is_property_only(read.subject));
+        // The annotation of `o` shows that it is not a union, so its read is
+        // dropped without resolving anything.
+        assert!(!info.flow.is_candidate(marked(SOURCE, "o", "o")));
+    }
+
+    #[test]
+    fn held_properties_that_the_root_writes_narrow_nothing() {
+        const SOURCE: &str = r#"
+            function f(s: { k: "a" } | { k: "b" }, t: { k: "a" } | { k: "b" }) {
+                const k = s.k;
+                const { k: j } = t;
+                const ok = s.k === "a";
+                s.k = "b";
+                if (k === "a" && j === "a" && ok) { /*s*/s; /*t*/t; }
+                if (s.k === "a") { /*direct*/s; }
+            }
+        "#;
+        let info = module(SOURCE);
+        let read = info.flow.read(marked(SOURCE, "t", "t")).unwrap();
+        let root = info.flow.root(read.root).unwrap();
+        // Each condition is decomposed once per outcome.
+        let mut objects: Vec<_> = root
+            .guards
+            .iter()
+            .filter_map(|guard| match guard {
+                super::FlowGuard::Property {
+                    object, aliased, ..
+                } => Some((root.subject_binding(*object).unwrap(), *aliased)),
+                _ => None,
+            })
+            .collect();
+        objects.dedup();
+        let s = root.subject_binding(info.flow.read(marked(SOURCE, "s", "s")).unwrap().subject);
+        let t = root.subject_binding(read.subject);
+        // Only the guard of `t` from a `const` and the direct test of `s.k`
+        // remain, because the root writes `s.k` between the `const`
+        // declarations and the first test.
+        assert_eq!(objects, [(t.unwrap(), true), (s.unwrap(), false)]);
     }
 
     #[test]

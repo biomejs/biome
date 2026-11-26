@@ -719,6 +719,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 test,
                 positive,
                 optional_chain,
+                ..
             } => {
                 if *object != subject {
                     return Some(ty);
