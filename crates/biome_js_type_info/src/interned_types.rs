@@ -20,8 +20,8 @@ use crate::{
     generated::global_types::ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
         DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, MAP_ID_GLOBAL_TYPE_ID,
-        PROMISE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        PROMISE_ID_GLOBAL_TYPE_ID, PROMISE_LIKE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID,
+        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     globals_ids::GlobalTypeId,
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
@@ -728,6 +728,15 @@ impl<'db> TypeData<'db> {
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Promise")
+    }
+
+    /// Returns whether this is the handle of the built-in `PromiseLike`
+    /// interface.
+    ///
+    /// Built-in declarations refer to `PromiseLike` through this handle, as in
+    /// the return type of `AsyncDisposable[Symbol.asyncDispose]`.
+    pub(crate) fn is_promise_like_interface(self) -> bool {
+        self == Self::GlobalType(PROMISE_LIKE_ID_GLOBAL_TYPE_ID)
     }
 
     /// Recognizes built-in classes whose instances are non-primitive values.

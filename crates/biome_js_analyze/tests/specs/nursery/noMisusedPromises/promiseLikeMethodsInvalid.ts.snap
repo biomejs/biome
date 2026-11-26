@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promiseLikeMethodsInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const thenable: PromiseLike<number>;
+declare const resource: AsyncDisposable;
+
+if (thenable.then((value) => value)) {
+}
+
+if (resource[Symbol.asyncDispose]()) {
+}
+
+```
+
+# Diagnostics
+```
+promiseLikeMethodsInvalid.ts:5:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    3 │ declare const resource: AsyncDisposable;
+    4 │ 
+  > 5 │ if (thenable.then((value) => value)) {
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseLikeMethodsInvalid.ts:8:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+     6 │ }
+     7 │ 
+   > 8 │ if (resource[Symbol.asyncDispose]()) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

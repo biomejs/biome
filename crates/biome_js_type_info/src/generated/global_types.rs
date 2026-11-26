@@ -912,22 +912,6 @@ pub(crate) mod ids {
         GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID + 234));
     pub(crate) const GLOBAL_PROMISE_TRY_ID: RawTypeId =
         RawTypeId::Global(PROMISE_TRY_ID_GLOBAL_TYPE_ID);
-    pub(crate) const ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID: GlobalTypeId =
-        GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID + 235));
-    pub(crate) const GLOBAL_ERROR_CONSTRUCT_ID: RawTypeId =
-        RawTypeId::Global(ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID);
-    pub(crate) const ERROR_CALL_ID_GLOBAL_TYPE_ID: GlobalTypeId =
-        GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID + 236));
-    pub(crate) const GLOBAL_ERROR_CALL_ID: RawTypeId =
-        RawTypeId::Global(ERROR_CALL_ID_GLOBAL_TYPE_ID);
-    pub(crate) const DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID: GlobalTypeId =
-        GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID + 237));
-    pub(crate) const GLOBAL_DISPOSABLE_DISPOSE_ID: RawTypeId =
-        RawTypeId::Global(DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID);
-    pub(crate) const ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID: GlobalTypeId =
-        GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID + 238));
-    pub(crate) const GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID: RawTypeId =
-        RawTypeId::Global(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID);
 }
 
 /// Names of generated globals in ID order.
@@ -1167,10 +1151,6 @@ pub(crate) const GENERATED_GLOBAL_NAMES: &[&str] = &[
     "Promise.reject",
     "Promise.resolve",
     "Promise.try",
-    "Error.constructor",
-    "Error.call",
-    "Disposable[Symbol.dispose]",
-    "AsyncDisposable[Symbol.asyncDispose]",
 ];
 
 /// Globals that type annotations can name, sorted by name.
@@ -1763,7 +1743,7 @@ pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[
 ];
 
 /// Builds each generated global's type data, in ID order after the manifest.
-pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; 239] = [
+pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; 235] = [
     global_na_n,
     global_infinity,
     global_eval,
@@ -1999,10 +1979,6 @@ pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; 239] = [
     global_promise_reject,
     global_promise_resolve,
     global_promise_try,
-    global_error_construct,
-    global_error_call,
-    global_disposable_dispose,
-    global_async_disposable_async_dispose,
 ];
 
 fn global_na_n() -> crate::TypeData {
@@ -4205,17 +4181,17 @@ fn global_error() -> crate::TypeData {
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Constructor,
-                ty: crate::globals::GLOBAL_ERROR_CONSTRUCT_ID.into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::CallSignature,
-                ty: crate::globals::GLOBAL_ERROR_CALL_ID.into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "prototype",
                 )),
-                ty: crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
     }))
@@ -9488,7 +9464,7 @@ fn global_disposable() -> crate::TypeData {
             kind: crate::TypeMemberKind::ComputedValue(
                 crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
             ),
-            ty: crate::globals::GLOBAL_DISPOSABLE_DISPOSE_ID.into(),
+            ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
         }]),
     }))
 }
@@ -9501,7 +9477,7 @@ fn global_async_disposable() -> crate::TypeData {
             kind: crate::TypeMemberKind::ComputedValue(
                 crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into(),
             ),
-            ty: crate::globals::GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID.into(),
+            ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         }]),
     }))
 }
@@ -10227,55 +10203,6 @@ fn global_promise_try() -> crate::TypeData {
         is_async: false,
         type_parameters: Box::default(),
         name: Some(biome_rowan::Text::new_static("Promise.try")),
-        parameters: Box::new([]),
-        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
-    }))
-}
-fn global_error_construct() -> crate::TypeData {
-    crate::TypeData::Constructor(Box::new(crate::Constructor {
-        type_parameters: Box::default(),
-        parameters: Box::new([crate::ConstructorParameter {
-            parameter: crate::FunctionParameter::Named(crate::NamedFunctionParameter {
-                name: biome_rowan::Text::new_static("message"),
-                ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
-                is_optional: true,
-                is_rest: false,
-            }),
-            accessibility: None,
-        }]),
-        return_type: Some(crate::globals::GLOBAL_ERROR_ID.into()),
-    }))
-}
-fn global_error_call() -> crate::TypeData {
-    crate::TypeData::Function(Box::new(crate::Function {
-        is_async: false,
-        type_parameters: Box::default(),
-        name: Some(biome_rowan::Text::new_static("Error")),
-        parameters: Box::new([crate::FunctionParameter::Named(
-            crate::NamedFunctionParameter {
-                name: biome_rowan::Text::new_static("message"),
-                ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
-                is_optional: true,
-                is_rest: false,
-            },
-        )]),
-        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into()),
-    }))
-}
-fn global_disposable_dispose() -> crate::TypeData {
-    crate::TypeData::Function(Box::new(crate::Function {
-        is_async: false,
-        type_parameters: Box::default(),
-        name: None,
-        parameters: Box::new([]),
-        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
-    }))
-}
-fn global_async_disposable_async_dispose() -> crate::TypeData {
-    crate::TypeData::Function(Box::new(crate::Function {
-        is_async: true,
-        type_parameters: Box::default(),
-        name: None,
         parameters: Box::new([]),
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID.into()),
     }))
@@ -16859,6 +16786,44 @@ static REG_EXP_CONSTRUCTOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 8]
                         is_rest: false,
                     }),
                 ]),
+                return_type: crate::ReturnType::Type(
+                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                ),
+            })),
+        ]
+    });
+static ERROR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
+    std::sync::LazyLock::new(|| {
+        [
+            crate::TypeData::instance_of(crate::TypeInstance {
+                ty: crate::globals::GLOBAL_ERROR_ID.into(),
+                type_parameters: Box::default(),
+            }),
+            crate::TypeData::Constructor(Box::new(crate::Constructor {
+                type_parameters: Box::default(),
+                parameters: Box::new([crate::ConstructorParameter {
+                    parameter: crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("message"),
+                        ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
+                        is_optional: true,
+                        is_rest: false,
+                    }),
+                    accessibility: None,
+                }]),
+                return_type: Some(crate::RawTypeId::Local(crate::TypeId::new(0)).into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: None,
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("message"),
+                        ty: crate::globals::GLOBAL_STRING_KEYWORD_ID.into(),
+                        is_optional: true,
+                        is_rest: false,
+                    },
+                )]),
                 return_type: crate::ReturnType::Type(
                     crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 ),
@@ -40324,6 +40289,34 @@ static PROMISE_WITH_RESOLVERS_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData;
             })),
         ]
     });
+static DISPOSABLE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
+    std::sync::LazyLock::new(|| {
+        [crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("[Symbol.dispose]")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
+        }))]
+    });
+static ASYNC_DISPOSABLE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 2]> =
+    std::sync::LazyLock::new(|| {
+        [
+            crate::TypeData::instance_of(crate::TypeInstance {
+                ty: crate::globals::GLOBAL_PROMISE_LIKE_ID.into(),
+                type_parameters: Box::new([crate::globals::GLOBAL_VOID_ID.into()]),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("[Symbol.asyncDispose]")),
+                parameters: Box::new([]),
+                return_type: crate::ReturnType::Type(
+                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                ),
+            })),
+        ]
+    });
 static SUPPRESSED_ERROR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 3]> =
     std::sync::LazyLock::new(|| {
         [
@@ -41784,6 +41777,7 @@ pub(crate) fn generated_local_types(
         ids::REG_EXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID => &*REG_EXP_EXEC_ARRAY_LOCAL_TYPES,
         ids::REG_EXP_ID_GLOBAL_TYPE_ID => &*REG_EXP_LOCAL_TYPES,
         ids::REG_EXP_CONSTRUCTOR_ID_GLOBAL_TYPE_ID => &*REG_EXP_CONSTRUCTOR_LOCAL_TYPES,
+        ids::ERROR_ID_GLOBAL_TYPE_ID => &*ERROR_LOCAL_TYPES,
         ids::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID => &*ERROR_CONSTRUCTOR_LOCAL_TYPES,
         ids::EVAL_ERROR_ID_GLOBAL_TYPE_ID => &*EVAL_ERROR_LOCAL_TYPES,
         ids::EVAL_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID => &*EVAL_ERROR_CONSTRUCTOR_LOCAL_TYPES,
@@ -41937,6 +41931,8 @@ pub(crate) fn generated_local_types(
             &*AGGREGATE_ERROR_CONSTRUCTOR_LOCAL_TYPES
         }
         ids::PROMISE_WITH_RESOLVERS_ID_GLOBAL_TYPE_ID => &*PROMISE_WITH_RESOLVERS_LOCAL_TYPES,
+        ids::DISPOSABLE_ID_GLOBAL_TYPE_ID => &*DISPOSABLE_LOCAL_TYPES,
+        ids::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID => &*ASYNC_DISPOSABLE_LOCAL_TYPES,
         ids::SUPPRESSED_ERROR_ID_GLOBAL_TYPE_ID => &*SUPPRESSED_ERROR_LOCAL_TYPES,
         ids::SUPPRESSED_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID => {
             &*SUPPRESSED_ERROR_CONSTRUCTOR_LOCAL_TYPES
