@@ -793,9 +793,22 @@ impl FormatMdInlineItemList {
             match item {
                 FencedCodeContentItem::NewlineRun {
                     newlines,
+                    blanks,
                     is_leading,
                 } => {
                     let newline_count = newlines.len();
+
+                    for blank in &blanks {
+                        let token = match blank {
+                            AnyMdInline::MdIndentToken(indent) => indent.md_indent_char_token()?,
+                            AnyMdInline::MdTextual(text) => text.value_token()?,
+                            _ => continue,
+                        };
+                        f.context()
+                            .comments()
+                            .mark_suppression_checked(blank.syntax());
+                        write!(f, [format_removed(&token)])?;
+                    }
 
                     for newline in &newlines {
                         write!(
@@ -1188,8 +1201,12 @@ enum FencedCodeContentItem {
     /// A leading run is the newline sequence immediately after the opening
     /// fence. Non-leading runs represent literal line breaks inside the code
     /// content and must preserve their exact blank-line count.
+    ///
+    /// `blanks` holds the indentation and whitespace of the whitespace-only
+    /// lines inside the run. These lines are printed as empty lines.
     NewlineRun {
         newlines: Vec<MdTextual>,
+        blanks: Vec<AnyMdInline>,
         is_leading: bool,
     },
     /// A non-newline textual node from the fenced code content.
@@ -1227,24 +1244,35 @@ impl FencedCodeContentIterator {
             let is_leading = self.is_leading;
             self.is_leading = false;
             let mut newlines = vec![text];
+            let mut blanks = Vec::new();
 
             loop {
-                let next_is_newline = match self.items.peek() {
-                    Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
-                    _ => false,
-                };
+                match self.items.peek() {
+                    Some(AnyMdInline::MdTextual(next)) if next.is_newline().ok()? => {
+                        if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
+                            newlines.push(next);
+                        }
+                    }
+                    Some(AnyMdInline::MdIndentToken(_) | AnyMdInline::MdTextual(_)) => {
+                        // A whitespace-only line belongs to the run as a blank line.
+                        let blank_line_len = whitespace_only_line_len(self.items.clone())?;
+                        if blank_line_len == 0 {
+                            break;
+                        }
 
-                if !next_is_newline {
-                    break;
-                }
-
-                if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
-                    newlines.push(next);
+                        for _ in 0..blank_line_len {
+                            if let Some(item) = self.items.next() {
+                                blanks.push(item);
+                            }
+                        }
+                    }
+                    _ => break,
                 }
             }
 
             Some(FencedCodeContentItem::NewlineRun {
                 newlines,
+                blanks,
                 is_leading,
             })
         } else {
@@ -1260,6 +1288,35 @@ impl FencedCodeContentIterator {
                 next_is_newline_or_end,
             })
         }
+    }
+}
+
+/// Returns how many items at the start of `items` form a whitespace-only line:
+/// an optional list continuation indent, then optional whitespace, then a
+/// newline that is not counted. Returns `0` when the line has other content.
+fn whitespace_only_line_len(
+    mut items: Peekable<AstNodeListIterator<MarkdownLanguage, AnyMdInline>>,
+) -> Option<usize> {
+    let mut len = 0;
+
+    if matches!(items.peek(), Some(AnyMdInline::MdIndentToken(_))) {
+        items.next();
+        len += 1;
+    }
+
+    if let Some(AnyMdInline::MdTextual(text)) = items.peek()
+        && !text.is_newline().ok()?
+    {
+        if !text.value_token().ok()?.text().trim().is_empty() {
+            return Some(0);
+        }
+        items.next();
+        len += 1;
+    }
+
+    match items.next() {
+        Some(AnyMdInline::MdTextual(text)) if text.is_newline().ok()? => Some(len),
+        _ => Some(0),
     }
 }
 

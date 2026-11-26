@@ -445,6 +445,11 @@ fn prepare_next_code_content_token(
         if at_closing_fence(p, is_tilde_fence, fence_len) {
             return CodeContentTokenAction::Break;
         }
+        // A whitespace-only line ends right after its indent. Its newline
+        // must start a new line, so the next line's indent is stripped too.
+        if consume_code_newline(p) {
+            return CodeContentTokenAction::Skip;
+        }
     }
 
     // Prefix/indent consumption above can advance directly to EOF.
