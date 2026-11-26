@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::aria::Aria};
+use crate::{JsRuleAction, a11y::TabindexSpelling, services::aria::Aria};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -17,6 +17,8 @@ declare_lint_rule! {
     /// When using the tab key to navigate a webpage, limit it to interactive elements.
     /// You don't need to add tabindex to items in an unordered list as assistive technology can navigate through the HTML.
     /// Keep the tab ring small, which is the order of elements when tabbing, for a more efficient and accessible browsing experience.
+    ///
+    /// In Astro templates and in projects that depend on `solid-js`, the rule also recognizes the HTML spelling `tabindex`.
     ///
     /// ## Examples
     ///
@@ -64,6 +66,7 @@ declare_lint_rule! {
 
 pub struct RuleState {
     attribute_range: TextRange,
+    attribute_name: TokenText,
     element_name: TokenText,
 }
 
@@ -80,8 +83,12 @@ impl Rule for NoNoninteractiveTabindex {
         }
 
         if ctx.aria_roles().is_not_interactive_element(node) {
-            let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
+            let tabindex_attribute = TabindexSpelling::from_context(ctx).find_attribute(node)?;
             let tabindex_attribute_value = tabindex_attribute.initializer()?.value().ok()?;
+            let attribute_name = tabindex_attribute
+                .name_value_token()
+                .ok()?
+                .token_text_trimmed();
             if attribute_has_negative_tabindex(&tabindex_attribute_value)? {
                 return None;
             }
@@ -98,6 +105,7 @@ impl Rule for NoNoninteractiveTabindex {
             let Some(role_attribute) = role_attribute else {
                 return Some(RuleState {
                     attribute_range: tabindex_attribute.range(),
+                    attribute_name,
                     element_name,
                 });
             };
@@ -109,6 +117,7 @@ impl Rule for NoNoninteractiveTabindex {
 
             return Some(RuleState {
                 attribute_range: tabindex_attribute.range(),
+                attribute_name,
                 element_name,
             });
         }
@@ -117,12 +126,13 @@ impl Rule for NoNoninteractiveTabindex {
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let element_name = state.element_name.text();
+        let attribute_name = state.attribute_name.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.attribute_range,
                 markup! {
-                "The HTML element "<Emphasis>{{element_name}}</Emphasis>" is non-interactive. Do not use "<Emphasis>"tabIndex"</Emphasis>"."
+                "The HTML element "<Emphasis>{{element_name}}</Emphasis>" is non-interactive. Do not use "<Emphasis>{attribute_name}</Emphasis>"."
 
                 },
             )
@@ -132,16 +142,16 @@ impl Rule for NoNoninteractiveTabindex {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
+        let tabindex_attribute = TabindexSpelling::from_context(ctx).find_attribute(node)?;
         let mut mutation = ctx.root().begin();
 
         mutation.remove_node(tabindex_attribute);
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
+            markup! { "Remove the "<Emphasis>{state.attribute_name.text()}</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }

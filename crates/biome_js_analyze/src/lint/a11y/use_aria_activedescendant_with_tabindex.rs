@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::aria::Aria};
+use crate::{JsRuleAction, a11y::TabindexSpelling, services::aria::Aria};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -30,6 +30,9 @@ declare_lint_rule! {
     ///
     /// Because an element with `aria-activedescendant` must be tabbable,
     /// it must either have an inherent tabIndex of zero or declare a tabIndex attribute.
+    ///
+    /// In Astro templates and in projects that depend on `solid-js`, the rule also recognizes the HTML spelling `tabindex`,
+    /// and its fix adds `tabindex` instead of `tabIndex`.
     ///
     /// ## Examples
     ///
@@ -77,7 +80,9 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             && node
                 .find_attribute_by_name("aria-activedescendant")
                 .is_some()
-            && node.find_attribute_by_name("tabIndex").is_none()
+            && TabindexSpelling::from_context(ctx)
+                .find_attribute(node)
+                .is_none()
         {
             return Some(());
         }
@@ -87,6 +92,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let tabindex_name = TabindexSpelling::from_context(ctx).attribute_name();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -95,9 +101,9 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             )
             .note(
                 "aria-activedescendant is used to manage focus within a composite widget.\nThe element with the attribute aria-activedescendant retains the active document focus."
-            ).note(
-                "Add the tabIndex attribute to the element with a value greater than or equal to -1."
-            ),
+            ).note(markup! {
+                "Add the "{tabindex_name}" attribute to the element with a value greater than or equal to -1."
+            }),
         )
     }
 
@@ -105,6 +111,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         let descendant_attribute = node.find_attribute_by_name("aria-activedescendant")?;
+        let tabindex_name = TabindexSpelling::from_context(ctx).attribute_name();
 
         let old_attribute_list = descendant_attribute
             .syntax()
@@ -113,7 +120,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             .find_map(JsxAttributeList::cast)?;
 
         let new_attribute = jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(
-            jsx_ident("tabIndex").with_leading_space(),
+            jsx_ident(tabindex_name).with_leading_space(),
         )))
         .with_initializer(jsx_attribute_initializer_clause(
             token(T![=]),
@@ -129,7 +136,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Add the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
+            markup! { "Add the "<Emphasis>{tabindex_name}</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }

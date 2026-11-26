@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLowercaseTabindex.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div role="button" tabindex={0} onClick={() => {}} />;
+
+```
+
+# Diagnostics
+```
+invalidLowercaseTabindex.jsx:2:1 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element with the interactive role "button" is not focusable.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div role="button" tabindex={0} onClick={() => {}} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
+  
+  i Add a tabIndex attribute to make this element focusable.
+  
+
+```

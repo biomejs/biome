@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAstro.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+{items.map((item) => <div tabindex="0">{item}</div>)}
+
+```
+
+# Diagnostics
+```
+invalidAstro.astro:2:27 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element div is non-interactive. Do not use tabindex.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ {items.map((item) => <div tabindex="0">{item}</div>)}
+      │                           ^^^^^^^^^^^^
+    3 │ 
+  
+  i Adding non-interactive elements to the keyboard navigation flow can confuse users.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    1 │ items.map((item)·=>·<div·tabindex="0">{item}</div>)
+      │                          ------------              
+
+```

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSolid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<div tabindex={0} />
+	<div tabindex="-1" />
+	<div tabIndex={-1} />
+</>;
+
+```

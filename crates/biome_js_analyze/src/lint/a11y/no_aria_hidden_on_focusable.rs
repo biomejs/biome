@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::aria::Aria};
+use crate::{JsRuleAction, a11y::TabindexSpelling, services::aria::Aria};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,6 +14,8 @@ declare_lint_rule! {
     /// `aria-hidden="true"` can be used to hide purely decorative content from screen reader users.
     /// A focusable element with `aria-hidden="true"` can be reached by keyboard.
     /// This can lead to confusion or unexpected behavior for screen reader users.
+    ///
+    /// In Astro templates and in projects that depend on `solid-js`, the rule also recognizes the HTML spelling `tabindex`.
     ///
     /// ## Example
     ///
@@ -79,7 +81,7 @@ impl Rule for NoAriaHiddenOnFocusable {
                 return None;
             }
 
-            if let Some(tabindex_attr) = node.find_attribute_by_name("tabIndex") {
+            if let Some(tabindex_attr) = TabindexSpelling::from_context(ctx).find_attribute(node) {
                 let tabindex_val = tabindex_attr.initializer()?.value().ok()?;
 
                 match tabindex_val {
