@@ -203,7 +203,10 @@ impl Rule for NoUselessSetConstruction {
         // The copy is made before the argument is evaluated, so it is only useless if the
         // argument can't change the original `Set`, neither while it is evaluated nor
         // while the method reads it.
-        if collection_kind(&call.argument, model).is_none() || may_have_side_effects(&call.argument)
+        if !matches!(
+            collection_kind(&call.argument, model),
+            Some(CollectionKind::Set | CollectionKind::Map)
+        ) || may_have_side_effects(&call.argument)
         {
             return None;
         }

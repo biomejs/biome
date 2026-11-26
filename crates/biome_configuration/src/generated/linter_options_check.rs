@@ -192,6 +192,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_class_assign::NoClassAssignOptions>(),
     ));
     result.push((
+        "nursery",
+        "noCollectionBracketAccess",
+        TypeId::of::<
+            biome_rule_options::no_collection_bracket_access::NoCollectionBracketAccessOptions,
+        >(),
+    ));
+    result.push((
         "complexity",
         "noCommaOperator",
         TypeId::of::<biome_rule_options::no_comma_operator::NoCommaOperatorOptions>(),

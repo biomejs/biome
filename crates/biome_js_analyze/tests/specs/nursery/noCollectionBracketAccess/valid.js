@@ -1,0 +1,78 @@
+/* should not generate diagnostics */
+const map = new Map();
+map.get("foo");
+map.set("foo", "bar");
+map.has("foo");
+map.delete("foo");
+const set = new Set();
+set.add("foo");
+set.has("foo");
+const weakMap = new WeakMap();
+weakMap.get(key);
+const weakSet = new WeakSet();
+weakSet.add(key);
+
+// Real properties and methods
+map["size"];
+map["get"]("foo");
+map[`set`]("foo", "bar");
+map[condition ? "get" : "has"]("foo");
+set["has"]("foo");
+set[set.has("foo") ? "delete" : "add"]("foo");
+set[condition ? "delete" : otherCondition ? "add" : "has"]("foo");
+set["union"](other);
+weakMap["delete"](key);
+weakSet["add"](key);
+map["size"] = 1;
+map[(0, "size")];
+map[(sideEffect(), "size")];
+
+// Well-known symbols
+map[Symbol.iterator];
+map[Symbol.toStringTag];
+map[Symbol["iterator"]];
+weakSet[Symbol.toStringTag];
+const iteratorKey = Symbol.iterator;
+map[iteratorKey];
+map[condition ? Symbol.iterator : Symbol.toStringTag];
+
+// Inherited properties of every object
+map["toString"];
+map["hasOwnProperty"]("foo");
+map["constructor"];
+
+// Keys that are a property name through a variable
+const sizeKey = "size";
+map[sizeKey];
+const methodKey = condition ? "get" : "has";
+map[methodKey]("foo");
+
+// Not a known collection
+array[0];
+object["foo"];
+object["foo"] = "bar";
+delete object["foo"];
+
+// The value isn't known to be a collection
+let reassigned = new Map();
+reassigned = something;
+reassigned["foo"];
+function read(parameter) {
+	return parameter["foo"];
+}
+const fromCall = getMap();
+fromCall["foo"];
+const cache = { map: new Map() };
+cache.map["foo"] = "bar";
+class Foo {
+	map = new Map();
+	bar() {
+		this.map["foo"] = "bar";
+	}
+}
+
+// A local variable that shadows a global
+function shadowed(Map) {
+	const local = new Map();
+	local["foo"];
+}

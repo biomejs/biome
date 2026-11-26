@@ -1,5 +1,5 @@
-//! Recognizes values that are built-in `Set` or `Map` collections, from how they are
-//! created, declared, or asserted, without type inference.
+//! Recognizes values that are built-in `Set`, `Map`, `WeakSet`, or `WeakMap`
+//! collections, from how they are created, declared, or asserted, without type inference.
 
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -13,15 +13,29 @@ use biome_rowan::{AstNode, AstSeparatedList};
 pub enum CollectionKind {
     Set,
     Map,
+    WeakSet,
+    WeakMap,
+}
+
+impl biome_console::fmt::Display for CollectionKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_str(match self {
+            Self::Set => "Set",
+            Self::Map => "Map",
+            Self::WeakSet => "WeakSet",
+            Self::WeakMap => "WeakMap",
+        })
+    }
 }
 
 /// The maximum number of variables that are looked up to find the value of an expression.
 const MAX_VARIABLE_LOOKUPS: u8 = 16;
 
-/// Returns whether `expression` evaluates to a built-in `Set` or `Map`, or `None` if the
-/// kind can't be determined.
+/// Returns the kind of built-in collection that `expression` evaluates to, or `None` if
+/// the kind can't be determined.
 ///
-/// A value is recognized if it is created with `new Set()` or `new Map()`, or if it is
+/// A value is recognized if it is created with `new Set()`, `new Map()`, `new WeakSet()`,
+/// or `new WeakMap()`, or if it is
 /// declared or asserted with a type that [`type_collection_kind`] recognizes. When a
 /// `const` variable or an asserted expression has no such type, the value that the
 /// variable is initialized with, or the expression itself, is checked instead:
@@ -98,7 +112,7 @@ pub fn collection_kind(
 }
 
 /// Returns the kind of collection that `new` creates, if its callee is the built-in
-/// `Set` or `Map`.
+/// `Set`, `Map`, `WeakSet`, or `WeakMap`.
 pub fn constructed_collection_kind(
     new: &JsNewExpression,
     model: &SemanticModel,
@@ -111,27 +125,32 @@ pub fn constructed_collection_kind(
     match name.value_token().ok()?.text_trimmed() {
         "Set" => Some(CollectionKind::Set),
         "Map" => Some(CollectionKind::Map),
+        "WeakSet" => Some(CollectionKind::WeakSet),
+        "WeakMap" => Some(CollectionKind::WeakMap),
         _ => None,
     }
 }
 
 /// What a type tells about the kind of collection that a value is.
 enum TypeCollectionKind {
-    /// The type is a built-in `Set` type, a built-in `Map` type, or a union of types of
-    /// the same kind, such as `Set<string> | ReadonlySet<number>`.
+    /// The type is a built-in collection type, or a union of types of the same kind,
+    /// such as `Set<string> | ReadonlySet<number>`.
     Collection(CollectionKind),
     /// The type is a union of built-in `Set` and `Map` types.
     SetOrMap,
-    /// The type, or a member of the union type, isn't a built-in `Set` or `Map` type.
+    /// The type, or a member of the union type, isn't a built-in collection type, or
+    /// the type is a union of a `WeakSet` or `WeakMap` type with a type of another kind.
     Other,
 }
 
 /// Returns what `ty` tells about the kind of collection that a value is.
 ///
-/// The built-in types are `Set`, `ReadonlySet`, `Map`, and `ReadonlyMap`.
+/// The built-in types are `Set`, `ReadonlySet`, `Map`, `ReadonlyMap`, `WeakSet`, and
+/// `WeakMap`.
 fn type_collection_kind(ty: AnyTsType, model: &SemanticModel) -> TypeCollectionKind {
     let mut kind = None;
-    let mut has_both_kinds = false;
+    let mut has_mixed_kinds = false;
+    let mut has_weak_kind = false;
     let mut next = Some(ty);
     // The members of the union types that are still to check.
     let mut pending = Vec::new();
@@ -163,18 +182,20 @@ fn type_collection_kind(ty: AnyTsType, model: &SemanticModel) -> TypeCollectionK
         let Some(found) = found else {
             return TypeCollectionKind::Other;
         };
-        has_both_kinds |= kind.is_some_and(|kind| kind != found);
+        has_mixed_kinds |= kind.is_some_and(|kind| kind != found);
+        has_weak_kind |= matches!(found, CollectionKind::WeakSet | CollectionKind::WeakMap);
         kind = Some(found);
     }
     match kind {
-        Some(_) if has_both_kinds => TypeCollectionKind::SetOrMap,
+        Some(_) if has_mixed_kinds && has_weak_kind => TypeCollectionKind::Other,
+        Some(_) if has_mixed_kinds => TypeCollectionKind::SetOrMap,
         Some(kind) => TypeCollectionKind::Collection(kind),
         None => TypeCollectionKind::Other,
     }
 }
 
 /// Returns the kind of collection that `reference` names, if it names one of the
-/// built-in `Set` and `Map` types.
+/// built-in collection types.
 fn builtin_collection_type(
     reference: &TsReferenceType,
     model: &SemanticModel,
@@ -184,6 +205,8 @@ fn builtin_collection_type(
     let kind = match name.value_token().ok()?.text_trimmed() {
         "Set" | "ReadonlySet" => CollectionKind::Set,
         "Map" | "ReadonlyMap" => CollectionKind::Map,
+        "WeakSet" => CollectionKind::WeakSet,
+        "WeakMap" => CollectionKind::WeakMap,
         _ => return None,
     };
     is_global_reference(name, model).then_some(kind)
@@ -193,7 +216,7 @@ fn builtin_collection_type(
 /// declares or imports.
 ///
 /// A declaration in a `declare global` block describes the global itself.
-fn is_global_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
+pub fn is_global_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
     model.binding(reference).is_none_or(|binding| {
         binding
             .syntax()
