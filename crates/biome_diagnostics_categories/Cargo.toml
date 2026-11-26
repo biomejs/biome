@@ -11,10 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-schema = ["dep:schemars", "dep:serde_json", "serde"]
-serde  = ["dep:serde"]
-
 [dependencies]
 schemars   = { workspace = true, optional = true }
 serde      = { workspace = true, optional = true }
@@ -22,6 +18,10 @@ serde_json = { workspace = true, optional = true }
 
 [build-dependencies]
 quote = { workspace = true }
+
+[features]
+schema = ["dep:schemars", "dep:serde_json", "serde"]
+serde  = ["dep:serde"]
 
 [lints]
 workspace = true

@@ -8,11 +8,9 @@ edition = "2024"
 [package.metadata]
 cargo-fuzz = true
 
-[features]
-default          = ["libfuzzer"]
-full-idempotency = []
-libfuzzer        = ["libfuzzer-sys/link_libfuzzer"]
-rome_all         = []
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
 
 [[bin]]
 name              = "rome_parse_all"
@@ -94,9 +92,11 @@ biome_service        = { path = "../crates/biome_service" }
 libfuzzer-sys        = { git = "https://github.com/rust-fuzz/libfuzzer", default-features = false }
 similar              = { workspace = true }
 
-# Prevent this from interfering with workspaces
-[workspace]
-members = ["."]
+[features]
+default          = ["libfuzzer"]
+full-idempotency = []
+libfuzzer        = ["libfuzzer-sys/link_libfuzzer"]
+rome_all         = []
 
 [profile.dev]
 opt-level = 3

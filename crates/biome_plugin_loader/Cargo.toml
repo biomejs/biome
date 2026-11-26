@@ -11,11 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-default   = []
-js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:parking_lot", "dep:windows"]
-schema    = ["dep:schemars", "biome_glob/schema", "biome_manifest/schema"]
-
 [[bench]]
 harness           = false
 name              = "plugins"
@@ -73,6 +68,11 @@ libc = { workspace = true, optional = true }
 
 [target."cfg(windows)".dependencies]
 windows = { workspace = true, features = ["Win32_System_Threading"], optional = true }
+
+[features]
+default   = []
+js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:parking_lot", "dep:windows"]
+schema    = ["biome_glob/schema", "biome_manifest/schema", "dep:schemars"]
 
 [lints]
 workspace = true

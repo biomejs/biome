@@ -12,9 +12,6 @@ categories.workspace = true
 include              = ["!**/*_test.*", "!**/*_tests.*", "build.rs", "src/**/*"]
 publish              = false
 
-[features]
-schema = ["biome_glob/schema", "schemars"]
-
 [[bench]]
 harness = false
 name    = "js_analyzer"
@@ -91,6 +88,9 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
+
+[features]
+schema = ["biome_glob/schema", "schemars"]
 
 [lints]
 workspace = true

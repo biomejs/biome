@@ -11,9 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-schema = ["dep:schemars"]
-
 [dependencies]
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["serde"] }
@@ -29,6 +26,9 @@ serde                    = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
+
+[features]
+schema = ["dep:schemars"]
 
 [lints]
 workspace = true

@@ -12,11 +12,6 @@ categories.workspace = true
 include              = ["LICENSE-*", "src/**/*"]
 publish              = true
 
-[features]
-countme = ["dep:countme"]
-schema  = ["dep:schemars", "serde"]
-serde   = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
-
 [[bench]]
 harness = false
 name    = "mutation"
@@ -35,6 +30,11 @@ iai               = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
+
+[features]
+countme = ["dep:countme"]
+schema  = ["dep:schemars", "serde"]
+serde   = ["biome_text_size/serde", "biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true

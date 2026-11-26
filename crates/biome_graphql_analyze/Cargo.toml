@@ -12,9 +12,6 @@ categories.workspace = true
 include              = ["build.rs", "src/**/*"]
 publish              = true
 
-[features]
-schema = ["schemars"]
-
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_analyze_macros     = { workspace = true }
@@ -41,6 +38,9 @@ biome_test_utils     = { path = "../biome_test_utils", features = ["lang_graphql
 camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }
 tests_macros         = { path = "../tests_macros" }
+
+[features]
+schema = ["schemars"]
 
 [lints]
 workspace = true

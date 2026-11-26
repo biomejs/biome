@@ -11,11 +11,11 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-
 [dependencies]
 camino = { workspace = true }
 salsa  = { workspace = true }
+
+[features]
 
 [lints]
 workspace = true

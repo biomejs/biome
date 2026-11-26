@@ -11,11 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-biome_deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:biome_text_size"]
-schema            = ["dep:schemars", "serde"]
-serde             = ["dep:serde"]
-
 [dependencies]
 biome_deserialize        = { workspace = true, optional = true }
 biome_deserialize_macros = { workspace = true, optional = true }
@@ -23,6 +18,11 @@ biome_text_size          = { workspace = true, optional = true }
 globset                  = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, optional = true }
+
+[features]
+biome_deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:biome_text_size"]
+schema            = ["dep:schemars", "serde"]
+serde             = ["dep:serde"]
 
 [lints]
 workspace = true

@@ -12,13 +12,6 @@ categories.workspace = true
 include              = ["LICENSE", "README.md", "src/**/*"]
 publish              = true
 
-[features]
-bpaf   = ["dep:bpaf"]
-camino = ["dep:camino"]
-notify = ["dep:notify"]
-schema = ["dep:schemars", "biome_console/schema", "biome_diagnostics_categories/schema", "biome_text_edit/schema"]
-std    = []
-
 [[example]]
 name = "cli"
 test = true
@@ -58,6 +51,13 @@ unicode-width                = { workspace = true }
 insta      = { workspace = true }
 serde_json = { workspace = true }
 trybuild   = { workspace = true }
+
+[features]
+bpaf   = ["dep:bpaf"]
+camino = ["dep:camino"]
+notify = ["dep:notify"]
+schema = ["biome_console/schema", "biome_diagnostics_categories/schema", "biome_text_edit/schema", "dep:schemars"]
+std    = []
 
 [lints]
 workspace = true

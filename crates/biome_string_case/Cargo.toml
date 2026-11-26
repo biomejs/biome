@@ -11,9 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-biome_rowan = ["dep:biome_rowan"]
-
 [[bench]]
 harness = false
 name    = "case_insensitive_search"
@@ -24,6 +21,9 @@ caseless    = { workspace = true }
 
 [dev-dependencies]
 divan = { workspace = true }
+
+[features]
+biome_rowan = ["dep:biome_rowan"]
 
 [lints]
 workspace = true

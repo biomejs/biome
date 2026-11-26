@@ -16,9 +16,6 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
-[features]
-schemars = ["dep:schemars", "biome_grit_syntax/schema"]
-
 [dependencies]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
@@ -39,6 +36,9 @@ insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
+
+[features]
+schemars = ["biome_grit_syntax/schema", "dep:schemars"]
 
 [lints]
 workspace = true

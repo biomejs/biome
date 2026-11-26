@@ -11,10 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-schema = ["dep:schemars", "biome_js_parser/schema", "serde"]
-serde  = ["dep:serde", "dep:serde_json"]
-
 [[bench]]
 harness = false
 name    = "grit_query"
@@ -57,6 +53,10 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
+
+[features]
+schema = ["biome_js_parser/schema", "dep:schemars", "serde"]
+serde  = ["dep:serde", "dep:serde_json"]
 
 [lints]
 workspace = true

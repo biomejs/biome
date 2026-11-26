@@ -11,23 +11,6 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = true
 
-[features]
-# This is used only for testing purpose. It enables ALL languages
-all          = ["lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json", "lang_md", "lang_yaml"]
-lang_css     = []
-lang_graphql = []
-lang_grit    = []
-lang_html    = []
-lang_js      = []
-lang_json    = []
-lang_md      = []
-# MDX is still in development and stays out of release builds until this
-# feature is removed.
-lang_mdx     = ["lang_md"]
-lang_yaml    = []
-# Insert here only languages that are **exposed to the user** or enabled via feature flags
-schema       = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
-
 [dependencies]
 biome_console.workspace = true
 biome_db                = { workspace = true }
@@ -44,6 +27,23 @@ tracing                 = { workspace = true }
 
 [dev-dependencies]
 serde_json.workspace = true
+
+[features]
+# This is used only for testing purpose. It enables ALL languages
+all          = ["lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json", "lang_md", "lang_yaml"]
+lang_css     = []
+lang_graphql = []
+lang_grit    = []
+lang_html    = []
+lang_js      = []
+lang_json    = []
+lang_md      = []
+# MDX is still in development and stays out of release builds until this
+# feature is removed.
+lang_mdx     = ["lang_md"]
+lang_yaml    = []
+# Insert here only languages that are **exposed to the user** or enabled via feature flags
+schema       = ["dep:schemars", "lang_css", "lang_graphql", "lang_grit", "lang_html", "lang_js", "lang_json"]
 
 [lints]
 workspace = true
