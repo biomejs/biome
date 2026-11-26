@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoreUnusedArguments.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export const getTask = query({
+	handler: async (ctx, { id }) => {
+		return await ctx.db.get(id);
+	},
+});
+
+export const oldSyntax = mutation(async (ctx, args) => {});
+
+export const onlyRestParameter = query({ handler: async (...params) => {} });
+
+```
+
+# Diagnostics
+```
+invalidIgnoreUnusedArguments.js:2:24 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export const getTask = query({
+      │                        ^^^^^
+    3 │ 	handler: async (ctx, { id }) => {
+    4 │ 		return await ctx.db.get(id);
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreUnusedArguments.js:8:26 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+     6 │ });
+     7 │ 
+   > 8 │ export const oldSyntax = mutation(async (ctx, args) => {});
+       │                          ^^^^^^^^
+     9 │ 
+    10 │ export const onlyRestParameter = query({ handler: async (...params) => {} });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Replace the handler with an object that has an args property describing each argument, for example args: { id: v.id("tasks") }, and a handler property with the handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreUnusedArguments.js:10:34 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+     8 │ export const oldSyntax = mutation(async (ctx, args) => {});
+     9 │ 
+  > 10 │ export const onlyRestParameter = query({ handler: async (...params) => {} });
+       │                                  ^^^^^
+    11 │ 
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
