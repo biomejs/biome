@@ -1672,7 +1672,7 @@ fn assert_settings_query_routes(db_state: fn(Arc<dyn FsWithResolverProxy>) -> Db
         .format_file(FormatFileParams {
             project_key,
             path: BiomePath::new(PATH),
-            inline_config: Some(inline_configuration),
+            inline_config: Some(Box::new(inline_configuration)),
         })
         .unwrap();
     assert!(inline.as_code().contains("\"bar\""));
@@ -1842,7 +1842,7 @@ fn settings_query_preserves_sequential_analyzer_rule_options() {
         .unwrap();
 
     let no_console = AnalyzerSelector::from_str("lint/suspicious/noConsole").unwrap();
-    for inline_config in [None, Some(Configuration::default())] {
+    for inline_config in [None, Some(Box::default())] {
         let diagnostics = workspace
             .pull_diagnostics(PullDiagnosticsParams {
                 project_key,
@@ -1936,7 +1936,7 @@ fn settings_query_uses_inline_analyzer_override_indices() {
             skip: Vec::new(),
             enabled_rules: Vec::new(),
             include_code_fix: false,
-            inline_config: Some(inline_configuration),
+            inline_config: Some(Box::new(inline_configuration)),
             max_diagnostics: None,
             diagnostic_level: Severity::Hint,
             enforce_assist: false,
@@ -2249,7 +2249,7 @@ fn inline_configuration_applies_to_the_parse_of_its_client() {
             },
             document_file_source: None,
             persist_node_cache: false,
-            inline_config: Some(json_allow_comments(true)),
+            inline_config: Some(Box::new(json_allow_comments(true))),
             editor_features: None,
         })
         .unwrap();
@@ -6505,7 +6505,7 @@ fn virtual_documents_bypass_filesystem_overrides() {
             },
             document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
             persist_node_cache: false,
-            inline_config: Some(inline_config.clone()),
+            inline_config: Some(Box::new(inline_config.clone())),
             editor_features: None,
         })
         .unwrap();
@@ -6515,7 +6515,7 @@ fn virtual_documents_bypass_filesystem_overrides() {
             project_key,
             path: document_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
-            inline_config: Some(inline_config.clone()),
+            inline_config: Some(Box::new(inline_config.clone())),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().build(),
         })
@@ -6539,7 +6539,7 @@ fn virtual_documents_bypass_filesystem_overrides() {
             skip: vec![],
             enabled_rules: vec![],
             include_code_fix: false,
-            inline_config: Some(inline_config.clone()),
+            inline_config: Some(Box::new(inline_config.clone())),
             max_diagnostics: None,
             diagnostic_level: Severity::Hint,
             enforce_assist: false,
@@ -6551,7 +6551,7 @@ fn virtual_documents_bypass_filesystem_overrides() {
         .format_file(FormatFileParams {
             project_key,
             path: document_path,
-            inline_config: Some(inline_config),
+            inline_config: Some(Box::new(inline_config)),
         })
         .unwrap();
 }
@@ -8184,13 +8184,13 @@ fn fix_file_respects_inline_format_with_errors() {
                 enabled_rules: vec![use_const],
                 rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
                 suppression_reason: None,
-                inline_config: Some(Configuration {
+                inline_config: Some(Box::new(Configuration {
                     formatter: Some(FormatterConfiguration {
                         format_with_errors: Some(inline_format_with_errors.into()),
                         ..Default::default()
                     }),
                     ..Default::default()
-                }),
+                })),
             })
             .unwrap();
 

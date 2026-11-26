@@ -979,11 +979,11 @@ impl DbState {
         view: ViewId,
         text: Arc<str>,
         file_source_index: usize,
-        inline_configuration: Option<Configuration>,
+        inline_configuration: Option<Box<Configuration>>,
     ) -> Source {
         let configuration_index = inline_configuration.map(|configuration| {
             self.shared_data()
-                .insert_inline_configuration(configuration)
+                .insert_inline_configuration(*configuration)
         });
         self.publish_file_view(path, view, text, file_source_index, configuration_index)
     }
@@ -1000,11 +1000,11 @@ impl DbState {
         view: ViewId,
         text: Arc<str>,
         file_source_index: usize,
-        inline_configuration: Option<Configuration>,
+        inline_configuration: Option<Box<Configuration>>,
     ) -> Option<Source> {
         let configuration_index = inline_configuration.map(|configuration| {
             self.shared_data()
-                .insert_inline_configuration(configuration)
+                .insert_inline_configuration(*configuration)
         });
         if let DbStorage::Shared(shared_db) = &self.storage
             && let Some(changes) = &self.scanner_changes

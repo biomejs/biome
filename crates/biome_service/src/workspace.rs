@@ -125,7 +125,7 @@ pub struct SupportsFeatureParams {
     pub features: FeatureName,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 
     #[serde(default, skip_serializing_if = "is_false")]
     pub skip_ignore_check: bool,
@@ -837,7 +837,7 @@ pub struct OpenFileParams {
     pub persist_node_cache: bool,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 
     /// Used to enable further document services e.g. semantic model
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -981,7 +981,7 @@ pub struct ChangeFileParams {
     pub version: i32,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 
     /// Used to enable further document services e.g. semantic model
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1040,7 +1040,7 @@ pub struct PullDiagnosticsParams {
     #[serde(default)]
     pub include_code_fix: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 
     /// Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
     /// However, the workspace still processes ALL diagnostics coming from the analyzer to compute their severity.
@@ -1136,7 +1136,7 @@ pub struct PullActionsParams {
     #[serde(default)]
     pub categories: RuleCategories,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
     /// When `false`, returned actions have `suggestion: None` (no `BatchMutation`
     /// computed). Used by `codeAction/resolve` to defer edit computation.
     #[serde(default = "default_true")]
@@ -1162,7 +1162,7 @@ pub struct PullDiagnosticsAndActionsParams {
     #[serde(default)]
     pub categories: RuleCategories,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1199,7 +1199,7 @@ pub struct FormatFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -1210,7 +1210,7 @@ pub struct FormatRangeParams {
     pub path: BiomePath,
     pub range: TextRange,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -1221,7 +1221,7 @@ pub struct FormatOnTypeParams {
     pub path: BiomePath,
     pub offset: TextSize,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
@@ -1256,7 +1256,7 @@ pub struct FixFileParams {
     #[serde(default)]
     pub suppression_reason: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inline_config: Option<Configuration>,
+    pub inline_config: Option<Box<Configuration>>,
 }
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]

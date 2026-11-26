@@ -1617,7 +1617,7 @@ impl Session {
 
         let inline_configuration = self.inline_config();
         if let Some(inline_configuration) = inline_configuration {
-            configuration.merge_with(inline_configuration);
+            configuration.merge_with(*inline_configuration);
         }
 
         // If the configuration from the LSP or the workspace, the directory path is used as
@@ -1883,7 +1883,7 @@ impl Session {
             .scan_kind_from_editor_features()
     }
 
-    pub(crate) fn inline_config(&self) -> Option<Configuration> {
+    pub(crate) fn inline_config(&self) -> Option<Box<Configuration>> {
         self.extension_settings.read().inline_config()
     }
 
