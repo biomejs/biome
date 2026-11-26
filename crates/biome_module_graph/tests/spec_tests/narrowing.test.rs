@@ -747,10 +747,15 @@ fn narrowed_callable_shapes_preserve_classification_uncertainty() {
     use TypeInferenceClassification::{Indeterminate, Match, NoMatch};
     const SOURCE: &str = r#"
         type Overloaded = { (): Promise<void>; (value: string): void };
+        type AsyncOverloaded = { (): Promise<void>; (value: string): Promise<string> };
         type Single = { (): Promise<void> };
         function overloaded(cb: Overloaded | null) {
             if (cb === null) return;
             /*overloaded*/cb;
+        }
+        function asyncOverloaded(cb: AsyncOverloaded | null) {
+            if (cb === null) return;
+            /*asyncOverloaded*/cb;
         }
         function single(cb: Single | null) {
             if (cb === null) return;
@@ -768,7 +773,8 @@ fn narrowed_callable_shapes_preserve_classification_uncertainty() {
     let (db, module) = narrowing_db(SOURCE);
     for (marker, expected) in [
         ("overloaded", Indeterminate),
-        ("single", Indeterminate),
+        ("asyncOverloaded", Match),
+        ("single", Match),
         ("direct", NoMatch),
         ("promise", Match),
     ] {

@@ -11,7 +11,7 @@ use std::cmp::Ordering;
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 33;
+const PREDEFINED_TYPE_COUNT: usize = 31;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -147,8 +147,6 @@ predefined_globals! {
         "\"bigint\" | \"boolean\" | \"function\" | \"number\" | \"object\" | \"string\" | \"symbol\" | \"undefined\"",
         Helper,
     ),
-    (T_ID, T_ID_NAME, T_ID_GLOBAL_TYPE_ID, GLOBAL_T_ID, "T", Helper),
-    (VOID_CALLBACK_ID, VOID_CALLBACK_ID_NAME, VOID_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_VOID_CALLBACK_ID, "() => void", Helper),
     (FETCH_ID, FETCH_ID_NAME, FETCH_ID_GLOBAL_TYPE_ID, _, "fetch", HostManual),
     (INSTANCEOF_REG_EXP_ID, INSTANCEOF_REG_EXP_ID_NAME, INSTANCEOF_REG_EXP_ID_GLOBAL_TYPE_ID, _, "instanceof RegExp", Helper),
     (INSTANCEOF_SYMBOL_ID, INSTANCEOF_SYMBOL_ID_NAME, INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, _, "instanceof Symbol", Helper),

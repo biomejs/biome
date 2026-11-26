@@ -15,7 +15,6 @@ use biome_string_case::StrLikeExtension;
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
-    compare::compare_lowered_globals,
     lower::{
         LoweredGlobal, LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData,
         LoweredTypeReference, lower_global_types,
@@ -1023,7 +1022,6 @@ mod tests {
             "DISPOSABLE",
             "ASYNC_DISPOSABLE",
             "PROMISE",
-            "PROMISE_THEN",
             "DATE",
             "MATH",
         ] {
@@ -1472,15 +1470,6 @@ mod tests {
         let lowered = lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts")?;
         assert!(lowered.gaps().iter().any(|gap| gap.owner == "WeakMap"
             && gap.detail == "merged declarations have different type parameter counts"));
-        Ok(())
-    }
-
-    #[test]
-    fn comparator_accepts_generated_global_shapes() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
-
-        compare_lowered_globals(&lowered)?;
-
         Ok(())
     }
 

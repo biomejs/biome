@@ -972,6 +972,19 @@ impl<'db> InferredType<'db> {
 
     /// Returns whether this callable returns a Promise while resolving only
     /// its outer callable wrappers and return type.
+    ///
+    /// An object with call signatures is an overloaded function, which
+    /// returns a Promise when every overload does. Overloads that disagree
+    /// give `None`, because the answer depends on the selected overload:
+    ///
+    /// ```ts
+    /// declare function resolve(): Promise<void>;
+    /// declare function resolve<T>(value: T): Promise<T>;
+    /// declare function mixed(): void;
+    /// declare function mixed(value: string): Promise<void>;
+    /// ```
+    ///
+    /// Here `resolve` gives `Some(true)` and `mixed` gives `None`.
     pub fn function_returns_promise_with(
         self,
         mut resolve: impl FnMut(TypeData<'db>) -> TypeData<'db>,
@@ -1016,6 +1029,32 @@ impl<'db> InferredType<'db> {
                         return None;
                     }
                     pending.extend(union.types(self.db).iter().copied());
+                }
+                TypeData::Object(object) => {
+                    let mut overloads = object
+                        .members(self.db)
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature())
+                        .map(|member| {
+                            let overload = resolve(member.ty).expand_structural_global(self.db);
+                            match overload.callable_function(self.db)?.return_type(self.db) {
+                                ReturnType::Type(return_ty) => {
+                                    InferredType::new(self.db, *return_ty)
+                                        .is_promise_instance_with(&mut resolve)
+                                }
+                                ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(false),
+                            }
+                        });
+                    let Some(first) = overloads.next() else {
+                        continue;
+                    };
+                    if !overloads.all(|overload| overload == first) {
+                        indeterminate = true;
+                    } else if first == Some(true) {
+                        return Some(true);
+                    } else if first.is_none() {
+                        indeterminate = true;
+                    }
                 }
                 TypeData::Unknown
                 | TypeData::Local(_)

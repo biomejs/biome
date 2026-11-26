@@ -483,6 +483,44 @@ fn class_method_overloads_preserve_member_lookup() {
 }
 
 #[test]
+fn overloaded_promise_statics_classify_arrays_by_every_overload() {
+    use TypeInferenceClassification::{Indeterminate, NoMatch};
+    const SOURCE: &str = r#"
+        declare const all: Array<Promise<void>>;
+        declare const resolved: Array<Promise<void>>;
+        declare const awaited: Array<Promise<void>>;
+        Promise.all(all);
+        Promise.resolve(resolved);
+        await Promise.resolve(awaited);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    for (expression, expected) in [
+        // Every overload returns a Promise, which is not an array.
+        ("Promise.all(all)", NoMatch),
+        ("Promise.resolve(resolved)", NoMatch),
+        // The awaited value depends on the type argument that a call infers.
+        ("await Promise.resolve(awaited)", Indeterminate),
+    ] {
+        let range = expression_range_by_source(&db, module, SOURCE, expression);
+        assert_eq!(
+            execute_type_inference_request(
+                &db,
+                TypeInferenceCaller::new("test", "overloadedPromiseStatics"),
+                ArrayOfPromisesClassificationRequest::new(module, range),
+            ),
+            expected,
+            "{expression}"
+        );
+    }
+}
+
+#[test]
 fn classification_and_return_type_requests_stay_selective() {
     let source = r#"
         const promise = Promise.resolve(1);

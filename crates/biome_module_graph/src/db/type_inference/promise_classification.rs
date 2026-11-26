@@ -18,7 +18,9 @@
 //! expression forms, accessors, ambiguous exports, cycles, and an exhausted
 //! work limit are indeterminate.
 
-use super::{ImportResolution, ResolutionCtx, find_value_member_type_on_demand};
+use super::{
+    ImportResolution, ResolutionCtx, find_value_member_type_on_demand, resolve_local_type_on_demand,
+};
 use crate::db::queries::{
     function_returns_promise, is_array_of_promise_type, is_promise_type, resolved_export_origin,
 };
@@ -29,7 +31,8 @@ use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
     interned_types::{
-        ReturnType, TypeData as InferredTypeData, TypeSubstitution, TypeTransformResult,
+        InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
+        TypeSubstitution, TypeTransformResult,
     },
 };
 use biome_rowan::Text;
@@ -408,20 +411,24 @@ fn classify_expression(
                                 Some(false) => DoesNotReturnPromise,
                                 None => Indeterminate,
                             },
-                            Projection::ArrayFunctionReturn => {
-                                ty = ty.expand_canonical_global(db);
-                                let Some(function) = ty.callable_function(db) else {
-                                    return DoesNotReturnPromise;
-                                };
-                                let ReturnType::Type(return_ty) = function.return_type(db) else {
-                                    return DoesNotReturnPromise;
-                                };
-                                match is_array_of_promise_type(db, *return_ty) {
-                                    Some(true) => ReturnsPromise,
-                                    Some(false) => DoesNotReturnPromise,
-                                    None => Indeterminate,
-                                }
-                            }
+                            Projection::ArrayFunctionReturn => classify_callee_return(
+                                db,
+                                ty.expand_canonical_global(db),
+                                |function, return_ty| {
+                                    match is_array_of_promise_type(db, return_ty) {
+                                        // An instance of an unrelated class is not an
+                                        // array, whatever its type arguments are.
+                                        Some(false)
+                                            if depends_on_type_parameters(
+                                                db, function, return_ty,
+                                            ) && !is_non_array_class_instance(db, return_ty) =>
+                                        {
+                                            None
+                                        }
+                                        result => result,
+                                    }
+                                },
+                            ),
                             Projection::AwaitedArrayPromise => {
                                 let Some(awaited) = ctx.resolve_await_expression(ty) else {
                                     return Indeterminate;
@@ -432,23 +439,23 @@ fn classify_expression(
                                     None => Indeterminate,
                                 }
                             }
-                            Projection::AwaitedArrayFunctionReturn => {
-                                ty = ty.expand_canonical_global(db);
-                                let Some(function) = ty.callable_function(db) else {
-                                    return DoesNotReturnPromise;
-                                };
-                                let ReturnType::Type(return_ty) = function.return_type(db) else {
-                                    return DoesNotReturnPromise;
-                                };
-                                let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
-                                    return Indeterminate;
-                                };
-                                match is_array_of_promise_type(db, awaited) {
-                                    Some(true) => ReturnsPromise,
-                                    Some(false) => DoesNotReturnPromise,
-                                    None => Indeterminate,
-                                }
-                            }
+                            Projection::AwaitedArrayFunctionReturn => classify_callee_return(
+                                db,
+                                ty.expand_canonical_global(db),
+                                |function, return_ty| {
+                                    let awaited = ctx.resolve_await_expression(return_ty)?;
+                                    match is_array_of_promise_type(db, awaited) {
+                                        Some(false)
+                                            if depends_on_type_parameters(
+                                                db, function, return_ty,
+                                            ) =>
+                                        {
+                                            None
+                                        }
+                                        result => result,
+                                    }
+                                },
+                            ),
                             Projection::PromiseTarget => Indeterminate,
                         };
                     }
@@ -1127,6 +1134,117 @@ fn classify_expression(
     }
 
     Indeterminate
+}
+
+/// Classifies what a call to `callee` returns.
+///
+/// `classify` receives a function and its declared return type. It answers
+/// whether the return type has the requested shape, or `None` when it can't
+/// tell. A callee that isn't a function returns nothing to classify.
+///
+/// An object with call signatures is an overloaded function, and every overload
+/// is classified. The result is indeterminate unless the overloads agree,
+/// because the answer depends on the overload that a call selects.
+fn classify_callee_return<'db>(
+    db: &'db dyn ModuleDb,
+    callee: InferredTypeData<'db>,
+    mut classify: impl FnMut(InferredFunction<'db>, InferredTypeData<'db>) -> Option<bool>,
+) -> PromiseClassification {
+    let result = if callee.callable_function(db).is_some() {
+        classify_function_return(db, callee, &mut classify)
+    } else if let InferredTypeData::Object(object) =
+        resolve_local_type_on_demand(db, callee).expand_structural_global(db)
+    {
+        let mut overloads = object
+            .members(db)
+            .iter()
+            .filter(|member| member.kind.is_call_signature())
+            .map(|member| {
+                classify_function_return(
+                    db,
+                    resolve_local_type_on_demand(db, member.ty).expand_structural_global(db),
+                    &mut classify,
+                )
+            });
+        match overloads.next() {
+            Some(first) if overloads.all(|overload| overload == first) => first,
+            Some(_) => None,
+            None => Some(false),
+        }
+    } else {
+        Some(false)
+    };
+    match result {
+        Some(true) => PromiseClassification::ReturnsPromise,
+        Some(false) => PromiseClassification::DoesNotReturnPromise,
+        None => PromiseClassification::Indeterminate,
+    }
+}
+
+/// Applies `classify` to the declared return type of the function `ty`.
+///
+/// Returns `None` when `ty` is not a function. A type predicate or an assertion
+/// returns no value of the requested shape.
+fn classify_function_return<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+    classify: &mut impl FnMut(InferredFunction<'db>, InferredTypeData<'db>) -> Option<bool>,
+) -> Option<bool> {
+    let function = ty.callable_function(db)?;
+    match function.return_type(db) {
+        ReturnType::Type(return_ty) => classify(function, *return_ty),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(false),
+    }
+}
+
+/// Returns whether `ty` may refer to a type parameter of `function`.
+///
+/// Such a type is only known once a call infers the type parameters, so a
+/// classification that rejects it is not conclusive. A failed substitution
+/// counts as a reference.
+fn depends_on_type_parameters<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    ty: InferredTypeData<'db>,
+) -> bool {
+    let ty = ty.expand_global_local(db);
+    function.type_parameters(db).iter().any(|type_parameter| {
+        let Some(generic) = type_parameter.as_generic_reference(db) else {
+            return true;
+        };
+        let generic = InferredTypeData::Generic(generic);
+        [
+            generic,
+            InferredTypeData::instance_of(db, generic, Box::default()),
+        ]
+        .into_iter()
+        .any(|generic| {
+            let substitution = TypeSubstitution {
+                generic,
+                replacement: InferredTypeData::Unknown,
+            };
+            !matches!(
+                ty.substitute_type(db, substitution),
+                TypeTransformResult::Transformed(substituted) if substituted == ty
+            )
+        })
+    })
+}
+
+/// Returns whether `ty` is an instance of a class that is not `Array` and
+/// extends no class, so no instance of it is an array.
+fn is_non_array_class_instance<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    let InferredTypeData::InstanceOf(instance) =
+        resolve_local_type_on_demand(db, ty).expand_structural_global(db)
+    else {
+        return false;
+    };
+    let target = resolve_local_type_on_demand(db, instance.ty(db));
+    !target.is_array_class(db)
+        && matches!(
+            target.expand_canonical_global(db),
+            InferredTypeData::Class(class) if class.extends(db).is_none()
+        )
 }
 
 /// Finds an own named member visible through the requested side of a class.

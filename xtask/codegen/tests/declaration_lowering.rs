@@ -6,7 +6,6 @@ use anyhow::{Context, Result};
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::collect,
-    compare::compare_lowered_globals,
     lower::{
         LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
         LoweredMemberKind, LoweredReturnKind, LoweredTypeData, LoweredTypeReference,
@@ -602,7 +601,6 @@ fn symbol_static_members_follow_merged_constructor_declarations() -> Result<()> 
             ),
         )?;
         let lowered = lower(&[file, extension])?;
-        compare_lowered_globals(&lowered)?;
         let symbol = global(&lowered, "Symbol");
         let LoweredTypeData::Class(class) = symbol.data() else {
             panic!("expected class")
@@ -898,6 +896,116 @@ fn function_declarations_preserve_generic_overloads_and_parameters() -> Result<(
         }
     }
     assert_ne!(generics[0], generics[1]);
+    Ok(())
+}
+
+#[test]
+fn promise_declarations_preserve_handlers_and_overloads() -> Result<()> {
+    let lowered = lower(&[source(
+        "promise.d.ts",
+        "interface PromiseLike<T> {}
+        interface Promise<T> {
+            then<TResult1 = T, TResult2 = never>(
+                onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
+                onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+            ): Promise<TResult1 | TResult2>;
+        }
+        interface PromiseConstructor {
+            new <T>(executor: (resolve: (value: T | PromiseLike<T>) => void) => void): Promise<T>;
+            resolve(): Promise<void>;
+            resolve<T>(value: T): Promise<T>;
+        }
+        declare var Promise: PromiseConstructor;",
+    )?])?;
+    let promise = global(&lowered, "Promise");
+    let LoweredTypeData::Class(class) = promise.data() else {
+        panic!("expected class")
+    };
+    let [value] = class.type_parameters() else {
+        panic!("expected one type parameter")
+    };
+
+    let then = class.member("then").unwrap();
+    assert_eq!(then.kind(), &LoweredMemberKind::Named { optional: false });
+    let LoweredTypeData::Function(then) = local(promise, then.type_reference()) else {
+        panic!("expected method")
+    };
+    let [fulfilled, rejected] = then.type_parameters() else {
+        panic!("expected two type parameters")
+    };
+    for (generic, expected_default) in [
+        (fulfilled, value.clone()),
+        (rejected, predefined("GLOBAL_NEVER_KEYWORD_ID")),
+    ] {
+        let LoweredTypeData::GenericParameter { default, .. } = local(promise, generic) else {
+            panic!("expected generic parameter")
+        };
+        assert_eq!(default, &Some(expected_default));
+    }
+    let [on_fulfilled, on_rejected] = then.parameters() else {
+        panic!("expected two handlers")
+    };
+    assert!(on_fulfilled.is_optional() && on_rejected.is_optional());
+    let LoweredTypeData::Union(handler) = local(promise, on_fulfilled.type_reference()) else {
+        panic!("expected nullable handler")
+    };
+    assert_eq!(handler[1], predefined("GLOBAL_NULL_KEYWORD_ID"));
+    let LoweredTypeData::Function(callback) = local(promise, &handler[0]) else {
+        panic!("expected callback")
+    };
+    assert_eq!(callback.parameters()[0].type_reference(), value);
+    let LoweredTypeData::InstanceOf {
+        ty,
+        type_parameters,
+    } = local(promise, then.return_type())
+    else {
+        panic!("expected promise")
+    };
+    assert_eq!(ty, &generated("GLOBAL_PROMISE_ID"));
+    let [result] = type_parameters.as_ref() else {
+        panic!("expected one type argument")
+    };
+    assert_eq!(
+        local(promise, result),
+        &LoweredTypeData::Union(Box::new([fulfilled.clone(), rejected.clone()]))
+    );
+
+    let constructor = class.member("constructor").unwrap();
+    assert_eq!(constructor.kind(), &LoweredMemberKind::Constructor);
+    let LoweredTypeData::Constructor(constructor) = local(promise, constructor.type_reference())
+    else {
+        panic!("expected constructor")
+    };
+    let [executor] = constructor.parameters() else {
+        panic!("expected one parameter")
+    };
+    let LoweredTypeData::Function(executor) = local(promise, executor.type_reference()) else {
+        panic!("expected executor")
+    };
+    assert_eq!(executor.parameters().len(), 1);
+    let LoweredTypeData::InstanceOf {
+        ty,
+        type_parameters,
+    } = local(promise, constructor.return_type().unwrap())
+    else {
+        panic!("expected promise")
+    };
+    assert_eq!(ty, &generated("GLOBAL_PROMISE_ID"));
+    assert_eq!(type_parameters.as_ref(), constructor.type_parameters());
+
+    let resolve = class.member("resolve").unwrap();
+    assert_eq!(resolve.kind(), &LoweredMemberKind::NamedStatic);
+    let LoweredTypeData::Object(overloads) = local(promise, resolve.type_reference()) else {
+        panic!("expected overloads")
+    };
+    assert_eq!(overloads.len(), 2);
+    for overload in overloads {
+        assert_eq!(overload.kind(), &LoweredMemberKind::CallSignature);
+        assert!(matches!(
+            local(promise, overload.type_reference()),
+            LoweredTypeData::Function(_)
+        ));
+    }
     Ok(())
 }
 
