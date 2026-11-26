@@ -996,6 +996,19 @@ mod tests {
     }
 
     #[test]
+    fn create_dir_all_creates_missing_parent_directories() {
+        let temporary = TemporaryFs::new("create_dir_all_creates_missing_parent_directories");
+        let fs = temporary.create_os();
+        let directory = temporary.working_directory.join("parent/child");
+
+        fs.create_dir_all(&directory).unwrap();
+        assert!(fs.path_is_dir(&directory));
+
+        fs.create_dir_all(&directory)
+            .expect("an existing directory to be accepted");
+    }
+
+    #[test]
     fn handles_each_physical_file_once_preferring_canonical_paths() {
         let mut temporary = TemporaryFs::new("handles_each_physical_file_once");
         temporary.create_file("project/src/file.js", "statement();");

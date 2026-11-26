@@ -43,11 +43,16 @@ impl CompletionShell {
 
     /// Returns the completion script for this shell.
     // The scripts are byte-for-byte what bpaf prints for
-    // `--bpaf-complete-style-<shell>` when the program is named `biome`. Each
-    // script passes a `--bpaf-complete-rev` number that selects bpaf's output
-    // format for that shell, so the scripts must change when bpaf changes
-    // those numbers. The `completion_scripts_match_bpaf` test compares them
-    // with bpaf's output.
+    // `--bpaf-complete-style-<shell>` when the program is named `biome`, except
+    // that the Bash script quotes `${line}` in `eval`. Unquoted, Bash expands
+    // file name patterns in the command line, and `eval` runs the matching
+    // file names as code: after `touch 'x;id;#'`, `biome check *` and Tab runs
+    // `id`.
+    //
+    // Each script passes a `--bpaf-complete-rev` number that selects bpaf's
+    // output format for that shell, so the scripts must change when bpaf
+    // changes those numbers. The `completion_scripts_match_bpaf` test compares
+    // them with bpaf's output.
     const fn script(self) -> &'static str {
         match self {
             Self::Bash => {
@@ -57,7 +62,7 @@ impl CompletionShell {
     if [[ ${COMP_WORDS[-1]} == "" ]]; then
         line="${line} \"\""
     fi
-    source <( eval ${line})
+    source <( eval "${line}")
 }
 complete -o nosort -F _bpaf_dynamic_completion biome
 "#
@@ -185,7 +190,8 @@ impl UserDirectories {
         let home = Utf8PathBuf::from_path_buf(base.home_dir().to_path_buf()).ok()?;
         // bash-completion and fish use the XDG base directories on every
         // platform, but `directories` follows them only on Linux. On macOS it
-        // returns `~/Library/Application Support`, where neither shell looks.
+        // returns `~/Library/Application Support`, where neither shell looks,
+        // so other platforms read the variables here.
         let (data, config) = cfg_select! {
             target_os = "linux" => {
                 (
@@ -193,10 +199,26 @@ impl UserDirectories {
                     Utf8PathBuf::from_path_buf(base.config_dir().to_path_buf()).ok()?,
                 )
             }
-            _ => (home.join(".local/share"), home.join(".config")),
+            _ => (
+                xdg_directory(std::env::var("XDG_DATA_HOME").ok(), home.join(".local/share")),
+                xdg_directory(std::env::var("XDG_CONFIG_HOME").ok(), home.join(".config")),
+            ),
         };
         Some(Self { home, data, config })
     }
+}
+
+/// Returns the path in `value`, the value of an XDG base directory variable,
+/// or `default` when the variable is unset or holds a relative path.
+///
+/// The XDG Base Directory Specification says to ignore relative paths, and
+/// `directories` applies the same rule on Linux.
+#[cfg(not(target_os = "linux"))]
+fn xdg_directory(value: Option<String>, default: Utf8PathBuf) -> Utf8PathBuf {
+    value
+        .map(Utf8PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .unwrap_or(default)
 }
 
 /// Runs the `completion` command.
@@ -355,14 +377,41 @@ mod tests {
         assert!(fish.ends_with("fish/completions/biome.fish"), "{fish}");
         assert!(CompletionShell::Elvish.install_target().is_err());
 
-        if !cfg!(target_os = "linux") {
+        // The defaults apply only when the XDG variables aren't set, and tests
+        // can't unset them because other tests read the same environment.
+        #[cfg(not(target_os = "linux"))]
+        {
             let home = BaseDirs::new().unwrap().home_dir().to_path_buf();
-            assert_eq!(
-                bash,
-                home.join(".local/share/bash-completion/completions/biome")
-            );
-            assert_eq!(fish, home.join(".config/fish/completions/biome.fish"));
+            if std::env::var_os("XDG_DATA_HOME").is_none() {
+                assert_eq!(
+                    bash,
+                    home.join(".local/share/bash-completion/completions/biome")
+                );
+            }
+            if std::env::var_os("XDG_CONFIG_HOME").is_none() {
+                assert_eq!(fish, home.join(".config/fish/completions/biome.fish"));
+            }
         }
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    #[test]
+    fn xdg_directory_ignores_unset_and_relative_values() {
+        let home =
+            Utf8PathBuf::from_path_buf(BaseDirs::new().unwrap().home_dir().to_path_buf()).unwrap();
+        let default = home.join(".config");
+        let custom = home.join("custom-config");
+
+        assert_eq!(
+            xdg_directory(Some(custom.to_string()), default.clone()),
+            custom
+        );
+        assert_eq!(xdg_directory(None, default.clone()), default);
+        assert_eq!(xdg_directory(Some(String::new()), default.clone()), default);
+        assert_eq!(
+            xdg_directory(Some("relative/config".to_string()), default.clone()),
+            default
+        );
     }
 
     #[test]

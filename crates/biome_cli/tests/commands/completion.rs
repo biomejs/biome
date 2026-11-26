@@ -65,6 +65,14 @@ fn completion_scripts_match_bpaf() {
         // `.exe` extension on Windows.
         let expected =
             stdout(&[&format!("--bpaf-complete-style-{shell}")]).replace("biome.exe", "biome");
+        // Biome's Bash script quotes `${line}`, so that `eval` doesn't run file
+        // names that match patterns in the command line. See
+        // `CompletionShell::script`.
+        let expected = if shell == "bash" {
+            expected.replace("eval ${line})", "eval \"${line}\")")
+        } else {
+            expected
+        };
         assert_eq!(
             stdout(&["completion", shell]),
             expected,
