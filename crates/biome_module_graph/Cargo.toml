@@ -13,6 +13,10 @@ include              = ["README.md", "src/**/*"]
 publish              = true
 autotests            = false
 
+[features]
+schema = ["dep:schemars"]
+serde  = ["dep:serde"]
+
 [[test]]
 name = "spec_tests"
 path = "tests/spec_tests.rs"
@@ -91,10 +95,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["dep:schemars"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

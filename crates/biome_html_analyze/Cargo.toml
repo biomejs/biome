@@ -12,6 +12,9 @@ categories.workspace = true
 include              = ["!**/*_tests.*", "build.rs", "src/**/*"]
 publish              = false
 
+[features]
+schema = ["schemars"]
+
 [[bench]]
 harness = false
 name    = "html_analyzer"
@@ -67,9 +70,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["schemars"]
 
 [lints]
 workspace = true

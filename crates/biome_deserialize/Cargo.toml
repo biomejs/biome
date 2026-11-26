@@ -14,6 +14,17 @@ publish              = true
 [package.metadata.cargo-udeps.ignore]
 development = ["biome_deserialize", "biome_deserialize_macros"]
 
+[features]
+camino   = ["dep:camino"]
+indexmap = ["dep:indexmap"]
+serde    = ["dep:serde", "dep:serde_json"]
+smallvec = ["dep:smallvec"]
+yaml     = [
+  "dep:biome_unicode_table",
+  "dep:biome_yaml_parser",
+  "dep:biome_yaml_syntax",
+]
+
 [dependencies]
 biome_console       = { workspace = true }
 biome_diagnostics   = { workspace = true }
@@ -35,17 +46,6 @@ smallvec            = { workspace = true, optional = true }
 biome_deserialize        = { path = ".", features = ["yaml"] }
 biome_deserialize_macros = { path = "../biome_deserialize_macros" }
 trybuild                 = { workspace = true }
-
-[features]
-camino   = ["dep:camino"]
-indexmap = ["dep:indexmap"]
-serde    = ["dep:serde", "dep:serde_json"]
-smallvec = ["dep:smallvec"]
-yaml     = [
-  "dep:biome_unicode_table",
-  "dep:biome_yaml_parser",
-  "dep:biome_yaml_syntax",
-]
 
 [lints]
 workspace = true

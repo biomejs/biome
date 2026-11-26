@@ -14,6 +14,10 @@ version     = "1.9.4"
 [package.metadata.wasm-pack.profile.profiling]
 wasm-opt = false
 
+[features]
+default  = ["console_error_panic_hook"]
+unstable = []
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -43,10 +47,6 @@ biome_rowan        = { workspace = true }
 biome_service      = { workspace = true, features = ["schema"] }
 quote              = { workspace = true }
 schemars           = { workspace = true }
-
-[features]
-default  = ["console_error_panic_hook"]
-unstable = []
 
 [lints]
 workspace = true

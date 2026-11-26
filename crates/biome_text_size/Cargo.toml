@@ -12,6 +12,10 @@ categories.workspace = true
 include              = ["LICENSE-*", "src/**/*"]
 publish              = true
 
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
+
 [[test]]
 name              = "serde"
 path              = "tests/serde.rs"
@@ -24,10 +28,6 @@ serde    = { workspace = true, optional = true }
 [dev-dependencies]
 serde_test        = { workspace = true }
 static_assertions = { workspace = true }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

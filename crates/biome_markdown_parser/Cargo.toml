@@ -15,6 +15,14 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
+[features]
+# Enables the MDX variant of Markdown. MDX is still in development and stays
+# out of release builds until this feature is removed.
+lang_mdx   = ["dep:biome_js_extent"]
+# Enables test utilities (to_html module) for CommonMark spec compliance testing.
+# Not included in production builds to avoid unnecessary dependencies and code.
+test_utils = ["dep:htmlize", "dep:percent-encoding"]
+
 [[bench]]
 harness = false
 name    = "markdown_parser"
@@ -56,14 +64,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-# Enables the MDX variant of Markdown. MDX is still in development and stays
-# out of release builds until this feature is removed.
-lang_mdx   = ["dep:biome_js_extent"]
-# Enables test utilities (to_html module) for CommonMark spec compliance testing.
-# Not included in production builds to avoid unnecessary dependencies and code.
-test_utils = ["dep:htmlize", "dep:percent-encoding"]
 
 [lints]
 workspace = true

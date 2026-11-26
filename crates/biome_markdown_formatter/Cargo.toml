@@ -12,6 +12,10 @@ categories.workspace = true
 include              = ["src/**/*"]
 publish              = true
 
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
+
 [[bench]]
 harness = false
 name    = "md_formatter"
@@ -51,10 +55,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

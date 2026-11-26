@@ -18,6 +18,10 @@ publish              = true
 [package.metadata.workspaces]
 independent = true
 
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
+
 [[bench]]
 harness = false
 name    = "json_formatter"
@@ -56,10 +60,6 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
 
 [lints]
 workspace = true

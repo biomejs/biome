@@ -12,6 +12,9 @@ categories.workspace = true
 include              = ["!**/*_test.*", "!**/*_tests.*", "src/**/*"]
 publish              = true
 
+[features]
+schema = ["dep:schemars", "dep:serde_json"]
+
 [dependencies]
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["indexmap", "smallvec"] }
@@ -35,9 +38,6 @@ smallvec                 = { workspace = true }
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
-
-[features]
-schema = ["dep:schemars", "dep:serde_json"]
 
 [lints]
 workspace = true

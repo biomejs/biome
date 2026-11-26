@@ -12,6 +12,9 @@ categories.workspace = true
 include              = ["LICENSE", "src/**/*"]
 publish              = true
 
+[features]
+schema = ["biome_rowan/serde", "schemars"]
+
 [dependencies]
 biome_aria          = { workspace = true }
 biome_aria_metadata = { workspace = true }
@@ -27,9 +30,6 @@ smallvec            = { workspace = true }
 biome_js_factory = { path = "../biome_js_factory" }
 biome_js_parser  = { path = "../biome_js_parser" }
 biome_languages  = { path = "../biome_languages", features = ["lang_js"] }
-
-[features]
-schema = ["biome_rowan/serde", "schemars"]
 
 [lints]
 workspace = true
