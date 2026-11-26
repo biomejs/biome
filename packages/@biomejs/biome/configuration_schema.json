@@ -4094,6 +4094,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexQueryFilterConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexQueryFilterOptions" }
+			]
+		},
+		"NoConvexQueryFilterOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoConvexTopOfHourCronsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9703,6 +9713,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexQueryFilter": {
+					"description": "Disallow calling .filter() on a Convex database query.\nSee https://biomejs.dev/linter/rules/no-convex-query-filter",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexQueryFilterConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConvexTopOfHourCrons": {
 					"description": "Disallow scheduling Convex cron jobs at the start of the hour.\nSee https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
 					"anyOf": [
@@ -13670,6 +13687,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoConvexDuplicateIndexesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexQueryFilterOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexQueryFilterOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

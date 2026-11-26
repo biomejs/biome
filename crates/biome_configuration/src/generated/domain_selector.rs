@@ -20,6 +20,7 @@ static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
 static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noConvexDuplicateIndexes"),
+        RuleFilter::Rule("nursery", "noConvexQueryFilter"),
         RuleFilter::Rule("nursery", "noConvexTopOfHourCrons"),
         RuleFilter::Rule("nursery", "useConvexAccessControl"),
     ]

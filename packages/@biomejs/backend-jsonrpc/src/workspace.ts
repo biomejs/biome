@@ -3069,6 +3069,11 @@ export interface Nursery {
 	 */
 	noConvexDuplicateIndexes?: NoConvexDuplicateIndexesConfiguration;
 	/**
+	 * Disallow calling .filter() on a Convex database query.
+	 * See https://biomejs.dev/linter/rules/no-convex-query-filter
+	 */
+	noConvexQueryFilter?: NoConvexQueryFilterConfiguration;
+	/**
 	 * Disallow scheduling Convex cron jobs at the start of the hour.
 	 * See https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons
 	 */
@@ -7025,6 +7030,9 @@ export type NoConstantComparisonsConfiguration =
 export type NoConvexDuplicateIndexesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexDuplicateIndexesOptions;
+export type NoConvexQueryFilterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexQueryFilterOptions;
 export type NoConvexTopOfHourCronsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexTopOfHourCronsOptions;
@@ -10259,6 +10267,10 @@ export interface RuleWithNoConstantComparisonsOptions {
 export interface RuleWithNoConvexDuplicateIndexesOptions {
 	level: RulePlainConfiguration;
 	options?: NoConvexDuplicateIndexesOptions;
+}
+export interface RuleWithNoConvexQueryFilterOptions {
+	level: RulePlainConfiguration;
+	options?: NoConvexQueryFilterOptions;
 }
 export interface RuleWithNoConvexTopOfHourCronsOptions {
 	level: RulePlainConfiguration;
@@ -14133,6 +14145,7 @@ export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
 export type NoConvexDuplicateIndexesOptions = {};
+export type NoConvexQueryFilterOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
@@ -16722,6 +16735,7 @@ export type Category =
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
 	| "lint/nursery/noConvexDuplicateIndexes"
+	| "lint/nursery/noConvexQueryFilter"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
