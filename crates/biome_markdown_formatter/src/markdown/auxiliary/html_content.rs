@@ -10,7 +10,8 @@ impl FormatNodeRule<MdHtmlContent> for FormatMdHtmlContent {
         let MdHtmlContentFields { value_token } = node.as_fields();
         let value_token = value_token?;
 
-        let range = value_token.text_range();
+        // Leading comments are trivia, which the comment formatting prints.
+        let range = value_token.text_trimmed_range();
         if f.context().is_embedded_node_range(range) && is_unindented_document_block(node) {
             let embedded = FormatEmbedded::new(range, &value_token.format(), f)?;
             write!(f, [embedded])

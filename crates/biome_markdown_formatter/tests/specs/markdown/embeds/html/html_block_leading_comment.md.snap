@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/html/html_block_leading_comment.md
+---
+
+# Input
+
+```md
+<!-- foo -->*bar*
+
+<!-- a -->
+<!-- b --><div   class="x"  >text</div>
+
+```
+
+
+# Options
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+<!-- foo -->*bar*
+
+<!-- a -->
+<!-- b --><div class="x">text</div>
+
+```
