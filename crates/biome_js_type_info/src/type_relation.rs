@@ -12,7 +12,8 @@
 //! for `in`. For `instanceof`, [`instance_types`] gives the instance types of
 //! a constructor, and [`is_derived_from`] compares a type with them by
 //! declaration. [`is_subtype`] follows TypeScript's subtype relation, which
-//! is stricter than assignability.
+//! is stricter than assignability. Narrowing by a type predicate such as
+//! `value is Foo` compares types in that relation.
 //!
 //! The operands must already be normalized, as with the operations in
 //! [`crate::type_operations`].
@@ -415,10 +416,31 @@ fn is_decimal_integer_name(name: &str) -> bool {
 /// Returns whether the normalized type `source` is a subtype of `target`
 /// under TypeScript's subtype relation.
 ///
-/// This is assignability with two differences: `any` is a subtype only of
-/// `any` and `unknown`, and a source that lacks an optional property of an
-/// object type target is not a subtype of it, unless the source is the type
-/// of an object literal or a tuple.
+/// This is assignability with these differences:
+///
+/// - `any` is a subtype only of `any` and `unknown`.
+/// - A source that lacks an optional property of an object type target is not
+///   a subtype of it, unless the source is the type of an object literal or a
+///   tuple.
+/// - A primitive is compared with an object type, such as an interface,
+///   through the members of the primitive's wrapper type, so `string` is a
+///   subtype of `{ length: number }` and not of `{ a: number }`.
+///   Assignability leaves these comparisons undetermined. See
+///   [`primitive_can_satisfy`].
+/// - `object` is not a subtype of an object type with a member, optional or
+///   not, that `Object` lacks, as `{ a?: number }`.
+/// - The comparison of two instances of classes with the same contents is
+///   undetermined when Biome reaches the classes through different handles,
+///   or through a handle and without one, such as one class declared in each
+///   of two modules. TypeScript relates classes with private members only to
+///   themselves and their subclasses. Two such classes without handles, as
+///   in two namespaces of one module, can't be told from one class.
+/// - A property of the type of an object literal or of an instance of a
+///   class that is not built in can have the literal type of its
+///   initializer, as `1` for `{ a: 1 }`, where TypeScript widens it to
+///   `number` unless it is readonly or `as const`. Such a property is also
+///   compared with its literal types widened, and the result is undetermined
+///   when the two comparisons disagree.
 pub(crate) fn is_subtype<'db>(
     db: &'db dyn TypeDb,
     source: TypeData<'db>,
@@ -1315,6 +1337,8 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         if source == TypeData::ObjectKeyword {
             return if self.is_empty_object(target) {
                 Assignability::Assignable
+            } else if self.is_subtype {
+                self.is_object_keyword_subtype(target)
             } else {
                 Assignability::Undetermined
             };
@@ -1385,6 +1409,12 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             (TypeData::InstanceOf(source), TypeData::InstanceOf(target))
                 if self.same_instance_target(source, target) =>
             {
+                if self.is_subtype
+                    && source.ty(self.db) != target.ty(self.db)
+                    && self.builtin_name(target.ty(self.db)).is_none()
+                {
+                    return Assignability::Undetermined;
+                }
                 self.are_type_arguments_assignable(source, target)
             }
             _ => self.is_structurally_assignable(source, target),
@@ -1735,7 +1765,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             // Other built-in types are compared with the wrapper's members.
             TypeData::InstanceOf(instance) => {
                 let Some(name) = self.builtin_name(instance.ty(self.db)) else {
-                    return Assignability::Undetermined;
+                    return self.is_primitive_subtype_of_object(source, target);
                 };
                 if name == "Object" || Some(name.text()) == source.primitive.wrapper_name() {
                     return Assignability::Assignable;
@@ -1746,7 +1776,50 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 let wrapper = TypeData::instance_of(self.db, wrapper, Box::default());
                 self.is_structurally_assignable(wrapper, target)
             }
-            _ => Assignability::Undetermined,
+            _ => self.is_primitive_subtype_of_object(source, target),
+        }
+    }
+
+    /// Compares a value of the primitive `source` with the object type
+    /// `target`, such as an interface or a type literal, in the subtype
+    /// relation, through the members of the primitive's wrapper type. `null`,
+    /// `undefined`, and `void` are subtypes of no object type. Assignability
+    /// leaves the result undetermined, because it also decides conditional
+    /// types.
+    fn is_primitive_subtype_of_object(
+        &mut self,
+        source: PrimitiveKind,
+        target: TypeData<'db>,
+    ) -> Assignability {
+        if !self.is_subtype {
+            return Assignability::Undetermined;
+        }
+        let kind = match source.primitive {
+            Primitive::BigInt => TypeofKind::BigInt,
+            Primitive::Boolean => TypeofKind::Boolean,
+            Primitive::Number => TypeofKind::Number,
+            Primitive::String => TypeofKind::String,
+            Primitive::Symbol => TypeofKind::Symbol,
+            Primitive::Null | Primitive::Undefined | Primitive::Void => {
+                return Assignability::NotAssignable;
+            }
+        };
+        // When every value of the kind has the type, so does a literal of the
+        // kind, and when no value has it, the literal doesn't either.
+        self.primitive_can_satisfy(kind, target)
+    }
+
+    /// Compares `object` with the object type `target` in the subtype
+    /// relation. Only a member of `target` that `Object` lacks is conclusive.
+    fn is_object_keyword_subtype(&mut self, target: TypeData<'db>) -> Assignability {
+        let object = TypeData::instance_of(
+            self.db,
+            TypeData::GlobalType(OBJECT_ID_GLOBAL_TYPE_ID),
+            Box::default(),
+        );
+        match self.is_structurally_assignable(object, target) {
+            Assignability::NotAssignable => Assignability::NotAssignable,
+            Assignability::Assignable | Assignability::Undetermined => Assignability::Undetermined,
         }
     }
 
@@ -1804,7 +1877,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                     }
                     found.push((name, source_ty, target_ty, target_is_optional));
                 }
-                MemberLookup::Missing if target_is_optional => {}
+                // The subtype relation requires the optional members of the
+                // target too.
+                MemberLookup::Missing if target_is_optional && !self.is_subtype => {}
                 MemberLookup::Missing => return Assignability::NotAssignable,
                 MemberLookup::Unknown => {
                     may_share_member = true;
@@ -2523,13 +2598,21 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             };
         }
 
+        let widens = (
+            self.is_subtype && self.may_widen_members(source),
+            self.is_subtype && self.may_widen_members(target),
+        );
         for (name, source_ty, source_is_optional, target_ty, target_is_optional) in found {
             let member_result = if source_is_optional && !target_is_optional {
                 Assignability::NotAssignable
-            } else if target_is_optional {
-                self.is_member_assignable(source_ty, with_undefined(self.db, target_ty), &name)
             } else {
-                self.is_member_assignable(source_ty, target_ty, &name)
+                self.is_widened_member_assignable(
+                    source_ty,
+                    target_ty,
+                    target_is_optional,
+                    &name,
+                    widens,
+                )
             };
             match member_result {
                 Assignability::Assignable => {}
@@ -2541,6 +2624,100 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             return Assignability::Undetermined;
         }
         result
+    }
+
+    /// Compares the source member `source` with the target member called
+    /// `name` of type `target` through [`Self::is_member_assignable`], with
+    /// `undefined` added to `target` when it is optional.
+    ///
+    /// `widens` tells whether the members of the source and of the target
+    /// may have literal types that TypeScript widens. A literal type of a
+    /// field initializer is widened unless the field is readonly or
+    /// `as const`, and Biome doesn't record either, so `{ a: 1 }` can be
+    /// `{ a: number }` in TypeScript. The member is then also compared with
+    /// its literal types widened, and the result is undetermined when the
+    /// comparisons disagree. Two members of the same type on two sides that
+    /// both may widen are taken as the same member, as a subclass inherits it.
+    fn is_widened_member_assignable(
+        &mut self,
+        source: TypeData<'db>,
+        target: TypeData<'db>,
+        target_is_optional: bool,
+        name: &str,
+        widens: (bool, bool),
+    ) -> Assignability {
+        let compare = |check: &mut Self, source, target| {
+            let target = if target_is_optional {
+                with_undefined(check.db, target)
+            } else {
+                target
+            };
+            check.is_member_assignable(source, target, name)
+        };
+        let result = compare(self, source, target);
+        // A member that a class inherits has the same type in both, whether
+        // TypeScript widens it or not.
+        if result == Assignability::Undetermined || (source == target && widens.0 && widens.1) {
+            return result;
+        }
+        let widened_source = if widens.0 { self.widened(source) } else { None };
+        let widened_target = if widens.1 { self.widened(target) } else { None };
+        for source_variant in [Some(source), widened_source].into_iter().flatten() {
+            for target_variant in [Some(target), widened_target].into_iter().flatten() {
+                if (source_variant, target_variant) != (source, target)
+                    && compare(self, source_variant, target_variant) != result
+                {
+                    return Assignability::Undetermined;
+                }
+            }
+        }
+        result
+    }
+
+    /// Returns whether the members of `ty` may have literal types that
+    /// TypeScript widens to their primitive types. This holds for the type of
+    /// an object literal and for an instance of a class that is not built in,
+    /// because their fields can take their types from initializers.
+    fn may_widen_members(&mut self, ty: TypeData<'db>) -> bool {
+        match ty {
+            TypeData::Object(object) => object.kind(self.db) == ObjectKind::Expression,
+            TypeData::Literal(literal) => matches!(literal.literal(self.db), Literal::Object(_)),
+            TypeData::InstanceOf(instance) => {
+                self.builtin_name(instance.ty(self.db)).is_none()
+                    && self.instance_class(instance).is_some()
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns `ty` with its primitive literal types, and those of the
+    /// members of a union, replaced by their primitive types, as `number`
+    /// replaces `1`, or `None` when it has none or is a union with more than
+    /// [`MAX_STRUCTURAL_MEMBERS`] members.
+    fn widened(&mut self, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+        let ty = self.resolve(ty);
+        if let Some(widened) = widened_literal(self.db, ty) {
+            return Some(widened);
+        }
+        let TypeData::Union(union) = ty else {
+            return None;
+        };
+        let members = union.types(self.db);
+        if members.len() > MAX_STRUCTURAL_MEMBERS {
+            return None;
+        }
+        let mut is_widened = false;
+        let widened = members
+            .iter()
+            .map(|member| {
+                let resolved = self.resolve(*member);
+                widened_literal(self.db, resolved).map_or(*member, |widened| {
+                    is_widened = true;
+                    widened
+                })
+            })
+            .collect();
+        is_widened.then(|| TypeData::union_from_types(self.db, widened))
     }
 
     /// Returns whether `target` is an instance of a user-defined class that
@@ -3742,6 +3919,24 @@ pub(crate) fn intersect_primitives<'db>(
         }
         _ => None,
     }
+}
+
+/// Returns the primitive type of the primitive literal type `ty`, such as
+/// `number` for `1`, or `None` for other types.
+pub(crate) fn widened_literal<'db>(
+    db: &'db dyn TypeDb,
+    ty: TypeData<'db>,
+) -> Option<TypeData<'db>> {
+    let TypeData::Literal(literal) = ty else {
+        return None;
+    };
+    Some(match literal.literal(db) {
+        Literal::BigInt(_) => TypeData::BigInt,
+        Literal::Boolean(_) => TypeData::Boolean,
+        Literal::Number(_) => TypeData::Number,
+        Literal::String(_) | Literal::Template(_) => TypeData::String,
+        Literal::Object(_) | Literal::RegExp(_) => return None,
+    })
 }
 
 /// Returns `ty` together with `undefined`, which an optional element or

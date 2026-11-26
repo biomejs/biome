@@ -5,8 +5,6 @@ declare function read(): string | null;
 declare function generic<T>(input: unknown): input is string;
 declare function overloaded(input: string): input is string;
 declare function overloaded(input: unknown): input is string;
-declare function structural(input: unknown): input is { name: string };
-declare function union(input: unknown): input is string | number;
 
 const alias = isString;
 
@@ -67,9 +65,4 @@ function optionalCallee(value: string | null, guard: ((input: unknown) => input 
 	if (guard?.(value)) {
 		return value?.length;
 	}
-}
-
-function unsupportedTargets(value: unknown) {
-	if (structural(value)) value?.name;
-	if (union(value)) value ?? "fallback";
 }
