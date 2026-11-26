@@ -68,6 +68,10 @@ impl FileSystem for OsFileSystem {
         }))
     }
 
+    fn create_dir_all(&self, path: &Utf8Path) -> io::Result<()> {
+        fs::create_dir_all(path)
+    }
+
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
         let working_directory = self
             .working_directory
@@ -989,6 +993,19 @@ mod tests {
 
         assert_eq!(ctx.visited.len(), 1);
         assert!(owners.take_candidates().is_empty());
+    }
+
+    #[test]
+    fn create_dir_all_creates_missing_parent_directories() {
+        let temporary = TemporaryFs::new("create_dir_all_creates_missing_parent_directories");
+        let fs = temporary.create_os();
+        let directory = temporary.working_directory.join("parent/child");
+
+        fs.create_dir_all(&directory).unwrap();
+        assert!(fs.path_is_dir(&directory));
+
+        fs.create_dir_all(&directory)
+            .expect("an existing directory to be accepted");
     }
 
     #[test]

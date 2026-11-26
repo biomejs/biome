@@ -1,5 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporterKind, ColorsArg, cli_options};
+use crate::commands::completion::CompletionShell;
 use crate::logging::log_options;
 use crate::logging::{LogOptions, LoggingKind};
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
@@ -48,12 +49,13 @@ use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
 use biome_service::workspace::{FixFileMode, SearchLanguage};
 use biome_service::{WatcherOptions, watcher_options};
-use bpaf::Bpaf;
+use bpaf::{Bpaf, ShellComp};
 use std::ffi::OsString;
 
 pub(crate) mod check;
 pub(crate) mod ci;
 pub(crate) mod clean;
+pub(crate) mod completion;
 pub(crate) mod daemon;
 pub(crate) mod explain;
 pub(crate) mod format;
@@ -221,7 +223,13 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
+        #[bpaf(
+            long("only"),
+            argument::<String>("GROUP|RULE|DOMAIN|ACTION|PLUGIN"),
+            complete(completion::complete_analyzer_selector),
+            parse(completion::parse_value),
+            many
+        )]
         only: Vec<AnalyzerSelector>,
 
         /// Skips the given lint rule, assist action, group of rules and actions, or domain. Matching
@@ -233,7 +241,13 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
+        #[bpaf(
+            long("skip"),
+            argument::<String>("GROUP|RULE|DOMAIN|ACTION|PLUGIN"),
+            complete(completion::complete_analyzer_selector),
+            parse(completion::parse_value),
+            many
+        )]
         skip: Vec<AnalyzerSelector>,
 
         /// After the initial run, watches the selected paths and reprocesses files modified afterward.
@@ -241,7 +255,7 @@ pub enum BiomeCommand {
         watch: bool,
 
         /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome checks files in the current working directory.
-        #[bpaf(positional("PATH"), many)]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }), many)]
         paths: Vec<OsString>,
     },
     /// Runs the linter on the specified files.
@@ -325,7 +339,13 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|PLUGIN"))]
+        #[bpaf(
+            long("only"),
+            argument::<String>("GROUP|RULE|DOMAIN|PLUGIN"),
+            complete(completion::complete_lint_selector),
+            parse(completion::parse_value),
+            many
+        )]
         only: Vec<AnalyzerSelector>,
 
         /// Skips the given lint rule, rule group, or domain by setting the affected rules to `off`.
@@ -336,7 +356,13 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|PLUGIN"))]
+        #[bpaf(
+            long("skip"),
+            argument::<String>("GROUP|RULE|DOMAIN|PLUGIN"),
+            complete(completion::complete_lint_selector),
+            parse(completion::parse_value),
+            many
+        )]
         skip: Vec<AnalyzerSelector>,
 
         /// Reads code from standard input and writes the processed code to standard output.
@@ -380,7 +406,7 @@ pub enum BiomeCommand {
         watch: bool,
 
         /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome lints files in the current working directory.
-        #[bpaf(positional("PATH"), many)]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }), many)]
         paths: Vec<OsString>,
     },
     /// Formats the specified files.
@@ -468,7 +494,7 @@ pub enum BiomeCommand {
         watch: bool,
 
         /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome formats files in the current working directory.
-        #[bpaf(positional("PATH"), many)]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }), many)]
         paths: Vec<OsString>,
     },
     /// Runs formatting checks, linting checks, and assist actions in CI without modifying files.
@@ -536,7 +562,13 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test --only=plugin
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
+        #[bpaf(
+            long("only"),
+            argument::<String>("GROUP|RULE|DOMAIN|ACTION|PLUGIN"),
+            complete(completion::complete_analyzer_selector),
+            parse(completion::parse_value),
+            many
+        )]
         only: Vec<AnalyzerSelector>,
 
         /// Skips the given lint rule, assist action, group of rules and actions, or domain. Matching
@@ -548,11 +580,17 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project --skip=plugin
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION|PLUGIN"))]
+        #[bpaf(
+            long("skip"),
+            argument::<String>("GROUP|RULE|DOMAIN|ACTION|PLUGIN"),
+            complete(completion::complete_analyzer_selector),
+            parse(completion::parse_value),
+            many
+        )]
         skip: Vec<AnalyzerSelector>,
 
         /// The optional `PATH` arguments accept one or more paths to files or directories. If omitted, Biome checks files in the current working directory.
-        #[bpaf(positional("PATH"), many)]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }), many)]
         paths: Vec<OsString>,
     },
 
@@ -654,7 +692,7 @@ pub enum BiomeCommand {
         pattern: String,
 
         /// One or more files or directories to search. Defaults to the current working directory.
-        #[bpaf(positional("PATH"), many)]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }), many)]
         paths: Vec<OsString>,
     },
 
@@ -672,13 +710,55 @@ pub enum BiomeCommand {
     #[bpaf(command)]
     Explain {
         /// `NAME` is a lint rule name or `daemon-logs`.
-        #[bpaf(positional("NAME"))]
+        #[bpaf(
+            positional::<String>("NAME"),
+            complete(completion::complete_explain_name),
+            parse(completion::parse_value)
+        )]
         doc: Doc,
     },
 
     #[bpaf(command)]
     /// Removes the Biome daemon server log files.
     Clean,
+
+    /// Prints a script to install shell completions for the Biome CLI.
+    ///
+    /// Supported shells: Bash, Zsh, fish, and Elvish are supported. Use `--write` to let
+    /// Biome install the script.
+    ///
+    /// ### Examples
+    ///
+    /// ```shell
+    /// biome completion zsh > ~/.zfunc/_biome
+    /// ```
+    ///
+    /// ```shell
+    /// biome completion --write zsh
+    /// ```
+    #[bpaf(command)]
+    Completion {
+        /// Installs the autocompletion script.
+        ///
+        /// Bash: `~/.local/share/bash-completion/completions/biome`.
+        /// Zsh: `~/.zfunc/_biome`.
+        /// Fish: `~/.config/fish/completions/biome.fish`.
+        ///
+        /// Elvish isn't supported.
+        ///
+        /// Bash and fish use `XDG_DATA_HOME` and `XDG_CONFIG_HOME` instead of `~/.local/share` and `~/.config` when
+        /// those variables are set. Biome then prints any step needed to load the script.
+        #[bpaf(long("write"), switch)]
+        write: bool,
+
+        /// The shell to produce the script for: `bash`, `zsh`, `fish`, or `elvish`.
+        #[bpaf(
+            positional::<String>("SHELL"),
+            complete(completion::complete_shell_name),
+            parse(completion::parse_value)
+        )]
+        shell: CompletionShell,
+    },
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
@@ -769,7 +849,7 @@ pub enum InspectSubCommand {
         semantic: bool,
 
         /// Path to the file
-        #[bpaf(positional("PATH"))]
+        #[bpaf(positional("PATH"), complete_shell(ShellComp::File { mask: None }))]
         path: OsString,
     },
 }
@@ -800,6 +880,7 @@ impl BiomeCommand {
             | Self::Explain { .. }
             | Self::RunServer { .. }
             | Self::Clean { .. }
+            | Self::Completion { .. }
             | Self::PrintSocket => None,
             Self::WhereAmI => None,
         }
@@ -824,6 +905,7 @@ impl BiomeCommand {
             | Self::Explain { .. }
             | Self::RunServer { .. }
             | Self::Clean { .. }
+            | Self::Completion { .. }
             | Self::PrintSocket => None,
             Self::WhereAmI => None,
         }
@@ -1179,6 +1261,36 @@ mod tests {
             .unwrap(),
             None
         );
+    }
+
+    fn complete(arguments: &[&str]) -> String {
+        biome_command()
+            .run_inner(bpaf::Args::from(arguments).set_comp(0))
+            .expect_err("completion to be requested")
+            .unwrap_stdout()
+    }
+
+    #[test]
+    fn path_positionals_complete_files() {
+        for arguments in [
+            &["check", "src"][..],
+            &["lint", "src"],
+            &["format", "src"],
+            &["ci", "src"],
+            &["search", "pattern", "src"],
+            &["inspect", "file", "src"],
+        ] {
+            let completion = complete(arguments);
+            assert!(
+                completion.contains("File { mask: None }"),
+                "{arguments:?} should complete file paths, got {completion:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn long_flags_complete() {
+        assert_eq!(complete(&["lint", "--wr"]), "--write");
     }
 
     #[test]

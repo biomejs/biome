@@ -1,0 +1,23 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome completion zsh
+```
+
+# Emitted Messages
+
+```block
+#compdef biome
+local line
+line="${words[1]} --bpaf-complete-rev=7 ${words[@]:1}"
+if [[ ${words[-1]} == "" ]]; then
+    line="${line} \"\""
+fi
+source <(eval ${line})
+
+
+```

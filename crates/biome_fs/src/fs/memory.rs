@@ -202,6 +202,18 @@ impl FileSystem for MemoryFileSystem {
             version: 0,
         }))
     }
+
+    fn create_dir_all(&self, _path: &Utf8Path) -> io::Result<()> {
+        if !self.allow_write {
+            return Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "cannot create a directory in a read-only filesystem",
+            ));
+        }
+
+        // The memory file system stores only files.
+        Ok(())
+    }
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
         let scope = MemoryTraversalScope {
             fs: self,
@@ -472,6 +484,28 @@ mod tests {
                 assert_eq!(error.kind(), io::ErrorKind::PermissionDenied);
             }
         }
+
+        match fs.create_dir_all(Utf8Path::new("directory")) {
+            Ok(()) => {
+                panic!("fs.create_dir_all() for a read-only filesystem should return an error")
+            }
+            Err(error) => {
+                assert_eq!(error.kind(), io::ErrorKind::PermissionDenied);
+            }
+        }
+    }
+
+    #[test]
+    fn create_dir_all_then_create_file() {
+        let fs = MemoryFileSystem::default();
+        let directory = Utf8Path::new("parent/directory");
+
+        fs.create_dir_all(directory)
+            .expect("the filesystem to accept the directory");
+        fs.create(&directory.join("file.js"))
+            .expect("the file to be created in the directory");
+
+        assert!(fs.path_is_dir(directory));
     }
 
     #[test]
