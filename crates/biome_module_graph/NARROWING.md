@@ -139,10 +139,34 @@ These limits apply to every *Supported* and *Partial* row below:
   `let`, if they are never written and not exported. A `let` statement at the
   top level of a file does not count, because other scripts can write a
   top-level `let` of a script, and Biome cannot tell a script from a module.
-  A property path, or `this`, never narrows through an aliased condition. As
-  in TypeScript, aliased conditions inline into one another at most five
+  A property path, or `this`, never narrows through an aliased condition,
+  but a test of a property in one still narrows the variable that holds the
+  property, as in `const ok = s.kind === "c"; if (ok) s`. As in TypeScript,
+  aliased conditions inline into one another at most five
   levels deep, so in `const c2 = c1; ...; const c6 = c5; if (c6)`, only the
   truthiness of `c1` is tested.
+- A runtime test of a property, such as `s.kind === "c"`, `s["kind"]`, or
+  `t[0] === "a"` on a tuple, also narrows the object that holds the property,
+  as TypeScript narrows a discriminated union. Only that object narrows:
+  `o.a.kind === "c"` narrows `o.a`, not `o`. The object must be a variable or
+  a property path that can narrow by the rules above, not `this`, and its
+  declared type must be a union with at least two object types in which
+  every member other than `null` and `undefined` declares the property. The
+  property must be a discriminant: in at least one member, its type is a
+  literal type, `null`, `undefined`, `boolean`, or a union of them, and the
+  members don't all give it the same type. An instance of a generic alias,
+  such as `r: Result<number>` with
+  `type Result<T> = { ok: true; value: T } | { ok: false }`, is not a union
+  yet, so it keeps its declared type where TypeScript narrows it. A member
+  whose property type is an object type stays after every test that leaves a
+  value other than `null` or `undefined`, because Biome does not compare
+  object types with other types, so with
+  `o: { k: { a: 1 }; x: 1 } | { k: "x"; y: 2 }`, `o.k === "x"` keeps both
+  members, where TypeScript keeps only the second. A call to a type-guard
+  function on the property, as in `isC(s.kind)`, does not narrow the object,
+  as in TypeScript. A write to the property, as in `s.kind = "b"`, keeps the
+  object narrowed, because the written value must fit the property of the
+  narrowed object.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to
@@ -224,7 +248,7 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 | `"function"` keeps functions and removes object types that no function can have | `interface Foo { a: number }`<br>`interface Len { length: number }`<br>`x: Foo \| (() => void); if (typeof x === "function") x`<br>`y: Len \| string; if (typeof y === "function") y` | `() => void`; `Function` | Partial: in the positive branch, as in TypeScript, an object type that no function can have is removed, one that every function has becomes `Function`, and one with a call or construct signature stays as it is. Object types that Biome cannot compare stay too, as listed for primitive kinds, and so do instances of classes derived from a built-in class. The negative branch keeps object types with a call or construct signature, which TypeScript removes, so `x: CallFoo \| string`, with `interface CallFoo { (): void; foo: string }`, gives `CallFoo \| string` where TypeScript gives `string`. |
 | `typeof` of a generic gives an intersection | `function f<T>(x: T) { if (typeof x === "string") x }` | `T & string` | Not yet |
 | `typeof` of a property | `o: { v: string \| number }; if (typeof o.v === "string") o.v` | `string` | Supported |
-| `typeof` of a discriminant narrows the object | `o: { k: "a"; a: 1 } \| { k: 1; b: 2 };`<br>`if (typeof o.k === "string") o` | `{ k: "a"; a: 1 }` | Not yet |
+| `typeof` of a discriminant narrows the object | `o: { k: "a"; a: 1 } \| { k: 1; b: 2 };`<br>`if (typeof o.k === "string") o` | `{ k: "a"; a: 1 }` | Supported |
 | `typeof x?.y` removes nullish types from `x` | `x: { y: number } \| undefined;`<br>`if (typeof x?.y === "number") x` | `{ y: number }` | Supported |
 | `switch (typeof x)` | `x: string \| number;`<br>`switch (typeof x) { case "string": x }` | `string` | Not yet |
 
@@ -262,12 +286,12 @@ The rows use `type Circle = { kind: "c"; r: number }` and
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Equality of a discriminant | `s: Circle \| Square; if (s.kind === "c") s` | `Circle` | Not yet |
-| Truthiness of a discriminant | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`if (r.ok) r` | `{ ok: true; v: number }` | Not yet |
+| Equality of a discriminant | `s: Circle \| Square; if (s.kind === "c") s` | `Circle` | Partial: `===` and `!==` with a string, number, bigint, or boolean literal, `null`, or `undefined`, and `== null` and `!= undefined`, narrow the object, as they narrow a variable. Loose `==` and `!=` with a literal, and comparisons with any other value, such as a `const` of a literal type, a negative number, or an enum member, don't narrow the object yet, so `const k = "c"; if (s.kind === k) s` gives `Circle \| Square`. |
+| Truthiness of a discriminant | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`if (r.ok) r` | `{ ok: true; v: number }` | Supported |
 | Destructured `const` or parameter | `s: { kind: "c"; v: number } \| { kind: "s"; v: string };`<br>`const { kind, v } = s; if (kind === "c") v` | `number` | Not yet |
 | Dependent rest parameters | `(...[k, p]: ["a", number] \| ["b", string]) => { if (k === "a") p }` | `number` | Not yet |
 | Discriminant held in a `const` | `s: Circle \| Square; const k = s.kind; if (k === "c") s` | `Circle` | Not yet |
-| Discriminant read through optional chaining | `s: Circle \| Square \| undefined; if (s?.kind === "c") s` | `Circle` | Not yet: Biome removes `undefined` from `s`, so the example gives `Circle \| Square`. |
+| Discriminant read through optional chaining | `s: Circle \| Square \| undefined; if (s?.kind === "c") s` | `Circle` | Supported: as in TypeScript, the `null` and `undefined` members stay in the branch where the property can be `undefined`, so `s?.kind !== "c"` keeps `Square \| undefined`. |
 
 ### `switch`
 
