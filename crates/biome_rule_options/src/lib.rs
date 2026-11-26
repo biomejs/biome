@@ -17,6 +17,7 @@ pub mod no_array_delete;
 pub mod no_array_for_each;
 pub mod no_array_index_key;
 pub mod no_array_methods_on_arguments;
+pub mod no_array_reduce;
 pub mod no_array_sort_for_min_max;
 pub mod no_assign_in_expressions;
 pub mod no_astro_component_default_export;

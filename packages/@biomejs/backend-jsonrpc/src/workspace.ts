@@ -2984,6 +2984,11 @@ export interface Nursery {
 	 */
 	noArrayMethodsOnArguments?: NoArrayMethodsOnArgumentsConfiguration;
 	/**
+	 * Disallow the reduce() and reduceRight() array methods.
+	 * See https://biomejs.dev/linter/rules/no-array-reduce
+	 */
+	noArrayReduce?: NoArrayReduceConfiguration;
+	/**
 	 * Disallow sorting an array only to read its smallest or largest value.
 	 * See https://biomejs.dev/linter/rules/no-array-sort-for-min-max
 	 */
@@ -6989,6 +6994,9 @@ export type NoArrayForEachConfiguration =
 export type NoArrayMethodsOnArgumentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArrayMethodsOnArgumentsOptions;
+export type NoArrayReduceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArrayReduceOptions;
 export type NoArraySortForMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArraySortForMinMaxOptions;
@@ -10195,6 +10203,10 @@ export interface RuleWithNoArrayForEachOptions {
 export interface RuleWithNoArrayMethodsOnArgumentsOptions {
 	level: RulePlainConfiguration;
 	options?: NoArrayMethodsOnArgumentsOptions;
+}
+export interface RuleWithNoArrayReduceOptions {
+	level: RulePlainConfiguration;
+	options?: NoArrayReduceOptions;
 }
 export interface RuleWithNoArraySortForMinMaxOptions {
 	/**
@@ -14152,6 +14164,7 @@ export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoArrayDeleteOptions = {};
 export type NoArrayForEachOptions = {};
 export type NoArrayMethodsOnArgumentsOptions = {};
+export type NoArrayReduceOptions = {};
 export type NoArraySortForMinMaxOptions = {};
 export type NoAstroComponentDefaultExportOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
@@ -16749,6 +16762,7 @@ export type Category =
 	| "lint/nursery/noArrayDelete"
 	| "lint/nursery/noArrayForEach"
 	| "lint/nursery/noArrayMethodsOnArguments"
+	| "lint/nursery/noArrayReduce"
 	| "lint/nursery/noArraySortForMinMax"
 	| "lint/nursery/noAstroComponentDefaultExport"
 	| "lint/nursery/noAstroConflictingSetDirectives"

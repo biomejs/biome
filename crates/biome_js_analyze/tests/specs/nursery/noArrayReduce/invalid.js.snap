@@ -1,0 +1,724 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+array.reduce((str, item) => str += item, "");
+array.reduceRight((str, item) => str += item, "");
+array?.reduce((str, item) => str += item, "");
+array.reduce((obj, item) => {
+	obj[item] = null;
+	return obj;
+}, {});
+array.reduce((obj, item) => ({ [item]: null }), {});
+const hyphenate = (str, char) => `${str}-${char}`;
+["a", "b", "c"].reduce(hyphenate);
+array.reduce(reducer);
+array.reduce(reducer, initialValue);
+array.reduceRight(reducer, initialValue);
+array.reduce(object.callback, initialValue);
+array.reduce(callback.bind(undefined), initialValue);
+array.reduce(async (total, item) => transform(total, item), initialValue);
+getArray().reduce(callback, initialValue);
+(array.reduce)(callback);
+new Int32Array().reduce(callback);
+// The function body has more than a `return` statement.
+array.reduce((total, item) => {
+	return total + doComplicatedThings(item);
+	function doComplicatedThings(item) {
+		return item + 1;
+	}
+}, 0);
+// A `return` statement without a value is not a simple operation.
+array.reduce((a, b) => { return; });
+array.reduce(function (a, b) { return; }, initialValue);
+// A logical operation is not a simple operation.
+array.reduce((a, b) => a || b);
+[].reduce.call(array, (s, i) => s + i);
+[].reduce.call(array, sum);
+[].reduce.call(sum);
+[].reduceRight.call(array, sum);
+Array.prototype.reduce.call(array, (s, i) => s + i);
+Array.prototype.reduce.call(array, sum);
+Array.prototype.reduceRight.call(array, sum);
+[].reduce.apply(array, [(s, i) => s + i]);
+[].reduce.apply(array, [sum]);
+Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+Array.prototype.reduceRight.apply(array, [sum]);
+array.reduce((a, b) => a && b);
+array.reduce((a, b) => a ?? b);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.reduce((str, item) => str += item, "");
+      │       ^^^^^^
+    3 │ array.reduceRight((str, item) => str += item, "");
+    4 │ array?.reduce((str, item) => str += item, "");
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduceRight().
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.reduce((str, item) => str += item, "");
+  > 3 │ array.reduceRight((str, item) => str += item, "");
+      │       ^^^^^^^^^^^
+    4 │ array?.reduce((str, item) => str += item, "");
+    5 │ array.reduce((obj, item) => {
+  
+  i The function passed to reduceRight() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop instead. To go through the items from last to first, loop over toReversed().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:8 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    2 │ array.reduce((str, item) => str += item, "");
+    3 │ array.reduceRight((str, item) => str += item, "");
+  > 4 │ array?.reduce((str, item) => str += item, "");
+      │        ^^^^^^
+    5 │ array.reduce((obj, item) => {
+    6 │ 	obj[item] = null;
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    3 │ array.reduceRight((str, item) => str += item, "");
+    4 │ array?.reduce((str, item) => str += item, "");
+  > 5 │ array.reduce((obj, item) => {
+      │       ^^^^^^
+    6 │ 	obj[item] = null;
+    7 │ 	return obj;
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+     7 │ 	return obj;
+     8 │ }, {});
+   > 9 │ array.reduce((obj, item) => ({ [item]: null }), {});
+       │       ^^^^^^
+    10 │ const hyphenate = (str, char) => `${str}-${char}`;
+    11 │ ["a", "b", "c"].reduce(hyphenate);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+     9 │ array.reduce((obj, item) => ({ [item]: null }), {});
+    10 │ const hyphenate = (str, char) => `${str}-${char}`;
+  > 11 │ ["a", "b", "c"].reduce(hyphenate);
+       │                 ^^^^^^
+    12 │ array.reduce(reducer);
+    13 │ array.reduce(reducer, initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    10 │ const hyphenate = (str, char) => `${str}-${char}`;
+    11 │ ["a", "b", "c"].reduce(hyphenate);
+  > 12 │ array.reduce(reducer);
+       │       ^^^^^^
+    13 │ array.reduce(reducer, initialValue);
+    14 │ array.reduceRight(reducer, initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    11 │ ["a", "b", "c"].reduce(hyphenate);
+    12 │ array.reduce(reducer);
+  > 13 │ array.reduce(reducer, initialValue);
+       │       ^^^^^^
+    14 │ array.reduceRight(reducer, initialValue);
+    15 │ array.reduce(object.callback, initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduceRight().
+  
+    12 │ array.reduce(reducer);
+    13 │ array.reduce(reducer, initialValue);
+  > 14 │ array.reduceRight(reducer, initialValue);
+       │       ^^^^^^^^^^^
+    15 │ array.reduce(object.callback, initialValue);
+    16 │ array.reduce(callback.bind(undefined), initialValue);
+  
+  i The function passed to reduceRight() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop instead. To go through the items from last to first, loop over toReversed().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    13 │ array.reduce(reducer, initialValue);
+    14 │ array.reduceRight(reducer, initialValue);
+  > 15 │ array.reduce(object.callback, initialValue);
+       │       ^^^^^^
+    16 │ array.reduce(callback.bind(undefined), initialValue);
+    17 │ array.reduce(async (total, item) => transform(total, item), initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    14 │ array.reduceRight(reducer, initialValue);
+    15 │ array.reduce(object.callback, initialValue);
+  > 16 │ array.reduce(callback.bind(undefined), initialValue);
+       │       ^^^^^^
+    17 │ array.reduce(async (total, item) => transform(total, item), initialValue);
+    18 │ getArray().reduce(callback, initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    15 │ array.reduce(object.callback, initialValue);
+    16 │ array.reduce(callback.bind(undefined), initialValue);
+  > 17 │ array.reduce(async (total, item) => transform(total, item), initialValue);
+       │       ^^^^^^
+    18 │ getArray().reduce(callback, initialValue);
+    19 │ (array.reduce)(callback);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:12 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    16 │ array.reduce(callback.bind(undefined), initialValue);
+    17 │ array.reduce(async (total, item) => transform(total, item), initialValue);
+  > 18 │ getArray().reduce(callback, initialValue);
+       │            ^^^^^^
+    19 │ (array.reduce)(callback);
+    20 │ new Int32Array().reduce(callback);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:8 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    17 │ array.reduce(async (total, item) => transform(total, item), initialValue);
+    18 │ getArray().reduce(callback, initialValue);
+  > 19 │ (array.reduce)(callback);
+       │        ^^^^^^
+    20 │ new Int32Array().reduce(callback);
+    21 │ // The function body has more than a `return` statement.
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:18 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    18 │ getArray().reduce(callback, initialValue);
+    19 │ (array.reduce)(callback);
+  > 20 │ new Int32Array().reduce(callback);
+       │                  ^^^^^^
+    21 │ // The function body has more than a `return` statement.
+    22 │ array.reduce((total, item) => {
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    20 │ new Int32Array().reduce(callback);
+    21 │ // The function body has more than a `return` statement.
+  > 22 │ array.reduce((total, item) => {
+       │       ^^^^^^
+    23 │ 	return total + doComplicatedThings(item);
+    24 │ 	function doComplicatedThings(item) {
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    27 │ }, 0);
+    28 │ // A `return` statement without a value is not a simple operation.
+  > 29 │ array.reduce((a, b) => { return; });
+       │       ^^^^^^
+    30 │ array.reduce(function (a, b) { return; }, initialValue);
+    31 │ // A logical operation is not a simple operation.
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    28 │ // A `return` statement without a value is not a simple operation.
+    29 │ array.reduce((a, b) => { return; });
+  > 30 │ array.reduce(function (a, b) { return; }, initialValue);
+       │       ^^^^^^
+    31 │ // A logical operation is not a simple operation.
+    32 │ array.reduce((a, b) => a || b);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    30 │ array.reduce(function (a, b) { return; }, initialValue);
+    31 │ // A logical operation is not a simple operation.
+  > 32 │ array.reduce((a, b) => a || b);
+       │       ^^^^^^
+    33 │ [].reduce.call(array, (s, i) => s + i);
+    34 │ [].reduce.call(array, sum);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    31 │ // A logical operation is not a simple operation.
+    32 │ array.reduce((a, b) => a || b);
+  > 33 │ [].reduce.call(array, (s, i) => s + i);
+       │    ^^^^^^
+    34 │ [].reduce.call(array, sum);
+    35 │ [].reduce.call(sum);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    32 │ array.reduce((a, b) => a || b);
+    33 │ [].reduce.call(array, (s, i) => s + i);
+  > 34 │ [].reduce.call(array, sum);
+       │    ^^^^^^
+    35 │ [].reduce.call(sum);
+    36 │ [].reduceRight.call(array, sum);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    33 │ [].reduce.call(array, (s, i) => s + i);
+    34 │ [].reduce.call(array, sum);
+  > 35 │ [].reduce.call(sum);
+       │    ^^^^^^
+    36 │ [].reduceRight.call(array, sum);
+    37 │ Array.prototype.reduce.call(array, (s, i) => s + i);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduceRight().
+  
+    34 │ [].reduce.call(array, sum);
+    35 │ [].reduce.call(sum);
+  > 36 │ [].reduceRight.call(array, sum);
+       │    ^^^^^^^^^^^
+    37 │ Array.prototype.reduce.call(array, (s, i) => s + i);
+    38 │ Array.prototype.reduce.call(array, sum);
+  
+  i The function passed to reduceRight() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop instead. To go through the items from last to first, loop over toReversed().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    35 │ [].reduce.call(sum);
+    36 │ [].reduceRight.call(array, sum);
+  > 37 │ Array.prototype.reduce.call(array, (s, i) => s + i);
+       │                 ^^^^^^
+    38 │ Array.prototype.reduce.call(array, sum);
+    39 │ Array.prototype.reduceRight.call(array, sum);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    36 │ [].reduceRight.call(array, sum);
+    37 │ Array.prototype.reduce.call(array, (s, i) => s + i);
+  > 38 │ Array.prototype.reduce.call(array, sum);
+       │                 ^^^^^^
+    39 │ Array.prototype.reduceRight.call(array, sum);
+    40 │ [].reduce.apply(array, [(s, i) => s + i]);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduceRight().
+  
+    37 │ Array.prototype.reduce.call(array, (s, i) => s + i);
+    38 │ Array.prototype.reduce.call(array, sum);
+  > 39 │ Array.prototype.reduceRight.call(array, sum);
+       │                 ^^^^^^^^^^^
+    40 │ [].reduce.apply(array, [(s, i) => s + i]);
+    41 │ [].reduce.apply(array, [sum]);
+  
+  i The function passed to reduceRight() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop instead. To go through the items from last to first, loop over toReversed().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    38 │ Array.prototype.reduce.call(array, sum);
+    39 │ Array.prototype.reduceRight.call(array, sum);
+  > 40 │ [].reduce.apply(array, [(s, i) => s + i]);
+       │    ^^^^^^
+    41 │ [].reduce.apply(array, [sum]);
+    42 │ Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:4 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    39 │ Array.prototype.reduceRight.call(array, sum);
+    40 │ [].reduce.apply(array, [(s, i) => s + i]);
+  > 41 │ [].reduce.apply(array, [sum]);
+       │    ^^^^^^
+    42 │ Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+    43 │ Array.prototype.reduceRight.apply(array, [sum]);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    40 │ [].reduce.apply(array, [(s, i) => s + i]);
+    41 │ [].reduce.apply(array, [sum]);
+  > 42 │ Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+       │                 ^^^^^^
+    43 │ Array.prototype.reduceRight.apply(array, [sum]);
+    44 │ array.reduce((a, b) => a && b);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:17 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduceRight().
+  
+    41 │ [].reduce.apply(array, [sum]);
+    42 │ Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+  > 43 │ Array.prototype.reduceRight.apply(array, [sum]);
+       │                 ^^^^^^^^^^^
+    44 │ array.reduce((a, b) => a && b);
+    45 │ array.reduce((a, b) => a ?? b);
+  
+  i The function passed to reduceRight() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop instead. To go through the items from last to first, loop over toReversed().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    42 │ Array.prototype.reduce.apply(array, [(s, i) => s + i]);
+    43 │ Array.prototype.reduceRight.apply(array, [sum]);
+  > 44 │ array.reduce((a, b) => a && b);
+       │       ^^^^^^
+    45 │ array.reduce((a, b) => a ?? b);
+    46 │ 
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:7 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    43 │ Array.prototype.reduceRight.apply(array, [sum]);
+    44 │ array.reduce((a, b) => a && b);
+  > 45 │ array.reduce((a, b) => a ?? b);
+       │       ^^^^^^
+    46 │ 
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
