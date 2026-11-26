@@ -461,6 +461,11 @@ fn prepare_next_code_content_token(
         if at_closing_fence(p, is_tilde_fence, fence_len) {
             return CodeContentTokenAction::Break;
         }
+        // On a whitespace-only line the indentation runs into the newline,
+        // and the line after it starts with its own indentation.
+        if consume_code_newline(p) {
+            return CodeContentTokenAction::Skip;
+        }
     }
 
     // Prefix/indent consumption above can advance directly to EOF.

@@ -793,9 +793,32 @@ impl FormatMdInlineItemList {
             match item {
                 FencedCodeContentItem::NewlineRun {
                     newlines,
+                    blank_line_items,
                     is_leading,
                 } => {
                     let newline_count = newlines.len();
+
+                    for item in &blank_line_items {
+                        match item {
+                            AnyMdInline::MdIndentToken(indent) => {
+                                f.context()
+                                    .comments()
+                                    .mark_suppression_checked(indent.syntax());
+                                let char_token = indent.md_indent_char_token()?;
+                                write!(f, [format_removed(&char_token)])?;
+                            }
+                            AnyMdInline::MdTextual(text) => {
+                                write!(
+                                    f,
+                                    [text.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
+                                    })]
+                                )?;
+                            }
+                            _ => {}
+                        }
+                    }
 
                     for newline in &newlines {
                         write!(
@@ -1188,8 +1211,13 @@ enum FencedCodeContentItem {
     /// A leading run is the newline sequence immediately after the opening
     /// fence. Non-leading runs represent literal line breaks inside the code
     /// content and must preserve their exact blank-line count.
+    ///
+    /// Lines between the newlines that hold only list continuation indentation
+    /// and whitespace are blank lines of the run. `blank_line_items` holds
+    /// their nodes, which are removed from the printed code content.
     NewlineRun {
         newlines: Vec<MdTextual>,
+        blank_line_items: Vec<AnyMdInline>,
         is_leading: bool,
     },
     /// A non-newline textual node from the fenced code content.
@@ -1227,17 +1255,10 @@ impl FencedCodeContentIterator {
             let is_leading = self.is_leading;
             self.is_leading = false;
             let mut newlines = vec![text];
+            let mut blank_line_items = Vec::new();
 
-            loop {
-                let next_is_newline = match self.items.peek() {
-                    Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
-                    _ => false,
-                };
-
-                if !next_is_newline {
-                    break;
-                }
-
+            while let Some(blank_line_len) = self.next_blank_line_len() {
+                blank_line_items.extend(self.items.by_ref().take(blank_line_len));
                 if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
                     newlines.push(next);
                 }
@@ -1245,6 +1266,7 @@ impl FencedCodeContentIterator {
 
             Some(FencedCodeContentItem::NewlineRun {
                 newlines,
+                blank_line_items,
                 is_leading,
             })
         } else {
@@ -1260,6 +1282,22 @@ impl FencedCodeContentIterator {
                 next_is_newline_or_end,
             })
         }
+    }
+}
+
+impl FencedCodeContentIterator {
+    /// If the next line is blank, returns the number of indentation and
+    /// whitespace nodes before its newline.
+    fn next_blank_line_len(&self) -> Option<usize> {
+        for (len, item) in self.items.clone().enumerate() {
+            match item {
+                AnyMdInline::MdTextual(text) if text.is_newline().ok()? => return Some(len),
+                AnyMdInline::MdTextual(text) if text.is_empty().ok()? => {}
+                AnyMdInline::MdIndentToken(_) => {}
+                _ => return None,
+            }
+        }
+        None
     }
 }
 
