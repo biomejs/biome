@@ -17,8 +17,12 @@ static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
         RuleFilter::Rule("nursery", "useBiomeTopLevelTypes"),
     ]
 });
-static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
-    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noConvexTopOfHourCrons")]);
+static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noConvexTopOfHourCrons"),
+        RuleFilter::Rule("nursery", "noConvexWrongRuntimeImports"),
+    ]
+});
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noDrizzleDbObjectInsideTransaction"),
@@ -67,6 +71,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noConvexWrongRuntimeImports"),
         RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),

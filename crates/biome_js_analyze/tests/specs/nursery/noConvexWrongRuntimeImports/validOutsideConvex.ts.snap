@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOutsideConvex.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// Files outside the convex folder don't run in the Convex runtime.
+import { hash } from "./convex/validNodeActions";
+
+```

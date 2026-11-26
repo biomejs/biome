@@ -1,0 +1,228 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { hash } from "./validNodeActions";
+import "./validNodeActions";
+import * as nodeActions from "./validNodeActions";
+import defaultExport, { type Hash } from "./validNodeActions";
+import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+import { hash as hashWithExtension } from "./validNodeActions.ts";
+import { runtime } from "./validNodeWithOtherDirectives";
+
+export { hash as reexportedHash } from "./validNodeActions";
+export * from "./validNodeActions";
+export * as reexportedNodeActions from "./validNodeActions";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:22 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { hash } from "./validNodeActions";
+      │                      ^^^^^^^^^^^^^^^^^^^^
+    3 │ import "./validNodeActions";
+    4 │ import * as nodeActions from "./validNodeActions";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:8 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { hash } from "./validNodeActions";
+  > 3 │ import "./validNodeActions";
+      │        ^^^^^^^^^^^^^^^^^^^^
+    4 │ import * as nodeActions from "./validNodeActions";
+    5 │ import defaultExport, { type Hash } from "./validNodeActions";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:30 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    2 │ import { hash } from "./validNodeActions";
+    3 │ import "./validNodeActions";
+  > 4 │ import * as nodeActions from "./validNodeActions";
+      │                              ^^^^^^^^^^^^^^^^^^^^
+    5 │ import defaultExport, { type Hash } from "./validNodeActions";
+    6 │ import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:42 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    3 │ import "./validNodeActions";
+    4 │ import * as nodeActions from "./validNodeActions";
+  > 5 │ import defaultExport, { type Hash } from "./validNodeActions";
+      │                                          ^^^^^^^^^^^^^^^^^^^^
+    6 │ import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+    7 │ import { hash as hashWithExtension } from "./validNodeActions.ts";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:59 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    4 │ import * as nodeActions from "./validNodeActions";
+    5 │ import defaultExport, { type Hash } from "./validNodeActions";
+  > 6 │ import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+      │                                                           ^^^^^^^^^^^^^^^^^^^^
+    7 │ import { hash as hashWithExtension } from "./validNodeActions.ts";
+    8 │ import { runtime } from "./validNodeWithOtherDirectives";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:43 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions.ts, which runs in Node.js.
+  
+    5 │ import defaultExport, { type Hash } from "./validNodeActions";
+    6 │ import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+  > 7 │ import { hash as hashWithExtension } from "./validNodeActions.ts";
+      │                                           ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ import { runtime } from "./validNodeWithOtherDirectives";
+    9 │ 
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:25 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeWithOtherDirectives, which runs in Node.js.
+  
+     6 │ import { type Hash as OtherHash, hash as otherHash } from "./validNodeActions";
+     7 │ import { hash as hashWithExtension } from "./validNodeActions.ts";
+   > 8 │ import { runtime } from "./validNodeWithOtherDirectives";
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ export { hash as reexportedHash } from "./validNodeActions";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:40 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+     8 │ import { runtime } from "./validNodeWithOtherDirectives";
+     9 │ 
+  > 10 │ export { hash as reexportedHash } from "./validNodeActions";
+       │                                        ^^^^^^^^^^^^^^^^^^^^
+    11 │ export * from "./validNodeActions";
+    12 │ export * as reexportedNodeActions from "./validNodeActions";
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:15 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    10 │ export { hash as reexportedHash } from "./validNodeActions";
+  > 11 │ export * from "./validNodeActions";
+       │               ^^^^^^^^^^^^^^^^^^^^
+    12 │ export * as reexportedNodeActions from "./validNodeActions";
+    13 │ 
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:40 lint/nursery/noConvexWrongRuntimeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file runs in the Convex runtime, but it imports ./validNodeActions, which runs in Node.js.
+  
+    10 │ export { hash as reexportedHash } from "./validNodeActions";
+    11 │ export * from "./validNodeActions";
+  > 12 │ export * as reexportedNodeActions from "./validNodeActions";
+       │                                        ^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Files with the "use node" directive run in Node.js. When you import one from a file without the directive, its code runs in the Convex runtime instead, where Node.js APIs aren't available.
+  
+  i Move the code you need into a file without the "use node" directive, or add the directive to this file if it only defines actions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

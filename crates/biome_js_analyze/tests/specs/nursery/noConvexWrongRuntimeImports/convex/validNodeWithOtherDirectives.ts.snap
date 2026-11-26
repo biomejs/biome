@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNodeWithOtherDirectives.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+"use strict";
+// The "use node" directive doesn't have to come first.
+'use node';
+
+export const runtime = "node";
+
+```

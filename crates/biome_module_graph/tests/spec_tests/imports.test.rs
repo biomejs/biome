@@ -159,3 +159,25 @@ fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let promise_ty = inferred.resolve_type(&db, promise_ty);
     assert!(promise_ty.is_promise_instance(&db));
 }
+
+#[test]
+fn test_collects_module_directives() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            // A comment before the directives.
+            "use strict";
+            'use node';
+            export const value = 1;
+            "not a directive";
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], false);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
+    let directives: Vec<_> = info.directives.iter().map(|text| text.text()).collect();
+    assert_eq!(directives, ["use strict", "use node"]);
+}

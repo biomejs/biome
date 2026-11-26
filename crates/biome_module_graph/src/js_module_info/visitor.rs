@@ -10,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
 use either::Either;
 
@@ -46,6 +46,7 @@ impl JsModuleVisitor {
 
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
+        collector.directives = self.collect_directives();
         let mut flow_roots = FlowRootScanner::default();
         // Declaration files contain no code that runs, so no root can need flow.
         let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
@@ -93,6 +94,18 @@ impl JsModuleVisitor {
             self.inference_mode,
             flow_roots,
         )
+    }
+
+    fn collect_directives(&self) -> Box<[TokenText]> {
+        let directives = match &self.root {
+            AnyJsRoot::JsModule(module) => module.directives(),
+            AnyJsRoot::JsScript(script) => script.directives(),
+            _ => return Box::default(),
+        };
+        directives
+            .iter()
+            .filter_map(|directive| directive.inner_string_text().ok())
+            .collect()
     }
 
     /// Collects static CSS class references from JSX `class` and `className`

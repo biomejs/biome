@@ -87,6 +87,9 @@ pub(super) struct JsModuleInfoCollector {
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
+
+    /// Values of the module's directives, without quotes, in source order.
+    pub(super) directives: Box<[TokenText]>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -155,6 +158,7 @@ impl JsModuleInfoCollector {
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
+            directives: Box::default(),
         }
     }
 
@@ -1083,6 +1087,7 @@ impl JsModuleInfo {
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             flow,
             referenced_classes: collector.referenced_classes,
+            directives: collector.directives,
         }))
     }
 }

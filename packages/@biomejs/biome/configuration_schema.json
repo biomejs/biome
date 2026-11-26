@@ -4094,6 +4094,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexWrongRuntimeImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexWrongRuntimeImportsOptions" }
+			]
+		},
+		"NoConvexWrongRuntimeImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDangerouslySetInnerHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9693,6 +9703,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexWrongRuntimeImports": {
+					"description": "Disallow importing Node.js runtime files from Convex runtime files.\nSee https://biomejs.dev/linter/rules/no-convex-wrong-runtime-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexWrongRuntimeImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDanglingUnderscore": {
 					"description": "Disallow names that start or end with an underscore.\nSee https://biomejs.dev/linter/rules/no-dangling-underscore",
 					"anyOf": [
@@ -13639,6 +13656,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoConvexTopOfHourCronsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexWrongRuntimeImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexWrongRuntimeImportsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

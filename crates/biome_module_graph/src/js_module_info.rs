@@ -15,7 +15,7 @@ use biome_js_type_info::{
     ImportSymbol, RawTypeData, RawTypeId, TypeId, TypeReference, resolved::InferredLocalTypeId,
 };
 use biome_resolver::ResolvedSpecifier;
-use biome_rowan::{Text, TextRange};
+use biome_rowan::{Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
@@ -275,6 +275,13 @@ pub struct JsModuleInfoInner {
     /// which may contain multiple space-separated class names.
     /// Only static string literals are collected; dynamic values are excluded.
     pub referenced_classes: Vec<CssClassReference>,
+
+    /// Values of the directives at the start of the module, without quotes,
+    /// in source order.
+    ///
+    /// For example, a module that starts with `"use client";` has the
+    /// directive `use client`.
+    pub directives: Box<[TokenText]>,
 }
 
 /// A binding declared directly inside a `namespace` or `module` declaration.

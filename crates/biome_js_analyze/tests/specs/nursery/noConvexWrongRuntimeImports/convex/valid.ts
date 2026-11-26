@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+import { formatAmount } from "./validShared";
+import type { Hash } from "./validNodeActions";
+import type * as NodeActions from "./validNodeActions";
+import { missing } from "./doesNotExist";
+
+export type { Hash } from "./validNodeActions";
+export type * from "./validNodeActions";
+
+// "use node" is not a directive here, because it comes after a statement.
+"use node";
+
+import { type Hash as InlineHash } from "./validNodeActions";
+import { type Hash as FirstHash, type Hash as SecondHash } from "./validNodeActions";
+export { type Hash as ReexportedHash } from "./validNodeActions";

@@ -3060,6 +3060,11 @@ export interface Nursery {
 	 */
 	noConvexTopOfHourCrons?: NoConvexTopOfHourCronsConfiguration;
 	/**
+	 * Disallow importing Node.js runtime files from Convex runtime files.
+	 * See https://biomejs.dev/linter/rules/no-convex-wrong-runtime-imports
+	 */
+	noConvexWrongRuntimeImports?: NoConvexWrongRuntimeImportsConfiguration;
+	/**
 	 * Disallow names that start or end with an underscore.
 	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
 	 */
@@ -7001,6 +7006,9 @@ export type NoConstantComparisonsConfiguration =
 export type NoConvexTopOfHourCronsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexTopOfHourCronsOptions;
+export type NoConvexWrongRuntimeImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexWrongRuntimeImportsOptions;
 export type NoDanglingUnderscoreConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDanglingUnderscoreOptions;
@@ -10226,6 +10234,10 @@ export interface RuleWithNoConstantComparisonsOptions {
 export interface RuleWithNoConvexTopOfHourCronsOptions {
 	level: RulePlainConfiguration;
 	options?: NoConvexTopOfHourCronsOptions;
+}
+export interface RuleWithNoConvexWrongRuntimeImportsOptions {
+	level: RulePlainConfiguration;
+	options?: NoConvexWrongRuntimeImportsOptions;
 }
 export interface RuleWithNoDanglingUnderscoreOptions {
 	level: RulePlainConfiguration;
@@ -14084,6 +14096,7 @@ export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
+export type NoConvexWrongRuntimeImportsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
 export type NoDoubleComparisonOptions = {};
@@ -16655,6 +16668,7 @@ export type Category =
 	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
+	| "lint/nursery/noConvexWrongRuntimeImports"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
@@ -16819,10 +16833,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"

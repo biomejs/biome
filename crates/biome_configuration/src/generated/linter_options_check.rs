@@ -297,6 +297,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noConvexTopOfHourCrons", TypeId::of::<biome_rule_options::no_convex_top_of_hour_crons::NoConvexTopOfHourCronsOptions>()));
     result.push((
+        "nursery",
+        "noConvexWrongRuntimeImports",
+        TypeId::of::<
+            biome_rule_options::no_convex_wrong_runtime_imports::NoConvexWrongRuntimeImportsOptions,
+        >(),
+    ));
+    result.push((
         "security",
         "noDangerouslySetInnerHtml",
         TypeId::of::<

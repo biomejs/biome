@@ -153,6 +153,7 @@ pub enum RuleName {
     NoContinue,
     NoControlCharactersInRegex,
     NoConvexTopOfHourCrons,
+    NoConvexWrongRuntimeImports,
     NoDangerouslySetInnerHtml,
     NoDangerouslySetInnerHtmlWithChildren,
     NoDanglingUnderscore,
@@ -1013,6 +1014,7 @@ impl RuleName {
             Self::NoContinue => "noContinue",
             Self::NoControlCharactersInRegex => "noControlCharactersInRegex",
             Self::NoConvexTopOfHourCrons => "noConvexTopOfHourCrons",
+            Self::NoConvexWrongRuntimeImports => "noConvexWrongRuntimeImports",
             Self::NoDangerouslySetInnerHtml => "noDangerouslySetInnerHtml",
             Self::NoDangerouslySetInnerHtmlWithChildren => "noDangerouslySetInnerHtmlWithChildren",
             Self::NoDanglingUnderscore => "noDanglingUnderscore",
@@ -1885,6 +1887,7 @@ impl RuleName {
             Self::NoContinue => RuleGroup::Style,
             Self::NoControlCharactersInRegex => RuleGroup::Suspicious,
             Self::NoConvexTopOfHourCrons => RuleGroup::Nursery,
+            Self::NoConvexWrongRuntimeImports => RuleGroup::Nursery,
             Self::NoDangerouslySetInnerHtml => RuleGroup::Security,
             Self::NoDangerouslySetInnerHtmlWithChildren => RuleGroup::Security,
             Self::NoDanglingUnderscore => RuleGroup::Nursery,
@@ -2748,6 +2751,7 @@ impl std::str::FromStr for RuleName {
             "noContinue" => Ok(Self::NoContinue),
             "noControlCharactersInRegex" => Ok(Self::NoControlCharactersInRegex),
             "noConvexTopOfHourCrons" => Ok(Self::NoConvexTopOfHourCrons),
+            "noConvexWrongRuntimeImports" => Ok(Self::NoConvexWrongRuntimeImports),
             "noDangerouslySetInnerHtml" => Ok(Self::NoDangerouslySetInnerHtml),
             "noDangerouslySetInnerHtmlWithChildren" => {
                 Ok(Self::NoDangerouslySetInnerHtmlWithChildren)
