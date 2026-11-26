@@ -21,7 +21,6 @@ mod module_graph;
 #[cfg(any(test, feature = "testing"))]
 pub mod test_utils;
 
-use camino::Utf8Path;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -77,10 +76,4 @@ impl<'app> Deref for WorkspaceRef<'app> {
             WorkspaceRef::Borrowed(inner) => *inner,
         }
     }
-}
-
-/// Returns `true` if `path` is a directory or
-/// if it is a symlink that resolves to a directory.
-fn is_dir(path: &Utf8Path) -> bool {
-    path.is_dir() || (path.is_symlink() && path.read_link_utf8().is_ok_and(|path| path.is_dir()))
 }

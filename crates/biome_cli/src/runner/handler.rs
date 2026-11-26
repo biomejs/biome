@@ -21,7 +21,18 @@ pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
 ];
 
 pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
-    fn can_handle<Ctx>(&self, biome_path: &BiomePath, path_kind: PathKind, ctx: &Ctx) -> bool
+    /// Returns whether the traversal should descend into the directory or process the file at
+    /// `biome_path`.
+    ///
+    /// When `ancestors_checked` is `true`, the ignore checks match only `biome_path` itself,
+    /// because this method already accepted every directory the traversal descended through.
+    fn can_handle<Ctx>(
+        &self,
+        biome_path: &BiomePath,
+        path_kind: PathKind,
+        ancestors_checked: bool,
+        ctx: &Ctx,
+    ) -> bool
     where
         Ctx: CrawlerContext,
     {
@@ -35,6 +46,11 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let workspace = ctx.workspace();
         let execution = ctx.execution();
         let project_key = ctx.project_key();
+        let ignore_kind = if ancestors_checked {
+            IgnoreKind::Path
+        } else {
+            IgnoreKind::Ancestors
+        };
         if path_kind.is_dir() {
             let can_handle = !workspace
                 .is_path_ignored(PathIsIgnoredParams {
@@ -42,7 +58,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                     path: biome_path.clone(),
                     is_dir: true,
                     features: execution.wanted_features(),
-                    ignore_kind: IgnoreKind::Ancestors,
+                    ignore_kind,
                 })
                 .unwrap_or_else(|err| {
                     ctx.push_diagnostic(err.into());
@@ -64,6 +80,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             inline_config: None,
             skip_ignore_check: false,
             not_requested_features: execution.not_requested_features(),
+            ignore_kind,
         });
 
         let file_features = match file_features {

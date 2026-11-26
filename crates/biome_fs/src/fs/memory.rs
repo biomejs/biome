@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use std::str;
 use std::sync::Arc;
 
-use crate::fs::OpenOptions;
+use crate::fs::{OpenOptions, context_id};
 use crate::utils::normalize_path_buf;
 use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
@@ -203,7 +203,25 @@ impl FileSystem for MemoryFileSystem {
         }))
     }
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
-        func(&MemoryTraversalScope { fs: self })
+        let scope = MemoryTraversalScope {
+            fs: self,
+            selected_files: Mutex::default(),
+        };
+        func(&scope);
+
+        // Handling the selected files one at a time, in processing order, after every input was
+        // walked keeps the results of in-memory traversals deterministic.
+        let mut selected_files = scope.selected_files.into_inner();
+        selected_files.sort_unstable_by(|(left_context, left), (right_context, right)| {
+            left.cmp_processing_priority(right)
+                .then_with(|| context_id(*left_context).cmp(&context_id(*right_context)))
+        });
+        selected_files.dedup_by(|(left_context, left), (right_context, right)| {
+            context_id(*left_context) == context_id(*right_context) && left == right
+        });
+        for (context, path) in selected_files {
+            context.handle_path(path);
+        }
     }
 
     fn working_directory(&self) -> Option<Utf8PathBuf> {
@@ -315,10 +333,28 @@ impl File for MemoryFile {
 
 pub struct MemoryTraversalScope<'scope> {
     fs: &'scope MemoryFileSystem,
+    /// Files selected by [TraversalScope::evaluate_and_handle], handled when the traversal ends.
+    selected_files: Mutex<Vec<(&'scope dyn TraversalContext, BiomePath)>>,
 }
 
 impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
     fn evaluate(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf) {
+        self.walk(ctx, base, false);
+    }
+
+    fn evaluate_and_handle(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf) {
+        self.walk(ctx, base, true);
+    }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
+        context.handle_path(path);
+    }
+}
+
+impl<'scope> MemoryTraversalScope<'scope> {
+    /// Walks the files under `base`, storing the selected files or, when `handle_files` is
+    /// `true`, recording them to be handled when the traversal ends.
+    fn walk(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf, handle_files: bool) {
         // Traversal is implemented by iterating on all keys, and matching on
         // those that are prefixed with the provided `base` path. Keys are normalized on insertion,
         // so the base must be normalized too.
@@ -348,6 +384,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if ctx.can_handle_with_kind(
                         &biome_path,
                         PathKind::Directory { is_symlink: false },
+                        false,
                     ) {
                         ctx.store_path(biome_path);
                     }
@@ -357,10 +394,19 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
             for path in matching_files {
                 let _ = ctx.interner().intern_path(path.clone());
                 let biome_path = BiomePath::new(path);
-                if !ctx.can_handle_with_kind(&biome_path, PathKind::File { is_symlink: false }) {
+                // Directories aren't checked before their files, so ancestors are never verified.
+                if !ctx.can_handle_with_kind(
+                    &biome_path,
+                    PathKind::File { is_symlink: false },
+                    false,
+                ) {
                     continue;
                 }
-                ctx.store_path(biome_path);
+                if handle_files {
+                    self.selected_files.lock().push((ctx, biome_path));
+                } else {
+                    ctx.store_path(biome_path);
+                }
             }
         }
 
@@ -380,10 +426,6 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                 }));
             }
         }
-    }
-
-    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
-        context.handle_path(path);
     }
 }
 
@@ -651,13 +693,5 @@ mod tests {
 
         assert_eq!(visited.len(), 1);
         assert!(visited.pin().contains(&BiomePath::new("dir2/file2")));
-
-        let logical_path = BiomePath::new("alias/file.js");
-        ctx.store_physical_path(
-            Utf8PathBuf::from("target/file.js"),
-            logical_path.clone(),
-            true,
-        );
-        assert!(ctx.visited.pin().contains(&logical_path));
     }
 }

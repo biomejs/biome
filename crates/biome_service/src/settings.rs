@@ -5,8 +5,8 @@ pub use query::SettingsIdentity;
 pub(crate) use query::SettingsQuerySelection;
 pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
-use crate::workspace::{FeatureKind, ScanKind};
-use crate::{WorkspaceError, is_dir};
+use crate::WorkspaceError;
+use crate::workspace::{FeatureKind, IgnoreKind, ScanKind};
 use biome_analyze::{
     AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider, options::TailwindOptions,
 };
@@ -675,9 +675,14 @@ impl Settings {
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
     ///
-    /// `path` is expected to point to a file and not a directory.
+    /// `is_dir` selects whether `path` is matched as a directory or as a file.
     #[inline]
-    pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
+    pub fn is_path_ignored_for_feature(
+        &self,
+        path: &Utf8Path,
+        is_dir: bool,
+        feature: FeatureKind,
+    ) -> bool {
         let feature_includes_files = match feature {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
@@ -687,7 +692,7 @@ impl Settings {
             FeatureKind::Debug => return false,
         };
 
-        if is_dir(path) {
+        if is_dir {
             !feature_includes_files.is_dir_included(path)
         } else {
             !feature_includes_files.is_file_included(path)
@@ -1406,13 +1411,14 @@ impl VcsSettings {
     }
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
+    ///
+    /// `ignore_kind` selects whether the parent directories of `path` are checked too.
     #[inline]
-    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool) -> bool {
+    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
         self.should_use_ignore_file()
-            && self
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir))
+            && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
+                ignored_matches.is_ignored(path, is_dir, ignore_kind)
+            })
     }
 
     #[inline]
@@ -1535,11 +1541,17 @@ impl VcsIgnoredPatterns {
     /// ignored. Git doesn't descend into ignored directories, so no pattern can re-include their
     /// contents. Whitelisting a directory only allows descending into it: each child is still
     /// matched on its own.
-    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool) -> bool {
+    ///
+    /// With [`IgnoreKind::Path`], only the decision for `path` itself is evaluated, so the caller
+    /// must have checked the parent directories already.
+    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
         match self {
             Self::Git { root, nested } => {
                 if Self::match_git_path(root, nested, path, is_dir) == Some(true) {
                     return true;
+                }
+                if ignore_kind == IgnoreKind::Path {
+                    return false;
                 }
 
                 let PathRelation::Descendant(relative) = root.root.relation_to(path) else {

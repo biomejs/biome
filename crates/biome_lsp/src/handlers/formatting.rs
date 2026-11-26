@@ -12,7 +12,7 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeatureKind, FeaturesBuilder, FeaturesSupported, FileFeaturesResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetFileContentParams,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind,
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
@@ -48,6 +48,7 @@ pub(crate) fn format(
             inline_config: session.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
     if !file_features.supports_format() {
         return notify_user(file_features, &url, doc.file_source);
@@ -137,6 +138,7 @@ pub(crate) fn format_range(
             inline_config: session.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
     if !file_features.supports_format() {
         return notify_user(file_features, &url, doc.file_source);
@@ -240,6 +242,7 @@ pub(crate) fn format_on_type(
             inline_config: session.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
     if !file_features.supports_format() {
         return notify_user(file_features, &url, doc.file_source);

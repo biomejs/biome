@@ -133,6 +133,9 @@ pub struct SupportsFeatureParams {
     /// Features that shouldn't be enabled
     #[serde(default, skip_serializing_if = "FeatureName::is_empty")]
     pub not_requested_features: FeatureName,
+
+    /// Controls whether the ignore checks also cover the directories that contain the file.
+    pub ignore_kind: IgnoreKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -1525,20 +1528,29 @@ pub struct PathIsIgnoredParams {
     /// Whether the path is ignored for specific features e.g. `formatter.includes`.
     /// When this field is empty, Biome checks only `files.includes`.
     pub features: FeatureName,
-    #[serde(default)]
-    /// Controls how to ignore check should be done
+    /// Controls whether the ignore checks also cover the directories that contain the path.
     pub ignore_kind: IgnoreKind,
 }
-#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+
+/// Selects which paths an ignore check matches against the `files.includes` patterns and the
+/// version control ignore files.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum IgnoreKind {
-    /// Checks whether a path itself is explicitly ignored only.
-    #[default]
+    /// Checks only the path itself.
+    ///
+    /// Use this only when every directory that contains the path was already checked and wasn't
+    /// ignored, for example while walking a directory tree from the top. Otherwise, a file inside
+    /// an ignored directory is reported as not ignored.
+    ///
+    /// The folder that contains a nested configuration file is the exception: its parent
+    /// directories are also checked against the `files.includes` of that configuration, because
+    /// they were checked against different settings.
     Path,
 
-    /// Checks whether a path itself or one of its ancestors is ignored,
-    /// up to the root path of the current project.
+    /// Checks the path itself and each directory that contains it, up to the root of the
+    /// project.
     Ancestors,
 }
 

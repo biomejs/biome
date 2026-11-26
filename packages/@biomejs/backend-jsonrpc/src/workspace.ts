@@ -2,6 +2,10 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
+	/**
+	 * Controls whether the ignore checks also cover the directories that contain the file.
+	 */
+	ignoreKind: IgnoreKind;
 	inlineConfig?: Configuration;
 	/**
 	 * Features that shouldn't be enabled
@@ -12,6 +16,11 @@ export interface SupportsFeatureParams {
 	skipIgnoreCheck?: boolean;
 }
 export type FeatureName = FeatureKind[];
+/**
+ * Selects which paths an ignore check matches against the `files.includes` patterns and the
+ * version control ignore files.
+ */
+export type IgnoreKind = "path" | "ancestors";
 /**
  * The configuration contained in `biome.json` or `biome.jsonc`.
  */
@@ -17854,9 +17863,9 @@ export interface PathIsIgnoredParams {
 	 */
 	features: FeatureName;
 	/**
-	 * Controls how to ignore check should be done
+	 * Controls whether the ignore checks also cover the directories that contain the path.
 	 */
-	ignoreKind?: IgnoreKind;
+	ignoreKind: IgnoreKind;
 	/**
 	 * Whether the path is a directory. Used to skip stat calls when the caller
 	 * already knows the file type from the filesystem traversal.
@@ -17868,7 +17877,6 @@ export interface PathIsIgnoredParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export type IgnoreKind = "path" | "ancestors";
 export interface UpdateModuleGraphParams {
 	path: BiomePath;
 	projectKey: ProjectKey;

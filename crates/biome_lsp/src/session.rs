@@ -25,7 +25,7 @@ use biome_service::workspace::{
     OpenFileParams, ServiceNotification,
 };
 use biome_service::workspace::{
-    FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
+    FeaturesBuilder, IgnoreKind, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
     RetryingWorkspace, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -903,6 +903,7 @@ impl Session {
             inline_config: self.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
