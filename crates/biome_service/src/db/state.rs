@@ -1337,6 +1337,56 @@ impl DbState {
         }
     }
 
+    /// Replaces what the frameworks of the package in `package_path` inject.
+    /// See [WorkspaceDb::set_frameworks].
+    ///
+    /// Nothing happens when it doesn't change, so that queries keep their
+    /// results.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_frameworks(
+        &self,
+        package_path: camino::Utf8PathBuf,
+        frameworks: std::sync::Arc<crate::frameworks::PackageFrameworks>,
+    ) {
+        if self
+            .fork()
+            .frameworks(&package_path)
+            .is_some_and(|current| current == frameworks)
+        {
+            return;
+        }
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .data()
+                    .set_frameworks(package_path, frameworks);
+                self.mark_module_graph_dirty();
+            }
+            DbStorage::Owned(db) => {
+                db.with_setter(|db| db.set_frameworks(package_path, frameworks));
+            }
+        }
+    }
+
+    /// Removes what the frameworks of the package in `package_path` inject.
+    /// See [WorkspaceDb::remove_frameworks].
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&self, package_path: &camino::Utf8Path) {
+        if self.fork().frameworks(package_path).is_none() {
+            return;
+        }
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().data().remove_frameworks(package_path);
+                self.mark_module_graph_dirty();
+            }
+            DbStorage::Owned(db) => {
+                db.with_setter(|db| db.remove_frameworks(package_path));
+            }
+        }
+    }
+
     /// Records that a project was replaced.
     ///
     /// In the view of a scan, the scan advances the projects generation when

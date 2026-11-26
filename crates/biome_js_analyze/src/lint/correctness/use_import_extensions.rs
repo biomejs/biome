@@ -208,6 +208,10 @@ impl Rule for UseImportExtensions {
                 mode,
             );
         }
+        // No file exists at the path of a module that a framework declares.
+        if resolved.kind() == ResolutionKind::FrameworkModule {
+            return None;
+        }
         let resolved_path = resolved.path().as_path()?;
 
         get_extensionless_import(

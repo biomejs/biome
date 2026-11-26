@@ -1,7 +1,7 @@
 use crate::{ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS};
 use biome_resolver::{
-    ResolutionKind, ResolveOptions, ResolvedPath, ResolvedSpecifier, ResolverDb, ResolverDbAdapter,
-    ResolverPathData, SassLoadRule, resolve_sass, resolve_with_metadata,
+    ResolutionKind, ResolveError, ResolveOptions, ResolvedPath, ResolvedSpecifier, ResolverDb,
+    ResolverDbAdapter, ResolverPathData, SassLoadRule, resolve_sass, resolve_with_metadata,
 };
 use camino::Utf8Path;
 
@@ -73,6 +73,10 @@ pub struct ResolutionRequest<'db> {
 }
 
 /// Resolves one interned module request using the path info in the database.
+///
+/// A script specifier that doesn't resolve to a file, except a runtime
+/// built-in, resolves to the module that a framework declares for it. See
+/// [ResolverDb::framework_module_path].
 #[salsa::tracked]
 pub fn resolve_module_request<'db>(
     db: &'db dyn ResolverDb,
@@ -88,7 +92,25 @@ pub fn resolve_module_request<'db>(
             let resolved = resolve_sass(specifier, base_directory, &proxy, rule, &options);
             ResolvedSpecifier::new(ResolvedPath::new(resolved), ResolutionKind::Other)
         }
-        _ => resolve_with_metadata(specifier, base_directory, &proxy, &options).into(),
+        ResolutionMode::JavaScript | ResolutionMode::HtmlScript => {
+            match resolve_with_metadata(specifier, base_directory, &proxy, &options) {
+                Err(error)
+                    if !matches!(error, ResolveError::NodeBuiltIn | ResolveError::BunBuiltIn) =>
+                {
+                    match db.framework_module_path(base_directory, specifier) {
+                        Some(path) => ResolvedSpecifier::new(
+                            ResolvedPath::from_path(path),
+                            ResolutionKind::FrameworkModule,
+                        ),
+                        None => error.into(),
+                    }
+                }
+                result => result.into(),
+            }
+        }
+        ResolutionMode::Css => {
+            resolve_with_metadata(specifier, base_directory, &proxy, &options).into()
+        }
     }
 }
 

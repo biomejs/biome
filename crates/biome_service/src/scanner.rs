@@ -538,6 +538,47 @@ impl Scanner {
         })
     }
 
+    /// Runs the framework loaders of the project `project_key` again, and
+    /// indexes the files that they visit and the dependencies of these files.
+    ///
+    /// Use this when a file that the loaders read changes, such as the
+    /// configuration of a framework or a manifest.
+    pub(crate) fn reindex_framework_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.index_with_context(workspace, project_key, IndexTrigger::Update, true, |ctx| {
+            let diagnostics = ctx.workspace.index_framework_files(project_key, &|paths| {
+                ctx.index_files_in_parallel(paths);
+            });
+            for diagnostic in diagnostics {
+                ctx.push_diagnostic(diagnostic);
+            }
+            let dependencies = mem::take(&mut ctx.dependencies)
+                .into_inner()
+                .unwrap()
+                .into_iter()
+                .collect();
+            scan_dependencies(project_path, dependencies, ctx).1
+        })
+        .map(|mut diagnostics| {
+            diagnostics.extend(
+                workspace
+                    .framework_diagnostics(project_key)
+                    .into_iter()
+                    .map(Diagnostic::new),
+            );
+            diagnostics
+        })
+        .inspect(|_| {
+            // Files were indexed before the frameworks were recorded, so the
+            // clients refresh their diagnostics again.
+            workspace.notify(ServiceNotification::IndexUpdated);
+        })
+    }
+
     /// Runs `index` with the context of a scan of the project, and returns the
     /// diagnostics it reported. The folders that `index` returns are watched
     /// when `watch` is set.
@@ -916,7 +957,7 @@ impl Scanner {
             mut diagnostics,
             duration: setup_duration,
         } = setup;
-        let (duration, files_diagnostics) = self.run_scan_phase(
+        let (duration, mut files_diagnostics) = self.run_scan_phase(
             workspace,
             project_key,
             trigger,
@@ -927,6 +968,21 @@ impl Scanner {
                 // The other files read the manifests that the setup phase
                 // deferred, so they're indexed first.
                 ctx.index_files_in_parallel(deferred_paths);
+                // The files of the project resolve imports to the modules that
+                // the framework files declare, so these are indexed before.
+                // Folders that the watcher indexes later don't change them.
+                #[cfg(not(target_family = "wasm"))]
+                if trigger == IndexTrigger::InitialScan
+                    && (scan_options.scan_kind.is_project()
+                        || scan_options.scan_kind.is_type_aware())
+                {
+                    let diagnostics = ctx.workspace.index_framework_files(project_key, &|paths| {
+                        ctx.index_files_in_parallel(paths);
+                    });
+                    for diagnostic in diagnostics {
+                        ctx.push_diagnostic(diagnostic);
+                    }
+                }
                 let traversal_ctx = &*ctx;
                 ctx.workspace
                     .fs()
@@ -957,6 +1013,12 @@ impl Scanner {
 
                 duration
             },
+        );
+        files_diagnostics.extend(
+            workspace
+                .framework_diagnostics(project_key)
+                .into_iter()
+                .map(Diagnostic::new),
         );
         diagnostics.extend(files_diagnostics);
 
@@ -1363,8 +1425,13 @@ impl DiagnosticsCollector {
     }
 
     /// Checks whether the given `diagnostic` should be collected or not.
+    ///
+    /// The diagnostics that tell why the rules that rely on frameworks don't
+    /// report are always collected, like the errors of configuration files.
     fn should_collect(&self, diagnostic: &Diagnostic) -> bool {
-        diagnostic.severity() >= self.diagnostic_level || diagnostic.tags().is_internal()
+        diagnostic.severity() >= self.diagnostic_level
+            || diagnostic.tags().is_internal()
+            || diagnostic.category() == Some(biome_diagnostics::category!("project/frameworks"))
     }
 
     fn run(&self, receiver: Receiver<Diagnostic>) -> Vec<Diagnostic> {

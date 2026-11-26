@@ -157,7 +157,19 @@ export interface CssConfiguration {
 	 */
 	formatter?: CssFormatterConfiguration;
 	/**
-	 * Reserved for future CSS analyzer support. This option currently has no effect.
+	 * Stylesheets that apply to every page without an import, such as the stylesheets that a
+	 * framework or a build tool adds. Each entry is a path or a glob pattern, relative to the
+	 * folder of the configuration file that declares it. A glob pattern matches only stylesheets
+	 * and doesn't match files in `node_modules`, so list those files by path. Negated patterns
+	 * aren't supported.
+	 *
+	 * Rules that check classes and custom properties, such as `noUndeclaredClasses`, treat these
+	 * stylesheets as available to every file of each package under the configuration, where a
+	 * package is a folder with a `package.json` file. When the
+	 * option has entries, these rules also report in packages where Biome can't find all the
+	 * stylesheets that a framework adds, for example because a function computes them.
+	 *
+	 * In an override, these stylesheets apply only to files selected by that override.
 	 */
 	globals?: string[];
 	/**
@@ -1348,6 +1360,11 @@ export interface MarkdownFormatterConfiguration {
 	 */
 	proseWrap?: ProseWrap;
 	/**
+	 * Selects the preferred quote style for link and image titles. Biome uses the other quote,
+	 * or parentheses, when that avoids additional escaping. Defaults to `double`.
+	 */
+	quoteStyle?: QuoteStyle;
+	/**
 	 * Whether to add a trailing newline at the end of the file.
 	 *
 	 * Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
@@ -1360,6 +1377,13 @@ export interface MarkdownFormatterConfiguration {
 	 * Defaults to true.
 	 */
 	trailingNewline?: TrailingNewline;
+	/**
+	 * The marker used for the items of unordered lists. Defaults to `dash`.
+	 *
+	 * When two unordered lists are next to each other, the second list uses another marker so
+	 * that Markdown doesn't merge them into one list.
+	 */
+	unorderedListMarker?: UnorderedListMarker;
 }
 /**
  * Options that change how the Markdown linter behaves
@@ -1690,6 +1714,14 @@ export type SeverityOrSuspicious = GroupPlainConfiguration | Suspicious;
  * line with two spaces or a backslash.
  */
 export type ProseWrap = "preserve" | "always" | "never";
+/**
+ * The marker that Biome prints for the items of unordered lists.
+ *
+ * Biome uses this marker for every unordered list, except when two lists are next to
+ * each other. Markdown would merge them into one list if they used the same marker, so
+ * the second list uses a different marker.
+ */
+export type UnorderedListMarker = "dash" | "asterisk" | "plus";
 export interface OverrideAssistConfiguration {
 	/**
 	 * The assist-action configuration for matched files.
@@ -17594,6 +17626,7 @@ export type Category =
 	| "deserialize"
 	| "plugin"
 	| "project"
+	| "project/frameworks"
 	| "search"
 	| "inspect"
 	| "internalError/io"

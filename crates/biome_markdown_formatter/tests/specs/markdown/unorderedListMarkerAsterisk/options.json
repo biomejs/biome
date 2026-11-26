@@ -1,0 +1,7 @@
+{
+  "markdown": {
+    "formatter": {
+      "unorderedListMarker": "asterisk"
+    }
+  }
+}

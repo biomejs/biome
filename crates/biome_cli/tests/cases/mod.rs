@@ -12,6 +12,7 @@ mod cts_files;
 mod diagnostics;
 mod editorconfig;
 mod format_with_errors;
+mod frameworks;
 mod graphql;
 mod grit;
 mod handle_astro_files;

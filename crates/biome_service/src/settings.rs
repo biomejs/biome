@@ -269,6 +269,51 @@ impl Settings {
         self.source.as_ref()?.source_path()
     }
 
+    #[cfg(all(feature = "module_graph", feature = "lang_css"))]
+    pub(crate) fn css_globals_by_indices<'a>(&'a self, indices: &[usize]) -> FxHashSet<&'a str> {
+        self.languages
+            .css
+            .globals
+            .iter()
+            .flatten()
+            .map(AsRef::as_ref)
+            .chain(
+                indices
+                    .iter()
+                    .filter_map(|&index| {
+                        self.override_settings
+                            .patterns
+                            .get(index)?
+                            .languages
+                            .css
+                            .globals
+                            .as_ref()
+                    })
+                    .flatten()
+                    .map(AsRef::as_ref),
+            )
+            .collect()
+    }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_css"))]
+    pub(crate) fn all_css_globals(&self) -> FxHashSet<&str> {
+        self.languages
+            .css
+            .globals
+            .iter()
+            .flatten()
+            .map(AsRef::as_ref)
+            .chain(
+                self.override_settings
+                    .patterns
+                    .iter()
+                    .filter_map(|pattern| pattern.languages.css.globals.as_ref())
+                    .flatten()
+                    .map(AsRef::as_ref),
+            )
+            .collect()
+    }
+
     /// Merges the [Configuration] into the settings.
     #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
@@ -2163,7 +2208,7 @@ impl OverrideSettingPattern {
     /// Note that only path to regular files should be passed.
     /// This function doesn't take directories into account.
     pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
-        !self.includes.is_unset() && self.includes.matches(file_path)
+        self.includes.is_unset() || self.includes.matches(file_path)
     }
 
     #[cfg(feature = "lang_js")]
@@ -2448,6 +2493,12 @@ impl OverrideSettingPattern {
 
         if let Some(prose_wrap) = md_formatter.prose_wrap {
             options.set_prose_wrap(prose_wrap);
+        }
+        if let Some(unordered_list_marker) = md_formatter.unordered_list_marker {
+            options.set_unordered_list_marker(unordered_list_marker);
+        }
+        if let Some(quote_style) = md_formatter.quote_style {
+            options.set_quote_style(quote_style);
         }
     }
 
@@ -2734,6 +2785,8 @@ fn to_css_language_settings(
 
     let assist = conf.assist.take().unwrap_or_default();
     language_setting.assist.enabled = assist.enabled;
+
+    language_setting.globals = conf.globals;
 
     language_setting
 }

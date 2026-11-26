@@ -8,6 +8,8 @@ pub(crate) use state::DbReadGuard;
 pub use state::DbState;
 
 use crate::WorkspaceError;
+#[cfg(feature = "module_graph")]
+use crate::frameworks::PackageFrameworks;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{GitIgnoreMatcher, Settings, SettingsIdentity, VcsIgnoredPatterns};
 pub(crate) use crate::workspace::views::ViewId;
@@ -20,8 +22,9 @@ use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TypeDb, module_for_key,
+    FrameworkScope, GlobalStylesheetScope, InferredLocalTypeId, InferredModuleKey, ModuleDb,
+    ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, TypeDb, ambient_module_declaring_file,
+    module_for_key,
 };
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -47,6 +50,17 @@ use tracing::{debug, instrument};
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
 
 type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
+#[cfg(feature = "module_graph")]
+type FrameworksByPackage = Arc<HashMap<Utf8PathBuf, Arc<PackageFrameworks>>>;
+
+/// Returns whether the module at `module_path` belongs to `path`: the file or
+/// directory at `path` contains the module, or declares it with
+/// `declare module "name"`.
+#[cfg(feature = "module_graph")]
+fn is_module_within(module_path: &Utf8Path, path: &Utf8Path) -> bool {
+    module_path.starts_with(path)
+        || ambient_module_declaring_file(module_path).is_some_and(|file| file.starts_with(path))
+}
 type SettingsQueryEventHandler =
     std::panic::AssertUnwindSafe<Arc<dyn Fn(salsa::Event) + Send + Sync>>;
 
@@ -233,6 +247,10 @@ pub struct WorkspaceDb {
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    /// What the frameworks of each package inject, by the path of the
+    /// package.
+    #[cfg(feature = "module_graph")]
+    frameworks: FrameworksByPackage,
     /// The path info observed by the resolver.
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
@@ -271,6 +289,8 @@ pub struct WorkspaceDbData {
     node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    #[cfg(feature = "module_graph")]
+    frameworks: FrameworksByPackage,
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -455,6 +475,26 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
+    /// Replaces what the frameworks of the package in `package_path` inject.
+    ///
+    /// A package without frameworks keeps an empty entry, so that its files
+    /// don't use what the frameworks of an enclosing package inject.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_frameworks(
+        &self,
+        package_path: Utf8PathBuf,
+        frameworks: Arc<PackageFrameworks>,
+    ) {
+        self.frameworks.pin().insert(package_path, frameworks);
+    }
+
+    /// Removes what the frameworks of the package in `package_path` inject,
+    /// so that its files use the frameworks of an enclosing package.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&self, package_path: &Utf8Path) {
+        self.frameworks.pin().remove(package_path);
+    }
+
     /// Removes all files and modules that start with the given path. That's
     /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
@@ -478,7 +518,7 @@ impl WorkspaceDbData {
             let modules = self.modules.pin();
             let to_remove: Vec<Utf8PathBuf> = modules
                 .keys()
-                .filter(|p| p.starts_with(path))
+                .filter(|p| is_module_within(p, path))
                 .cloned()
                 .collect();
             for p in to_remove {
@@ -507,6 +547,8 @@ impl WorkspaceDb {
             node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            frameworks: Arc::default(),
             #[cfg(feature = "module_graph")]
             resolver_paths: ResolverPaths::default(),
             fs,
@@ -610,6 +652,8 @@ impl WorkspaceDb {
             node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
@@ -1140,6 +1184,86 @@ impl WorkspaceDb {
         }
     }
 
+    /// Returns what the frameworks of the package in `package_path` inject,
+    /// if it was recorded.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn frameworks(&self, package_path: &Utf8Path) -> Option<Arc<PackageFrameworks>> {
+        self.frameworks.pin().get(package_path).cloned()
+    }
+
+    /// Replaces what the frameworks of the package in `package_path` inject,
+    /// and advances the module graph generation.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_frameworks(
+        &mut self,
+        package_path: Utf8PathBuf,
+        frameworks: Arc<PackageFrameworks>,
+    ) {
+        let data = self.data();
+        self.write_module_data(|_| data.set_frameworks(package_path, frameworks));
+    }
+
+    /// Replaces what the frameworks of the package in `package_path` inject
+    /// into its pages, for test purposes. The package declares no modules.
+    #[cfg(all(feature = "module_graph", feature = "testing"))]
+    pub fn set_framework_scope_for_test(
+        &mut self,
+        package_path: Utf8PathBuf,
+        scope: FrameworkScope,
+    ) {
+        let frameworks = PackageFrameworks {
+            modules: Default::default(),
+            scope: Arc::new(scope),
+            ..PackageFrameworks::default()
+        };
+        self.set_frameworks(package_path, Arc::new(frameworks));
+    }
+
+    /// Sets the resolved global stylesheets of `path` for test purposes.
+    #[cfg(all(feature = "module_graph", feature = "testing"))]
+    pub fn set_global_stylesheet_scope_for_test(
+        &mut self,
+        package_path: Utf8PathBuf,
+        path: Utf8PathBuf,
+        scope: GlobalStylesheetScope,
+    ) {
+        let mut frameworks = self
+            .frameworks(&package_path)
+            .map_or_default(|frameworks| (*frameworks).clone());
+        frameworks
+            .resolved_global_stylesheets
+            .insert(path, Arc::new(scope));
+        self.set_frameworks(package_path, Arc::new(frameworks));
+    }
+
+    /// Returns the paths of the packages whose frameworks were recorded.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn framework_package_paths(&self) -> Vec<Utf8PathBuf> {
+        self.frameworks.pin().keys().cloned().collect()
+    }
+
+    /// Removes what the frameworks of the package in `package_path` inject,
+    /// and advances the module graph generation.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&mut self, package_path: &Utf8Path) {
+        let data = self.data();
+        self.write_module_data(|_| data.remove_frameworks(package_path));
+    }
+
+    /// Returns what the frameworks of the nearest package that contains
+    /// `path` inject.
+    ///
+    /// The entries change with the module graph generation, so reading it
+    /// makes the queries that read the entries run again.
+    #[cfg(feature = "module_graph")]
+    fn package_frameworks(&self, path: &Utf8Path) -> Option<Arc<PackageFrameworks>> {
+        let _ = self.module_graph_generation();
+        let frameworks = self.frameworks.pin();
+        path.ancestors()
+            .find_map(|directory| frameworks.get(directory))
+            .cloned()
+    }
+
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&mut self, path: &Utf8Path) {
         if self.modules.pin().contains_key(path) {
@@ -1175,7 +1299,7 @@ impl WorkspaceDb {
                 .modules
                 .pin()
                 .keys()
-                .filter(|module_path| module_path.starts_with(path))
+                .filter(|module_path| is_module_within(module_path, path))
                 .cloned()
                 .collect::<Vec<_>>();
             if !to_remove.is_empty() {
@@ -1468,6 +1592,8 @@ pub struct SharedWorkspaceDb {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
+    frameworks: FrameworksByPackage,
+    #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     /// The filesystem adapter shared by operation-local database forks.
     fs: Arc<dyn FsWithResolverProxy>,
@@ -1498,6 +1624,8 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
+            frameworks,
+            #[cfg(feature = "module_graph")]
             resolver_paths,
             fs,
             file_sources,
@@ -1513,6 +1641,8 @@ impl SharedWorkspaceDb {
             node_caches,
             #[cfg(feature = "module_graph")]
             modules,
+            #[cfg(feature = "module_graph")]
+            frameworks,
             #[cfg(feature = "module_graph")]
             resolver_paths,
             fs,
@@ -1533,6 +1663,8 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
+            frameworks: self.frameworks.clone(),
+            #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),
@@ -1551,6 +1683,8 @@ impl SharedWorkspaceDb {
             source_projects: self.source_projects.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             fs: self.fs.clone(),
@@ -1582,6 +1716,16 @@ impl ResolverDb for WorkspaceDb {
 
     fn resolver_paths(&self) -> &ResolverPaths {
         &self.resolver_paths
+    }
+
+    fn framework_module_path(&self, directory: &Utf8Path, specifier: &str) -> Option<Utf8PathBuf> {
+        // The declaring file can be removed before the frameworks are
+        // registered again.
+        self.package_frameworks(directory)?
+            .modules
+            .module_path(specifier)
+            .filter(|path| self.modules.pin().contains_key(path.as_path()))
+            .cloned()
     }
 }
 
@@ -1649,6 +1793,68 @@ impl ModuleDb for WorkspaceDb {
         for (_, module) in iter {
             f(*module);
         }
+    }
+
+    fn framework_scope(&self, path: &Utf8Path) -> Option<Arc<FrameworkScope>> {
+        Some(self.package_frameworks(path)?.scope.clone())
+    }
+
+    fn framework_scopes(&self) -> Vec<Arc<FrameworkScope>> {
+        // Read the generation before reading the entries.
+        let _ = self.module_graph_generation();
+        self.frameworks
+            .pin()
+            .values()
+            .map(|frameworks| frameworks.scope.clone())
+            .collect()
+    }
+
+    fn global_stylesheet_scope(&self, path: &Utf8Path) -> Arc<GlobalStylesheetScope> {
+        let Some(frameworks) = self.package_frameworks(path) else {
+            return Arc::new(GlobalStylesheetScope::default());
+        };
+        if let Some(scope) = frameworks.resolved_global_stylesheets.get(path) {
+            return scope.clone();
+        }
+
+        #[cfg(feature = "lang_css")]
+        {
+            let Some(project_key) = ProjectDb::find_project_for_path(self, path) else {
+                return Arc::new(GlobalStylesheetScope::default());
+            };
+            let Some((_, _, _, settings)) = self.get_settings_context_for_path(project_key, path)
+            else {
+                return Arc::new(GlobalStylesheetScope::default());
+            };
+            let settings = settings.as_ref();
+            let indices: Vec<_> = settings.override_settings.matching_indices(path).collect();
+            let entries = settings.css_globals_by_indices(&indices);
+            if entries.is_empty() {
+                return Arc::new(GlobalStylesheetScope::default());
+            }
+
+            let mut stylesheets = frameworks.css_globals.resolve(entries);
+            let has_unreadable_styles = stylesheets.iter().any(|stylesheet| {
+                !matches!(
+                    self.module_info_for_path(stylesheet),
+                    Some(ModuleInfoKind::Css(_))
+                )
+            });
+            stylesheets.retain(|stylesheet| {
+                matches!(
+                    self.module_info_for_path(stylesheet),
+                    Some(ModuleInfoKind::Css(_))
+                )
+            });
+            Arc::new(GlobalStylesheetScope {
+                stylesheets,
+                is_authoritative: true,
+                has_unreadable_styles,
+            })
+        }
+
+        #[cfg(not(feature = "lang_css"))]
+        Arc::new(GlobalStylesheetScope::default())
     }
 }
 

@@ -1,21 +1,24 @@
 use crate::css_module_info::CssClassReference;
-use biome_js_semantic::ScopeId;
+use biome_js_semantic::{Binding, ScopeId, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName, AnyJsxAttributeValue,
-    AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause, JsExportNamedFromClause,
-    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
-    TsExportAssignmentClause, unescape_js_string,
+    AnyJsModuleItem, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsStatement,
+    AnyJsxAttributeName, AnyJsxAttributeValue, AnyTsExternalModuleDeclarationBody,
+    AnyTsIdentifierBinding, AnyTsModuleName, AnyTsModuleReference, JsExport,
+    JsExportDefaultDeclarationClause, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedSpecifierList, JsIdentifierBinding, JsLanguage, JsSyntaxNode,
+    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, TsExternalModuleDeclaration,
+    TsGlobalDeclaration, TsModuleBlock, binding_ext::AnyJsBindingDeclaration, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, SyntaxKindSet, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
 use either::Either;
 
 use crate::{
-    JsImport, JsImportPhase, JsModuleInfo, JsReexport,
+    JsAmbientModule, JsImport, JsImportPhase, JsModuleInfo, JsReexport,
     js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
     js_module_info::flow::FlowRootScanner,
 };
@@ -55,43 +58,166 @@ impl JsModuleVisitor {
         let kinds = AnyJsImportLike::KIND_SET
             .union(JsExport::KIND_SET)
             .union(JsxAttribute::KIND_SET)
+            .union(TsExternalModuleDeclaration::KIND_SET)
             .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
         let root = self.root.syntax().clone();
-        // The flow root scanner must see every node, not only the kinds that
-        // the collector visits.
-        let events = if scan_flow_roots {
-            Either::Left(root.preorder())
-        } else {
-            Either::Right(root.preorder_of_kinds(kinds))
-        };
-        for event in events {
-            match event {
-                WalkEvent::Enter(node) => {
-                    if scan_flow_roots {
-                        flow_roots.enter(&node);
-                    }
-                    if let Some(import) = AnyJsImportLike::cast_ref(&node) {
-                        self.visit_import(import, &mut collector);
-                    } else if let Some(export) = JsExport::cast_ref(&node) {
-                        self.visit_export(export, &mut collector);
-                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
-                        self.visit_jsx_attribute(attr, &mut collector);
-                    }
-                }
-                WalkEvent::Leave(node) => {
-                    if scan_flow_roots {
-                        flow_roots.leave(&node);
-                    }
-                    collector.leave_node(&node);
-                }
-            }
-        }
+        self.collect_from(
+            &root,
+            kinds,
+            &mut collector,
+            scan_flow_roots.then_some(&mut flow_roots),
+        );
+        let ambient_modules = self.collect_ambient_modules(&collector);
+        collector.ambient_modules = ambient_modules;
 
         JsModuleInfo::new(
             collector,
             self.semantic_model,
             self.inference_mode,
             flow_roots,
+        )
+    }
+
+    /// Visits the nodes of `kinds` in `node` and its descendants, and collects
+    /// their imports, exports, class references, and types into `collector`.
+    ///
+    /// A script can't be imported, except through the modules it declares
+    /// with `declare module "name"`. The exports of these modules become the
+    /// exports of the script, so that importing a package whose types are a
+    /// script that declares the package finds them.
+    fn collect_from(
+        &mut self,
+        node: &JsSyntaxNode,
+        kinds: SyntaxKindSet<JsLanguage>,
+        collector: &mut JsModuleInfoCollector,
+        mut flow_roots: Option<&mut FlowRootScanner>,
+    ) {
+        let is_script = is_script(&self.root);
+        // The flow root scanner must see every node, not only the kinds that
+        // the collector visits.
+        let events = if flow_roots.is_some() {
+            Either::Left(node.preorder())
+        } else {
+            Either::Right(node.preorder_of_kinds(kinds))
+        };
+        for event in events {
+            match event {
+                WalkEvent::Enter(node) => {
+                    if let Some(flow_roots) = flow_roots.as_deref_mut() {
+                        flow_roots.enter(&node);
+                    }
+                    if let Some(declaration) = TsExternalModuleDeclaration::cast_ref(&node) {
+                        if is_script {
+                            collector.export_scope =
+                                self.semantic_model.scope(declaration.syntax()).id();
+                        }
+                    } else if let Some(import) = AnyJsImportLike::cast_ref(&node) {
+                        self.visit_import(import, collector);
+                    } else if let Some(export) = JsExport::cast_ref(&node) {
+                        self.visit_export(export, collector);
+                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
+                        self.visit_jsx_attribute(attr, collector);
+                    }
+                }
+                WalkEvent::Leave(node) => {
+                    if let Some(flow_roots) = flow_roots.as_deref_mut() {
+                        flow_roots.leave(&node);
+                    }
+                    if let Some(declaration) = TsExternalModuleDeclaration::cast_ref(&node)
+                        && is_script
+                    {
+                        register_implicit_exports(&self.semantic_model, &declaration, collector);
+                        collector.export_scope = ScopeId::GLOBAL;
+                    }
+                    collector.leave_node(&node);
+                }
+            }
+        }
+    }
+
+    /// Collects the modules that the file declares with
+    /// `declare module "name"` at the top level.
+    ///
+    /// Returns nothing for a file with top-level imports or exports, because
+    /// each such declaration there augments an existing module.
+    ///
+    /// `file` is the collector of the file, before it infers types.
+    fn collect_ambient_modules(&mut self, file: &JsModuleInfoCollector) -> Box<[JsAmbientModule]> {
+        if !is_script(&self.root) {
+            return Box::default();
+        }
+        let items = match &self.root {
+            AnyJsRoot::JsModule(module) => module.items(),
+            AnyJsRoot::TsDeclarationModule(module) => module.items(),
+            _ => return Box::default(),
+        };
+
+        items
+            .iter()
+            .filter_map(|item| {
+                let AnyJsModuleItem::AnyJsStatement(AnyJsStatement::TsDeclareStatement(statement)) =
+                    item
+                else {
+                    return None;
+                };
+                match statement.declaration().ok()? {
+                    AnyJsDeclarationClause::TsExternalModuleDeclaration(declaration) => {
+                        Some(declaration)
+                    }
+                    _ => None,
+                }
+            })
+            .filter_map(|declaration| self.collect_ambient_module(file, &declaration))
+            .collect()
+    }
+
+    fn collect_ambient_module(
+        &mut self,
+        file: &JsModuleInfoCollector,
+        declaration: &TsExternalModuleDeclaration,
+    ) -> Option<JsAmbientModule> {
+        let name = declaration
+            .source()
+            .ok()?
+            .as_js_module_source()?
+            .inner_string_text()
+            .ok()?;
+        let info = match declaration.body() {
+            Some(AnyTsExternalModuleDeclarationBody::TsModuleBlock(block)) => {
+                Some(self.collect_ambient_module_info(file, declaration, &block))
+            }
+            Some(AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(_))
+            | None => None,
+        };
+
+        Some(JsAmbientModule {
+            name: name.into(),
+            range: declaration.syntax().text_trimmed_range(),
+            info,
+        })
+    }
+
+    fn collect_ambient_module_info(
+        &mut self,
+        file: &JsModuleInfoCollector,
+        declaration: &TsExternalModuleDeclaration,
+        block: &TsModuleBlock,
+    ) -> JsModuleInfo {
+        let scope = self.semantic_model.scope(declaration.syntax());
+        let mut collector = JsModuleInfoCollector::new_for_ambient_module(file, scope.id());
+        // The module info of an ambient module has no types, so the walk only
+        // needs the imports and exports.
+        let kinds = AnyJsImportLike::KIND_SET
+            .union(JsExport::KIND_SET)
+            .union(biome_js_syntax::JsImport::KIND_SET);
+        self.collect_from(block.syntax(), kinds, &mut collector, None);
+        register_implicit_exports(&self.semantic_model, declaration, &mut collector);
+
+        JsModuleInfo::new(
+            collector,
+            self.semantic_model.clone(),
+            TypeInferenceMode::Disabled,
+            FlowRootScanner::default(),
         )
     }
 
@@ -135,6 +261,11 @@ impl JsModuleVisitor {
     }
 
     fn visit_import(&mut self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
+        // The name of `declare module "name"` declares a module, it doesn't
+        // import one.
+        if node.is_in_ts_module_declaration() {
+            return;
+        }
         let Some(specifier) = node.inner_string_text() else {
             return;
         };
@@ -206,8 +337,9 @@ impl JsModuleVisitor {
         node: TsExportAssignmentClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
+        let scope_id = collector.export_scope;
         let type_data =
-            TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, &node.expression().ok()?);
+            TypeData::from_any_js_expression(collector, scope_id, &node.expression().ok()?);
         let ty = TypeReference::from(collector.register_and_resolve(type_data));
         collector.register_export(JsCollectedExport::ExportDefaultAssignment { ty });
 
@@ -299,10 +431,13 @@ impl JsModuleVisitor {
         match node {
             AnyJsExpression::JsIdentifierExpression(ident) => {
                 let local_name = ident.name().ok()?.name().ok()?;
-                collector.register_export(JsCollectedExport::ExportNamedDefault { local_name });
+                let scope = collector.export_scope;
+                collector
+                    .register_export(JsCollectedExport::ExportNamedDefault { local_name, scope });
             }
             _ => {
-                let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
+                let scope_id = collector.export_scope;
+                let type_data = TypeData::from_any_js_expression(collector, scope_id, node);
                 let ty = TypeReference::from(collector.register_and_resolve(type_data));
                 collector.register_export(JsCollectedExport::ExportDefault { ty });
             }
@@ -506,6 +641,113 @@ impl JsModuleVisitor {
         collector.register_export_with_name(name.clone(), name);
         Some(())
     }
+}
+
+/// Returns whether `root` is a script: a file without top-level imports or
+/// exports.
+///
+/// Only a script declares modules with `declare module "name"`. In other
+/// files, such a declaration augments an existing module.
+fn is_script(root: &AnyJsRoot) -> bool {
+    let items = match root {
+        AnyJsRoot::JsModule(module) => module.items(),
+        AnyJsRoot::TsDeclarationModule(module) => module.items(),
+        _ => return false,
+    };
+    !items.iter().any(|item| is_module_syntax(&item))
+}
+
+/// Registers the declarations of the body of `declaration` that TypeScript
+/// exports without the `export` modifier.
+///
+/// TypeScript exports every declaration of an ambient module that has no
+/// export declaration or export assignment.
+fn register_implicit_exports(
+    model: &SemanticModel,
+    declaration: &TsExternalModuleDeclaration,
+    collector: &mut JsModuleInfoCollector,
+) {
+    let Some(AnyTsExternalModuleDeclarationBody::TsModuleBlock(block)) = declaration.body() else {
+        return;
+    };
+    if has_export_declarations(&block) {
+        return;
+    }
+    let scope = model.scope(declaration.syntax());
+    let previous_scope = collector.export_scope;
+    collector.export_scope = scope.id();
+    for binding in scope.bindings() {
+        if !is_implicitly_exported(&binding) {
+            continue;
+        }
+        let Ok(name) = binding.tree().name_token() else {
+            continue;
+        };
+        let name = name.token_text_trimmed();
+        collector.register_export_with_name(name.clone(), name);
+    }
+    collector.export_scope = previous_scope;
+}
+
+/// Returns whether `item` makes its file a module: an import, an export, or
+/// `import name = require("specifier")`.
+fn is_module_syntax(item: &AnyJsModuleItem) -> bool {
+    match item {
+        AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_) => true,
+        AnyJsModuleItem::AnyJsStatement(AnyJsStatement::TsImportEqualsDeclaration(declaration)) => {
+            matches!(
+                declaration.module_reference(),
+                Ok(AnyTsModuleReference::TsExternalModuleReference(_))
+            )
+        }
+        AnyJsModuleItem::AnyJsStatement(_) => false,
+    }
+}
+
+/// Returns whether TypeScript exports `binding` under its own name from an
+/// ambient module without export declarations.
+///
+/// Imports aren't exported. A declaration in a `global { ... }` block declares
+/// a global instead. `export default function name()` exports only `default`.
+fn is_implicitly_exported(binding: &Binding) -> bool {
+    let tree = binding.tree();
+    let declaration = tree.declaration();
+    let is_import = binding.declaration_kind().is_import_declaration()
+        || matches!(
+            declaration,
+            Some(AnyJsBindingDeclaration::TsImportEqualsDeclaration(_))
+        );
+    let is_default_export = declaration.is_some_and(|declaration| {
+        declaration
+            .syntax()
+            .parent()
+            .is_some_and(|parent| JsExportDefaultDeclarationClause::can_cast(parent.kind()))
+    });
+    let is_global = tree
+        .syntax()
+        .ancestors()
+        .any(|node| TsGlobalDeclaration::can_cast(node.kind()));
+
+    !is_import && !is_default_export && !is_global
+}
+
+/// Returns whether `block` contains an export declaration, such as
+/// `export { name }` or `export * from "specifier"`, or an export assignment,
+/// such as `export = name` or `export default name`.
+fn has_export_declarations(block: &TsModuleBlock) -> bool {
+    block.items().iter().any(|item| {
+        let AnyJsModuleItem::JsExport(export) = item else {
+            return false;
+        };
+        matches!(
+            export.export_clause(),
+            Ok(AnyJsExportClause::JsExportNamedClause(_)
+                | AnyJsExportClause::JsExportFromClause(_)
+                | AnyJsExportClause::JsExportNamedFromClause(_)
+                | AnyJsExportClause::JsExportDefaultExpressionClause(_)
+                | AnyJsExportClause::TsExportAssignmentClause(_))
+        )
+    })
 }
 
 fn get_name(binding_result: AnyJsBinding) -> Option<TokenText> {

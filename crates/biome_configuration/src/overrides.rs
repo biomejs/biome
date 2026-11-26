@@ -154,10 +154,6 @@ impl OverridePattern {
                 javascript.parser = None;
             }
         }
-        #[cfg(feature = "lang_css")]
-        if let Some(css) = css.as_mut() {
-            css.globals = None;
-        }
         #[cfg(feature = "lang_html")]
         if let Some(html) = html.as_mut() {
             html.experimental_full_support_enabled = None;
@@ -873,6 +869,37 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "lang_css")]
+    #[test]
+    fn applies_css_globals_from_override() {
+        let mut configuration = Configuration {
+            css: Some(crate::CssConfiguration {
+                globals: Some(["base.css".into()].into_iter().collect()),
+                ..crate::CssConfiguration::default()
+            }),
+            ..Configuration::default()
+        };
+        let pattern = OverridePattern {
+            css: Some(crate::CssConfiguration {
+                globals: Some(["override.css".into()].into_iter().collect()),
+                ..crate::CssConfiguration::default()
+            }),
+            ..OverridePattern::default()
+        };
+
+        let base_configuration = configuration.clone();
+        pattern.apply_to_configuration(&mut configuration, &base_configuration);
+
+        assert_eq!(
+            configuration.css.and_then(|css| css.globals),
+            Some(
+                ["base.css".into(), "override.css".into()]
+                    .into_iter()
+                    .collect()
+            )
+        );
+    }
+
     #[test]
     fn resets_runtime_inherited_values_for_each_override() {
         let base_configuration = Configuration {
@@ -1077,6 +1104,8 @@ mod tests {
             line_width: Some(LineWidth::try_from(80).expect("valid line width")),
             trailing_newline: global_formatter.trailing_newline,
             prose_wrap: Some(ProseWrap::Always),
+            unordered_list_marker: None,
+            quote_style: None,
             format_embeds: None,
         };
         assert_eq!(

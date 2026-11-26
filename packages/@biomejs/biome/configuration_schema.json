@@ -1923,7 +1923,7 @@
 					"default": null
 				},
 				"globals": {
-					"description": "Reserved for future CSS analyzer support. This option currently has no effect.",
+					"description": "Stylesheets that apply to every page without an import, such as the stylesheets that a\nframework or a build tool adds. Each entry is a path or a glob pattern, relative to the\nfolder of the configuration file that declares it. A glob pattern matches only stylesheets\nand doesn't match files in `node_modules`, so list those files by path. Negated patterns\naren't supported.\n\nRules that check classes and custom properties, such as `noUndeclaredClasses`, treat these\nstylesheets as available to every file of each package under the configuration, where a\npackage is a folder with a `package.json` file. When the\noption has entries, these rules also report in packages where Biome can't find all the\nstylesheets that a framework adds, for example because a function computes them.\n\nIn an override, these stylesheets apply only to files selected by that override.",
 					"type": ["array", "null"],
 					"items": { "type": "string" },
 					"uniqueItems": true
@@ -3403,9 +3403,20 @@
 					"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
 					"anyOf": [{ "$ref": "#/$defs/ProseWrap" }, { "type": "null" }]
 				},
+				"quoteStyle": {
+					"description": "Selects the preferred quote style for link and image titles. Biome uses the other quote,\nor parentheses, when that avoids additional escaping. Defaults to `double`.",
+					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
+				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				},
+				"unorderedListMarker": {
+					"description": "The marker used for the items of unordered lists. Defaults to `dash`.\n\nWhen two unordered lists are next to each other, the second list uses another marker so\nthat Markdown doesn't merge them into one list.",
+					"anyOf": [
+						{ "$ref": "#/$defs/UnorderedListMarker" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -24665,6 +24676,26 @@
 					"description": "Disallow a Unicode byte order mark at the start of every file.",
 					"type": "string",
 					"const": "never"
+				}
+			]
+		},
+		"UnorderedListMarker": {
+			"description": "The marker that Biome prints for the items of unordered lists.\n\nBiome uses this marker for every unordered list, except when two lists are next to\neach other. Markdown would merge them into one list if they used the same marker, so\nthe second list uses a different marker.",
+			"oneOf": [
+				{
+					"description": "Use `-` for list items. This is the default.",
+					"type": "string",
+					"const": "dash"
+				},
+				{
+					"description": "Use `*` for list items.",
+					"type": "string",
+					"const": "asterisk"
+				},
+				{
+					"description": "Use `+` for list items.",
+					"type": "string",
+					"const": "plus"
 				}
 			]
 		},

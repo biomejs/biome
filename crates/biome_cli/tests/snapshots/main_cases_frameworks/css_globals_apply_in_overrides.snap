@@ -1,0 +1,176 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint src/admin/Page.jsx src/public/Page.jsx
+```
+
+## `biome.json`
+
+```json
+{
+  "css": { "globals": ["src/base.css"] },
+  "linter": {
+    "rules": { "nursery": { "noUndeclaredClasses": "error" } }
+  },
+  "overrides": [
+    {
+      "includes": ["src/admin/**"],
+      "css": { "globals": ["src/admin.css"] }
+    }
+  ]
+}
+```
+
+## `package.json`
+
+```json
+{}
+```
+
+## `src/admin.css`
+
+```css
+.admin {
+}
+```
+
+## `src/admin/Page.jsx`
+
+```jsx
+import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+
+```
+
+## `src/base.css`
+
+```css
+.base {
+}
+```
+
+## `src/local.css`
+
+```css
+.local {
+}
+```
+
+## `src/public/Page.jsx`
+
+```jsx
+import "../local.css";
+
+export const Page = () => <div className="local base admin missing" />;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/admin/Page.jsx:3:60 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class missing is not defined in any imported stylesheet.
+  
+    1 │ import "../local.css";
+    2 │ 
+  > 3 │ export const Page = () => <div className="local base admin missing" />;
+      │                                                            ^^^^^^^
+    4 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    src/admin/Page.jsx (this file) -> which imports src/local.css
+  
+  
+  i The stylesheets that frameworks add to every page were checked too.
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+src/public/Page.jsx:3:54 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class admin is not defined in any imported stylesheet.
+  
+    1 │ import "../local.css";
+    2 │ 
+  > 3 │ export const Page = () => <div className="local base admin missing" />;
+      │                                                      ^^^^^
+    4 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    src/public/Page.jsx (this file) -> which imports src/local.css
+  
+  
+  i The stylesheets that frameworks add to every page were checked too.
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+src/public/Page.jsx:3:60 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class missing is not defined in any imported stylesheet.
+  
+    1 │ import "../local.css";
+    2 │ 
+  > 3 │ export const Page = () => <div className="local base admin missing" />;
+      │                                                            ^^^^^^^
+    4 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    src/public/Page.jsx (this file) -> which imports src/local.css
+  
+  
+  i The stylesheets that frameworks add to every page were checked too.
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

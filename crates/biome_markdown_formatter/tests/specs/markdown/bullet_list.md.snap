@@ -36,15 +36,15 @@ __bold__
 
 * item with **bold** and _italic_
 
-+ item with `code`
+- item with `code`
 
-+ ---
+- ***
 
-+ ---
+- ***
 
 **bold**
 
-+ ---
+- ***
 
 * item after dash thematic break
 

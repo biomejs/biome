@@ -1,5 +1,7 @@
 use crate::services::database::ResolvedImports;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_semantic::semantic_model;
@@ -9,7 +11,9 @@ use biome_css_syntax::{
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, JsxElement};
 use biome_languages::{CssFileSource, css::CssEmbeddingKind};
-use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
+use biome_module_graph::{
+    SymbolFromModuleInfo, css_property_definitions, has_unknown_framework_styles,
+};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 
@@ -36,6 +40,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 
@@ -53,6 +58,9 @@ impl Rule for NoUndeclaredCustomProperties {
         let Some(module) = db.module_for_path(ctx.file_path()) else {
             return Vec::new();
         };
+        if has_unknown_framework_styles(db, module) {
+            return Vec::new();
+        }
         let properties = inline_custom_properties(text.text());
 
         properties
@@ -60,14 +68,16 @@ impl Rule for NoUndeclaredCustomProperties {
             .into_iter()
             .filter_map(|(range, name)| {
                 let decoded_name = decode_css_identifier(name.text());
-                if properties.definitions.iter().any(|definition| {
-                    decode_css_identifier(definition.text()) == decoded_name
-                }) || ancestor_defines_custom_property(ctx.query(), decoded_name.as_ref())
+                if properties
+                    .definitions
+                    .iter()
+                    .any(|definition| decode_css_identifier(definition.text()) == decoded_name)
+                    || ancestor_defines_custom_property(ctx.query(), decoded_name.as_ref())
                     || !css_property_definitions(
-                    db,
-                    SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
-                )
-                .is_empty()
+                        db,
+                        SymbolFromModuleInfo::new(db, decoded_name.as_ref(), module),
+                    )
+                    .is_empty()
                 {
                     return None;
                 }
@@ -146,10 +156,7 @@ fn inline_custom_properties(value: &str) -> InlineCustomProperties {
         .filter_map(CssFunction::cast)
         .filter_map(|function| {
             let property = custom_property_name_from_var_function(&function)?;
-            Some((
-                property.text_trimmed_range(),
-                property.token_text_trimmed(),
-            ))
+            Some((property.text_trimmed_range(), property.token_text_trimmed()))
         })
         .collect();
     InlineCustomProperties {
@@ -159,10 +166,7 @@ fn inline_custom_properties(value: &str) -> InlineCustomProperties {
 }
 
 fn ancestor_defines_custom_property(attribute: &JsxAttribute, name: &str) -> bool {
-    let current = attribute
-        .syntax()
-        .ancestors()
-        .find_map(AnyJsxElement::cast);
+    let current = attribute.syntax().ancestors().find_map(AnyJsxElement::cast);
     attribute
         .syntax()
         .ancestors()

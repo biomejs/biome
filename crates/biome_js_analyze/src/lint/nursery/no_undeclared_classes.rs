@@ -1,17 +1,21 @@
 use crate::services::database::{DbService, ResolvedImports};
 use crate::services::semantic::SemanticModelBuilderVisitor;
-use biome_analyze::{AddVisitor, Phases, QueryKey, Queryable, Rule, RuleDiagnostic, RuleDomain, ServiceBag, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    AddVisitor, Phases, QueryKey, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleFramework,
+    ServiceBag, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsxAttribute,
-    AnyJsRoot, JsLanguage, JsSyntaxNode, binding_ext::AnyJsBindingDeclaration,
+    AnyJsObjectMember, AnyJsRoot, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsLanguage,
+    JsSyntaxNode, JsxAttribute, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_languages::JsFileSource;
 use biome_module_graph::{
     ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html, build_import_tree_for_js,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    framework_class_steps, has_unknown_framework_styles, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
@@ -56,6 +60,7 @@ declare_lint_rule! {
         recommended: false,
         issue_number: Some("9156"),
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 
@@ -131,6 +136,9 @@ impl Rule for NoUndeclaredClasses {
         let Some(module) = db.module_for_path(file_path) else {
             return Vec::new();
         };
+        if has_unknown_framework_styles(db, module) {
+            return Vec::new();
+        }
         // Collect all reachable CSS steps. If no CSS is reachable at all,
         // skip to avoid false positives on files without any stylesheets.
         let css_steps = if is_html_like {
@@ -142,11 +150,12 @@ impl Rule for NoUndeclaredClasses {
         if css_steps.is_empty() {
             return Vec::new();
         }
+        let framework_steps = framework_class_steps(db, module);
 
         let mut signals = Vec::new();
 
         for entry in &class_entries {
-            let found_class = css_steps.iter().any(|step| {
+            let found_class = css_steps.iter().chain(framework_steps).any(|step| {
                 step.css_classes
                     .values()
                     .any(|c| c.text() == entry.name.as_ref())
@@ -162,6 +171,7 @@ impl Rule for NoUndeclaredClasses {
                     range: entry.range,
                     name: entry.name.clone(),
                     import_tree,
+                    has_framework_stylesheets: !framework_steps.is_empty(),
                 });
             }
         }
@@ -189,6 +199,11 @@ impl Rule for NoUndeclaredClasses {
                 "Checked import tree:\n\n"{tree_display}
             });
         }
+        if state.has_framework_stylesheets {
+            diag = diag.note(markup! {
+                "The stylesheets that frameworks add to every page were checked too."
+            });
+        }
 
         Some(diag.note(markup! {
             "Either import a CSS file that defines this class or remove this class name."
@@ -204,6 +219,8 @@ pub struct UndeclaredClass {
     pub name: Box<str>,
     /// The import tree structure for displaying which files/CSS were checked.
     pub import_tree: Option<ImportTreeNode>,
+    /// Whether the stylesheets that frameworks add to every page were checked.
+    pub has_framework_stylesheets: bool,
 }
 
 /// A single class name occurrence found in the source code, with its range.
@@ -313,6 +330,9 @@ fn run_without_semantic(
     let Some(module) = db.module_for_path(file_path) else {
         return Vec::new();
     };
+    if has_unknown_framework_styles(db, module) {
+        return Vec::new();
+    }
 
     // Collect all reachable CSS steps. If no CSS is reachable at all,
     // skip to avoid false positives on files without any stylesheets.
@@ -321,10 +341,11 @@ fn run_without_semantic(
     if css_steps.is_empty() {
         return Vec::new();
     }
+    let framework_steps = framework_class_steps(db, module);
 
     let mut signals = Vec::new();
     for entry in &entries {
-        let found_class = css_steps.iter().any(|step| {
+        let found_class = css_steps.iter().chain(framework_steps).any(|step| {
             step.css_classes
                 .values()
                 .any(|c| c.text() == entry.name.as_ref())
@@ -336,6 +357,7 @@ fn run_without_semantic(
                 range: entry.range,
                 name: entry.name.clone(),
                 import_tree,
+                has_framework_stylesheets: !framework_steps.is_empty(),
             });
         }
     }

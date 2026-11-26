@@ -1,7 +1,9 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
-use biome_markdown_formatter::context::ProseWrap;
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
+use biome_markdown_formatter::context::{ProseWrap, UnorderedListMarker};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -175,6 +177,29 @@ pub struct MarkdownFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
+
+    /// The marker used for the items of unordered lists. Defaults to `dash`.
+    ///
+    /// When two unordered lists are next to each other, the second list uses another marker so
+    /// that Markdown doesn't merge them into one list.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(
+            long("md-formatter-unordered-list-marker"),
+            argument("dash|asterisk|plus")
+        )
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unordered_list_marker: Option<UnorderedListMarker>,
+
+    /// Selects the preferred quote style for link and image titles. Biome uses the other quote,
+    /// or parentheses, when that avoids additional escaping. Defaults to `double`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-formatter-quote-style"), argument("double|single"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 
     /// Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
     /// of the code's language. Defaults to `true`.

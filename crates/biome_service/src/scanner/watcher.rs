@@ -261,20 +261,36 @@ impl Watcher {
         workspace: &impl WorkspaceWatcherBridge,
         event: NotifyEvent,
     ) -> Vec<Diagnostic> {
+        let mut diagnostics: Vec<_> = event
+            .paths
+            .iter()
+            .filter_map(|path| Utf8Path::from_path(path))
+            .flat_map(|path| {
+                workspace
+                    .reload_frameworks_for_ignored_config(path)
+                    .unwrap_or_else(|error| {
+                        warn!("Error reloading the frameworks: {error}");
+                        Vec::new()
+                    })
+            })
+            .collect();
         if matches!(
             &event.kind,
             EventKind::Modify(ModifyKind::Name(RenameMode::Both))
         ) {
-            return Self::rename_paths(workspace, event.paths).unwrap_or_else(|error| {
-                // TODO: improve error propagation
-                warn!("Error processing watch event: {error}");
-                vec![]
-            });
+            diagnostics.extend(Self::rename_paths(workspace, event.paths).unwrap_or_else(
+                |error| {
+                    // TODO: improve error propagation
+                    warn!("Error processing watch event: {error}");
+                    vec![]
+                },
+            ));
+            return diagnostics;
         }
 
         let paths = Self::watched_paths(workspace, event.paths);
         if paths.is_empty() {
-            return vec![];
+            return diagnostics;
         };
 
         let result = match event.kind {
@@ -308,11 +324,12 @@ impl Watcher {
             },
             EventKind::Any | EventKind::Other => Ok(vec![]),
         };
-        result.unwrap_or_else(|error| {
+        diagnostics.extend(result.unwrap_or_else(|error| {
             // TODO: improve error propagation
             warn!("Error processing watch event: {error}");
             vec![]
-        })
+        }));
+        diagnostics
     }
 
     fn rename_paths(

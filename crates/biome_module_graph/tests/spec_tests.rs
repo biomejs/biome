@@ -38,6 +38,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[path = "spec_tests/aliased_conditions.test.rs"]
 mod aliased_conditions;
+#[path = "spec_tests/ambient_modules.test.rs"]
+mod ambient_modules;
 #[path = "spec_tests/assertions.test.rs"]
 mod assertions;
 #[path = "spec_tests/callback_parameters.test.rs"]
@@ -56,6 +58,8 @@ mod database;
 mod expected_argument_inference;
 #[path = "spec_tests/expressions.test.rs"]
 mod expressions;
+#[path = "spec_tests/framework_scope.test.rs"]
+mod framework_scope;
 #[path = "spec_tests/function_guards.test.rs"]
 mod function_guards;
 #[path = "spec_tests/globals.test.rs"]
@@ -107,6 +111,9 @@ struct TestModuleDb {
     files: BTreeMap<Utf8PathBuf, Source>,
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     resolver_paths: ResolverPaths,
+    /// The modules that frameworks declare, by specifier. See
+    /// [ResolverDb::framework_module_path].
+    framework_modules: BTreeMap<String, Utf8PathBuf>,
     events: Events,
     module_enumeration_count: AtomicUsize,
     module_lookup_count: AtomicUsize,
@@ -126,6 +133,7 @@ impl TestModuleDb {
             files: BTreeMap::new(),
             modules: BTreeMap::new(),
             resolver_paths: ResolverPaths::default(),
+            framework_modules: BTreeMap::new(),
             module_enumeration_count: AtomicUsize::new(0),
             module_lookup_count: AtomicUsize::new(0),
             storage: salsa::Storage::new(Some(Box::new({
@@ -191,6 +199,10 @@ impl ResolverDb for TestModuleDb {
 
     fn resolver_paths(&self) -> &ResolverPaths {
         &self.resolver_paths
+    }
+
+    fn framework_module_path(&self, _directory: &Utf8Path, specifier: &str) -> Option<Utf8PathBuf> {
+        self.framework_modules.get(specifier).cloned()
     }
 }
 
