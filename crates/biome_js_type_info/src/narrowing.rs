@@ -581,6 +581,59 @@ pub fn may_narrow_by_property(db: &dyn TypeDb, declared: InferredTypeData) -> bo
         .is_some()
 }
 
+/// Returns whether every member of `ty` other than `null` and `undefined`
+/// declares the property `name` itself as readonly, so that no assignment
+/// through a value of type `ty` can change the property.
+///
+/// A property is readonly when it is declared `readonly`, when it belongs to
+/// an object under an `as const` assertion, when a mapped type such as
+/// `Readonly<T>` makes it readonly, and when it is an element of a `readonly`
+/// tuple. A getter is never readonly, because Biome doesn't collect setters,
+/// so a getter may have one. A property that a member inherits, through an
+/// `extends` clause or a prototype, doesn't count. Another declaration of an
+/// interface or a class in the same module, or a module augmentation, can
+/// give the member a property of the same name that isn't readonly, and
+/// Biome's types include neither.
+///
+/// Returns false when `ty` has no member other than `null` and `undefined`,
+/// when a member is a primitive, a function, an array, an intersection, a
+/// generic, `unknown`, or another type whose properties can't be looked up,
+/// and when the union traversal, which visits at most 256 types, runs out.
+/// `resolve` resolves handles as for [`narrow_type`], and is also used to
+/// look up the property.
+pub fn has_readonly_property<'db>(
+    db: &'db dyn TypeDb,
+    ty: InferredTypeData<'db>,
+    name: &str,
+    mut resolve: impl FnMut(InferredTypeData<'db>) -> InferredTypeData<'db>,
+) -> bool {
+    let resolve: &mut TypeResolver<'db, '_> = &mut resolve;
+    let mut pending = vec![ty];
+    let mut has_member = false;
+    for _ in 0..MAX_NARROWING_STEPS {
+        let Some(current) = pending.pop() else {
+            return has_member;
+        };
+        match resolve_wrapped_type(db, current, resolve) {
+            InferredTypeData::Union(union) => pending.extend(union.types(db).iter().copied()),
+            InferredTypeData::Null | InferredTypeData::Undefined => {}
+            member => match find_property(db, member, name, resolve) {
+                PropertyLookup::Found {
+                    is_readonly: true,
+                    is_inherited: false,
+                    ..
+                } => has_member = true,
+                PropertyLookup::Found { .. }
+                | PropertyLookup::Missing
+                | PropertyLookup::Unknown => {
+                    return false;
+                }
+            },
+        }
+    }
+    false
+}
+
 /// Narrows `ty` by the runtime test `name in value`, as TypeScript does.
 ///
 /// Like TypeScript, Biome treats an object type as closed, so a member of the
@@ -3422,6 +3475,160 @@ mod tests {
         assert_eq!(property_modifiers(db, readonly, "0"), Some((false, true)));
         assert_eq!(property_modifiers(db, readonly, "1"), Some((true, true)));
         assert_eq!(property_modifiers(db, readonly, "2"), None);
+    }
+
+    fn has_readonly_v<'db>(db: &'db TestDb, ty: InferredTypeData<'db>) -> bool {
+        super::has_readonly_property(db, ty, "v", |ty| ty)
+    }
+
+    #[test]
+    fn readonly_properties_must_be_readonly_in_every_member() {
+        let db = &TestDb::default();
+        let readonly = |kind: fn(Text) -> TypeMemberKind<'static>| TypeMember {
+            kind: kind(Text::new_static("v")),
+            ty: InferredTypeData::String,
+        };
+        let declared = object(db, vec![readonly(TypeMemberKind::ReadonlyNamed)]);
+        let optional = object(db, vec![readonly(TypeMemberKind::ReadonlyNamedOptional)]);
+        let constant = object(db, vec![readonly(TypeMemberKind::ConstAssertedNamed)]);
+        let mutable = object(db, vec![member("v", InferredTypeData::String)]);
+        let getter = object(
+            db,
+            vec![TypeMember {
+                kind: TypeMemberKind::Getter(Text::new_static("v")),
+                ty: method(db, "get", InferredTypeData::String),
+            }],
+        );
+        for (ty, expected) in [
+            (declared, true),
+            (optional, true),
+            (constant, true),
+            (
+                interface(db, &[], vec![readonly(TypeMemberKind::ReadonlyNamed)]),
+                true,
+            ),
+            (
+                class_instance(db, vec![readonly(TypeMemberKind::ReadonlyNamed)]),
+                true,
+            ),
+            // `null` and `undefined` have no property to change.
+            (
+                union(
+                    db,
+                    &[
+                        declared,
+                        InferredTypeData::Null,
+                        InferredTypeData::Undefined,
+                    ],
+                ),
+                true,
+            ),
+            (union(db, &[declared, constant]), true),
+            // TypeScript takes the property as readonly when one member of a
+            // union declares it `readonly`, but a write through another
+            // member can change it.
+            (union(db, &[declared, mutable]), false),
+            (mutable, false),
+            // A setter may change a getter's value.
+            (getter, false),
+            (
+                union(db, &[InferredTypeData::Null, InferredTypeData::Undefined]),
+                false,
+            ),
+            (object(db, Vec::new()), false),
+            (union(db, &[declared, InferredTypeData::String]), false),
+            (InferredTypeData::Unknown, false),
+            (InferredTypeData::UnknownKeyword, false),
+        ] {
+            assert_eq!(has_readonly_v(db, ty), expected, "{ty:?}");
+        }
+    }
+
+    #[test]
+    fn intersections_have_readonly_properties_only_when_every_operand_does() {
+        let db = &TestDb::default();
+        let readonly = |kind: fn(Text) -> TypeMemberKind<'static>| TypeMember {
+            kind: kind(Text::new_static("v")),
+            ty: InferredTypeData::String,
+        };
+        let declared = object(db, vec![readonly(TypeMemberKind::ReadonlyNamed)]);
+        let constant = object(db, vec![readonly(TypeMemberKind::ConstAssertedNamed)]);
+        let mutable = object(db, vec![member("v", InferredTypeData::String)]);
+        let other = object(db, vec![member("w", InferredTypeData::Number)]);
+        for (operands, expected) in [
+            (vec![declared, other], true),
+            (vec![other, declared], true),
+            (vec![declared, constant], true),
+            (vec![declared, mutable], false),
+            (vec![mutable, declared], false),
+            (vec![constant, mutable], false),
+        ] {
+            let ty = InferredTypeData::intersection_from_types(db, operands);
+            assert_eq!(has_readonly_v(db, ty), expected, "{ty:?}");
+        }
+    }
+
+    #[test]
+    fn inherited_readonly_properties_do_not_count() {
+        let db = &TestDb::default();
+        let parent = interface(
+            db,
+            &[],
+            vec![TypeMember {
+                kind: TypeMemberKind::ReadonlyNamed(Text::new_static("v")),
+                ty: InferredTypeData::String,
+            }],
+        );
+        // Another declaration of the interface, or a module augmentation, can
+        // declare `v` without `readonly` on the child itself.
+        assert!(!has_readonly_v(db, interface(db, &[parent], Vec::new())));
+        assert!(matches!(
+            find_property(db, interface(db, &[parent], Vec::new()), "v", &mut |ty| ty),
+            PropertyLookup::Found {
+                is_readonly: true,
+                is_inherited: true,
+                ..
+            }
+        ));
+        assert!(matches!(
+            find_property(db, parent, "v", &mut |ty| ty),
+            PropertyLookup::Found {
+                is_readonly: true,
+                is_inherited: false,
+                ..
+            }
+        ));
+        // A member of `Object` is inherited too.
+        assert!(matches!(
+            find_property(db, parent, "toString", &mut |ty| ty),
+            PropertyLookup::Found {
+                is_inherited: true,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn readonly_tuples_have_readonly_elements() {
+        let db = &TestDb::default();
+        let tuple = InferredTypeData::Tuple(InternedTuple::new(
+            db,
+            Box::from([TupleElementType {
+                ty: InferredTypeData::String,
+                name: None,
+                is_optional: false,
+                is_rest: false,
+            }]),
+            false,
+        ));
+        let readonly = InferredTypeData::TypeOperator(InternedTypeOperatorType::new(
+            db,
+            tuple,
+            crate::TypeOperator::Readonly,
+        ));
+        assert!(super::has_readonly_property(db, readonly, "0", |ty| ty));
+        assert!(!super::has_readonly_property(db, tuple, "0", |ty| ty));
+        assert!(!super::has_readonly_property(db, readonly, "1", |ty| ty));
     }
 
     /// Narrows `ty` by `name in ty`, with a resolver that returns its input.

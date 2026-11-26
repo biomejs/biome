@@ -157,8 +157,9 @@ fn path_reads_start_from_the_narrowed_object() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows each read below to `string`,
 // because a call that may write `o.v`, a write through another variable, a
 // write inside a callback, and a write to a longer path never cancel property
-// narrowing. Biome copies this unsound narrowing; `NARROWING.md` lists it among
-// the deliberate choices.
+// narrowing.
+// Biome copies this unsound narrowing; `NARROWING.md` lists it among the
+// deliberate choices.
 #[test]
 fn calls_aliases_and_callbacks_keep_property_narrowing() {
     use InferredTypeData::String;
@@ -367,9 +368,8 @@ fn type_guards_and_assertions_narrow_properties() {
     );
 }
 
-// TypeScript 7.0.2 (`tsc --strict`) gives every expression below the expected
-// type, because a call or member access on a narrowed path uses the narrowed
-// type.
+// TypeScript 7.0.2 (`tsc --strict`) gives every call below the expected type,
+// because a narrowed method is called with the narrowed type.
 #[test]
 fn narrowed_callees_resolve_their_calls() {
     use InferredTypeData::{Number, String};
@@ -813,14 +813,14 @@ fn static_members_keep_paths_on_this_unnarrowed() {
 }
 
 // TypeScript 7.0.2 (`tsc --strict`) narrows every read below to `string`,
-// because an object literal method takes `this` from the object or from its
-// contextual type, and a function or method with a `this` parameter takes it
-// from the parameter. Biome finds the object or class only through a variable
-// it initializes or a class name. Otherwise it types `this` from the enclosing
-// class or object literal, or not at all, so `argument` and `classArgument`
-// read the field of `K`, `nested` reads the field of `o`, and `module` reads
-// `unknown`. Biome also ignores `this` parameters, so `function` reads
-// `unknown`. It narrows no path on `this` in any of these places.
+// because an object literal method takes `this` from the object, or from its
+// contextual type, and a function or method with a `this` parameter from the
+// parameter.
+// Biome finds the object or class only through a variable it initializes or a
+// class name. Otherwise it types `this` from the enclosing class or object
+// literal, so `argument` and `classArgument` read the field of `K` and
+// `nested` the field of `o`, or not at all, and it ignores `this` parameters.
+// It narrows no path on `this` there.
 #[test]
 fn paths_on_this_stay_unnarrowed_where_biome_types_this_otherwise() {
     use InferredTypeData::{Null, Number, String, Unknown};
@@ -1013,8 +1013,8 @@ const RECEIVER: &str = r#"
 "#;
 
 // TypeScript 7.0.2 (`tsc --strict`) gives each read `X` where the expected
-// value is `false` and `X | undefined` where it is `true`, because a test of
-// an optional chain shows that its receiver is not nullish in the branch where
+// value is `false` and `X | undefined` where it is `true`, because a test of an
+// optional chain shows that its receiver is not nullish in the branch where
 // the chain cannot be `undefined`, and in no branch of `??`.
 #[test]
 fn optional_chain_receivers_follow_the_kind_of_test() {
@@ -1097,10 +1097,10 @@ fn optional_chain_receivers_follow_the_kind_of_test() {
 
 // TypeScript 7.0.2 (`tsc --strict`) gives every read below a type without
 // `undefined` (`X`, `{ w: string }`, `C`, `() => X | undefined`,
-// `Record<string, string>`, or `string`), except at `callResult`. Every
-// receiver along the chain that is a subject narrows, including callees and
-// receivers after a call. `get()` is a call, not a subject, so it keeps
-// `X | undefined` at `callResult`.
+// `Record<string, string>`, or `string`), except at `callResult`, where
+// `get()` is a call, not a subject, and keeps `X | undefined`. Every receiver
+// along the chain that is a subject narrows, including callees and receivers
+// after a call.
 #[test]
 fn optional_chain_receivers_narrow_along_the_chain() {
     let source = format!(
@@ -1156,7 +1156,7 @@ fn optional_chain_receivers_narrow_along_the_chain() {
 // TypeScript 7.0.2 (`tsc --strict`) narrows `x` at `parenthesizedReceiver`,
 // because `(x)` is the receiver of the chain. Parentheses around an optional
 // chain end the outer chain. In a comparison, TypeScript narrows `x.z` but not
-// `x`, so `x?.z` adds `undefined` back from `x`. It gives `X | undefined` and
+// `x`, so `x?.z` adds `undefined` back from `x`, and gives `X | undefined` and
 // `{ w: string } | undefined` at `chain` and `chainInner`, and
 // `X | undefined` and `C | undefined` at `chainPath` and `chainPathInner`.
 // When it tests `(x?.z)?.w` for truthiness, TypeScript narrows `x` to `X` and

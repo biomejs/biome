@@ -1,0 +1,150 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidReadonlyAliasedConditions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function readonlyProperty(o: { readonly v: string | null }) {
+	const ok = o.v !== null;
+	if (ok) {
+		return o.v?.length;
+	}
+}
+
+function nestedPath(o: { readonly a: { readonly v: string | undefined } }) {
+	const hasValue = o.a.v !== undefined;
+	if (hasValue) {
+		return o.a.v?.length;
+	}
+}
+
+function readonlyMapped(o: Readonly<{ v: string | null }>) {
+	const isString = typeof o.v === "string";
+	if (isString) {
+		return o.v?.length;
+	}
+}
+
+class Cache {
+	readonly value: string | undefined;
+
+	constructor(value: string | undefined) {
+		this.value = value;
+	}
+
+	read() {
+		const ready = this.value !== undefined;
+		if (ready) {
+			return this.value?.length;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidReadonlyAliasedConditions.ts:6:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    4 │ 	const ok = o.v !== null;
+    5 │ 	if (ok) {
+  > 6 │ 		return o.v?.length;
+      │ 		       ^^^
+    7 │ 	}
+    8 │ }
+  
+  i Replace ?. with ..
+  
+    4 │ 	const ok = o.v !== null;
+    5 │ 	if (ok) {
+  > 6 │ 		return o.v?.length;
+      │ 		          ^^
+    7 │ 	}
+    8 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidReadonlyAliasedConditions.ts:13:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    11 │ 	const hasValue = o.a.v !== undefined;
+    12 │ 	if (hasValue) {
+  > 13 │ 		return o.a.v?.length;
+       │ 		       ^^^^^
+    14 │ 	}
+    15 │ }
+  
+  i Replace ?. with ..
+  
+    11 │ 	const hasValue = o.a.v !== undefined;
+    12 │ 	if (hasValue) {
+  > 13 │ 		return o.a.v?.length;
+       │ 		            ^^
+    14 │ 	}
+    15 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidReadonlyAliasedConditions.ts:20:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    18 │ 	const isString = typeof o.v === "string";
+    19 │ 	if (isString) {
+  > 20 │ 		return o.v?.length;
+       │ 		       ^^^
+    21 │ 	}
+    22 │ }
+  
+  i Replace ?. with ..
+  
+    18 │ 	const isString = typeof o.v === "string";
+    19 │ 	if (isString) {
+  > 20 │ 		return o.v?.length;
+       │ 		          ^^
+    21 │ 	}
+    22 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidReadonlyAliasedConditions.ts:34:11 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    32 │ 		const ready = this.value !== undefined;
+    33 │ 		if (ready) {
+  > 34 │ 			return this.value?.length;
+       │ 			       ^^^^^^^^^^
+    35 │ 		}
+    36 │ 	}
+  
+  i Replace ?. with ..
+  
+    32 │ 		const ready = this.value !== undefined;
+    33 │ 		if (ready) {
+  > 34 │ 			return this.value?.length;
+       │ 			                 ^^
+    35 │ 		}
+    36 │ 	}
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

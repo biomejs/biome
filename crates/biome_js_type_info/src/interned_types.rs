@@ -2466,6 +2466,20 @@ impl<'db> TypeMemberKind<'db> {
         }
     }
 
+    /// Makes a named instance property mutable, the opposite of
+    /// [`Self::with_readonly`]: a `readonly` or `as const` property becomes a
+    /// plain one. Other members are returned unchanged.
+    pub fn without_readonly(self) -> Self {
+        match self {
+            Self::ReadonlyNamed(name) | Self::ConstAssertedNamed(name) => Self::Named(name),
+            Self::ReadonlyNamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+                Self::NamedOptional(name)
+            }
+            Self::ConstAssertedComputedValueNamed(name, key) => Self::ComputedValueNamed(name, key),
+            other => other,
+        }
+    }
+
     pub fn is_call_signature(&self) -> bool {
         matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
     }
