@@ -27,7 +27,6 @@ biome_analyze_macros         = { path = "./crates/biome_analyze_macros", version
 biome_aria                   = { path = "./crates/biome_aria", version = "0.7.3" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.7.3" }
 biome_astro_semantic         = { path = "./crates/biome_astro_semantic" }
-biome_bench_utils            = { path = "./crates/biome_bench_utils" }
 biome_embeds                 = { path = "./crates/biome_embeds" }
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
@@ -48,7 +47,6 @@ biome_diagnostics_categories = { path = "./crates/biome_diagnostics_categories",
 biome_diagnostics_macros     = { path = "./crates/biome_diagnostics_macros", version = "0.7.3" }
 biome_flags                  = { path = "./crates/biome_flags" }
 biome_formatter              = { path = "./crates/biome_formatter", version = "0.7.3" }
-biome_formatter_test         = { path = "./crates/biome_formatter_test" }
 biome_fs                     = { path = "./crates/biome_fs", version = "0.7.3" }
 biome_glob                   = { path = "./crates/biome_glob", version = "0.7.3" }
 biome_graphql_analyze        = { path = "./crates/biome_graphql_analyze", version = "0.7.3" }
@@ -240,8 +238,6 @@ web-time                     = "1.1.0"
 windows                      = "0.62.2"
 yastl                        = "0.1.2"
 parking_lot                  = { version = "0.13.0" }
-xtask_codegen                = { path = "xtask/codegen" }
-xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }
 
 [workspace.lints.clippy]
