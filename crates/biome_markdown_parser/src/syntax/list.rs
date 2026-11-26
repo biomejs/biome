@@ -658,6 +658,9 @@ impl ParseNodeList for BulletList {
             |p, marker_kind| {
                 let next_is_bullet_at_indent = p.lookahead(|p| {
                     p.bump(NEWLINE);
+                    if next_line_left_open_quote(p) {
+                        return false;
+                    }
                     // Don't set virtual_line_start here — it would cause
                     // list_item_within_indent to zero out base_indent,
                     // making the inner list claim items at outer indent.
@@ -1179,6 +1182,9 @@ impl ParseNodeList for OrderedList {
             |p, marker_delim| {
                 let next_is_ordered = p.lookahead(|p| {
                     p.bump(NEWLINE);
+                    if next_line_left_open_quote(p) {
+                        return false;
+                    }
                     at_order_list_item_with_base_indent(p, marker_indent)
                 });
                 if next_is_ordered {
@@ -3496,6 +3502,15 @@ fn consume_all_blank_lines(p: &mut MarkdownParser) {
     }
 }
 
+/// Whether the line at the cursor has left the innermost open block quote.
+///
+/// A list item inside a quote cannot continue onto that line. The marker
+/// there belongs to an outer list.
+fn next_line_left_open_quote(p: &mut MarkdownParser) -> bool {
+    let quote_depth = p.state().block_quote_depth;
+    quote_depth > 0 && !has_quote_prefix(p, quote_depth)
+}
+
 /// Check if there's a bullet list item after skipping blank lines.
 ///
 /// Per CommonMark §5.3, blank lines between list items don't end the list,
@@ -3568,6 +3583,13 @@ where
                 return false;
             }
         } else if indent < expected_indent || indent > expected_indent + MAX_BLOCK_PREFIX_INDENT {
+            return false;
+        }
+
+        // A list opened inside a block quote only continues while the next
+        // item's line is still in that quote. A marker with no `>` belongs
+        // to an outer list (#13386).
+        if next_line_left_open_quote(p) {
             return false;
         }
 

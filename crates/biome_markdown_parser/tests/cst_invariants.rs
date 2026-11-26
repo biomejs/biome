@@ -349,6 +349,38 @@ fn nested_fence_as_bullet_item_does_not_swallow_siblings() {
 }
 
 #[test]
+fn quoted_list_fence_does_not_expect_item_after_closing_fence() {
+    // #13386: a fenced code block in a list item inside a block quote, then a
+    // blank line and another top-level item. The closing fence is valid
+    // CommonMark. The inner list must not treat the following bullet as its
+    // own item and emit "Expected a list item".
+    let input = "- > - ```text\n  >   hello\n  >   ```\n\n- > - ```text\n  >   there\n  >   ```\n";
+    let parsed = parse_markdown(input, MarkdownParserOptions::default());
+
+    assert!(
+        parsed.diagnostics().is_empty(),
+        "quoted list fence emitted a diagnostic:\n{:#?}",
+        parsed.diagnostics()
+    );
+    assert_eq!(
+        bullet_item_counts(input),
+        [2, 1, 1],
+        "quoted list fence grouped the outer items together:\n{:#?}",
+        parsed.tree()
+    );
+
+    // The same mis-claim happens with no blank line between the items.
+    let adjacent = "- > - ```text\n  >   hello\n  >   ```\n- > - ```text\n  >   there\n  >   ```\n";
+    let adjacent_parsed = parse_markdown(adjacent, MarkdownParserOptions::default());
+    assert!(
+        adjacent_parsed.diagnostics().is_empty(),
+        "adjacent quoted list fence emitted a diagnostic:\n{:#?}",
+        adjacent_parsed.diagnostics()
+    );
+    assert_eq!(bullet_item_counts(adjacent), [2, 1, 1]);
+}
+
+#[test]
 fn blockquoted_fence_as_bullet_item_does_not_swallow_siblings() {
     // The fence-as-bullet break must fire before the line's blockquote prefix
     // is consumed into the code block; otherwise `> - x` has its `>` absorbed
