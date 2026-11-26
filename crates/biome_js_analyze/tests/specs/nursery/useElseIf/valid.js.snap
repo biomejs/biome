@@ -1,0 +1,464 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+if (foo === 1) {}
+else if (foo === 2) {}
+
+{
+	if (foo === 1) {}
+	if (bar === 2) {}
+}
+
+{
+	if (foo == 1) {}
+	if (foo == 2) {}
+}
+
+{
+	if (foo === 1 && bar === 2) {}
+	if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {}
+	bar();
+	if (foo === 2) {}
+}
+
+function returns() {
+	if (foo === 1) {
+		return;
+	}
+
+	if (foo === 2) {}
+}
+
+function throws() {
+	if (foo === 1) {
+		throw new Error();
+	}
+
+	if (foo === 2) {}
+}
+
+while (unicorn) {
+	if (foo === 1) {
+		break;
+	}
+
+	if (foo === 2) {}
+}
+
+while (unicorn) {
+	if (foo === 1) {
+		continue;
+	}
+
+	if (foo === 2) {}
+}
+
+function exhaustiveSwitch() {
+	if (foo === 1) {
+		switch (bar) {
+			case 1:
+				return;
+			default:
+				throw new Error();
+		}
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {}
+	else {}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {}
+
+	if (foo === 2) {}
+	else {}
+}
+
+{
+	if (foo === 1) {
+		foo = 2;
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		foo++;
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		foo += 1;
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo.bar === 1) {
+		foo.bar = 2;
+	}
+
+	if (foo.bar === 2) {}
+}
+
+{
+	if (foo.bar === 1) {
+		foo["bar"] = 2;
+	}
+
+	if (foo.bar === 2) {}
+}
+
+{
+	if (foo.bar === 1) {
+		foo = {};
+	}
+
+	if (foo.bar === 2) {}
+}
+
+{
+	if (foo === 1) {
+		({ foo } = object);
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		({ bar: foo } = object);
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		[foo] = array;
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo.bar.baz === 1) {
+		foo.bar = { baz: 2 };
+	}
+
+	if (foo.bar.baz === 2) {}
+}
+
+{
+	if (foo[bar] === 1) {
+		bar = "baz";
+	}
+
+	if (foo[bar] === 2) {}
+}
+
+{
+	if (foo.bar === 1) {
+		delete foo.bar;
+	}
+
+	if (foo.bar === undefined) {}
+}
+
+{
+	if (foo?.bar === undefined) {}
+	if (foo.bar === 2) {}
+}
+
+{
+	if (foo?.bar === 1) {}
+	if (foo?.bar === 2) {}
+}
+
+function redeclared(foo) {
+	if (foo === 1) {
+		var foo = 2;
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		for (foo of values) {}
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		for ({ foo } in object) {}
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		class Bar {
+			static {
+				foo = 2;
+			}
+		}
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === bar) {}
+	if (foo === baz) {}
+}
+
+{
+	if (foo === 1) {}
+	if (foo === 1) {}
+}
+
+{
+	if (foo === 1) {}
+	if (foo === 1.0) {}
+}
+
+{
+	if (foo === 0x10) {}
+	if (foo === 16) {}
+}
+
+{
+	if (foo === 16n) {}
+	if (foo === 0x10n) {}
+}
+
+{
+	if (foo === 1 || foo === 2) {}
+	if (foo === 2 || foo === 3) {}
+}
+
+{
+	if (foo) {}
+	if (foo === false) {}
+}
+
+{
+	if (Boolean(foo)) {}
+	if (foo === false) {}
+}
+
+{
+	let foo = true;
+
+	if (foo) {}
+	if (foo === false) {}
+}
+
+{
+	const foo = true;
+
+	if (foo) {}
+	if (foo === true) {}
+}
+
+{
+	const Boolean = (value) => value;
+	const foo = true;
+
+	if (Boolean(foo)) {}
+	if (foo === false) {}
+}
+
+{
+	const undefined = 1;
+
+	if (foo === undefined) {}
+	if (foo === null) {}
+}
+
+{
+	if (foo === 1) {}
+	else if (foo === 2) {}
+	else {}
+
+	if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {}
+
+	if (foo === 2) {}
+	else if (foo === 3) {}
+	else {}
+}
+
+{
+	if (foo === 1) {}
+	else if (foo === 2) {}
+
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {}
+
+	if (foo === 2) {}
+	else if (foo === 1) {}
+}
+
+{
+	if (foo === 1) {}
+
+	if (foo === 2) {}
+	else if (bar === 3) {}
+}
+
+{
+	if (foo === 1) {}
+	else if (bar === 2) {}
+
+	if (foo === 3) {}
+}
+
+function laterBranchReturns() {
+	if (foo === 1) {}
+	else if (foo === 2) {
+		return;
+	}
+
+	if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {}
+	else if (foo === 2) {
+		foo = 3;
+	}
+
+	if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {}
+	else if (foo === 2 || foo === 3) {}
+
+	if (foo === 4) {}
+	else if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {
+		[foo = 2] = values;
+	}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		[, ...foo] = values;
+	}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		({ bar, ...foo } = values);
+	}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {
+		var foo = 2;
+	}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1 || bar === 2) {}
+	if (foo === 3) {}
+}
+
+{
+	if (value === `a`) {}
+	if (value === "a") {}
+}
+
+{
+	if (value === `\u{61}`) {}
+	if (value === "a") {}
+}
+
+{
+	if (value === "\x61") {}
+	if (value === "a") {}
+}
+
+{
+	if (value === `a${suffix}`) {}
+	if (value === `b`) {}
+}
+
+{
+	if (value === tag`a`) {}
+	if (value === `b`) {}
+}
+
+{
+	if (value === /a/) {}
+	if (value === /b/) {}
+}
+
+{
+	if (value === -1) {}
+	if (value === 1) {}
+}
+
+{
+	if (object[`state${name}`] === "a") {}
+	if (object.state === "b") {}
+}
+
+{
+	if (foo() === 1) {}
+	if (foo() === 2) {}
+}
+
+{
+	if (foo === 1) {}
+	{
+		if (foo === 2) {}
+	}
+}
+
+{
+	const { foo } = true;
+
+	if (!foo) {}
+	if (foo === undefined) {}
+}
+
+```

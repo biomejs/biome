@@ -1,0 +1,50 @@
+/* should not generate diagnostics */
+function optional(foo?: boolean) {
+	if (!foo) {}
+	if (foo === undefined) {}
+}
+
+function optionalShorthand(foo?: boolean) {
+	if (foo) {}
+	if (foo === false) {}
+}
+
+function sameValue(foo: boolean) {
+	if (foo) {}
+	if (foo === true) {}
+}
+
+function notBoolean(foo: string) {
+	if (foo) {}
+	if (foo === false) {}
+}
+
+function nullable(foo: boolean | null) {
+	if (foo) {}
+	if (foo === false) {}
+}
+
+function shadowedBoolean(foo: boolean, Boolean: (value: unknown) => boolean) {
+	if (Boolean(foo)) {}
+	if (foo === false) {}
+}
+
+declare const options: { enabled: boolean };
+{
+	if (options.enabled) {}
+	if (options.enabled === false) {}
+}
+
+{
+	if ((foo as any).bar === 1) {
+		(foo as any).bar = 2;
+	}
+	if (foo.bar === 2) {}
+}
+
+{
+	if (foo.bar === 1) {
+		foo!.bar = 2;
+	}
+	if (foo.bar === 2) {}
+}

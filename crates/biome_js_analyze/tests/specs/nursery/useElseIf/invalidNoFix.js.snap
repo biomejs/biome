@@ -1,0 +1,181 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// An `else` after an `if` without its own `else` would belong to that inner `if`.
+{
+	if (x === 1) if (y) 0;
+	if (x === 2) console.log("two");
+}
+
+{
+	if (x === 1) while (y) if (y) 0;
+	if (x === 2) console.log("two");
+}
+
+{
+	if (x === 1) foo: if (y) 0;
+	if (x === 2) console.log("two");
+}
+
+{
+	if (x === 1) 1; else if (x === 3) if (y) 0;
+	if (x === 2) console.log("two");
+}
+
+{
+	if (x === 1) for (const a of b) if (y) 0;
+	if (x === 2) console.log("two");
+}
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:5:2 lint/nursery/useElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    3 │ {
+    4 │ 	if (x === 1) if (y) 0;
+  > 5 │ 	if (x === 2) console.log("two");
+      │ 	^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i The previous condition is here.
+  
+    2 │ // An `else` after an `if` without its own `else` would belong to that inner `if`.
+    3 │ {
+  > 4 │ 	if (x === 1) if (y) 0;
+      │ 	    ^^^^^^^
+    5 │ 	if (x === 2) console.log("two");
+    6 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:10:2 lint/nursery/useElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+     8 │ {
+     9 │ 	if (x === 1) while (y) if (y) 0;
+  > 10 │ 	if (x === 2) console.log("two");
+       │ 	^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i The previous condition is here.
+  
+     8 │ {
+   > 9 │ 	if (x === 1) while (y) if (y) 0;
+       │ 	    ^^^^^^^
+    10 │ 	if (x === 2) console.log("two");
+    11 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:15:2 lint/nursery/useElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    13 │ {
+    14 │ 	if (x === 1) foo: if (y) 0;
+  > 15 │ 	if (x === 2) console.log("two");
+       │ 	^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i The previous condition is here.
+  
+    13 │ {
+  > 14 │ 	if (x === 1) foo: if (y) 0;
+       │ 	    ^^^^^^^
+    15 │ 	if (x === 2) console.log("two");
+    16 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:20:2 lint/nursery/useElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    18 │ {
+    19 │ 	if (x === 1) 1; else if (x === 3) if (y) 0;
+  > 20 │ 	if (x === 2) console.log("two");
+       │ 	^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i The previous condition is here.
+  
+    18 │ {
+  > 19 │ 	if (x === 1) 1; else if (x === 3) if (y) 0;
+       │ 	                         ^^^^^^^
+    20 │ 	if (x === 2) console.log("two");
+    21 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:25:2 lint/nursery/useElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    23 │ {
+    24 │ 	if (x === 1) for (const a of b) if (y) 0;
+  > 25 │ 	if (x === 2) console.log("two");
+       │ 	^^^^^^^^^^^^
+    26 │ }
+    27 │ 
+  
+  i The previous condition is here.
+  
+    23 │ {
+  > 24 │ 	if (x === 1) for (const a of b) if (y) 0;
+       │ 	    ^^^^^^^
+    25 │ 	if (x === 2) console.log("two");
+    26 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
