@@ -78,6 +78,7 @@ revisiting the row.
 | A private name and a string key with the same text | `class K { #x: string \| null = null; "#x": string \| null = null; m() { if (this.#x) this["#x"] } }` | `string`: TypeScript treats `this.#x` and `this["#x"]` as the same reference | `string \| null`: `this.#x` and `this["#x"]` are different paths, so neither narrows the other | A private name is not a property, so `this["#x"]` reads the property named `"#x"`, another value, which can be `null` after the test of `this.#x`. Keeping them apart is sound and loses nothing in code that has no property whose name starts with `#`. |
 | A write to a property between a `const` that holds it and the test of the `const` | `type Circle = { kind: "c"; r: number };`<br>`type Square = { kind: "s"; w: number };`<br>`s: Circle \| Square;`<br>`const k = s.kind; s.kind = "s"; if (k === "c") s`<br>`const ok = s.kind === "c"; s.kind = "s"; if (ok) s` | `Circle` | `Circle \| Square`: a test of a `const` that holds a property, and an aliased condition that tests a property, narrow the object only when the code of the execution root never writes the property, as a property path narrows only when the root never writes it. A write after the test counts too. A test of the property itself, as in `if (s.kind === "c")`, still narrows `s` after the write. Calls and callbacks that write the property don't count, as for property narrowing. | `k` holds the value of `s.kind` from before the write, so `s.kind` is `"s"` at the read and `s` matches neither member. TypeScript checks a write to a discriminant against the narrowed object, so code rarely writes a discriminant in a function that also tests it, and the sound result loses little. |
 | A rest element in a destructuring `const` holds no property | `r: { ok: true; v: number } \| { ok: false; e: string };`<br>`const { ...ok } = r; if (ok) r` | `{ ok: true; v: number }`: TypeScript takes `ok` as the property `r.ok` | The declared type of `r` | `ok` holds a new object with the other properties of `r`, which is always truthy, so `r` can have `ok: false` at the read. |
+| `in` treats object types as closed | `function f(x: { a: 1 } \| { b: 2 }) { if ("a" in x) x.a }`<br>`const v = { a: "s", b: 2 as const }; f(v)` | `1` | `1`, the same as TypeScript: `"a" in x` keeps `{ a: 1 }` and removes `{ b: 2 }` | `{ b: 2 }` also describes objects with other properties, so `f(v)` passes an object whose property `a` is `"s"`, and `x.a` is `"s"` at the read. Keeping `{ b: 2 }` in the true branch, as `{ b: 2 } & Record<"a", unknown>`, would make `in` useless for telling the members of a union apart, while code rarely passes an object whose type leaves out a property that the code tests with `in`. |
 | Code between two elements of a destructuring pattern keeps the narrowing | `s: { kind: "c"; x?: number; v: number } \| { kind: "s"; x?: number; v: string };`<br>`const { kind, x = reset(s), v } = s; if (kind === "c") v` | `number` | `number`, the same as TypeScript. A computed key between the elements, as in `{ kind, [key()]: x, v }`, keeps the narrowing too. | Destructuring reads `kind`, then runs the default of `x` when `s.x` is `undefined`, then reads `v`, so `reset` can change `s` before `v` is read and make `v` a string at the read. A computed key runs code at the same point. Defaults and computed keys rarely write the value being destructured, while stopping the narrowing at every default or computed key that can run code would lose it in patterns such as `{ kind, items = load(), v }`. |
 
 ## Limits
@@ -188,12 +189,31 @@ These limits apply to every *Supported* and *Partial* row below:
   direct elements of the same pattern that have no default and are not rest
   elements, so in `const { a: { kind, v }, b } = w`, a test of `b` doesn't
   narrow `v`, and in `const { kind, ...rest } = s`, a test of `kind` doesn't
-  narrow `rest`. A nested pattern narrows only when no enclosing pattern
+  narrow `rest`. An element of an array pattern from index 16 on neither
+  narrows the pattern nor holds a discriminant, where TypeScript has no such
+  limit. A nested pattern narrows only when no enclosing pattern
   supplies a default, as `{ a: { kind, v } = d }` does. The destructured
   value narrows as the object of a test of its property does, by the rules
   above, except that its `null` and `undefined` members don't count, because
   destructuring throws on them. The element's own tests then narrow the
   element further, as a property path's own tests do.
+- `"a" in x` and `0 in x` narrow `x` when its declared type is a union with
+  at least two object types, and `x` is a variable, `this`, or a property
+  path that can narrow by the rules above. The key must be a string literal
+  without escapes or a decimal integer literal of the kind that a property
+  path accepts. As in TypeScript, the true branch keeps the members that
+  declare the property, even as optional, or whose index signature accepts
+  its name, and removes the others only when some member does, and the false
+  branch removes the members that declare the property as required. A member
+  stays in both branches when Biome can't tell whether it has the property,
+  as the row on `in` lists. Only the value that `in` looks into narrows:
+  `"a" in s.k` narrows `s.k`, not `s`, as in TypeScript. The deliberate
+  choices above describe why object types count as closed.
+- Members that one module adds to an interface of another module through
+  module augmentation are not seen. So with
+  `declare module "./shapes" { interface X { extra: 1 } }` in one module,
+  `x: X | E`, and `interface E { extra: 2 }`, `"extra" in x` gives `E`, where
+  TypeScript gives `X | E`.
 - Falsy and `typeof` tests compare an object type with the types that give
   primitives and functions their members, such as `String` and `Function`,
   from TypeScript's ES2015 library files. Members that the project adds to
@@ -293,8 +313,8 @@ code as TS7027, an error with `allowUnreachableCode: false`.
 
 | Behaviour | Example | TypeScript | Status |
 | --- | --- | --- | --- |
-| Keeps the union members that declare the property | `x: { a: 1 } \| { b: 2 }; if ("a" in x) x` | `{ a: 1 }` | Not yet |
-| An undeclared property adds a `Record` | `x: object; if ("a" in x) x` | `object & Record<"a", unknown>` | Not yet |
+| Keeps the union members that declare the property | `x: { a: 1 } \| { b: 2 }; if ("a" in x) x` | `{ a: 1 }`; `{ b: 2 }` in the `else` branch | Partial: the limits above describe the keys and subjects. A member stays in both branches when Biome can't tell whether it has the property: a primitive, a function, a tuple, an array, an intersection, a generic, an instance of a class, because Biome doesn't collect the setters and index signatures of classes, or of a built-in type such as `Date` or `Error`, because Biome's built-in types come from the ES2015 library files, which lack members that newer ones add, such as `at` of arrays and `cause` of errors. So does an object type with a call or construct signature, with a setter, a spread, or a computed key, or with a member whose name is spelled with an escape or as a number other than a decimal integer, such as `"\u0061"` or `1.0`. So `x: { a: 1 } \| Date` gives `{ a: 1 } \| Date`, where TypeScript gives `{ a: 1 }`, and `x: P \| Q`, with `class P { p = 1 }` and `class Q { q = 1 }`, gives `P \| Q` for `"p" in x` and `Q` in the `else` branch, where TypeScript gives `P` and `Q`. TypeScript also narrows with a key spelled otherwise, such as a `const` of a literal type, a template literal, `"\u0061"`, or `0x0`, with a key that starts with `#`, such as `"#a"`, and a declared type with a single object type, which can make the `else` branch impossible. |
+| An undeclared property adds a `Record` | `x: object; if ("a" in x) x` | `object & Record<"a", unknown>` | Not yet: Biome keeps the declared type when no member declares the property or has an index signature that accepts it. |
 | `#brand in x` | `class C { #p = 1 }`<br>`x: C \| Date; if (#p in x) x` (inside `C`) | `C` | Not yet |
 | `in` and `hasOwnProperty` remove a missing optional property | `x: { a?: string }; if ("a" in x) x.a`<br>(with `exactOptionalPropertyTypes`) | `string`; `string \| undefined` without `exactOptionalPropertyTypes` | Not yet |
 
