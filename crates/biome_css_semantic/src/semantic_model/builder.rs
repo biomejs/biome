@@ -1,7 +1,7 @@
 use biome_css_syntax::{
     AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssMediaAtRule, CssScopeAtRule,
     CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
-    single_expression_item,
+    TwCustomVariantAtRule, TwUtilityAtRule, TwVariantAtRule, single_expression_item,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -26,7 +26,10 @@ const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::
     .union(CssMediaAtRule::KIND_SET)
     .union(CssScopeAtRule::KIND_SET)
     .union(CssStartingStyleAtRule::KIND_SET)
-    .union(CssSupportsAtRule::KIND_SET);
+    .union(CssSupportsAtRule::KIND_SET)
+    .union(TwCustomVariantAtRule::KIND_SET)
+    .union(TwUtilityAtRule::KIND_SET)
+    .union(TwVariantAtRule::KIND_SET);
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,

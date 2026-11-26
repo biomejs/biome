@@ -13,7 +13,7 @@ use biome_css_syntax::{
     CssRelativeSelectorList, CssScopeAtRule, CssSelectorList, CssStartingStyleAtRule,
     CssSupportsAtRule, CssSupportsFeatureDeclaration, ScssAtRootAtRule, ScssEachAtRule,
     ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
-    ScssMixinAtRule, ScssWhileAtRule,
+    ScssMixinAtRule, ScssWhileAtRule, TwCustomVariantAtRule, TwUtilityAtRule, TwVariantAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
@@ -26,7 +26,10 @@ const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule
     .union(CssMediaAtRule::KIND_SET)
     .union(CssScopeAtRule::KIND_SET)
     .union(CssStartingStyleAtRule::KIND_SET)
-    .union(CssSupportsAtRule::KIND_SET);
+    .union(CssSupportsAtRule::KIND_SET)
+    .union(TwCustomVariantAtRule::KIND_SET)
+    .union(TwUtilityAtRule::KIND_SET)
+    .union(TwVariantAtRule::KIND_SET);
 
 const SCSS_SELECTOR_CONTEXT_KINDS: SyntaxKindSet<CssLanguage> = ScssAtRootAtRule::KIND_SET
     .union(ScssEachAtRule::KIND_SET)

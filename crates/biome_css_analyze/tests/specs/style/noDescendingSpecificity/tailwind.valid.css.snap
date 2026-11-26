@@ -1,0 +1,74 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: tailwind.valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+.a .outer {
+  color: red;
+}
+
+@utility fade {
+  .a .inner {
+    color: red;
+  }
+  .outer {
+    color: blue;
+  }
+}
+
+@utility shimmer {
+  .inner {
+    color: blue;
+  }
+}
+
+@variant dark {
+  .a .card {
+    color: white;
+  }
+  .outer {
+    color: blue;
+  }
+}
+
+@variant light {
+  .card {
+    color: black;
+  }
+}
+
+.btn {
+  @variant hover {
+    .a .nested {
+      color: red;
+    }
+  }
+  @variant active {
+    .nested {
+      color: blue;
+    }
+  }
+}
+
+@custom-variant theme-a {
+  .a .slot-target {
+    color: red;
+    @slot;
+  }
+  .outer {
+    color: blue;
+    @slot;
+  }
+}
+
+@custom-variant theme-b {
+  .slot-target {
+    color: blue;
+    @slot;
+  }
+}
+
+```

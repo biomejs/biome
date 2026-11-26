@@ -4,8 +4,8 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
     CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
     CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule,
-    ScssExpression, ScssPartialCombinatorSelector, decode_css_identifier,
-    property_syntax::PropertySyntaxResult,
+    ScssExpression, ScssPartialCombinatorSelector, TwCustomVariantAtRule, TwUtilityAtRule,
+    TwVariantAtRule, decode_css_identifier, property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
@@ -408,7 +408,7 @@ impl Rule {
 }
 
 declare_node_union! {
-    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule | ScssAtRootAtRule
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule | ScssAtRootAtRule | TwCustomVariantAtRule | TwUtilityAtRule | TwVariantAtRule
 }
 
 impl AnyRuleStart {
@@ -422,6 +422,9 @@ impl AnyRuleStart {
             Self::CssStartingStyleAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
             Self::ScssAtRootAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::TwCustomVariantAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::TwUtilityAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::TwVariantAtRule(node) => node.syntax().text_trimmed_range(),
         }
     }
 }

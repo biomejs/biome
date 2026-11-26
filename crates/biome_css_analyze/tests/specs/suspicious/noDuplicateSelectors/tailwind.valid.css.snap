@@ -1,0 +1,99 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: tailwind.valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+.outer-shared {
+  color: black;
+}
+
+/* Different @utility blocks each define their own context */
+@utility fade {
+  color: red;
+  .outer-shared {
+    color: purple;
+  }
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: blue;
+  }
+}
+
+@utility shimmer {
+  color: green;
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: yellow;
+  }
+}
+
+/* Functional @utility blocks */
+@utility tab-* {
+  tab-size: 2;
+  &:hover {
+    tab-size: 4;
+  }
+}
+
+@utility indent-* {
+  text-indent: 1rem;
+  &:hover {
+    text-indent: 2rem;
+  }
+}
+
+/* Nested @media inside @utility creates a distinct child context */
+@utility responsive-fade {
+  &:hover {
+    color: red;
+  }
+  @media (min-width: 600px) {
+    &:hover {
+      color: blue;
+    }
+  }
+}
+
+/* Different @variant blocks at top level and nested inside a rule */
+@variant dark {
+  .card {
+    color: white;
+  }
+}
+
+@variant light {
+  .card {
+    color: black;
+  }
+}
+
+.btn {
+  @variant hover {
+    &:focus {
+      color: red;
+    }
+  }
+  @variant active {
+    &:focus {
+      color: blue;
+    }
+  }
+}
+
+/* Different block @custom-variant directives */
+@custom-variant theme-a {
+  .slot-target {
+    @slot;
+  }
+}
+
+@custom-variant theme-b {
+  .slot-target {
+    @slot;
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+```

@@ -1,0 +1,151 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: tailwind.invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+@utility fade {
+  .a .inner {
+    color: red;
+  }
+  .inner {
+    color: blue;
+  }
+}
+
+@variant dark {
+  .a .card {
+    color: white;
+  }
+  .card {
+    color: black;
+  }
+}
+
+.btn {
+  @variant hover {
+    .a &:focus {
+      color: red;
+    }
+    &:focus {
+      color: blue;
+    }
+  }
+}
+
+@custom-variant theme-a {
+  .a .slot-target {
+    color: red;
+    @slot;
+  }
+  .slot-target {
+    color: blue;
+    @slot;
+  }
+}
+
+```
+
+# Diagnostics
+```
+tailwind.invalid.css:7:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    5 │     color: red;
+    6 │   }
+  > 7 │   .inner {
+      │   ^^^^^^
+    8 │     color: blue;
+    9 │   }
+  
+  i This selector specificity is (0, 2, 0)
+  
+    3 │ @utility fade {
+  > 4 │   .a .inner {
+      │   ^^^^^^^^^
+    5 │     color: red;
+    6 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+tailwind.invalid.css:16:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    14 │     color: white;
+    15 │   }
+  > 16 │   .card {
+       │   ^^^^^
+    17 │     color: black;
+    18 │   }
+  
+  i This selector specificity is (0, 2, 0)
+  
+    12 │ @variant dark {
+  > 13 │   .a .card {
+       │   ^^^^^^^^
+    14 │     color: white;
+    15 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+tailwind.invalid.css:26:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    24 │       color: red;
+    25 │     }
+  > 26 │     &:focus {
+       │     ^^^^^^^
+    27 │       color: blue;
+    28 │     }
+  
+  i This selector specificity is (0, 3, 0)
+  
+    21 │ .btn {
+    22 │   @variant hover {
+  > 23 │     .a &:focus {
+       │     ^^^^^^^^^^
+    24 │       color: red;
+    25 │     }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+tailwind.invalid.css:37:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    35 │     @slot;
+    36 │   }
+  > 37 │   .slot-target {
+       │   ^^^^^^^^^^^^
+    38 │     color: blue;
+    39 │     @slot;
+  
+  i This selector specificity is (0, 2, 0)
+  
+    32 │ @custom-variant theme-a {
+  > 33 │   .a .slot-target {
+       │   ^^^^^^^^^^^^^^^
+    34 │     color: red;
+    35 │     @slot;
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
