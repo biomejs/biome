@@ -457,7 +457,9 @@ impl WorkspaceDbData {
 
     /// Removes all files and modules that start with the given path. That's
     /// usually used when removing a library or a folder from the project.
-    pub fn unload_path(&self, path: &Utf8Path) {
+    /// Removes the files within `path` from the files that queries read, with
+    /// their node caches.
+    pub(crate) fn unload_files(&self, path: &Utf8Path) {
         let files = self.files.pin();
         let to_remove: Vec<Utf8PathBuf> = files
             .keys()
@@ -468,7 +470,6 @@ impl WorkspaceDbData {
             files.remove(&p);
         }
         self.node_caches.pin().retain(|p, _| !p.starts_with(path));
-        self.unload_modules(path);
     }
 
     /// Removes the modules within `path`.
@@ -1149,22 +1150,6 @@ impl WorkspaceDb {
                 debug_assert!(removed.is_some());
             });
         }
-    }
-
-    pub fn unload_path(&mut self, path: &Utf8Path) {
-        {
-            let files = self.files.pin();
-            let to_remove: Vec<Utf8PathBuf> = files
-                .keys()
-                .filter(|p| p.starts_with(path))
-                .cloned()
-                .collect();
-            for p in to_remove {
-                files.remove(&p);
-            }
-        }
-        self.node_caches.pin().retain(|p, _| !p.starts_with(path));
-        self.unload_modules(path);
     }
 
     /// Removes the modules within `path`.
@@ -3030,7 +3015,7 @@ mod tests {
 
         let db = std::thread::scope(|scope| {
             let writer = scope.spawn(move || {
-                db.unload_path(Utf8Path::new("root"));
+                db.unload_modules(Utf8Path::new("root"));
                 db
             });
 

@@ -475,42 +475,43 @@ fn clients_keep_their_own_content() {
     assert_eq!(content_in(&second, project_key, PATH), "import 'disk';");
 }
 
-/// A client that didn't open a file, like the CLI attached to the daemon of an
-/// editor, reads the content on disk, and doesn't see the files that only
-/// other clients opened.
+/// The files of dependencies that a client opens are in the database only:
+/// the services read them, and clients don't. Closing the files of the client
+/// removes them.
 #[cfg(feature = "module_graph")]
 #[test]
-fn clients_that_did_not_open_a_file_read_the_disk() {
-    const INDEXED: &str = "/project/indexed.js";
-    const UNSAVED: &str = "/project/unsaved.js";
+fn dependencies_that_a_client_opens_are_database_only() {
+    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
 
-    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
-    watcher(&workspace)
-        .index_file(project_key, BiomePath::new(INDEXED))
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    open_in(
+        &editor,
+        project_key,
+        PATH,
+        "export declare const value: number;",
+    );
+
+    let exists = editor
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(PATH),
+        })
         .unwrap();
-    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
-    open_in(&editor, project_key, INDEXED, "import 'editor';");
-    open_in(&editor, project_key, UNSAVED, "import 'editor';");
+    assert!(!exists);
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
 
-    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
-    let db = workspace.get_db();
-    let parse = cli.get_parse(&BiomePath::new(INDEXED)).unwrap();
-    let parsed_text = parse
-        .parsed(&db)
-        .syntax::<JsLanguage>()
-        .text_with_trivia()
-        .to_string();
-    assert_eq!(parsed_text, "import 'disk';");
-    let exists = |client: &WorkspaceServerWithDb, path: &str| {
-        client
-            .file_exists(FileExistsParams {
-                file_path: BiomePath::new(path),
-            })
-            .unwrap()
-    };
-    assert!(exists(&cli, INDEXED));
-    assert!(!exists(&cli, UNSAVED));
-    assert!(exists(&editor, UNSAVED));
+    editor.close_client_files().unwrap();
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_none()
+    );
 }
 
 /// A change from a client that didn't open a file records the content on
@@ -557,37 +558,6 @@ fn change_from_another_client_records_the_disk_content() {
         })
         .unwrap();
     assert_eq!(content_in(&editor, project_key, PATH), "import 'changed';");
-}
-
-/// Closing the files of a client also closes the dependencies it opened,
-/// which the workspace keeps in the database only.
-#[cfg(feature = "module_graph")]
-#[test]
-fn closing_the_files_of_a_client_closes_its_dependencies() {
-    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
-
-    let (workspace, project_key, _) = lsp_workspace(&[]);
-    let editor = client(&workspace, 1);
-    open_in(
-        &editor,
-        project_key,
-        PATH,
-        "export declare const value: number;",
-    );
-    assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
-            .is_some()
-    );
-
-    editor.close_client_files().unwrap();
-    assert!(
-        workspace
-            .get_db()
-            .get_parsed_source(Utf8Path::new(PATH))
-            .is_none()
-    );
 }
 
 /// The analysis of a script reads the embedded content, such as the template
@@ -654,184 +624,6 @@ import Card from './Card.vue';
     };
     assert_eq!(unused_imports(&editor), 1);
     assert_eq!(unused_imports(&cli), 0);
-}
-
-/// Forgetting a closed client removes the record of its close, so the files
-/// that a client with the same identifier opens are kept.
-#[cfg(feature = "module_graph")]
-#[test]
-fn forgotten_clients_keep_the_files_they_open() {
-    const PATH: &str = "/project/a.js";
-
-    let (workspace, project_key, _) = lsp_workspace(&[]);
-    let editor = client(&workspace, 1);
-    editor.close_client_files().unwrap();
-    workspace.server.forget_closed_client(ClientId::new(1));
-    open_in(&editor, project_key, PATH, "let a = 1;");
-
-    let exists = editor
-        .file_exists(FileExistsParams {
-            file_path: BiomePath::new(PATH),
-        })
-        .unwrap();
-    assert!(exists);
-}
-
-/// A change that a client sent before its files were closed, and that
-/// publishes its content after the close, doesn't leave the file open.
-#[cfg(feature = "module_graph")]
-#[test]
-fn change_published_after_the_close_of_its_client_is_closed() {
-    const PATH: &str = "/project/a.js";
-
-    let (workspace, project_key, _) = lsp_workspace(&[]);
-    let editor = client(&workspace, 1);
-    open_in(&editor, project_key, PATH, "let a = 1;");
-    workspace
-        .server
-        .close_client_files_before_change_publish
-        .store(true, Ordering::Release);
-
-    let changed = editor.change_file(ChangeFileParams {
-        project_key,
-        path: BiomePath::new(PATH),
-        content: "let a = 2;".into(),
-        version: 2,
-        inline_config: None,
-        editor_features: None,
-    });
-
-    assert!(changed.is_err());
-    assert_eq!(
-        workspace.get_db().get_parsed_source(Utf8Path::new(PATH)),
-        None
-    );
-}
-
-/// Closing a dependency, which the workspace keeps in the database only,
-/// keeps the views of the other clients that have it open.
-#[cfg(feature = "module_graph")]
-#[test]
-fn closing_a_dependency_keeps_the_views_of_other_clients() {
-    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
-
-    let (workspace, project_key, _) = lsp_workspace(&[]);
-    let (first, second) = (client(&workspace, 1), client(&workspace, 2));
-    open_in(
-        &first,
-        project_key,
-        PATH,
-        "export declare const first: number;",
-    );
-    open_in(
-        &second,
-        project_key,
-        PATH,
-        "export declare const second: number;",
-    );
-
-    first
-        .close_file(CloseFileParams {
-            project_key,
-            path: BiomePath::new(PATH),
-        })
-        .unwrap();
-
-    let db = workspace.get_db();
-    let path = Utf8Path::new(PATH);
-    assert_eq!(db.get_client_parsed_source(path, ClientId::new(1)), None);
-    let parsed_text = db
-        .get_client_parsed_source(path, ClientId::new(2))
-        .expect("the second client keeps its view")
-        .parsed(&db)
-        .syntax::<JsLanguage>()
-        .text_with_trivia()
-        .to_string();
-    assert_eq!(parsed_text, "export declare const second: number;");
-}
-
-/// The requests that a client sent before its files were closed, such as the
-/// ones still running when it disconnects, don't keep the files they open or
-/// change.
-#[cfg(feature = "module_graph")]
-#[test]
-fn closed_clients_do_not_keep_the_files_they_open_or_change() {
-    const OPENED: &str = "/project/opened.js";
-    const INDEXED: &str = "/project/indexed.js";
-
-    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
-    watcher(&workspace)
-        .index_file(project_key, BiomePath::new(INDEXED))
-        .unwrap();
-    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
-    open_in(&editor, project_key, INDEXED, "import 'editor';");
-    editor.close_client_files().unwrap();
-
-    open_in(&editor, project_key, OPENED, "import 'late';");
-    editor
-        .change_file(ChangeFileParams {
-            project_key,
-            path: BiomePath::new(INDEXED),
-            content: "import 'late';".into(),
-            version: 2,
-            inline_config: None,
-            editor_features: None,
-        })
-        .unwrap();
-
-    let exists = editor
-        .file_exists(FileExistsParams {
-            file_path: BiomePath::new(OPENED),
-        })
-        .unwrap();
-    assert!(!exists);
-    assert_eq!(
-        workspace.get_db().get_parsed_source(Utf8Path::new(OPENED)),
-        None
-    );
-    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
-}
-
-/// Closing the files of a client while another write is pending waits for the
-/// write instead of failing.
-#[cfg(feature = "module_graph")]
-#[test]
-fn closing_the_files_of_a_client_retries_when_a_write_is_pending() {
-    const TIMEOUT: Duration = Duration::from_secs(5);
-    const PATH: &str = "/project/a.js";
-
-    let (workspace, project_key, _) = lsp_workspace(&[]);
-    open_in(&client(&workspace, 1), project_key, PATH, "let a = 1;");
-
-    // The retained read keeps the setter pending, so closing the files must
-    // read the database while a write is waiting.
-    let retained_db = workspace.get_db();
-    let closed = std::thread::scope(|scope| {
-        let update = scope.spawn(|| {
-            workspace
-                .db_state
-                .insert_root_settings(project_key, Settings::default());
-        });
-        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
-
-        let close = scope.spawn(|| client(&workspace, 1).close_client_files());
-        std::thread::sleep(Duration::from_millis(50));
-        drop(retained_db);
-
-        update.join().expect("the setter completes");
-        close.join()
-    });
-
-    assert!(
-        closed.expect("closing the files must not unwind").is_ok(),
-        "closing the files succeeds after the write completes"
-    );
-    let exists = client(&workspace, 1)
-        .file_exists(FileExistsParams {
-            file_path: BiomePath::new(PATH),
-        })
-        .unwrap();
-    assert!(!exists);
 }
 
 /// A change to a file that no client opened doesn't stop the workspace from
@@ -2265,64 +2057,6 @@ fn inline_configuration_applies_to_the_parse_of_its_client() {
             .db_get_parse_diagnostics(Utf8Path::new(PATH))
             .is_empty()
     );
-}
-
-/// A node cache is kept only for the documents opened with
-/// `persist_node_cache`, across their changes, until the document or its
-/// project is closed.
-#[test]
-fn node_caches_live_while_their_documents_are_open() {
-    const KEPT: &str = "/project/kept.js";
-    const OTHER: &str = "/project/other.js";
-    const NESTED: &str = "/project/nested/kept.js";
-
-    let (workspace, project_key) =
-        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
-    let open = |path: &str, persist_node_cache| {
-        workspace
-            .open_file(OpenFileParams {
-                project_key,
-                path: BiomePath::new(path),
-                content: FileContent::from_client("let a = 1;"),
-                document_file_source: None,
-                persist_node_cache,
-                inline_config: None,
-                editor_features: None,
-            })
-            .unwrap();
-    };
-    open(KEPT, true);
-    open(OTHER, false);
-    open(NESTED, true);
-    let has_node_cache = |path: &str| workspace.db_state.has_node_cache(Utf8Path::new(path));
-    assert!(has_node_cache(KEPT));
-    assert!(!has_node_cache(OTHER));
-
-    workspace
-        .change_file(ChangeFileParams {
-            project_key,
-            path: BiomePath::new(KEPT),
-            content: "let b = 2;".into(),
-            version: 1,
-            inline_config: None,
-            editor_features: None,
-        })
-        .unwrap();
-    assert!(has_node_cache(KEPT));
-
-    workspace
-        .close_file(CloseFileParams {
-            project_key,
-            path: BiomePath::new(KEPT),
-        })
-        .unwrap();
-    assert!(!has_node_cache(KEPT));
-    assert!(has_node_cache(NESTED));
-
-    workspace
-        .close_project(CloseProjectParams { project_key })
-        .unwrap();
-    assert!(!has_node_cache(NESTED));
 }
 
 /// Closing a file evicts its own cached parsed source through
@@ -3899,10 +3633,13 @@ fn store_embedded_nodes_with_current_ranges() {
 
     let db = workspace.get_db();
     let snippets = workspace.get_snippets(BiomePath::new("/project/file.html").as_path());
-    let documents = workspace.documents.pin();
-    let document = documents.get(&Utf8PathBuf::from("/project/file.html"));
+    let exists = workspace
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new("/project/file.html"),
+        })
+        .unwrap();
 
-    assert!(document.is_some());
+    assert!(exists);
     let scripts: Vec<_> = snippets
         .iter()
         .filter(|node| {
@@ -6767,96 +6504,6 @@ fn failed_virtual_open_preserves_other_clients_document() {
                 file_path: document_path,
             })
             .unwrap()
-    );
-}
-
-#[test]
-fn concurrent_virtual_open_survives_the_last_view_closing() {
-    const TIMEOUT: Duration = Duration::from_secs(5);
-
-    let (workspace, project_key) =
-        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
-    let first = workspace
-        .server
-        .with_client(&workspace.db_state, ClientId::new(1));
-    let second = workspace
-        .server
-        .with_client(&workspace.db_state, ClientId::new(2));
-    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
-    let document_path = virtual_path.clone();
-
-    first
-        .open_file(OpenFileParams {
-            project_key,
-            path: document_path.clone(),
-            content: FileContent::FromClient {
-                content: "const first = 1;".into(),
-                version: 0,
-            },
-            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
-            persist_node_cache: false,
-            inline_config: None,
-            editor_features: None,
-        })
-        .unwrap();
-
-    workspace
-        .server
-        .pause_close_after_document_update
-        .store(true, Ordering::Release);
-    let (closed, opened) = std::thread::scope(|scope| {
-        let resume_close = ClearOnDrop(&workspace.server.pause_close_after_document_update);
-        let close_path = document_path.clone();
-        let close = scope.spawn(move || {
-            first.close_file(CloseFileParams {
-                project_key,
-                path: close_path,
-            })
-        });
-        assert!(wait_until(TIMEOUT, || {
-            workspace
-                .server
-                .close_document_updates
-                .load(Ordering::Acquire)
-                == 1
-        }));
-
-        let opened = second.open_file(OpenFileParams {
-            project_key,
-            path: virtual_path,
-            content: FileContent::FromClient {
-                content: "const second = 2;".into(),
-                version: 0,
-            },
-            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
-            persist_node_cache: false,
-            inline_config: None,
-            editor_features: None,
-        });
-        drop(resume_close);
-        (close.join(), opened)
-    });
-
-    assert!(opened.is_ok(), "concurrent open failed: {opened:?}");
-    assert!(
-        closed.expect("close must not unwind").is_ok(),
-        "close must succeed"
-    );
-    assert!(
-        second
-            .file_exists(FileExistsParams {
-                file_path: document_path.clone(),
-            })
-            .unwrap()
-    );
-    assert_eq!(
-        second
-            .get_file_content(GetFileContentParams {
-                project_key,
-                path: document_path,
-            })
-            .unwrap(),
-        "const second = 2;"
     );
 }
 

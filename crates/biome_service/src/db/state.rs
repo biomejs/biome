@@ -966,6 +966,11 @@ impl DbState {
         }
     }
 
+    // #region FILE VIEWS
+    // Only the document lifecycle calls these methods, so that the views in
+    // the database and the document metadata change together. See
+    // `crate::workspace::document`.
+
     /// Publishes `text` as `view` of `path`, and returns the view of `path`
     /// that the services shared by the clients read. See
     /// [FileViews](super::FileViews).
@@ -1189,31 +1194,39 @@ impl DbState {
         self.shared_data().node_caches.pin().contains_key(path)
     }
 
-    pub(crate) fn unload_path(&self, path: &Utf8Path) {
+    /// Removes the files within `path` from the files that queries read, with
+    /// all their views and their node caches.
+    pub(crate) fn unload_files(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => {
-                let data = shared_db.data();
-                data.unload_path(path);
-                #[cfg(feature = "module_graph")]
-                {
-                    self.mark_module_graph_dirty();
-                    self.record_resolver_changes(data.resolver_changes_within(path));
-                }
-            }
-            DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
+            DbStorage::Shared(shared_db) => shared_db.data().unload_files(path),
+            // The setter gate serializes the removal with the setters that
+            // publish views of these files.
+            DbStorage::Owned(db) => db.with_setter(|db| db.data().unload_files(path)),
         }
     }
 
-    /// Removes the disk views of the files within `path`, and the modules
-    /// within it. The files that a client has open keep their editor views.
-    ///
-    /// Use this when the filesystem reports that `path` was removed.
-    pub(crate) fn unload_disk_views(&self, path: &Utf8Path) {
+    /// Removes the disk views of the files within `path`. The files that a
+    /// client has open keep their editor views.
+    pub(crate) fn remove_disk_views_within(&self, path: &Utf8Path) {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 shared_db
                     .fork()
                     .remove_disk_views_within(path, ParsedSourceUpdateMode::Replace);
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_disk_views_within(path, ParsedSourceUpdateMode::Setters);
+            }),
+        }
+    }
+
+    // #endregion
+
+    /// Removes the modules within `path`, and refreshes the resolver path info
+    /// of the known paths within it.
+    pub(crate) fn unload_modules(&self, path: &Utf8Path) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
                 let data = shared_db.data();
                 data.unload_modules(path);
                 #[cfg(feature = "module_graph")]
@@ -1222,10 +1235,7 @@ impl DbState {
                     self.record_resolver_changes(data.resolver_changes_within(path));
                 }
             }
-            DbStorage::Owned(db) => db.with_setter(|db| {
-                db.remove_disk_views_within(path, ParsedSourceUpdateMode::Setters);
-                db.unload_modules(path);
-            }),
+            DbStorage::Owned(db) => db.with_setter(|db| db.unload_modules(path)),
         }
     }
 
@@ -1984,7 +1994,8 @@ mod tests {
             let source = lookup(&state, SOURCE);
 
             fs.remove(Utf8Path::new(SOURCE));
-            state.unload_path(Utf8Path::new("/project"));
+            state.unload_files(Utf8Path::new("/project"));
+            state.unload_modules(Utf8Path::new("/project"));
 
             assert_eq!(info(&state, source), Err(ResolveError::NotFound));
             assert_eq!(

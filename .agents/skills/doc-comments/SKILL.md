@@ -23,8 +23,8 @@ snapshots.
 | Rustdoc inside `declare_lint_rule!` or the assist macro `declare_source_rule!` | Biome users reading rule or assist documentation on the website |
 
 A file can mix audiences. For example,
-[`workspace.rs`](../../../crates/biome_service/src/workspace.rs) contains
-contributor-facing module docs and user-facing daemon contracts, while
+[`operation.rs`](../../../crates/biome_service/src/workspace/operation.rs)
+contains contributor-facing module docs and user-facing daemon contracts, while
 [`FormatterConfiguration`](../../../crates/biome_configuration/src/formatter.rs)
 has user-facing field docs and contributor-facing methods.
 
@@ -269,10 +269,10 @@ Long files group related items with paired region markers:
 ```
 
 This is an established convention across the codebase (`biome_service`,
-`biome_module_graph`, `biome_rowan`, the parsers). The `Workspace` trait in
-[`crates/biome_service/src/workspace.rs`](../../../crates/biome_service/src/workspace.rs)
-uses it to group its methods. Editors fold on these markers; they exist for
-navigation, not documentation.
+`biome_module_graph`, `biome_rowan`, the parsers). The workspace operations in
+[`crates/biome_service/src/workspace/operation.rs`](../../../crates/biome_service/src/workspace/operation.rs)
+use it to group the methods of the `Workspace` trait. Editors fold on these
+markers; they exist for navigation, not documentation.
 
 - Pair every `// #region` with `// #endregion`.
 - Name what the group contains. Use a plain label, or anchor the name to a

@@ -53,6 +53,7 @@
 
 mod client;
 pub(crate) mod document;
+mod operation;
 pub mod search;
 mod server;
 pub(crate) mod views;
@@ -94,6 +95,7 @@ use schemars::{Schema, SchemaGenerator};
 
 use crate::module_graph::SerializedModuleInfo;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
+use crate::workspace::operation::workspace_operations;
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
 pub use search::grit::GritSearchQuery;
@@ -1609,277 +1611,27 @@ pub struct GetModuleGraphResult {
     pub data: FxHashMap<String, SerializedModuleInfo>,
 }
 
-// NOTE: when you add new functions to this trait, you must update:
-// - the macro `delegate_workspace_methods` to include the new function if necessary
-// - the macro `retrying_workspace_methods` to include the new function if necessary
+/// Declares the method of each workspace operation on the [Workspace] trait.
+macro_rules! declare_workspace_methods {
+    ($($(#[$meta:meta])* $name:ident($params:ty) -> $result:ty = $method:literal;)*) => {
+        $(
+            $(#[$meta])*
+            fn $name(&self, params: $params) -> Result<$result, WorkspaceError>;
+        )*
+    };
+}
+
 pub trait Workspace: Send + Sync + RefUnwindSafe {
-    // #region PROJECT-LEVEL METHODS
-
-    /// Opens a project within the workspace.
-    ///
-    /// The path given as part of the `params` is used to determine the root of
-    /// the Biome project, but it may not have to be the root itself. The first
-    /// ancestor directory of the path (including the path itself) that contains
-    /// a **top-level** `biome.json` is determined to be the project root and
-    /// will be used for opening the project.
-    ///
-    /// If no `biome.json` file can be found in any of the ancestors, and
-    /// `open_uninitialized` is `true` the directory will be opened as a Biome
-    /// project will default settings.
-    ///
-    /// Note: Opening a project does not mean the project is ready for use. You
-    /// probably want to follow it up with a call to `scan_project()` or
-    /// explicitly load settings into the project using `update_settings()`.
-    ///
-    /// Returns the key of the opened project and the [ScanKind] of this project.
-    ///
-    /// The key can be used with follow-up methods to perform actions related to the project,
-    /// such as opening files or querying them.
-    ///
-    /// The `scan_kind` can be used to tell the scanner how it should scan the project.
-    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
-
-    /// Scans the given project, and initializes all settings and service data.
-    ///
-    /// The first time you call this method, it may take a long time since it
-    /// will traverse the entire project folder recursively, parse all included
-    /// files (and possibly their dependencies), and perform processing for
-    /// extracting the service data.
-    ///
-    /// Follow-up calls may be much faster as they can reuse cached data.
-    ///
-    /// If [`ScanProjectParams::watch`] is `true`, this method also
-    /// registers file watchers to make sure the cache remains up-to-date.
-    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
-
-    /// Updates the global settings for the given project.
-    ///
-    /// TODO: This method should not be used in combination with
-    /// `scan_project()`. When scanning is enabled, the server should
-    /// manage project settings on its own.
-    fn update_settings(
-        &self,
-        params: UpdateSettingsParams,
-    ) -> Result<UpdateSettingsResult, WorkspaceError>;
-
-    /// Closes the project with the given key.
-    ///
-    /// Releases the calling client's use of the project. The project is unloaded only after every
-    /// client releases it. Filesystem-backed documents that belong only to the unloaded project are
-    /// closed. Virtual documents remain open until their clients close them, and later operations
-    /// must use another open project as their processing context.
-    ///
-    /// Projects should normally **not** be closed, so that follow-up
-    /// invocations to Biome can reuse the loaded settings and open files. Only
-    /// when the user explicitly asks for a project to be closed, will we do so
-    /// in order to allow the user to reclaim memory. (Although in reality
-    /// they'll probably just kill the daemon anyway.)
-    ///
-    /// If a file watcher was registered as a result of a call to
-    /// `scan_project()`, it will also be unregistered.
-    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError>;
-
-    // #endregion
-
-    // #region FILE-LEVEL METHODS
-
-    /// Opens a new file in the workspace.
-    ///
-    /// Content sent by the client belongs to that client: changes on disk and
-    /// requests from other clients don't replace it until the client closes
-    /// the file. When several clients have the file open, the services they
-    /// share, such as the module graph, use the content of the client that
-    /// opened it first.
-    ///
-    /// If a filesystem path is under a folder that belongs to an opened project
-    /// other than the current one, the current project is changed accordingly.
-    /// Virtual documents use the project's root settings and do not participate
-    /// in filesystem ignore or override matching.
-    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
-
-    /// Checks if `file_path` exists in the workspace for this client: the
-    /// client opened it, or Biome read it from the file system, for example
-    /// while scanning the project. A file that only other clients opened
-    /// doesn't exist for this client.
-    ///
-    /// This method is useful to avoid unexpected errors before using the file method and avoid errors.
-    ///
-    /// ### Error
-    ///
-    /// It throws an error only if there's an issue with the client transport.
-    fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError>;
-
-    /// Checks whether a certain feature is supported for the given file path.
-    ///
-    /// There are different conditions:
-    /// - Biome doesn't recognize a file, so it can't provide the feature;
-    /// - the feature is disabled inside the configuration;
-    /// - the file is ignored
-    fn file_features(
-        &self,
-        params: SupportsFeatureParams,
-    ) -> Result<FileFeaturesResult, WorkspaceError>;
-
-    /// Checks if the given path is ignored by the project for a specific
-    /// feature.
-    ///
-    /// If the file path matches, `true` is returned, and it should be
-    /// considered ignored.
-    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
-
-    /// Returns the content of a file as this client sees it: the content that
-    /// the client sent, if it opened the file, otherwise the content on disk.
-    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
-
-    /// Returns the size of a given file, as well as the allowed maximum file
-    /// size for that file.
-    fn check_file_size(
-        &self,
-        params: CheckFileSizeParams,
-    ) -> Result<CheckFileSizeResult, WorkspaceError>;
-
-    /// Changes the content of a file.
-    ///
-    /// When the client opened the file, the change applies to the content of
-    /// the client. Otherwise, the change records the content on disk, for
-    /// example after the client wrote the file.
-    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
-
-    /// Processes a file by applying linting, formatting, and assist without changing the open workspace document.
-    /// This is a stateless operation, which means that the new document, after the fixes/fomatting, isn't saved in the workspace.
-    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
-
-    /// Retrieves the list of diagnostics associated with a file.
-    fn pull_diagnostics(
-        &self,
-        params: PullDiagnosticsParams,
-    ) -> Result<PullDiagnosticsResult, WorkspaceError>;
-
-    /// Retrieves the list of code actions available for a given cursor
-    /// position within a file.
-    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
-
-    /// Pulls diagnostics with their relative code actions
-    fn pull_diagnostics_and_actions(
-        &self,
-        params: PullDiagnosticsAndActionsParams,
-    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
-
-    /// Runs the given file through the formatter using the provided options
-    /// and returns the resulting source code.
-    fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
-
-    /// Runs a range of an open document through the formatter.
-    fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
-
-    /// Runs a "block" ending at the specified character of an open document
-    /// through the formatter.
-    fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
-
-    /// Returns the content of the file with all safe code actions applied.
-    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
-
-    /// Returns the content of the file after renaming a symbol.
-    fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError>;
-
-    /// Navigates to the definition of the symbol at the given cursor position.
-    ///
-    /// Returns `None` if the symbol cannot be resolved (e.g., external
-    /// dependency, cursor not on an identifier, or no definition found).
-    fn go_to_definition(
-        &self,
-        params: GoToDefinitionParams,
-    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
-
-    /// Closes a file that this client opened.
-    ///
-    /// Other clients that have the file open keep their content. When no
-    /// client has the file open anymore, the file is unloaded from the
-    /// workspace, unless the scanner indexed it: it may still be required for
-    /// multi-file analysis, so its content on disk is used again.
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
-
-    /// Updates the internal module graph using the provided path.
-    ///
-    /// ## Errors
-    ///
-    /// An error is emitted if the path doesn't exist inside the workspace. Use
-    /// the method [Workspace::open_file] before updating the module graph.
-    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
+    workspace_operations!(declare_workspace_methods);
 
     /// Returns the filesystem implementation to open files with.
     ///
     /// This may be an in-memory file system.
     fn fs(&self) -> &dyn FsWithResolverProxy;
 
-    // #endregion
-
-    // #region SEARCH-RELATED METHODS
-
-    /// Parses a pattern to be used in follow-up [`Self::search_pattern`]
-    /// requests.
-    ///
-    /// Clients should call [`Self::drop_pattern()`] when they no need longer
-    /// need it.
-    fn parse_pattern(
-        &self,
-        params: ParsePatternParams,
-    ) -> Result<ParsePatternResult, WorkspaceError>;
-
-    /// Searches a file for matches of the given pattern.
-    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
-
-    /// Used to indicate a client no longer needs a specific pattern.
-    fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError>;
-
-    // #endregion
-
-    // #region DEBUGGING METHODS
-
-    /// Returns a textual, debug representation of the syntax tree for a given
-    /// document.
-    fn get_syntax_tree(
-        &self,
-        params: GetSyntaxTreeParams,
-    ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the control flow graph at a
-    /// given position in the document.
-    fn get_control_flow_graph(
-        &self,
-        params: GetControlFlowGraphParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the formatter IR for a given
-    /// document.
-    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
-
-    /// Returns an IR of the type information of the document
-    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
-
-    /// Returns the registered types of the document
-    fn get_registered_types(
-        &self,
-        params: GetRegisteredTypesParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the semantic model for the document.
-    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
-
-    /// Returns a serializable version of the module graph
-    fn get_module_graph(
-        &self,
-        params: GetModuleGraphParams,
-    ) -> Result<GetModuleGraphResult, WorkspaceError>;
-
-    /// Returns debug information about this workspace.
-    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
-
     /// Returns information about the server this workspace is connected to or
     /// `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
-
-    // #endregion
 }
 
 /// Runs `op` again when it is interrupted by a concurrent update to the
@@ -1918,56 +1670,28 @@ impl<W: Workspace> RetryingWorkspace<W> {
     }
 }
 
+/// Implements the method of each workspace operation on [RetryingWorkspace].
 macro_rules! retrying_workspace_methods {
-    ($(fn $name:ident($params:ident: $params_ty:ty) -> $return_ty:ty;)*) => {
-        $(
-            fn $name(&self, $params: $params_ty) -> $return_ty {
-                retry_on_pending_write(|| self.0.$name($params.clone()))
-            }
-        )*
+    ($($(#[$meta:meta])* $name:ident($params:ty) -> $result:ty = $method:literal;)*) => {
+        $(retrying_workspace_method!($name($params) -> $result);)*
+    };
+}
+
+macro_rules! retrying_workspace_method {
+    (scan_project($params:ty) -> $result:ty) => {
+        fn scan_project(&self, params: $params) -> Result<$result, WorkspaceError> {
+            self.0.scan_project(params)
+        }
+    };
+    ($name:ident($params:ty) -> $result:ty) => {
+        fn $name(&self, params: $params) -> Result<$result, WorkspaceError> {
+            retry_on_pending_write(|| self.0.$name(params.clone()))
+        }
     };
 }
 
 impl<W: Workspace> Workspace for RetryingWorkspace<W> {
-    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
-        self.0.scan_project(params)
-    }
-
-    retrying_workspace_methods! {
-        fn open_project(params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
-        fn update_settings(params: UpdateSettingsParams) -> Result<UpdateSettingsResult, WorkspaceError>;
-        fn close_project(params: CloseProjectParams) -> Result<(), WorkspaceError>;
-        fn open_file(params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
-        fn file_exists(params: FileExistsParams) -> Result<bool, WorkspaceError>;
-        fn file_features(params: SupportsFeatureParams) -> Result<FileFeaturesResult, WorkspaceError>;
-        fn is_path_ignored(params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
-        fn get_file_content(params: GetFileContentParams) -> Result<String, WorkspaceError>;
-        fn check_file_size(params: CheckFileSizeParams) -> Result<CheckFileSizeResult, WorkspaceError>;
-        fn change_file(params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
-        fn process_file(params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError>;
-        fn pull_diagnostics(params: PullDiagnosticsParams) -> Result<PullDiagnosticsResult, WorkspaceError>;
-        fn pull_actions(params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
-        fn pull_diagnostics_and_actions(params: PullDiagnosticsAndActionsParams) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
-        fn format_file(params: FormatFileParams) -> Result<Printed, WorkspaceError>;
-        fn format_range(params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
-        fn format_on_type(params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
-        fn fix_file(params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
-        fn rename(params: RenameParams) -> Result<RenameResult, WorkspaceError>;
-        fn go_to_definition(params: GoToDefinitionParams) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
-        fn close_file(params: CloseFileParams) -> Result<(), WorkspaceError>;
-        fn update_module_graph(params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
-        fn parse_pattern(params: ParsePatternParams) -> Result<ParsePatternResult, WorkspaceError>;
-        fn search_pattern(params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
-        fn drop_pattern(params: DropPatternParams) -> Result<(), WorkspaceError>;
-        fn get_syntax_tree(params: GetSyntaxTreeParams) -> Result<GetSyntaxTreeResult, WorkspaceError>;
-        fn get_control_flow_graph(params: GetControlFlowGraphParams) -> Result<String, WorkspaceError>;
-        fn get_formatter_ir(params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
-        fn get_type_info(params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
-        fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
-        fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
-        fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
-        fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
-    }
+    workspace_operations!(retrying_workspace_methods);
 
     // These two never touch the workspace database, so there is nothing to
     // retry.
