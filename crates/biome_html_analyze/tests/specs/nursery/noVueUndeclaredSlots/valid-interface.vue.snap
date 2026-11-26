@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-interface.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+interface Slots {
+    default(props: { msg: string }): any;
+    footer: (props: {}) => any;
+}
+defineSlots<Slots>();
+</script>
+
+<template>
+    <slot msg="hello" />
+    <slot name="footer" />
+</template>
+
+```

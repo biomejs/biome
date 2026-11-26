@@ -11,7 +11,8 @@ use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, PrintDiagnostic, Severity};
 use biome_service::WorkspaceError;
 use biome_service::workspace::{
-    FeaturesSupported, FileContent, FileFeaturesResult, ProcessFileParams, SupportsFeatureParams,
+    FeaturesSupported, FileContent, FileFeaturesResult, IgnoreKind, ProcessFileParams,
+    SupportsFeatureParams,
 };
 use tracing::info;
 
@@ -144,6 +145,7 @@ impl ProcessFile for LintAssistProcessFile {
             inline_config: None,
             skip_ignore_check,
             not_requested_features: execution.not_requested_features(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
 
         if file_features.is_ignored() {

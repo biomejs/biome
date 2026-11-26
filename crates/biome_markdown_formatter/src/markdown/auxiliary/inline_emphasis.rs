@@ -2,7 +2,8 @@ use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{
-    AnyMdInline, MdInlineEmphasis, MdInlineEmphasisFields, emphasis_ext::MdEmphasisFence,
+    AnyMdInline, MarkdownSyntaxToken, MdInlineEmphasis, MdInlineEmphasisFields,
+    emphasis_ext::MdEmphasisFence,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -45,29 +46,37 @@ impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
             }
         });
 
-        if node.fence()? == MdEmphasisFence::DoubleStar {
-            write!(f, [l_fence.format(), content, r_fence.format()])
+        let fence = node.fence()?;
+        write!(
+            f,
+            [
+                format_emphasis_fence(&l_fence, fence),
+                content,
+                format_emphasis_fence(&r_fence, fence),
+            ]
+        )
+    }
+}
+
+/// Formats an emphasis delimiter as `**`, replacing a `__` delimiter.
+pub(crate) fn format_emphasis_fence(
+    fence: &MarkdownSyntaxToken,
+    kind: MdEmphasisFence,
+) -> impl Format<MarkdownFormatContext> + '_ {
+    format_with(move |f| {
+        if kind == MdEmphasisFence::DoubleStar {
+            write!(f, [fence.format()])
         } else {
             write!(
                 f,
-                [
-                    format_replaced(
-                        &l_fence,
-                        &text(
-                            MdEmphasisFence::DoubleStar.as_str(),
-                            Some(l_fence.text_range().start())
-                        )
-                    ),
-                    content,
-                    format_replaced(
-                        &r_fence,
-                        &text(
-                            MdEmphasisFence::DoubleStar.as_str(),
-                            Some(r_fence.text_range().start())
-                        )
-                    ),
-                ]
+                [format_replaced(
+                    fence,
+                    &text(
+                        MdEmphasisFence::DoubleStar.as_str(),
+                        Some(fence.text_range().start())
+                    )
+                )]
             )
         }
-    }
+    })
 }

@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-object-data-comments.vue
+---
+# Input
+```vue
+<script>
+export default {
+	data:
+		// a leading comment
+		{
+			foo: 'bar'
+		} // a trailing comment
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-object-data-comments.vue:3:2 lint/correctness/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
+
+  × Found an object declaration for `data` in this component.
+  
+    1 │ <script>
+    2 │ export default {
+  > 3 │ 	data:
+      │ 	^^^^^
+  > 4 │ 		// a leading comment
+  > 5 │ 		{
+  > 6 │ 			foo: 'bar'
+  > 7 │ 		} // a trailing comment
+      │ 		^
+    8 │ }
+    9 │ </script>
+  
+  i Using an object declaration for `data` is deprecated, and can result in different component instances sharing the same data.
+  
+  i Safe fix: Refactor the data object into a function returning the data object
+  
+    3  3 │     data:
+    4  4 │       // a leading comment
+    5    │ - → → {
+       5 │ + → → function()·{
+       6 │ + return·{
+    6  7 │         foo: 'bar'
+    7    │ - → → }·//·a·trailing·comment
+       8 │ + → → }
+       9 │ + }·//·a·trailing·comment
+    8 10 │   }
+    9 11 │   
+  
+
+```

@@ -324,7 +324,9 @@ pub fn module_graph_for_test_file(
             else {
                 continue;
             };
-            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let content = fs
+                .read_file_from_path(path.as_path())
+                .expect("CSS test file exists");
             let source_index = db.insert_source(file_source.into());
             let parsed_source = Source::new(
                 &db,
@@ -371,7 +373,9 @@ pub fn module_graph_for_css_test_file(
         else {
             continue;
         };
-        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let content = fs
+            .read_file_from_path(path.as_path())
+            .expect("CSS test file exists");
         let source_index = db.insert_source(file_source.into());
         let parsed_source = Source::new(
             &db,
@@ -475,7 +479,7 @@ pub fn module_graph_for_html_test_file(
     // We pass document_file_source explicitly with experimental_full_html_support=true
     // so that .vue/.astro/.svelte files are correctly parsed as HTML-like.
     let files_with_sources = all_files.iter().map(|file_path| {
-        let biome_path = BiomePath::new(file_path.clone());
+        let biome_path = BiomePath::new(file_path);
         let document_file_source = DocumentFileSource::from_well_known(file_path.as_path(), true);
         (biome_path, document_file_source)
     });
@@ -540,16 +544,19 @@ pub fn get_added_js_paths<'a>(
                 return None;
             };
 
-            let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let parsed =
-                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                let diagnostics = parsed.diagnostics();
-                assert!(
-                    diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
-                );
-                parsed.try_tree()
-            })?;
+            let root = fs
+                .read_file_from_path(path.as_path())
+                .ok()
+                .and_then(|content| {
+                    let parsed =
+                        biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                    let diagnostics = parsed.diagnostics();
+                    assert!(
+                        diagnostics.is_empty(),
+                        "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                    );
+                    parsed.try_tree()
+                })?;
 
             // Build semantic model for the parsed root
             let semantic_model = biome_js_semantic::semantic_model(
@@ -576,7 +583,7 @@ pub fn get_css_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let root = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let options = if file_source.is_css_modules() {
                     CssParserOptions::default().allow_css_modules()
                 } else {
@@ -609,7 +616,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let parse = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -693,8 +700,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 manifest,
             );
         }
@@ -716,8 +722,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_tsconfig(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
         }
@@ -751,8 +756,7 @@ pub fn project_layout_for_test_file(
             project_layout.insert_turbo_json(
                 input_file
                     .parent()
-                    .map(|dir_path| dir_path.to_path_buf())
-                    .unwrap_or_default(),
+                    .map_or_default(|dir_path| dir_path.to_path_buf()),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
         }
@@ -1048,6 +1052,31 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
 }
 
 /// Validator to run in our parser's spec tests to make sure that
+/// [SyntaxNode::borrowed_tokens_with_comments] returns, for every node of the
+/// tree, the tokens of the node with a comment in their trivia, as found by
+/// reading every token's trivia through the cursor API.
+pub fn validate_borrowed_tokens_with_comments<L: Language>(syntax: &SyntaxNode<L>) {
+    for node in syntax.descendants() {
+        let actual: Vec<_> = node
+            .borrowed_tokens_with_comments()
+            .map(|token| token.text_range())
+            .collect();
+        let expected: Vec<_> = node
+            .descendants_tokens(Direction::Next)
+            .filter(|token| {
+                token
+                    .leading_trivia()
+                    .pieces()
+                    .chain(token.trailing_trivia().pieces())
+                    .any(|piece| piece.is_comments())
+            })
+            .map(|token| token.text_range())
+            .collect();
+        assert_eq!(actual, expected, "wrong tokens with comments for {node:#?}");
+    }
+}
+
+/// Validator to run in our parser's spec tests to make sure that
 /// [SyntaxNode::text_trimmed_range] agrees, for every node of the tree, with
 /// a reference that walks the tokens: it skips tokens with empty text from
 /// the node's first token forward and from its last token backward, leaving
@@ -1127,7 +1156,7 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 
     let is_valid_test_file = match file_path.extension().unwrap_or_default() {
         // Excluded files types which cannot contain comment in the source code
-        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" => false,
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" | "mdx" => false,
         _ => {
             let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
             // We can't know all the valid file names, but this should catch most common cases.
@@ -1326,7 +1355,7 @@ pub fn analyze_with_workspace(
     let mut all_virtual_files = sidecar_paths;
     all_virtual_files.push(virtual_file_path.clone());
     let files_with_sources = all_virtual_files.iter().map(|path| {
-        let biome_path = BiomePath::new(path.clone());
+        let biome_path = BiomePath::new(path);
         let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
         (biome_path, doc_source)
     });

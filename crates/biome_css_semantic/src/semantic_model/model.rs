@@ -17,6 +17,8 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
+use super::SyntheticCustomProperty;
+
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -37,6 +39,16 @@ impl SemanticModel {
         self.data.root()
     }
 
+    /// Returns custom properties supplied by the embedding host.
+    pub fn synthetic_custom_properties(&self) -> &[SyntheticCustomProperty] {
+        &self.data.synthetic_custom_properties
+    }
+
+    /// Whether the host may supply additional custom properties.
+    pub fn custom_properties_are_open(&self) -> bool {
+        self.data.custom_properties_open
+    }
+
     /// Returns all top-level rules in the CSS document.
     pub fn rules(&self) -> Vec<Rule> {
         self.data
@@ -48,6 +60,15 @@ impl SemanticModel {
 
     pub fn global_custom_variables(&self) -> GlobalCustomVariables<'_> {
         GlobalCustomVariables { data: &self.data }
+    }
+
+    /// Returns the declarations of the root's own declaration block, such as a `style` attribute
+    /// or the top level of a CSS-in-JS template. A stylesheet has none.
+    pub fn root_declarations(&self) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        self.data
+            .root_declarations
+            .iter()
+            .map(|declaration| CssModelDeclaration::from_data(self.data.clone(), declaration))
     }
 
     /// Returns declarations that assign values to custom properties.
@@ -99,6 +120,29 @@ impl SemanticModel {
         rule_id.and_then(|id| self.rule(*id))
     }
 
+    /// Returns the declarations of the rule that contains the given range, or the
+    /// [root declarations](Self::root_declarations) when no rule contains it.
+    pub fn get_declarations_by_range(&self, target_range: TextRange) -> Vec<CssModelDeclaration> {
+        match self.get_rule_by_range(target_range) {
+            Some(rule) => rule.declarations,
+            None => self.root_declarations().collect(),
+        }
+    }
+
+    /// Returns the declarations in scope at the given range: those of the rule that contains
+    /// it, then those of each ancestor rule from the innermost outwards, then the
+    /// [root declarations](Self::root_declarations).
+    pub fn get_ancestor_declarations_by_range(
+        &self,
+        target_range: TextRange,
+    ) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        std::iter::successors(self.get_rule_by_range(target_range), |rule| {
+            rule.parent_id().and_then(|id| self.rule(id))
+        })
+        .flat_map(|rule| rule.declarations)
+        .chain(self.root_declarations())
+    }
+
     /// Returns an iterator over the specificity of all rules in source order.
     pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> + '_ {
         self.data
@@ -145,11 +189,14 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: SendNode,
+    pub(crate) synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    pub(crate) custom_properties_open: bool,
     /// Single source of truth for all rules, indexed by RuleId
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Declarations parsed outside a rule, such as declarations in a `style` attribute.
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute or at the
+    /// top level of a CSS-in-JS template.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
@@ -186,7 +233,15 @@ impl PartialEq for SemanticModel {
         let self_root = self.data.root();
         let other_root = other.data.root();
 
-        self_rules.len() == other_rules.len()
+        self.data.synthetic_custom_properties.len() == other.data.synthetic_custom_properties.len()
+            && self
+                .data
+                .synthetic_custom_properties
+                .iter()
+                .zip(&other.data.synthetic_custom_properties)
+                .all(|(this, other)| this.name() == other.name())
+            && self.data.custom_properties_open == other.data.custom_properties_open
+            && self_rules.len() == other_rules.len()
             && self_rules
                 .iter()
                 .zip(other_rules.iter())
@@ -224,6 +279,7 @@ impl PartialEq for SemanticModel {
 pub(crate) struct RuleData {
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<SelectorData>,
     /// The declarations within this rule.
@@ -235,15 +291,6 @@ pub(crate) struct RuleData {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
-}
-
-impl RuleData {
-    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(css_root.syntax())
-            .syntax()
-            .text_trimmed_range()
-    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -267,14 +314,13 @@ pub struct Rule {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
     pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
-    /// The ids of the child rules
-    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
@@ -285,7 +331,7 @@ impl PartialEq for Rule {
         self.specificity == other.specificity
             && self.id == other.id
             && self.parent_id == other.parent_id
-            && self.child_ids == other.child_ids
+            && self.child_ids() == other.child_ids()
             && self.selectors.len() == other.selectors.len()
             && self
                 .selectors
@@ -320,10 +366,10 @@ impl Rule {
             data,
             id: rule.id,
             node: rule.node.clone(),
+            range: rule.range,
             selectors,
             declarations,
             parent_id: rule.parent_id,
-            child_ids: rule.child_ids.clone(),
             specificity: rule.specificity,
         }
     }
@@ -337,10 +383,7 @@ impl Rule {
     }
 
     pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -356,7 +399,7 @@ impl Rule {
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
+        &self.data.all_rules[self.id.index()].child_ids
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -441,23 +484,35 @@ impl ResolvedSelector {
         )
     }
 
-    /// Returns `true` if `kind` starts a new simple selector within a compound.
+    /// Returns the compound selectors, split at top-level combinators.
+    pub fn compounds(&self) -> CompoundSelectorIterator<'_> {
+        CompoundSelectorIterator { tokens: &self.0 }
+    }
+
+    /// Returns whether the selector contains an SCSS placeholder (`%name`) or interpolation
+    /// (`#{...}`), whose emitted selector depends on SCSS evaluation. A `%` or `#{` inside a plain
+    /// quoted string doesn't count.
+    pub fn requires_scss_evaluation(&self) -> bool {
+        self.0
+            .iter()
+            .any(|(kind, _)| *kind == CssSyntaxKind::PERCENT)
+            || self.0.windows(2).any(|pair| {
+                matches!(
+                    pair,
+                    [(CssSyntaxKind::HASH, _), (CssSyntaxKind::L_CURLY, _)]
+                )
+            })
+    }
+
+    /// Returns the last compound selector, which holds the element the selector styles, or `None`
+    /// for an empty selector.
     ///
-    /// This is used to split compound selectors into their constituent simple
-    /// selectors for normalization.
-    fn starts_simple_selector(kind: CssSyntaxKind) -> bool {
-        matches!(
-            kind,
-            // Class selector: `.foo`
-            CssSyntaxKind::DOT
-            // ID selector: `#foo`
-            | CssSyntaxKind::HASH
-            // Attribute selector: `[attr]`
-            | CssSyntaxKind::L_BRACK
-            // Pseudo-class: `:hover`, pseudo-element: `::before`
-            | CssSyntaxKind::COLON
-            | CssSyntaxKind::COLON2
-        )
+    /// ```css
+    /// .a ul li:hover {}
+    ///       ^^^^^^^^
+    /// ```
+    pub fn subject(&self) -> Option<CompoundSelector<'_>> {
+        self.compounds().last()
     }
 
     /// Produces a normalized string representation of this selector for use in
@@ -468,97 +523,257 @@ impl ResolvedSelector {
     /// 1. **Whitespace**: already stripped (trivia excluded from token list).
     /// 2. **Type selector case**: HTML tag names are case-insensitive, so bare
     ///    type selectors (`div`, `SPAN`, `P`) are lowercased.
-    /// 3. **Compound selector ordering**: within a compound selector (tokens between
-    ///    two combinators), the individual simple selectors (`.a`, `#id`, `[attr]`,
-    ///    `:hover`) are sorted alphabetically so that `.a.b` and `.b.a` are
-    ///    considered equal.
+    /// 3. **Compound selector ordering**: within a compound selector, the simple
+    ///    selectors are sorted by [SimpleSelector::cmp_in_compound], so that
+    ///    `.a.b` and `.b.a` are considered equal.
     ///
     /// The combinator representation is canonical: space-literal becomes `" "`,
     /// explicit combinators keep their text with surrounding spaces.
     pub fn normalize(&self) -> String {
-        // Step 1: split token list at combinators into (combinator_str, compound_tokens) pairs.
-        // The first pair has an empty combinator.
-        let mut compounds: Vec<(String, Vec<(CssSyntaxKind, &TokenText)>)> = Vec::new();
-        let mut current_combinator = String::new();
-        let mut current_tokens: Vec<(CssSyntaxKind, &TokenText)> = Vec::new();
-
-        for (kind, text) in &self.0 {
-            if Self::is_combinator(*kind) {
-                compounds.push((current_combinator, current_tokens));
-                // Represent all combinators canonically with surrounding spaces
-                current_combinator = if *kind == CssSyntaxKind::CSS_SPACE_LITERAL {
-                    " ".to_string()
-                } else {
-                    format!(" {text} ")
-                };
-                current_tokens = Vec::new();
-            } else {
-                current_tokens.push((*kind, text));
-            }
-        }
-        // Push the last compound (or the only one for simple selectors)
-        compounds.push((current_combinator, current_tokens));
-
-        // Step 2: for each compound, split into simple-selector chunks and sort them.
         let mut result = String::new();
-
-        for (combinator, tokens) in &compounds {
-            result.push_str(combinator);
-
-            // Split the compound into simple-selector chunks.
-            // A new chunk starts at each token that "opens" a new simple selector
-            // (DOT, HASH, L_BRACK, COLON, COLON2), or at the very first token
-            // (which may be a type selector: IDENT, STAR, or even AMP for nesting).
-            let mut chunks: Vec<String> = Vec::new();
-            let mut chunk = String::new();
-
-            for (i, (kind, text)) in tokens.iter().enumerate() {
-                let starts_new = i == 0 || Self::starts_simple_selector(*kind);
-                if starts_new && i != 0 {
-                    if !chunk.is_empty() {
-                        chunks.push(chunk);
-                    }
-                    chunk = String::new();
+        let mut simple_selectors = Vec::new();
+        for compound in self.compounds() {
+            match compound.combinator() {
+                Some((CssSyntaxKind::CSS_SPACE_LITERAL, _)) => result.push(' '),
+                Some((_, text)) => {
+                    result.push(' ');
+                    result.push_str(text);
+                    result.push(' ');
                 }
-
-                // Lowercase bare type selectors (IDENT at position 0 of the compound,
-                // not preceded by DOT/HASH/COLON — i.e., the first token is the type).
-                // In practice: if this is the first token of the compound and it is
-                // an IDENT (not DOT/HASH/COLON/COLON2), treat it as a type selector.
-                let token_text =
-                    if i == 0 && matches!(*kind, CssSyntaxKind::IDENT | CssSyntaxKind::STAR) {
-                        text.to_lowercase_cow()
-                    } else {
-                        text.to_string().into()
-                    };
-
-                chunk.push_str(&token_text);
+                None => {}
             }
-            if !chunk.is_empty() {
-                chunks.push(chunk);
+            simple_selectors.clear();
+            simple_selectors.extend(compound.simple_selectors());
+            simple_selectors.sort_unstable_by(SimpleSelector::cmp_in_compound);
+            for selector in &simple_selectors {
+                selector.write_normalized(&mut result);
             }
-
-            // Sort simple-selector chunks within the compound for canonical order.
-            // This makes `.b.a` == `.a.b`.
-            //
-            // The first chunk may be a type selector (IDENT) or universal selector
-            // (*), which by CSS grammar must always come first in a compound.  Only
-            // sort the non-type chunks (index 1 onward) so that `a:hover` and
-            // `a.foo` are never reordered to `:hovera` or `.fooa`.
-            let (type_prefix, rest) = if chunks
-                .first()
-                .is_some_and(|c| !c.starts_with(['.', '#', '[', ':', '&']))
-            {
-                chunks.split_at_mut(1)
-            } else {
-                chunks.split_at_mut(0)
-            };
-            rest.sort();
-            result.push_str(&type_prefix.join(""));
-            result.push_str(&rest.join(""));
         }
-
         result
+    }
+}
+
+/// Returns where the first selector in `tokens` ends: the index of the next token after the first
+/// for which `starts` returns `true`, or the length of `tokens`. Tokens inside parentheses,
+/// brackets and braces are skipped.
+fn first_selector_end(
+    tokens: &[(CssSyntaxKind, TokenText)],
+    starts: fn(CssSyntaxKind) -> bool,
+) -> usize {
+    let mut depth = 0u32;
+    for (index, (kind, _)) in tokens.iter().enumerate() {
+        if index > 0 && depth == 0 && starts(*kind) {
+            return index;
+        }
+        match kind {
+            CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK | CssSyntaxKind::L_CURLY => {
+                depth += 1;
+            }
+            CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK | CssSyntaxKind::R_CURLY => {
+                depth = depth.saturating_sub(1);
+            }
+            _ => {}
+        }
+    }
+    tokens.len()
+}
+
+/// Returned by [ResolvedSelector::compounds].
+///
+/// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, don't split.
+/// In a selector that starts with a combinator, such as `> .a`, the first compound carries it.
+pub struct CompoundSelectorIterator<'a> {
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> Iterator for CompoundSelectorIterator<'a> {
+    type Item = CompoundSelector<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.tokens.is_empty() {
+            return None;
+        }
+        let end = first_selector_end(self.tokens, ResolvedSelector::is_combinator);
+        let (compound, rest) = self.tokens.split_at(end);
+        self.tokens = rest;
+        Some(match compound {
+            [first, tokens @ ..] if ResolvedSelector::is_combinator(first.0) => CompoundSelector {
+                combinator: Some(first),
+                tokens,
+            },
+            tokens => CompoundSelector {
+                combinator: None,
+                tokens,
+            },
+        })
+    }
+}
+
+/// Returned by [CompoundSelector::simple_selectors].
+///
+/// A suffix added through SCSS nesting stays part of the selector it extends, so `&--x`
+/// under `.a` yields the single class selector `.a--x`.
+pub struct SimpleSelectorIterator<'a> {
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> Iterator for SimpleSelectorIterator<'a> {
+    type Item = SimpleSelector<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.tokens.is_empty() {
+            return None;
+        }
+        let end = first_selector_end(self.tokens, |kind| {
+            matches!(
+                kind,
+                CssSyntaxKind::DOT
+                    | CssSyntaxKind::HASH
+                    | CssSyntaxKind::L_BRACK
+                    | CssSyntaxKind::COLON
+                    | CssSyntaxKind::COLON2
+                    | CssSyntaxKind::AMP
+                    | CssSyntaxKind::PERCENT
+            )
+        });
+        let (simple, rest) = self.tokens.split_at(end);
+        self.tokens = rest;
+        Some(SimpleSelector::from_tokens(simple))
+    }
+}
+
+/// The simple selectors between two top-level combinators, such as `li:hover` in `ul > li:hover`.
+#[derive(Debug, Clone, Copy)]
+pub struct CompoundSelector<'a> {
+    /// The combinator that joins this compound selector to the previous one, such as `>` in
+    /// `ul > li:hover`. `None` for the first compound selector, unless the selector starts with a
+    /// combinator, as `> .a` can in a nested rule.
+    combinator: Option<&'a (CssSyntaxKind, TokenText)>,
+    /// The tokens of the simple selectors, without the combinator.
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> CompoundSelector<'a> {
+    /// Returns the combinator that joins this compound selector to the previous one.
+    pub fn combinator(&self) -> Option<&'a (CssSyntaxKind, TokenText)> {
+        self.combinator
+    }
+
+    /// Returns the tokens of the simple selectors, without the combinator.
+    pub fn tokens(&self) -> &'a [(CssSyntaxKind, TokenText)] {
+        self.tokens
+    }
+
+    /// Returns the tokens of the simple selectors, without the combinator.
+    pub fn simple_selectors(&self) -> SimpleSelectorIterator<'a> {
+        SimpleSelectorIterator {
+            tokens: self.tokens,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SimpleSelectorKind {
+    /// `div`, or `svg|a` with a namespace.
+    Type,
+    /// `*`
+    Universal,
+    /// `.a`
+    Class,
+    /// `#a`
+    Id,
+    /// `[href]`
+    Attribute,
+    /// `:hover`, including legacy single-colon pseudo-elements such as `:before`.
+    PseudoClass,
+    /// `::before`
+    PseudoElement,
+    /// `&` that wasn't resolved because the selector has no parent.
+    Nesting,
+    /// SCSS `%placeholder`
+    Placeholder,
+    /// SCSS `#{$name}`
+    Interpolation,
+}
+
+/// One simple selector of a compound, such as `.a`, `[href]` or `:hover`.
+#[derive(Debug, Clone, Copy)]
+pub struct SimpleSelector<'a> {
+    kind: SimpleSelectorKind,
+    tokens: &'a [(CssSyntaxKind, TokenText)],
+}
+
+impl<'a> SimpleSelector<'a> {
+    fn from_tokens(tokens: &'a [(CssSyntaxKind, TokenText)]) -> Self {
+        let kind = match tokens {
+            [(CssSyntaxKind::DOT, _), ..] => SimpleSelectorKind::Class,
+            [(CssSyntaxKind::HASH, _), (CssSyntaxKind::L_CURLY, _), ..] => {
+                SimpleSelectorKind::Interpolation
+            }
+            [(CssSyntaxKind::HASH, _), ..] => SimpleSelectorKind::Id,
+            [(CssSyntaxKind::L_BRACK, _), ..] => SimpleSelectorKind::Attribute,
+            [(CssSyntaxKind::COLON, _), ..] => SimpleSelectorKind::PseudoClass,
+            [(CssSyntaxKind::COLON2, _), ..] => SimpleSelectorKind::PseudoElement,
+            [(CssSyntaxKind::AMP, _), ..] => SimpleSelectorKind::Nesting,
+            [(CssSyntaxKind::PERCENT, _), ..] => SimpleSelectorKind::Placeholder,
+            [(CssSyntaxKind::STAR, _), ..] => SimpleSelectorKind::Universal,
+            _ => SimpleSelectorKind::Type,
+        };
+        Self { kind, tokens }
+    }
+
+    pub fn kind(&self) -> SimpleSelectorKind {
+        self.kind
+    }
+
+    pub fn tokens(&self) -> &'a [(CssSyntaxKind, TokenText)] {
+        self.tokens
+    }
+
+    /// Returns the first identifier, such as `hover` for `:hover` or `a` for `.a`.
+    pub fn name(&self) -> Option<&'a str> {
+        self.tokens
+            .iter()
+            .find(|(kind, _)| *kind == CssSyntaxKind::IDENT)
+            .map(|(_, text)| text.text())
+    }
+
+    /// Appends the selector's text to `buffer`, spacing combinators as [ResolvedSelector]'s
+    /// `Display` does. Type selectors are lowercased, because HTML element names are
+    /// case-insensitive.
+    pub fn write_normalized(&self, buffer: &mut String) {
+        for (kind, text) in self.tokens {
+            if ResolvedSelector::is_explicit_combinator(*kind) {
+                buffer.push(' ');
+                buffer.push_str(text);
+                buffer.push(' ');
+            } else if self.kind == SimpleSelectorKind::Type {
+                buffer.push_str(&text.to_lowercase_cow());
+            } else {
+                buffer.push_str(text);
+            }
+        }
+    }
+
+    fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
+        self.tokens.iter().flat_map(|(_, text)| text.bytes())
+    }
+
+    fn is_type(&self) -> bool {
+        matches!(
+            self.kind,
+            SimpleSelectorKind::Type | SimpleSelectorKind::Universal
+        )
+    }
+
+    /// Orders the simple selectors of a compound: type and universal selectors first, because CSS
+    /// requires them to start a compound, then the rest by their text.
+    pub fn cmp_in_compound(&self, other: &Self) -> Ordering {
+        match (self.is_type(), other.is_type()) {
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            _ => self.bytes().cmp(other.bytes()),
+        }
     }
 }
 
@@ -579,6 +794,7 @@ impl std::fmt::Display for ResolvedSelector {
 #[derive(Debug, Clone)]
 pub(crate) struct SelectorData {
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -599,56 +815,49 @@ pub(crate) struct SelectorData {
 #[derive(Debug, Clone)]
 pub struct Selector {
     pub(crate) data: Arc<SemanticModelData>,
-    pub(crate) node: AstPtr<AnyCssSelectorLike>,
-    /// The resolved selector, accounting for nesting and `&` references.
-    /// For top-level selectors this is the token sequence from the source.
-    /// For nested selectors each `&` is replaced by the parent token sequence,
-    /// and a space-literal token is inserted when there is no `&`.
-    pub(crate) resolved: ResolvedSelector,
-    /// The specificity of the selector.
-    pub(crate) specificity: Specificity,
+    rule_id: RuleId,
+    index: usize,
 }
 
 impl Selector {
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
-        let selector = &data.all_rules[rule_id.index()].selectors[index];
-        let node = selector.node.clone();
-        let resolved = selector.resolved.clone();
-        let specificity = selector.specificity;
         Self {
             data,
-            node,
-            resolved,
-            specificity,
+            rule_id,
+            index,
         }
+    }
+
+    fn selector_data(&self) -> &SelectorData {
+        &self.data.all_rules[self.rule_id.index()].selectors[self.index]
     }
 }
 
 impl PartialEq for Selector {
     fn eq(&self, other: &Self) -> bool {
-        self.specificity == other.specificity && self.resolved == other.resolved
+        self.specificity() == other.specificity() && self.resolved() == other.resolved()
     }
 }
 
 impl Selector {
     pub fn node(&self) -> AnyCssSelectorLike {
-        self.node.to_node(self.data.root().syntax())
+        self.selector_data().node.to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
     pub fn resolved(&self) -> &ResolvedSelector {
-        &self.resolved
+        &self.selector_data().resolved
     }
 
     pub fn range(&self) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.selector_data().range
     }
 
     pub fn specificity(&self) -> Specificity {
-        self.specificity
+        self.selector_data().specificity
     }
 }
 
@@ -1221,6 +1430,10 @@ impl CustomProperty {
 }
 
 /// A view over global custom properties indexed by name.
+///
+/// Properties supplied by the embedding host, listed by
+/// [`SemanticModel::synthetic_custom_properties`], are visible only through
+/// [`Self::contains_key`].
 #[derive(Debug)]
 pub struct GlobalCustomVariables<'a> {
     pub(crate) data: &'a Arc<SemanticModelData>,
@@ -1243,11 +1456,17 @@ impl<'a> GlobalCustomVariables<'a> {
             })
     }
 
-    /// Returns whether a custom property with `name` is present.
+    /// Returns whether the stylesheet declares a custom property with `name`,
+    /// or the embedding host supplies one.
     pub fn contains_key(&self, name: impl AsRef<str>) -> bool {
-        self.data
-            .global_custom_variables
-            .contains_key(name.as_ref())
+        let name = name.as_ref();
+        self.data.global_custom_variables.contains_key(name)
+            || name.strip_prefix("--").is_some_and(|name| {
+                self.data
+                    .synthetic_custom_properties
+                    .iter()
+                    .any(|property| property.name().text() == name)
+            })
     }
 
     /// Returns the number of custom properties.

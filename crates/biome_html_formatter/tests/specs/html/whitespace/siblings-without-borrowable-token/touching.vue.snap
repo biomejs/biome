@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/siblings-without-borrowable-token/touching.vue
+---
+
+# Input
+
+```vue
+<template>
+  <p><span>label</span>{{ label }}{{ description }}{{ hint }}</p>
+  <p><span>label</span><img src="image.png" />{{ description }}</p>
+</template>
+
+```
+
+
+# Options
+
+```json
+{
+	"formatter": {
+		"lineWidth": 40
+	}
+}
+```
+
+# Formatted
+
+```vue
+<template>
+	<p>
+		<span>label</span>{{ label }}{{
+			description
+		}}{{ hint }}
+	</p>
+	<p>
+		<span>label</span><img
+			src="image.png"
+		>{{ description }}
+	</p>
+</template>
+
+```

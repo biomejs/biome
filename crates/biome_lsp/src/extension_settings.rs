@@ -80,8 +80,8 @@ impl ExtensionSettings {
         }
     }
 
-    pub(crate) fn inline_config(&self) -> Option<Configuration> {
-        self.settings.inline_config.clone()
+    pub(crate) fn inline_config(&self) -> Option<Box<Configuration>> {
+        self.settings.inline_config.clone().map(Box::new)
     }
 
     pub(crate) fn editor_features(&self) -> EditorFeatures {

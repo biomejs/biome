@@ -13,7 +13,6 @@ use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
-mod batch;
 mod mutation;
 
 use crate::syntax::{SyntaxSlot, SyntaxSlots};
@@ -21,8 +20,7 @@ use crate::{
     Language, RawSyntaxKind, SyntaxKind, SyntaxList, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
     Text,
 };
-pub use batch::*;
-pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
+pub use mutation::*;
 
 /// Represents a set of [SyntaxKind] as a bitfield, with each bit representing
 /// whether the corresponding [RawSyntaxKind] value is contained in the set
@@ -926,8 +924,7 @@ impl<L: Language> SyntaxNodePtr<L> {
     /// several nodes can share an empty range at a boundary.
     pub fn as_node_near(&self, node: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
         if self.range.is_empty() {
-            let root = node.ancestors().last()?;
-            return self.try_to_node(&root);
+            return self.try_to_node(&node.tree_top());
         }
 
         // Every node whose range contains a non-empty range lies on the path
@@ -1096,6 +1093,191 @@ pub mod support {
         slot_index: usize,
     ) -> SyntaxResult<SyntaxToken<L>> {
         token(parent, slot_index).ok_or(SyntaxError::MissingRequiredChild)
+    }
+
+    /// Describes how [debug_any_node] prints the nodes of a language.
+    ///
+    /// The shape of a kind is a line of [Self::SHAPES]. Its first character
+    /// tells what the node is, and the name of its AST node follows:
+    ///
+    /// - `n`: a node whose children are named after the comma-separated
+    ///   fields that follow the name, in slot order. A field that starts with
+    ///   `?` is optional.
+    /// - `l`: a list of nodes.
+    /// - `s`: a list of nodes separated by tokens.
+    /// - `b`: a bogus node.
+    pub trait DebugNodeShapes: Sized + 'static {
+        type Language: Language;
+
+        /// The shapes of all the kinds, one per line.
+        const SHAPES: &'static str;
+
+        /// Returns the offset in [Self::SHAPES] of the shape of `kind`, or
+        /// [u32::MAX] if the kind has no shape.
+        fn shape_offset(kind: <Self::Language as Language>::Kind) -> u32;
+
+        /// Calls `f` with the number of nodes of the given raw kind that are
+        /// being printed on the current thread.
+        fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R;
+
+        /// Prints a node whose kind has no shape.
+        fn debug_unshaped(
+            node: &SyntaxNode<Self::Language>,
+            f: &mut Formatter<'_>,
+        ) -> std::fmt::Result;
+    }
+
+    /// Prints `node` the way the AST node of its kind is printed.
+    ///
+    /// A node is printed as a struct whose fields are the children in its
+    /// slots: a child node is printed recursively, a token with its own
+    /// [Debug] implementation, and a missing child as `missing (required)` or
+    /// `missing (optional)`. The children are omitted when 16 nodes of the
+    /// same kind are already being printed.
+    pub fn debug_any_node<P: DebugNodeShapes>(
+        node: &SyntaxNode<P::Language>,
+        f: &mut Formatter<'_>,
+    ) -> std::fmt::Result {
+        let kind = node.kind();
+        let offset = P::shape_offset(kind);
+        let Some(shape) = P::SHAPES
+            .get(offset as usize..)
+            .and_then(|shapes| shapes.lines().next())
+            .filter(|_| offset != u32::MAX)
+        else {
+            return P::debug_unshaped(node, f);
+        };
+        let (tag, shape) = shape.split_at(1);
+        let mut fields = shape.split(',');
+        let name = fields.next().unwrap_or_default();
+        match tag {
+            "n" if fields.clone().next().is_none() => f.debug_struct(name).finish(),
+            "n" => P::with_depth(usize::from(crate::SyntaxKind::to_raw(&kind).0), |depth| {
+                let current_depth = depth.get();
+                let result = if current_depth < 16 {
+                    depth.set(current_depth + 1);
+                    let mut debug = f.debug_struct(name);
+                    for (slot_index, field) in fields.enumerate() {
+                        let is_optional = field.starts_with('?');
+                        debug.field(
+                            field.trim_start_matches('?'),
+                            &DebugSlot::<P> {
+                                slot: node.slot(slot_index),
+                                is_optional,
+                            },
+                        );
+                    }
+                    debug.finish()
+                } else {
+                    f.debug_struct(name).finish()
+                };
+                depth.set(current_depth);
+                result
+            }),
+            "l" => {
+                f.write_str(name)?;
+                f.write_str(" ")?;
+                f.debug_list()
+                    .entries(super::AstNodeListIterator::<P::Language, DebugAnyNode<P>> {
+                        inner: node.clone().into_list().iter(),
+                        ph: std::marker::PhantomData,
+                    })
+                    .finish()
+            }
+            "s" => {
+                f.write_str(name)?;
+                f.write_str(" ")?;
+                f.debug_list()
+                    .entries(super::AstSeparatedListElementsIterator::<
+                        P::Language,
+                        DebugAnyNode<P>,
+                    >::new(&node.clone().into_list()))
+                    .finish()
+            }
+            _ => f
+                .debug_struct(name)
+                .field("items", &DebugChildren::<P>(node.children_with_tokens()))
+                .finish(),
+        }
+    }
+
+    /// A node of any kind, printed by [debug_any_node].
+    struct DebugAnyNode<P: DebugNodeShapes>(SyntaxNode<P::Language>);
+
+    impl<P: DebugNodeShapes> Clone for DebugAnyNode<P> {
+        fn clone(&self) -> Self {
+            Self(self.0.clone())
+        }
+    }
+
+    impl<P: DebugNodeShapes> AstNode for DebugAnyNode<P> {
+        type Language = P::Language;
+
+        // The nodes are only printed, never matched by their kind.
+        const KIND_SET: super::SyntaxKindSet<P::Language> =
+            super::SyntaxKindSet::from_raw(crate::RawSyntaxKind(0));
+
+        fn can_cast(_: <P::Language as Language>::Kind) -> bool {
+            true
+        }
+
+        fn cast(syntax: SyntaxNode<P::Language>) -> Option<Self> {
+            Some(Self(syntax))
+        }
+
+        fn syntax(&self) -> &SyntaxNode<P::Language> {
+            &self.0
+        }
+
+        fn into_syntax(self) -> SyntaxNode<P::Language> {
+            self.0
+        }
+    }
+
+    impl<P: DebugNodeShapes> Debug for DebugAnyNode<P> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            debug_any_node::<P>(&self.0, f)
+        }
+    }
+
+    struct DebugSlot<P: DebugNodeShapes> {
+        slot: Option<SyntaxSlot<P::Language>>,
+        is_optional: bool,
+    }
+
+    impl<P: DebugNodeShapes> Debug for DebugSlot<P> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            match &self.slot {
+                Some(SyntaxSlot::Node(node)) => debug_any_node::<P>(node, f),
+                Some(SyntaxSlot::Token(token)) => Debug::fmt(token, f),
+                Some(SyntaxSlot::Empty { .. }) | None if self.is_optional => {
+                    f.write_str("missing (optional)")
+                }
+                Some(SyntaxSlot::Empty { .. }) | None => f.write_str("missing (required)"),
+            }
+        }
+    }
+
+    /// The children of a bogus node.
+    struct DebugChildren<P: DebugNodeShapes>(SyntaxElementChildren<P::Language>);
+
+    impl<P: DebugNodeShapes> Debug for DebugChildren<P> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            f.debug_list()
+                .entries(self.0.clone().map(DebugElement::<P>))
+                .finish()
+        }
+    }
+
+    struct DebugElement<P: DebugNodeShapes>(crate::SyntaxElement<P::Language>);
+
+    impl<P: DebugNodeShapes> Debug for DebugElement<P> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            match &self.0 {
+                crate::SyntaxElement::Node(node) => debug_any_node::<P>(node, f),
+                crate::SyntaxElement::Token(token) => Debug::fmt(token, f),
+            }
+        }
     }
 
     /// New-type wrapper to flatten the debug output of syntax result fields when printing [AstNode]s.
@@ -1588,6 +1770,9 @@ mod tests {
         ))
     }
 
+    // Skipped under Miri. Resolving a pointer for every range and kind in 300
+    // random trees takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn syntax_ptr_resolves_like_child_steps_from_root() {
         let kinds = [

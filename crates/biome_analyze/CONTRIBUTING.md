@@ -608,10 +608,16 @@ Some rules may allow customization [using per-rule options in `biome.json`](http
 
 Rule options must be placed inside the crate `biome_rule_options`. If you run the command `just gen-analyzer`, the codegen
 should have created a new file inside the crate that has the name of your rule. For example, if the rule name is `useThisConvention`
-you should see a file `use_this_convention.rs` inside `biome_rule_options/lib`. Inside this file you'll see a struct called `UseThisConventionOptions`.
+you should see a file `use_this_convention.rs` inside `biome_rule_options/src`.
 
-Use this struct to add the options.
+This file declares `UseThisConventionOptions` as an alias of `EmptyRuleOptions`, the options type shared by
+the rules without options:
 
+```rust
+pub type UseThisConventionOptions = crate::EmptyRuleOptions;
+```
+
+To add options, replace the alias with a struct of the same name, as shown in [Representing the rule options in Rust](#representing-the-rule-options-in-rust).
 ##### Options for our example rule
 
 Let's assume that the rule we want to implement supports the following options:

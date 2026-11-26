@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_directives.js
+---
+# Input
+```js
+/* should generate diagnostics */
+'x' + 'y';
+function foo() {
+	bar();
+	'use ' + 'strict';
+}
+const mode = 'use ' + 'strict';
+if (condition) {
+	'use ' + 'strict';
+}
+('use ' + 'strict');
+
+```
+
+# Diagnostics
+```
+invalid_directives.js:2:1 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 'x' + 'y';
+      │ ^^^^^^^^^
+    3 │ function foo() {
+    4 │ 	bar();
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - 'x'·+·'y';
+        2 │ + "xy";
+     3  3 │   function foo() {
+     4  4 │   	bar();
+  
+
+```
+
+```
+invalid_directives.js:5:2 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    3 │ function foo() {
+    4 │ 	bar();
+  > 5 │ 	'use ' + 'strict';
+      │ 	^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ const mode = 'use ' + 'strict';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     3  3 │   function foo() {
+     4  4 │     bar();
+     5    │ - → 'use·'·+·'strict';
+        5 │ + → "use·strict";
+     6  6 │   }
+     7  7 │   const mode = 'use ' + 'strict';
+  
+
+```
+
+```
+invalid_directives.js:7:14 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    5 │ 	'use ' + 'strict';
+    6 │ }
+  > 7 │ const mode = 'use ' + 'strict';
+      │              ^^^^^^^^^^^^^^^^^
+    8 │ if (condition) {
+    9 │ 	'use ' + 'strict';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     5  5 │   	'use ' + 'strict';
+     6  6 │   }
+     7    │ - const·mode·=·'use·'·+·'strict';
+        7 │ + const·mode·=·"use·strict";
+     8  8 │   if (condition) {
+     9  9 │   	'use ' + 'strict';
+  
+
+```
+
+```
+invalid_directives.js:9:2 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     7 │ const mode = 'use ' + 'strict';
+     8 │ if (condition) {
+   > 9 │ 	'use ' + 'strict';
+       │ 	^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ ('use ' + 'strict');
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     7  7 │   const mode = 'use ' + 'strict';
+     8  8 │   if (condition) {
+     9    │ - → 'use·'·+·'strict';
+        9 │ + → "use·strict";
+    10 10 │   }
+    11 11 │   ('use ' + 'strict');
+  
+
+```
+
+```
+invalid_directives.js:11:2 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     9 │ 	'use ' + 'strict';
+    10 │ }
+  > 11 │ ('use ' + 'strict');
+       │  ^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     9  9 │   	'use ' + 'strict';
+    10 10 │   }
+    11    │ - ('use·'·+·'strict');
+       11 │ + ("use·strict");
+    12 12 │   
+  
+
+```

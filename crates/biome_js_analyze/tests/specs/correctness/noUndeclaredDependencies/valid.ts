@@ -26,6 +26,9 @@ import "my-package"
 
 import "@/internal";
 import "#internal";
+import "@components/valid";
+import("@components/valid");
+require("@components/valid");
 
 // import from `@types/jest`
 import type * as jest from "lodash";

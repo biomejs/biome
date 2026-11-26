@@ -44,12 +44,9 @@ unicode-normalization     = { workspace = true }
 biome_configuration = { path = "../biome_configuration" }
 biome_json_parser   = { path = "../biome_json_parser" }
 biome_test_utils    = { path = "../biome_test_utils", features = ["lang_json"] }
-criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion           = { workspace = true }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
-
-[build-dependencies]
-filetime = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

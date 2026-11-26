@@ -55,8 +55,7 @@ impl<'source> ConfigurationInspector<'source> {
         let override_patterns = base_configuration
             .overrides
             .as_ref()
-            .map(|overrides| overrides.0.as_slice())
-            .unwrap_or_default();
+            .map_or_default(|overrides| overrides.0.as_slice());
         let mut configuration = base_configuration.clone();
 
         for &override_index in matching_overrides {
@@ -93,8 +92,7 @@ impl<'source> ConfigurationInspector<'source> {
             .configuration
             .overrides
             .as_ref()
-            .map(|overrides| overrides.0.as_slice())
-            .unwrap_or_default();
+            .map_or_default(|overrides| overrides.0.as_slice());
         let mut effective_configuration = self.configuration.clone();
 
         for &override_index in matching_overrides {

@@ -68,16 +68,9 @@ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-pro
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,50 +1,50 @@
+@@ -1,51 +1,33 @@
 -<div style="color: #fff"></div>
-+<div
-+  style="
-+
-+color:
-+#fFf
-+
-+"
-+></div>
++<div style="color: #fff;"></div>
  
 -<div style=""></div>
 +<div style=" "></div>
@@ -131,27 +124,20 @@ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-pro
  ></div>
  
 -<div style="color: red; display: inline"></div>
-+<div
-+  style="   color : red;
-+            display    :inline "
-+></div>
- 
- <div
+-
+-<div
 -  style="
 -    color: green;
-+  style="  
-+
-+color: green;
-+
-+display: inline 
++<div style="color: red; display: inline;"></div>
  
 -    display: inline;
 -  "
-+"
- ></div>
+-></div>
++<div style="color: green; display: inline;"></div>
  
  <div
-@@ -55,12 +55,7 @@
+   attribute-1
+@@ -55,12 +37,7 @@
    attribute-5
    attribute-6
    attribute-7
@@ -161,7 +147,7 @@ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-pro
 -    css-prop-3: css-value;
 -    css-prop-4: css-value;
 -  "
-+  style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
++  style="css-prop-1: css-value; css-prop-2: css-value; css-prop-3: css-value; css-prop-4: css-value;"
    attribute-1
    attribute-2
    attribute-3
@@ -170,14 +156,7 @@ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-pro
 # Output
 
 ```html
-<div
-  style="
-
-color:
-#fFf
-
-"
-></div>
+<div style="color: #fff;"></div>
 
 <div style=" "></div>
 <div style></div>
@@ -204,20 +183,9 @@ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transpa
 "
 ></div>
 
-<div
-  style="   color : red;
-            display    :inline "
-></div>
+<div style="color: red; display: inline;"></div>
 
-<div
-  style="  
-
-color: green;
-
-display: inline 
-
-"
-></div>
+<div style="color: green; display: inline;"></div>
 
 <div
   attribute-1
@@ -227,7 +195,7 @@ display: inline
   attribute-5
   attribute-6
   attribute-7
-  style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  style="css-prop-1: css-value; css-prop-2: css-value; css-prop-3: css-value; css-prop-4: css-value;"
   attribute-1
   attribute-2
   attribute-3
@@ -244,7 +212,7 @@ display: inline
 
 # Lines exceeding max width of 80 characters
 ```
-   21: background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
-   31: background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
-   58:   style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+   14: background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+   24: background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+   40:   style="css-prop-1: css-value; css-prop-2: css-value; css-prop-3: css-value; css-prop-4: css-value;"
 ```

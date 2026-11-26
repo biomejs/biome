@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-plain-and-setup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export const foo = "foo";
+</script>
+
+<script setup>
+const bar = "bar";
+</script>
+
+```

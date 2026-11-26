@@ -60,8 +60,6 @@ pub fn generate_macros(ast: &AstSrc, language_kind: LanguageKind) -> Result<Stri
                 }
             };
         }
-
-        pub(crate) use map_syntax_node;
     };
 
     xtask_glue::reformat(ast)

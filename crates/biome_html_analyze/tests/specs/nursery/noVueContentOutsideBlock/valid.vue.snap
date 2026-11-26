@@ -1,0 +1,25 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<!-- leading comment -->
+<template>
+  <div>666</div>
+</template>
+<!-- comment between the blocks -->
+<script>
+export default {}
+</script>
+
+<style>
+div {
+  color: red;
+}
+</style>
+<!-- trailing comment -->
+
+```

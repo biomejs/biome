@@ -101,7 +101,7 @@ pub struct JsonSerializableFormatOptions {
 impl From<JsonSerializableFormatOptions> for JsonFormatOptions {
     fn from(test: JsonSerializableFormatOptions) -> Self {
         Self::default()
-            .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
+            .with_indent_style(test.indent_style.map_or_default(Into::into))
             .with_indent_width(
                 test.indent_width
                     .and_then(|width| IndentWidth::try_from(width).ok())

@@ -7,7 +7,6 @@ use crate::{
     JsonSyntaxElementChildren as SyntaxElementChildren,
     JsonSyntaxKind::{self as SyntaxKind, *},
     JsonSyntaxList as SyntaxList, JsonSyntaxNode as SyntaxNode, JsonSyntaxToken as SyntaxToken,
-    macros::map_syntax_node,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
@@ -519,26 +518,7 @@ impl AstNode for JsonArrayValue {
 }
 impl std::fmt::Debug for JsonArrayValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonArrayValue")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("elements", &self.elements())
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonArrayValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonArrayValue> for SyntaxNode {
@@ -574,21 +554,7 @@ impl AstNode for JsonBooleanValue {
 }
 impl std::fmt::Debug for JsonBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonBooleanValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonBooleanValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonBooleanValue> for SyntaxNode {
@@ -624,23 +590,7 @@ impl AstNode for JsonMember {
 }
 impl std::fmt::Debug for JsonMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonMember")
-                .field("name", &support::DebugSyntaxResult(self.name()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("JsonMember").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonMember> for SyntaxNode {
@@ -676,21 +626,7 @@ impl AstNode for JsonMemberName {
 }
 impl std::fmt::Debug for JsonMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonMemberName")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonMemberName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonMemberName> for SyntaxNode {
@@ -726,21 +662,7 @@ impl AstNode for JsonMetavariable {
 }
 impl std::fmt::Debug for JsonMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonMetavariable")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonMetavariable").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonMetavariable> for SyntaxNode {
@@ -776,21 +698,7 @@ impl AstNode for JsonNullValue {
 }
 impl std::fmt::Debug for JsonNullValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonNullValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonNullValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonNullValue> for SyntaxNode {
@@ -826,21 +734,7 @@ impl AstNode for JsonNumberValue {
 }
 impl std::fmt::Debug for JsonNumberValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonNumberValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonNumberValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonNumberValue> for SyntaxNode {
@@ -876,26 +770,7 @@ impl AstNode for JsonObjectValue {
 }
 impl std::fmt::Debug for JsonObjectValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonObjectValue")
-                .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("json_member_list", &self.json_member_list())
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonObjectValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonObjectValue> for SyntaxNode {
@@ -931,23 +806,7 @@ impl AstNode for JsonRoot {
 }
 impl std::fmt::Debug for JsonRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonRoot")
-                .field(
-                    "bom_token",
-                    &support::DebugOptionalElement(self.bom_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-                .finish()
-        } else {
-            f.debug_struct("JsonRoot").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonRoot> for SyntaxNode {
@@ -983,21 +842,7 @@ impl AstNode for JsonStringValue {
 }
 impl std::fmt::Debug for JsonStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("JsonStringValue")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("JsonStringValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonStringValue> for SyntaxNode {
@@ -1059,11 +904,7 @@ impl AstNode for AnyJsonMemberName {
 }
 impl std::fmt::Debug for AnyJsonMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::JsonBogusName(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonMemberName(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonMetavariable(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyJsonMemberName> for SyntaxNode {
@@ -1185,16 +1026,7 @@ impl AstNode for AnyJsonValue {
 }
 impl std::fmt::Debug for AnyJsonValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::JsonArrayValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonBogusValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonBooleanValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonNullValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonNumberValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonObjectValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::JsonStringValue(it) => std::fmt::Debug::fmt(it, f),
-        }
+        debug_syntax_node(self.syntax(), f)
     }
 }
 impl From<AnyJsonValue> for SyntaxNode {
@@ -1318,9 +1150,7 @@ impl AstNode for JsonBogus {
 }
 impl std::fmt::Debug for JsonBogus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsonBogus")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonBogus> for SyntaxNode {
@@ -1374,9 +1204,7 @@ impl AstNode for JsonBogusName {
 }
 impl std::fmt::Debug for JsonBogusName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsonBogusName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonBogusName> for SyntaxNode {
@@ -1430,9 +1258,7 @@ impl AstNode for JsonBogusValue {
 }
 impl std::fmt::Debug for JsonBogusValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsonBogusValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
+        debug_syntax_node(&self.syntax, f)
     }
 }
 impl From<JsonBogusValue> for SyntaxNode {
@@ -1510,8 +1336,7 @@ impl AstSeparatedList for JsonArrayElementList {
 }
 impl Debug for JsonArrayElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("JsonArrayElementList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for JsonArrayElementList {
@@ -1592,8 +1417,7 @@ impl AstSeparatedList for JsonMemberList {
 }
 impl Debug for JsonMemberList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("JsonMemberList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        debug_syntax_node(self.syntax_list.node(), f)
     }
 }
 impl IntoIterator for JsonMemberList {
@@ -1623,10 +1447,61 @@ struct DebugSyntaxElement(SyntaxElement);
 impl Debug for DebugSyntaxElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
-            SyntaxElement::Node(node) => {
-                map_syntax_node ! (node . clone () , node => std :: fmt :: Debug :: fmt (& node , f))
-            }
+            SyntaxElement::Node(node) => debug_syntax_node(node, f),
             SyntaxElement::Token(token) => Debug::fmt(token, f),
         }
     }
+}
+#[doc = r" Describes how the nodes of this language are printed."]
+struct DebugShapes;
+impl support::DebugNodeShapes for DebugShapes {
+    type Language = Language;
+    const SHAPES: &'static str = concat!(
+        "nJsonArrayValue,l_brack_token,elements,r_brack_token\n",
+        "nJsonBooleanValue,value_token\n",
+        "nJsonMember,name,colon_token,value\n",
+        "nJsonMemberName,value_token\n",
+        "nJsonMetavariable,value_token\n",
+        "nJsonNullValue,value_token\n",
+        "nJsonNumberValue,value_token\n",
+        "nJsonObjectValue,l_curly_token,json_member_list,r_curly_token\n",
+        "nJsonRoot,?bom_token,value,eof_token\n",
+        "nJsonStringValue,value_token\n",
+        "bJsonBogus\n",
+        "bJsonBogusName\n",
+        "bJsonBogusValue\n",
+        "sJsonArrayElementList\n",
+        "sJsonMemberList\n"
+    );
+    fn shape_offset(kind: SyntaxKind) -> u32 {
+        match kind {
+            JSON_ARRAY_VALUE => 0u32,
+            JSON_BOOLEAN_VALUE => 53u32,
+            JSON_MEMBER => 83u32,
+            JSON_MEMBER_NAME => 118u32,
+            JSON_METAVARIABLE => 146u32,
+            JSON_NULL_VALUE => 176u32,
+            JSON_NUMBER_VALUE => 203u32,
+            JSON_OBJECT_VALUE => 232u32,
+            JSON_ROOT => 294u32,
+            JSON_STRING_VALUE => 331u32,
+            JSON_BOGUS => 360u32,
+            JSON_BOGUS_NAME => 371u32,
+            JSON_BOGUS_VALUE => 386u32,
+            JSON_ARRAY_ELEMENT_LIST => 402u32,
+            JSON_MEMBER_LIST => 424u32,
+            _ => u32::MAX,
+        }
+    }
+    fn with_depth<R>(raw_kind: usize, f: impl FnOnce(&std::cell::Cell<u8>) -> R) -> R {
+        thread_local! { static DEPTHS : [std :: cell :: Cell < u8 > ; SyntaxKind :: __LAST as usize] = const { [const { std :: cell :: Cell :: new (0) } ; SyntaxKind :: __LAST as usize] } ; }
+        DEPTHS.with(|depths| f(&depths[raw_kind]))
+    }
+    fn debug_unshaped(_: &SyntaxNode, _: &mut Formatter<'_>) -> std::fmt::Result {
+        unreachable!("every kind of node has a shape")
+    }
+}
+#[doc = r" Prints `node` the way the AST node of its kind is printed."]
+fn debug_syntax_node(node: &SyntaxNode, f: &mut Formatter<'_>) -> std::fmt::Result {
+    support::debug_any_node::<DebugShapes>(node, f)
 }

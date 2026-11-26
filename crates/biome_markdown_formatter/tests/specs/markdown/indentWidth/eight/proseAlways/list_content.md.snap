@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/indentWidth/eight/proseAlways/list_content.md
+---
+
+# Input
+
+```md
+- a paragraph that is long enough to need wrapping when the line width is forty columns
+
+  a second paragraph that is long enough to need wrapping when the line width is forty columns
+  1. nested item that is long enough to need wrapping at forty columns
+
+     nested paragraph that is long enough to need wrapping at forty columns
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "indentWidth": 8,
+      "proseWrap": "always",
+      "lineWidth": 40
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+- a paragraph that is long enough to
+  need wrapping when the line width is
+  forty columns
+
+     a second paragraph that is long
+     enough to need wrapping when the
+     line width is forty columns
+     1. nested item that is long enough
+        to need wrapping at forty
+        columns
+
+           nested paragraph that is long
+           enough to need wrapping at
+           forty columns
+
+```

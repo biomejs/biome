@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<div class="flex w-full"></div>
+<div class="flex md:grid"></div>
+<div class={"p-2 px-4"}></div>
+<div class:list={clsx("flex", isGrid && "grid")}></div>
+
+```

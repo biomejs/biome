@@ -1,0 +1,45 @@
+/* should not generate diagnostics */
+@use "sass:math";
+
+$gap: 8px;
+
+:root {
+	--gap: #{$gap};
+	--calc: calc(#{$gap} * 2);
+	--label: "$gap";
+	--interpolated-string: "gap-#{$gap}";
+	--dollar-space: $ gap;
+	--price: 5$;
+	--name-#{$gap}: 1px;
+	--url-text: url(https://cdn.example/a$b.svg);
+	--url-digit: url($1x.png);
+	--interpolated-call: #{math.div(8px, 2)};
+	--interpolated-call-string: "#{math.div(8px, 2)}";
+	--css-functions: calc(100% - var(--gutter));
+	--color: rgb(0 0 0 / 50%);
+	--mix: color-mix(in srgb, red, blue);
+	--custom: --my-function(1);
+	--css-named-sass: saturate(#f00, 20%);
+	--css-rem: rem(10px, 3px);
+	--read-by-js: spring(1, 100, 10);
+	--imported: bpx(3);
+	--bare-condition: style(--a: 1);
+	--upper-case-sass: DARKEN(#fff, 10%);
+	--if: if(style(--a: 1): 2; else: 3);
+	--if-media-supports: if(media(print): 1; supports(display: grid): 2; else: 3);
+	--if-grouped: if((style(--a: 1) or style(--b: 2)) and media(print): 1; else: 2);
+	--if-not: if(not (supports(display: grid)): a; else: b);
+	--if-selector: if(supports(selector(:has(a))): 1; else: 2);
+	--if-font-tech: if(supports(font-tech(color-COLRv1)): 1; else: 2);
+	--url-call: url(foo(bar).svg);
+	--prefixed: -webkit-gradient(linear, left top, left bottom);
+	--string: "darken(#fff, 10%)";
+	--upper: CALC(1px + 2px);
+	--if-upper: IF(STYLE(--a: 1): 2; else: 3);
+	--url-upper: URL(foo(bar).svg);
+}
+
+a {
+	margin: $gap;
+	width: math.div(8px, 2);
+}

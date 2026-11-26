@@ -1,0 +1,10 @@
+# should generate diagnostics
+- !!str : tagged key
+- &anchor : anchored key
+- ? !!str
+  : tagged explicit key
+- ? &anchor2
+  : anchored explicit key
+- { !!str : tagged flow key, &anchor3 : anchored flow key }
+- !!map
+  : mapping with a tag

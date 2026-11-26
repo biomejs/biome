@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+a { font-weight: 700; }
+a { font-weight: bolder; }
+a { font-weight: LIGHTER; }
+a { font: italic small-caps lighter 16px/3 cursive; }

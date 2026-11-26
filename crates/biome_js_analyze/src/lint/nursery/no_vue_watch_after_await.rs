@@ -12,10 +12,11 @@ use biome_rowan::{AstNode, SyntaxKindSet};
 use biome_rule_options::no_vue_watch_after_await::NoVueWatchAfterAwaitOptions;
 
 use crate::frameworks::vue::vue_call::vue_api_name;
-use crate::frameworks::vue::vue_component::{VueComponent, VueComponentQuery};
 use crate::frameworks::vue::vue_setup::{
-    VueSetupCallAfterAwait, find_vue_setup_calls_after_await, vue_setup_function_body,
+    VueSetupCallAfterAwait, find_vue_setup_calls_after_await,
+    vue_setup_function,
 };
+use crate::services::vue::VueComponent;
 
 declare_lint_rule! {
     /// Disallow creating Vue watchers after an `await` in `setup()`.
@@ -77,23 +78,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueWatchAfterAwait {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = VueSetupCallAfterAwait;
     type Signals = Box<[Self::State]>;
     type Options = NoVueWatchAfterAwaitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
-            return [].into();
-        };
-
-        match vue_setup_function_body(component.kind()) {
-            Some(body) => find_vue_setup_calls_after_await(&body, |call| {
+        match vue_setup_function(ctx.query(), ctx.vue_model()).and_then(|function| function.body().ok()) {
+            Some(body) => find_vue_setup_calls_after_await(&body.into(), |call| {
                 is_unstoppable_watcher_call(call, ctx.model())
             }),
             None => [].into(),

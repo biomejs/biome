@@ -1,0 +1,296 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidAllowAtRootLevel.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function someFunction() { fs.fooSync(); }
+var a = function someFunction() { fs.fooSync(); };
+var b = () => fs.readFileSync(qux);
+var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+class A {
+	constructor() { fooSync(); }
+	method() { fs.fooSync(); }
+	set value(v) { fooSync(); }
+	property = fs.fooSync();
+}
+function withDefault(value = fooSync()) {}
+var d = (value = fooSync()) => value;
+class E { set value(v = fooSync()) {} }
+var f = { set value(v = fooSync()) {} };
+
+```
+
+# Diagnostics
+```
+invalidAllowAtRootLevel.js:2:27 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function someFunction() { fs.fooSync(); }
+      │                           ^^^^^^^^^^^^
+    3 │ var a = function someFunction() { fs.fooSync(); };
+    4 │ var b = () => fs.readFileSync(qux);
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:3:35 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function someFunction() { fs.fooSync(); }
+  > 3 │ var a = function someFunction() { fs.fooSync(); };
+      │                                   ^^^^^^^^^^^^
+    4 │ var b = () => fs.readFileSync(qux);
+    5 │ var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:4:15 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function readFileSync.
+  
+    2 │ function someFunction() { fs.fooSync(); }
+    3 │ var a = function someFunction() { fs.fooSync(); };
+  > 4 │ var b = () => fs.readFileSync(qux);
+      │               ^^^^^^^^^^^^^^^^^^^^
+    5 │ var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+    6 │ class A {
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:5:22 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    3 │ var a = function someFunction() { fs.fooSync(); };
+    4 │ var b = () => fs.readFileSync(qux);
+  > 5 │ var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+      │                      ^^^^^^^^^
+    6 │ class A {
+    7 │ 	constructor() { fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:5:57 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    3 │ var a = function someFunction() { fs.fooSync(); };
+    4 │ var b = () => fs.readFileSync(qux);
+  > 5 │ var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+      │                                                         ^^^^^^^^^
+    6 │ class A {
+    7 │ 	constructor() { fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:7:18 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    5 │ var c = { method() { fooSync(); }, get value() { return fooSync(); } };
+    6 │ class A {
+  > 7 │ 	constructor() { fooSync(); }
+      │ 	                ^^^^^^^^^
+    8 │ 	method() { fs.fooSync(); }
+    9 │ 	set value(v) { fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:8:13 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     6 │ class A {
+     7 │ 	constructor() { fooSync(); }
+   > 8 │ 	method() { fs.fooSync(); }
+       │ 	           ^^^^^^^^^^^^
+     9 │ 	set value(v) { fooSync(); }
+    10 │ 	property = fs.fooSync();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:9:17 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     7 │ 	constructor() { fooSync(); }
+     8 │ 	method() { fs.fooSync(); }
+   > 9 │ 	set value(v) { fooSync(); }
+       │ 	               ^^^^^^^^^
+    10 │ 	property = fs.fooSync();
+    11 │ }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:10:13 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     8 │ 	method() { fs.fooSync(); }
+     9 │ 	set value(v) { fooSync(); }
+  > 10 │ 	property = fs.fooSync();
+       │ 	           ^^^^^^^^^^^^
+    11 │ }
+    12 │ function withDefault(value = fooSync()) {}
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:12:30 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    10 │ 	property = fs.fooSync();
+    11 │ }
+  > 12 │ function withDefault(value = fooSync()) {}
+       │                              ^^^^^^^^^
+    13 │ var d = (value = fooSync()) => value;
+    14 │ class E { set value(v = fooSync()) {} }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:13:18 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    11 │ }
+    12 │ function withDefault(value = fooSync()) {}
+  > 13 │ var d = (value = fooSync()) => value;
+       │                  ^^^^^^^^^
+    14 │ class E { set value(v = fooSync()) {} }
+    15 │ var f = { set value(v = fooSync()) {} };
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:14:25 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    12 │ function withDefault(value = fooSync()) {}
+    13 │ var d = (value = fooSync()) => value;
+  > 14 │ class E { set value(v = fooSync()) {} }
+       │                         ^^^^^^^^^
+    15 │ var f = { set value(v = fooSync()) {} };
+    16 │ 
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAllowAtRootLevel.js:15:25 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    13 │ var d = (value = fooSync()) => value;
+    14 │ class E { set value(v = fooSync()) {} }
+  > 15 │ var f = { set value(v = fooSync()) {} };
+       │                         ^^^^^^^^^
+    16 │ 
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

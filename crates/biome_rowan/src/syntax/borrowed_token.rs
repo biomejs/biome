@@ -6,8 +6,8 @@
 //! each of them. In exchange, a [BorrowedToken] only describes the token
 //! itself: it can't navigate to its parent or to its siblings.
 
-use crate::green::Slot;
-use crate::{GreenNodeData, GreenTokenData, Language, SyntaxKind, TriviaPiece, TriviaPieceKind};
+use crate::green::{GreenTokens, GreenTokensWithComments};
+use crate::{GreenNodeRef, GreenTokenRef, Language, SyntaxKind, TriviaPiece, TriviaPieceKind};
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -17,20 +17,15 @@ use std::slice;
 ///
 /// Created by [SyntaxNode::borrowed_tokens](crate::SyntaxNode::borrowed_tokens).
 pub struct BorrowedTokensIterator<'a, L: Language> {
-    /// For each node the walk has entered, outermost first: its children
-    /// that haven't been visited yet, and the offset where the node starts.
-    ///
-    /// For example, after `a` is returned from `a + b`, the entry for the
-    /// binary expression holds `+` and `b`.
-    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    tokens: GreenTokens<'a>,
     _p: PhantomData<L>,
 }
 
 impl<'a, L: Language> BorrowedTokensIterator<'a, L> {
     /// Creates the iterator for `node`, whose range starts at `offset`.
-    pub(super) fn new(node: &'a GreenNodeData, offset: TextSize) -> Self {
+    pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
         Self {
-            pending_children: vec![(node.slice().iter(), offset)],
+            tokens: GreenTokens::new(node, offset),
             _p: PhantomData,
         }
     }
@@ -40,36 +35,56 @@ impl<'a, L: Language> Iterator for BorrowedTokensIterator<'a, L> {
     type Item = BorrowedToken<'a, L>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Depth-first walk: enter child nodes by pushing their children, and
-        // return to the parent by popping a node once it has none left.
-        loop {
-            let (slots, node_offset) = self.pending_children.last_mut()?;
-            match slots.next() {
-                Some(Slot::Token { rel_offset, token }) => {
-                    return Some(BorrowedToken {
-                        green: token,
-                        offset: *node_offset + *rel_offset,
-                        _p: PhantomData,
-                    });
-                }
-                Some(Slot::Node { rel_offset, node }) => {
-                    let offset = *node_offset + *rel_offset;
-                    self.pending_children.push((node.slice().iter(), offset));
-                }
-                Some(Slot::Empty { .. }) => {}
-                None => {
-                    self.pending_children.pop();
-                }
-            }
-        }
+        let token = self.tokens.next()?;
+        Some(BorrowedToken {
+            green: token.green,
+            offset: token.offset,
+            _p: PhantomData,
+        })
     }
 }
 
 impl<L: Language> FusedIterator for BorrowedTokensIterator<'_, L> {}
 
+/// Iterator over the tokens in a node's subtree whose leading or trailing
+/// trivia contains a comment, in source order.
+///
+/// Created by [SyntaxNode::borrowed_tokens_with_comments](crate::SyntaxNode::borrowed_tokens_with_comments).
+/// It skips every subtree without comments, so its cost depends on where the
+/// comments are, not on the size of the tree.
+pub struct BorrowedTokensWithCommentsIterator<'a, L: Language> {
+    tokens: GreenTokensWithComments<'a>,
+    _p: PhantomData<L>,
+}
+
+impl<'a, L: Language> BorrowedTokensWithCommentsIterator<'a, L> {
+    /// Creates the iterator for `node`, whose range starts at `offset`.
+    pub(super) fn new(node: GreenNodeRef<'a>, offset: TextSize) -> Self {
+        Self {
+            tokens: GreenTokensWithComments::new(node, offset),
+            _p: PhantomData,
+        }
+    }
+}
+
+impl<'a, L: Language> Iterator for BorrowedTokensWithCommentsIterator<'a, L> {
+    type Item = BorrowedToken<'a, L>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let token = self.tokens.next()?;
+        Some(BorrowedToken {
+            green: token.green,
+            offset: token.offset,
+            _p: PhantomData,
+        })
+    }
+}
+
+impl<L: Language> FusedIterator for BorrowedTokensWithCommentsIterator<'_, L> {}
+
 /// A token that borrows from the tree of the node it was reached from.
 pub struct BorrowedToken<'a, L: Language> {
-    green: &'a GreenTokenData,
+    green: GreenTokenRef<'a>,
     /// Start of the token's range, which includes its leading trivia.
     offset: TextSize,
     _p: PhantomData<L>,
@@ -351,6 +366,46 @@ mod tests {
             tokens,
             expected(condition.descendants_tokens(Direction::Next))
         );
+    }
+
+    /// Ranges of the tokens with a comment in their trivia, read through
+    /// the cursor API.
+    fn expected_with_comments(node: &SyntaxNode<RawLanguage>) -> Vec<TextRange> {
+        node.descendants_tokens(Direction::Next)
+            .filter(|token| token.has_leading_comments() || token.has_trailing_comments())
+            .map(|token| token.text_range())
+            .collect()
+    }
+
+    fn borrowed_with_comments(node: &SyntaxNode<RawLanguage>) -> Vec<TextRange> {
+        node.borrowed_tokens_with_comments()
+            .map(|token| token.text_range())
+            .collect()
+    }
+
+    #[test]
+    fn with_comments_matches_the_tokens_with_comments() {
+        let root = tree();
+
+        let tokens = borrowed_with_comments(&root);
+
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens, expected_with_comments(&root));
+        for node in root.descendants() {
+            assert_eq!(borrowed_with_comments(&node), expected_with_comments(&node));
+        }
+    }
+
+    #[test]
+    fn with_comments_yields_nothing_without_comments() {
+        let root = tree();
+        // Only skipped trivia, which isn't a comment.
+        let list = child(&root, RawLanguageKind::SEPARATED_EXPRESSION_LIST)
+            .last_child()
+            .unwrap();
+
+        assert!(list.has_skipped_descendants());
+        assert_eq!(list.borrowed_tokens_with_comments().count(), 0);
     }
 
     #[test]

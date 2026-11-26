@@ -11,8 +11,8 @@ use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, PrintDiagnostic, Severity, category};
 use biome_service::WorkspaceError;
 use biome_service::workspace::{
-    FeaturesBuilder, FeaturesSupported, FileContent, FileFeaturesResult, ProcessFileParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, FeaturesSupported, FileContent, FileFeaturesResult, IgnoreKind,
+    ProcessFileParams, SupportsFeatureParams,
 };
 use tracing::debug;
 
@@ -139,6 +139,7 @@ impl ProcessFile for FormatProcessFile {
                 .with_all()
                 .without_formatter()
                 .build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
 
         if file_features.is_ignored() {

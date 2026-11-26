@@ -421,7 +421,7 @@ impl SlotName {
 }
 
 /// Tag names that Vue resolves as components even though they are written in
-/// lowercase: `<component>` and tags that aren't known HTML or SVG elements.
+/// lowercase: `<component>` and tags that aren't known HTML, SVG, or MathML elements.
 const COMPONENT_TAG_KINDS: TokenSet<HtmlSyntaxKind> =
     token_set![T![component], HtmlSyntaxKind::HTML_UNKNOWN_TAG];
 

@@ -24,3 +24,7 @@ new ConstructorConsumer(async () => {});
 declare function consumeAfterSpread(prefix: number, callback: () => void): void;
 const prefixes: number[] = [];
 consumeAfterSpread(...prefixes, async () => {});
+
+function forEachWithDefault(callback: () => Promise<void> = async () => {}) {
+	[1].forEach(callback);
+}

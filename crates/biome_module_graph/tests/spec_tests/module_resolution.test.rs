@@ -301,7 +301,7 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
     assert!(matches!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "renamedSymbol", barrel)),
-        JsExportedSymbolLookup::Found(_)
+        JsExportedSymbolLookup::Found(..)
     ));
     assert_eq!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel)),
@@ -383,7 +383,7 @@ fn test_find_symbol_reexported_through_package_self_reference() {
         .unwrap();
     assert!(matches!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "NextRequest", server)),
-        JsExportedSymbolLookup::Found(_)
+        JsExportedSymbolLookup::Found(..)
     ));
 }
 
@@ -402,7 +402,7 @@ fn test_export_equals_namespace_without_type_inference() {
     for name in ["useState", "useCallback"] {
         assert!(matches!(
             find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
-            JsExportedSymbolLookup::Found(_)
+            JsExportedSymbolLookup::Found(..)
         ));
     }
 }

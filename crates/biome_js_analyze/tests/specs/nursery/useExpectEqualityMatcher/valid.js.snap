@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+expect.hasAssertions;
+expect.hasAssertions();
+expect.assertions(1);
+expect(true).toBe(...true);
+expect(a).to.be.a("string");
+expect(a == 1).toBe(true);
+expect(1 == a).toBe(true);
+expect(a == b).toBe(true);
+expect(a != b).toBe(true);
+expect(a < b).toBe(true);
+expect(a === b).toBe(c);
+expect(a === b).toBe("true");
+expect(a === b).toBeTruthy();
+expect(a === b).toBe(true, extra);
+expect(a === b).not.not.toBe(true);
+expect(a === b).not.resolves.toBe(true);
+expect(a === b).foo.toBe(true);
+expect(a).toBe(b);
+expect.soft(a === b).toBe(true);
+assert(a === b).toBe(true);
+
+```

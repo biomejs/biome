@@ -1,0 +1,25 @@
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import type { PropOptions, PropType } from "vue";
+
+interface User {
+  name: string;
+}
+
+defineProps({
+  user: Object as PropType<User>,
+  items: Array as PropType<string[]>,
+  factory: Object as () => User,
+  anything: { type: Object as any },
+  unknownValue: { type: Object as unknown },
+  settings: { type: Object as PropType<Record<string, string>> },
+  label: String,
+  value: [Number, String, Boolean],
+  mixed: [Object as PropType<User>, String],
+  computed: someFunction(),
+  nothing: {},
+  withDefault: { default: null },
+  castOptions: { type: Object, required: true } as PropOptions<User>,
+  castArrayOptions: ({ type: [Array, String] }) as PropOptions<string[] | string>,
+});
+</script>

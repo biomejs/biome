@@ -1,0 +1,76 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidSet.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+--- !!set
+? Mark McGwire
+? Sammy Sosa
+? Ken Griff
+
+```
+
+# Diagnostics
+```
+invalidSet.yaml:3:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    1 │ # should generate diagnostics
+    2 │ --- !!set
+  > 3 │ ? Mark McGwire
+      │ ^^^^^^^^^^^^^^
+    4 │ ? Sammy Sosa
+    5 │ ? Ken Griff
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSet.yaml:4:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    2 │ --- !!set
+    3 │ ? Mark McGwire
+  > 4 │ ? Sammy Sosa
+      │ ^^^^^^^^^^^^
+    5 │ ? Ken Griff
+    6 │ 
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSet.yaml:5:1 lint/nursery/noYamlEmptyMapValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This key has no value.
+  
+    3 │ ? Mark McGwire
+    4 │ ? Sammy Sosa
+  > 5 │ ? Ken Griff
+      │ ^^^^^^^^^^^
+    6 │ 
+  
+  i An empty value is easy to miss, and is often a value that was forgotten.
+  
+  i Add a value. If the value is meant to be empty, write it out, for example as null.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

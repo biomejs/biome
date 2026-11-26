@@ -6,6 +6,8 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, Text};
 
+pub(crate) use biome_js_syntax::try_unescape_js_string as string_value;
+
 /// Returns whether `left` and `right` read the same value: the same variable, property,
 /// `this`, `super`, or literal.
 ///

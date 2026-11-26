@@ -1,0 +1,25 @@
+$gap: 8px;
+
+.card {
+  --supports: if(supports(display: grid): $gap; else: darken(#fff, 10%));
+  --media: IF(media(width > 1px): 1);
+  --interpolated: if(media(print): #{$gap}; else: 0) $after;
+  --sass: if(sass($gap): 1; else: 2);
+  --not: if(not (style(--a: 1)): x; else: y);
+  --selector: if(supports(selector(:has(a))): 1; else: 2);
+  --multiline: if(
+    media(print): 1;
+    else: 2;
+  );
+  --empty-branch: if(media(print): ; else: 1);
+  --nested: if(style(--a: $b): calc(1px + $gap); else: 0);
+  --legacy: if($condition, a, b);
+  --malformed: if(media(print) 1);
+  color: red;
+}
+
+@supports (--condition: if(style(--a: 1): 1)) {
+  .card {
+    color: blue;
+  }
+}

@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validOwnDeclarations.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+defineOptions({
+  inheritAttrs: [1, 2].some((item) => item > 1),
+  data() {
+    const count = 0;
+    return { count };
+  },
+});
+</script>
+
+```

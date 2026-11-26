@@ -175,16 +175,16 @@ use crate::WorkspaceError;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
-use crate::settings::Settings;
+use crate::settings::{GitIgnoreMatcher, Settings};
 use crate::workspace::ClientId;
 use biome_configuration::Configuration;
 use biome_db::Source;
+use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
 use biome_resolver::ResolverPathChanges;
 use camino::{Utf8Path, Utf8PathBuf};
-use ignore::gitignore::Gitignore;
 use parking_lot::{Mutex, MutexGuard};
 #[cfg(feature = "module_graph")]
 use salsa::Setter;
@@ -242,11 +242,11 @@ enum ProjectUpdate {
         path: Utf8PathBuf,
         settings: Settings,
     },
-    /// The matchers of nested ignore files, from
-    /// [WorkspaceDb::nested_git_ignores].
-    NestedGitIgnores {
+    GitIgnores {
         project_key: ProjectKey,
-        git_ignores: Vec<Gitignore>,
+        root_git_ignore: Option<GitIgnoreMatcher>,
+        scope: BiomePath,
+        nested_git_ignores: Vec<GitIgnoreMatcher>,
     },
 }
 
@@ -269,15 +269,19 @@ impl ProjectUpdate {
                 settings,
                 ProjectUpdateMode::Setters,
             ),
-            Self::NestedGitIgnores {
+            Self::GitIgnores {
                 project_key,
-                git_ignores,
+                root_git_ignore,
+                scope,
+                nested_git_ignores,
             } => {
                 // The only error is a missing project. During a scan, the
                 // setter gate blocks the writes that remove projects.
-                let _ = db.insert_nested_git_ignores_with_mode(
+                let _ = db.replace_git_ignores_with_mode(
                     project_key,
-                    &git_ignores,
+                    root_git_ignore.as_ref(),
+                    &scope,
+                    &nested_git_ignores,
                     ProjectUpdateMode::Setters,
                 );
             }
@@ -299,8 +303,8 @@ enum DbStorage {
     Owned(OwnedDb),
 }
 
-/// A project scan, split into three phases: [ScanSetup], [ScanFiles] and
-/// [ScanDeferredFiles].
+/// A project scan, split into four phases: [ScanIgnoreFiles], [ScanSetup],
+/// [ScanFiles] and [ScanDeferredFiles].
 ///
 /// The scanner works through [Self::view] during each phase. The view can't
 /// run Salsa setters, so it records the changes that need them. Committing a
@@ -320,21 +324,24 @@ pub(crate) struct ScanSession<'a, Phase> {
     phase: PhantomData<Phase>,
 }
 
-/// The first phase of a scan: reads the configuration files, manifests and
-/// ignore files of the project.
+/// The first phase of a scan: discovers ignore files and publishes their matchers.
+pub(crate) struct ScanIgnoreFiles;
+
+/// The second phase of a scan: reads the configuration files and manifests of
+/// the project after the ignore matchers are available.
 ///
 /// Its view defers every file whose inputs need Salsa setters, including the
 /// manifests. No other file reads them before [ScanFiles] indexes them again.
 pub(crate) struct ScanSetup;
 
-/// The second phase of a scan: indexes again the files that [ScanSetup]
+/// The third phase of a scan: indexes again the files that [ScanSetup]
 /// deferred, then the other files of the project and their dependencies.
 ///
 /// Its view never defers the manifests and the JSON files, because the files
 /// that it indexes after them read them.
 pub(crate) struct ScanFiles;
 
-/// The last phase of a scan: indexes again the files that [ScanFiles]
+/// The fourth and last phase of a scan: indexes again the files that [ScanFiles]
 /// deferred, because updating their inputs needed Salsa setters.
 pub(crate) struct ScanDeferredFiles;
 
@@ -349,7 +356,10 @@ impl<'a, Phase> ScanSession<'a, Phase> {
     /// Publishes the changes of this phase, then starts the phase `Next` with
     /// a new view that reads them. Returns the paths of the files that this
     /// phase deferred, sorted and without duplicates.
-    fn commit_into<Next>(self) -> (ScanSession<'a, Next>, Vec<Utf8PathBuf>) {
+    fn commit_into<Next>(
+        self,
+        defers_manifests: bool,
+    ) -> (ScanSession<'a, Next>, Vec<Utf8PathBuf>) {
         let Self {
             view, mut writer, ..
         } = self;
@@ -362,11 +372,18 @@ impl<'a, Phase> ScanSession<'a, Phase> {
         deferred_paths.sort_unstable();
         deferred_paths.dedup();
         let session = ScanSession {
-            view: writer.view(false),
+            view: writer.view(defers_manifests),
             writer,
             phase: PhantomData,
         };
         (session, deferred_paths)
+    }
+}
+
+impl<'a> ScanSession<'a, ScanIgnoreFiles> {
+    /// Publishes the ignore matchers and starts [ScanSetup].
+    pub(crate) fn commit(self) -> (ScanSession<'a, ScanSetup>, Vec<Utf8PathBuf>) {
+        self.commit_into(true)
     }
 }
 
@@ -375,7 +392,7 @@ impl<'a> ScanSession<'a, ScanSetup> {
     /// starts [ScanFiles]. Returns the paths of the deferred files, which
     /// [ScanFiles] indexes again first.
     pub(crate) fn commit(self) -> (ScanSession<'a, ScanFiles>, Vec<Utf8PathBuf>) {
-        self.commit_into()
+        self.commit_into(false)
     }
 }
 
@@ -384,7 +401,7 @@ impl<'a> ScanSession<'a, ScanFiles> {
     /// Returns the paths of the deferred files, which [ScanDeferredFiles]
     /// indexes again.
     pub(crate) fn commit(self) -> (ScanSession<'a, ScanDeferredFiles>, Vec<Utf8PathBuf>) {
-        self.commit_into()
+        self.commit_into(false)
     }
 }
 
@@ -714,7 +731,7 @@ impl DbState {
     ///
     /// With Owned storage, this waits for the setter gate. It doesn't announce
     /// a pending Salsa write, so reads continue meanwhile.
-    pub(crate) fn scan_session(&self) -> ScanSession<'_, ScanSetup> {
+    pub(crate) fn scan_session(&self) -> ScanSession<'_, ScanIgnoreFiles> {
         let storage = match &self.storage {
             DbStorage::Shared(shared_db) => ScanStorage::Shared(shared_db.clone()),
             DbStorage::Owned(owner) => ScanStorage::Owned {
@@ -728,7 +745,7 @@ impl DbState {
             deferred_paths: Vec::new(),
         };
         ScanSession {
-            view: writer.view(true),
+            view: writer.view(false),
             writer,
             phase: PhantomData,
         }
@@ -851,48 +868,83 @@ impl DbState {
         }
     }
 
-    /// Adds the patterns of nested ignore files to the root settings of the
-    /// project `project_key`. Each entry of `payload` holds the directory of
-    /// an ignore file and its patterns.
+    /// Returns whether this scan session queued nested ignore matchers for `project_key` that are
+    /// located in `scope`.
     ///
-    /// Does nothing when `payload` is empty.
-    pub fn store_nested_ignore_patterns(
+    /// Queued matchers aren't visible in the database until the session commits, so clearing
+    /// `scope` must still be queued to replace them.
+    fn has_queued_git_ignores_in(&self, project_key: ProjectKey, scope: &BiomePath) -> bool {
+        self.scanner_changes.as_ref().is_some_and(|changes| {
+            changes.project_updates.lock().iter().any(|update| {
+                matches!(
+                    update,
+                    ProjectUpdate::GitIgnores {
+                        project_key: queued_project_key,
+                        nested_git_ignores,
+                        ..
+                    } if *queued_project_key == project_key
+                        && nested_git_ignores.iter().any(|matcher| matcher.is_in(scope))
+                )
+            })
+        })
+    }
+
+    /// Replaces the supplied root matcher and the nested matchers below `scope`.
+    /// Each entry of `payload` contains an ignore-file directory and its patterns.
+    pub fn store_git_ignores(
         &self,
         project_key: ProjectKey,
+        root_git_ignore: Option<GitIgnoreMatcher>,
+        scope: Utf8PathBuf,
         payload: Vec<(Utf8PathBuf, Vec<String>)>,
     ) -> Result<(), WorkspaceError> {
-        // Storing patterns only adds matchers, so storing none changes
-        // nothing. Updating the root settings anyway would make every query
-        // that reads them run again, including the parses.
-        if payload.is_empty() {
-            return Ok(());
-        }
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let git_ignores = db.nested_git_ignores(project_key, &payload)?;
+                let scope = db.biome_path(&scope);
+                if root_git_ignore.is_none()
+                    && payload.is_empty()
+                    && !db.has_nested_git_ignores_in(project_key, &scope)?
+                    && !self.has_queued_git_ignores_in(project_key, &scope)
+                {
+                    return Ok(());
+                }
+                let nested_git_ignores = db.nested_git_ignores(project_key, &payload)?;
                 if let Some(changes) = &self.scanner_changes {
                     changes
                         .project_updates
                         .lock()
-                        .push(ProjectUpdate::NestedGitIgnores {
+                        .push(ProjectUpdate::GitIgnores {
                             project_key,
-                            git_ignores,
+                            root_git_ignore,
+                            scope,
+                            nested_git_ignores,
                         });
                     Ok(())
                 } else {
-                    db.insert_nested_git_ignores_with_mode(
+                    db.replace_git_ignores_with_mode(
                         project_key,
-                        &git_ignores,
+                        root_git_ignore.as_ref(),
+                        &scope,
+                        &nested_git_ignores,
                         ProjectUpdateMode::Replace,
                     )
                 }
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                let git_ignores = db.nested_git_ignores(project_key, &payload)?;
-                db.insert_nested_git_ignores_with_mode(
+                let scope = db.biome_path(&scope);
+                if root_git_ignore.is_none()
+                    && payload.is_empty()
+                    && !db.has_nested_git_ignores_in(project_key, &scope)?
+                {
+                    return Ok(());
+                }
+                let nested_git_ignores = db.nested_git_ignores(project_key, &payload)?;
+                db.replace_git_ignores_with_mode(
                     project_key,
-                    &git_ignores,
+                    root_git_ignore.as_ref(),
+                    &scope,
+                    &nested_git_ignores,
                     ProjectUpdateMode::Setters,
                 )
             }),
@@ -927,11 +979,11 @@ impl DbState {
         view: ViewId,
         text: Arc<str>,
         file_source_index: usize,
-        inline_configuration: Option<Configuration>,
+        inline_configuration: Option<Box<Configuration>>,
     ) -> Source {
         let configuration_index = inline_configuration.map(|configuration| {
             self.shared_data()
-                .insert_inline_configuration(configuration)
+                .insert_inline_configuration(*configuration)
         });
         self.publish_file_view(path, view, text, file_source_index, configuration_index)
     }
@@ -948,11 +1000,11 @@ impl DbState {
         view: ViewId,
         text: Arc<str>,
         file_source_index: usize,
-        inline_configuration: Option<Configuration>,
+        inline_configuration: Option<Box<Configuration>>,
     ) -> Option<Source> {
         let configuration_index = inline_configuration.map(|configuration| {
             self.shared_data()
-                .insert_inline_configuration(configuration)
+                .insert_inline_configuration(*configuration)
         });
         if let DbStorage::Shared(shared_db) = &self.storage
             && let Some(changes) = &self.scanner_changes
@@ -1077,6 +1129,48 @@ impl DbState {
     /// database, and inserts it first if the table doesn't have it.
     pub(crate) fn insert_file_source(&self, file_source: DocumentFileSource) -> usize {
         self.shared_data().insert_source(file_source)
+    }
+
+    pub(crate) fn associate_source_with_project(
+        &self,
+        path: &Utf8Path,
+        client: ClientId,
+        source: Source,
+        project_key: ProjectKey,
+    ) {
+        let data = self.shared_data();
+        match data.project_key_for_source(source) {
+            Some(current_project) if current_project == project_key => return,
+            None => {
+                data.associate_source_with_project(source, project_key);
+                return;
+            }
+            Some(_) => {}
+        }
+
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                let mut db = shared_db.fork();
+                let text = source.text(&db).clone();
+                let file_source_index = source.file_source_index(&db);
+                let configuration_index = source.configuration_index(&db);
+                let source = db.update_or_insert_view(
+                    path,
+                    ViewId::Editor(client),
+                    text,
+                    file_source_index,
+                    configuration_index,
+                    ParsedSourceUpdateMode::Replace,
+                );
+                data.associate_source_with_project(source, project_key);
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(data.resolver_source_change(path));
+            }
+            DbStorage::Owned(db) => {
+                data.associate_source_with_project(source, project_key);
+                db.with_setter(WorkspaceDb::invalidate_projects);
+            }
+        }
     }
 
     /// Keeps a node cache for `path`. See [WorkspaceDbData::retain_node_cache].
@@ -1354,6 +1448,7 @@ mod tests {
     use super::*;
 
     use crate::projects::ProjectDb;
+    use crate::settings::VcsIgnoredPatterns;
     use biome_configuration::vcs::VcsClientKind;
     use biome_languages::JsFileSource;
     use camino::Utf8PathBuf;
@@ -1622,7 +1717,7 @@ mod tests {
         );
         assert!(source.has_errors(&*state.fork()));
 
-        let session = state.scan_session();
+        let (session, _) = state.scan_session().commit();
         let mut settings = Settings::default();
         settings.languages.json.parser.allow_trailing_commas = Some(true.into());
         session.view().insert_root_settings(project_key, settings);
@@ -1678,11 +1773,10 @@ mod tests {
         assert!(retained_db.get_project(&project_key).is_none());
     }
 
-    /// Storing no nested ignore patterns keeps the root settings of the
-    /// project, during a scan and outside one, so the parses that read them
-    /// stay valid.
+    /// An empty Git-ignore update preserves root-settings identity both during
+    /// and outside a scan.
     #[test]
-    fn storing_no_nested_ignore_patterns_keeps_root_settings() {
+    fn storing_no_git_ignore_changes_keeps_root_settings() {
         let state = DbState::lsp(test_fs());
         let project_key = state.insert_project(Utf8PathBuf::from("/project"));
         state.insert_root_settings(project_key, git_settings());
@@ -1699,15 +1793,47 @@ mod tests {
             let session = state.scan_session();
             session
                 .view()
-                .store_nested_ignore_patterns(project_key, Vec::new())
+                .store_git_ignores(project_key, None, Utf8PathBuf::from("/project"), Vec::new())
                 .unwrap();
         }
         assert_eq!(read(), before);
 
         state
-            .store_nested_ignore_patterns(project_key, Vec::new())
+            .store_git_ignores(project_key, None, Utf8PathBuf::from("/project"), Vec::new())
             .unwrap();
         assert_eq!(read(), before);
+    }
+
+    #[test]
+    fn clearing_a_scope_replaces_git_ignores_queued_in_the_same_scan() {
+        let state = DbState::lsp(test_fs());
+        let project_key = state.insert_project(Utf8PathBuf::from("/project"));
+        let mut settings = git_settings();
+        settings.vcs_settings.ignore_matches = Some(VcsIgnoredPatterns::Git {
+            root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("/project"), &[]).unwrap(),
+            nested: vec![],
+        });
+        state.insert_root_settings(project_key, settings);
+
+        {
+            let session = state.scan_session();
+            let view = session.view();
+            view.store_git_ignores(
+                project_key,
+                None,
+                Utf8PathBuf::from("/project/app"),
+                vec![(Utf8PathBuf::from("/project/app/src"), vec!["*.js".into()])],
+            )
+            .unwrap();
+            view.store_git_ignores(project_key, None, Utf8PathBuf::from("/project"), Vec::new())
+                .unwrap();
+        }
+
+        let db = state.fork();
+        assert!(
+            !db.has_nested_git_ignores_in(project_key, &BiomePath::new("/project"))
+                .unwrap()
+        );
     }
 
     #[test]

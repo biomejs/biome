@@ -69,6 +69,14 @@ invalid-with-setup.vue:3:11 lint/correctness/noVueDuplicateKeys ━━━━━�
     14 │   },
     15 │   setup () {
   
+  i Key foo is also defined here.
+  
+    18 │     return {
+  > 19 │       foo
+       │       ^^^
+    20 │     }
+    21 │   }
+  
   i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   
 

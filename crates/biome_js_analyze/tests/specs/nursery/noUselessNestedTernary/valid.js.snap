@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+a ? b : c;
+a && b ? c : d;
+a ? (b ? c : d) : e;
+a ? e : (b ? c : d);
+a ? (b ? c : d) : (b ? c : d);
+a ? x : (b ? y : (c ? x : z));
+foo ? (bar ? baz : object?.property) : object.property;
+foo ? object.property : (bar ? object?.property : baz);
+foo ? (bar ? baz : object.property) : object["property"];
+foo ? (bar ? baz : object[qux?.property]) : object[qux.property];
+
+// The conditions of these chains can be true at the same time.
+x === 1 ? a : (x > 0 ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 3 ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 2 || x === 3 ? b : (x === 3 || x === 4 ? a : c));
+x === 1 ? a : (x === 2 || y === 2 ? b : (x === 3 ? a : c));
+x === 1 ? a : (y === 2 ? b : (x === 3 ? a : c));
+x === 1 ? a : (enabled && (x === 2 || y === 2) ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 0 ? b : (x === -0 ? a : c));
+x === 1 ? a : (x === 0x2 ? b : (x === 2.0 ? a : c));
+x === 1n ? a : (x === 0x2n ? b : (x === 2n ? a : c));
+x === "a" ? a : (x === "\x62" ? b : (x === `b` ? a : c));
+x == 1 ? a : (x == 2 ? b : (x == 3 ? a : c));
+x === /a/ ? a : (x === /b/ ? b : (x === /a/ ? a : c));
+x === first ? a : (x === second ? b : (x === third ? a : c));
+x === 1 ? a : (x === undefined ? b : (x === 3 ? a : c));
+function shadowed(x, undefined) { return x === 0 ? a : (x === null ? b : (x === undefined ? a : c)); }
+x === 1 ? a : (x === tag`2` ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 2 ? b : (x === tag`\x\\01` ? a : c));
+typeof x === "string" ? a : (x === "number" ? b : (typeof x === "boolean" ? a : c));
+class Example { #kind; method() { return this.#kind === 1 ? a : (this.kind === 2 ? b : (this.#kind === 3 ? a : c)); } }
+x === 1 ? d : (x === 2 ? b : c);
+x === 1 ? (y ? a : d) : (x === 2 ? b : c);
+
+// These conditions can throw when they are evaluated in more cases than before.
+object.kind === "a" ? a : (object.kind === "b" ? b : (object.data.ready && object.kind === "c" ? a : c));
+object.kind === "a" ? (ready ? a : c) : (object.data.ready && object.kind === "b" ? b : c);
+x === 1 ? a : (x === 2 ? b : (key in object && x === 3 ? a : c));
+
+// These conditions have side effects, so they can't be reordered or skipped.
+getValue() === 1 ? a : (getValue() === 2 ? b : (getValue() === 3 ? a : c));
+x === 1 ? a : (x === 2 && (x = 3, false) ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 2 ? b : (x === 3 && (x = 2, false) ? a : c));
+x === 1 ? a : (mutate() && x === 2 ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 2 && mutate`value` ? b : (x === 3 ? a : c));
+x === 1 ? a : (x === 2 && [...values].length ? b : (x === 3 ? a : c));
+x === 1 ? a : (object[index++] === 2 ? b : (x === 3 ? a : c));
+x === 1 ? a : (delete x.property && x === 2 ? b : (x === 3 ? a : c));
+x === 1 ? ((x = 2, false) ? a : c) : (x === 2 ? b : c);
+x === 1 ? (check() ? a : c) : (x === 2 ? b : c);
+x === 1 ? (mutate`value` ? a : c) : (x === 2 ? b : c);
+
+```

@@ -1,4 +1,4 @@
-use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
@@ -6,7 +6,10 @@ use crate::syntax::scss::{
     parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
+use crate::syntax::value::function::{
+    is_nth_at_adjacent_l_paren, try_parse_custom_property_if_function,
+};
+use crate::syntax::value::r#if::is_at_if_function;
 use crate::syntax::value::url::parse_custom_property_url_function;
 use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -97,6 +100,17 @@ pub(crate) fn parse_supports_custom_property_value(
         CssCustomPropertyCommentMode::ScssLineComments,
         CSS_CUSTOM_PROPERTY_VALUE,
     )
+}
+
+/// Parses a raw custom-property value with the caller's `//` policy.
+///
+/// Example: `$gap` in `--space: if(media(print): $gap; else: 0);`.
+pub(crate) fn parse_custom_property_value_with_mode(
+    p: &mut CssParser,
+    end_set: TokenSet<CssSyntaxKind>,
+    comment_mode: CssCustomPropertyCommentMode,
+) -> CompletedMarker {
+    parse_raw_property_value_with_mode(p, end_set, comment_mode, CSS_CUSTOM_PROPERTY_VALUE)
 }
 
 /// Parses a raw custom-property value with the caller's `//` policy.
@@ -280,6 +294,14 @@ fn parse_custom_property_function(
     {
         return Present(url);
     }
+    // A modern `if()` gets its own node. Anything else, such as Sass's legacy
+    // `if($condition, $a, $b)`, stays a raw function.
+    if !legacy_filter_recovery
+        && is_at_if_function(p)
+        && let Present(function) = try_parse_custom_property_if_function(p, comment_mode)
+    {
+        return Present(function);
+    }
 
     let function = p.start();
     parse_custom_identifier_with_keywords(p, context, true).ok();
@@ -335,6 +357,15 @@ fn parse_custom_property_delimiter(p: &mut CssParser, context: CssLexContext) ->
     let delimiter = p.start();
     let kind = p.cur();
     p.bump_with_context(kind, context);
+
+    // A hash name may start with a digit, so `#4566a8` and `#12px` must not
+    // leave a dimension behind the `#`.
+    if kind == T![#]
+        && p.last_end() == Some(p.cur_range().start())
+        && matches!(p.cur_text().as_bytes().first(), Some(b'0'..=b'9' | b'-'))
+    {
+        p.re_lex(CssReLexContext::ScssIdentifierContinuation);
+    }
 
     Present(delimiter.complete(p, CSS_CUSTOM_PROPERTY_DELIMITER))
 }

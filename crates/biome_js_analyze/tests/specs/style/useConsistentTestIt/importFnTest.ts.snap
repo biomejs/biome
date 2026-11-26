@@ -28,7 +28,7 @@ importFnTest.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━�
   
     1   │ - import·{·it·}·from·"vitest";
     2   │ - it("first",·()·=>·{});
-      1 │ + import·{·it·,·it·as·test·}·from·"vitest";
+      1 │ + import·{·it,·it·as·test·}·from·"vitest";
       2 │ + test("first",·()·=>·{});
     3 3 │   describe("suite", () => { it("second", () => {}); });
     4 4 │   

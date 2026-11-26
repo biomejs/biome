@@ -649,10 +649,7 @@ impl<'a> HtmlRenderer<'a> {
             }
         }
 
-        self.buffers
-            .pop()
-            .map(|buffer| buffer.content)
-            .unwrap_or_default()
+        self.buffers.pop().map_or_default(|buffer| buffer.content)
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
@@ -1634,7 +1631,12 @@ fn render_textual(text: &MdTextual, out: &mut String) {
 fn render_inline_code(code: &MdInlineCode, out: &mut String) {
     out.push_str("<code>");
 
-    let mut content = collect_raw_inline_text(&code.content());
+    let mut content = String::new();
+    for item in code.content().iter() {
+        if !matches!(item, AnyMdInline::MdQuotePrefix(_)) {
+            collect_raw_inline_item(&item, &mut content);
+        }
+    }
     if code
         .syntax()
         .ancestors()
@@ -2148,6 +2150,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdCodeContent(_) => {
             // Fenced code content never appears inside link or image text
+        }
+        AnyMdInline::MdxInlineExpression(_) | AnyMdInline::MdxJsxInlineTag(_) => {
+            // MDX expressions and tags produce JavaScript, not CommonMark text
         }
     }
 }

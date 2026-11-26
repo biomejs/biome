@@ -35,9 +35,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteEachBlock {
             opening_block: SvelteEachOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -45,13 +43,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..27 " ['a', 'b'] as const " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@27..30 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@30..34 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@30..34 "item" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@34..35 "}" [] [],
             },
@@ -98,23 +94,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@67..83 " items as const " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@83..86 "as" [] [Whitespace(" ")],
-                    name: SvelteCurlyDestructuredName {
-                        l_curly_token: L_CURLY@86..88 "{" [] [Whitespace(" ")],
-                        names: SvelteBindingAssignmentBindingList [
-                            SvelteName {
-                                ident_token: IDENT@88..90 "id" [] [],
-                            },
-                            COMMA@90..92 "," [] [Whitespace(" ")],
-                            SvelteName {
-                                ident_token: IDENT@92..97 "name" [] [Whitespace(" ")],
-                            },
-                        ],
-                        r_curly_token: R_CURLY@97..98 "}" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@86..98 "{ id, name }" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@98..99 "}" [] [],
             },
@@ -171,18 +155,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@137..158 " getItems() as const " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@158..161 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@161..165 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@161..168 "item, i" [] [],
                     },
-                    index: SvelteEachIndex {
-                        comma_token: COMMA@165..167 "," [] [Whitespace(" ")],
-                        value: SvelteName {
-                            ident_token: IDENT@167..168 "i" [] [],
-                        },
-                    },
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@168..169 "}" [] [],
             },
@@ -239,13 +216,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@206..223 " items as  const " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@223..226 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@226..230 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@226..230 "item" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@230..231 "}" [] [],
             },
@@ -292,13 +267,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@263..279 " items as\tconst " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@279..282 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@282..286 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@282..286 "item" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@286..287 "}" [] [],
             },
@@ -349,21 +322,17 @@ HtmlRoot {
 0: HTML_ROOT@0..312
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..311
+  2: HTML_ROOT_ITEM_LIST@0..311
     0: SVELTE_EACH_BLOCK@0..59
       0: SVELTE_EACH_OPENING_BLOCK@0..35
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..27
           0: HTML_LITERAL@6..27 " ['a', 'b'] as const " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@27..34
+        3: SVELTE_EACH_BINDING_CLAUSE@27..34
           0: AS_KW@27..30 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@30..34
-            0: IDENT@30..34 "item" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@30..34
+            0: HTML_LITERAL@30..34 "item" [] []
         4: R_CURLY@34..35 "}" [] []
       1: HTML_ELEMENT_LIST@35..51
         0: HTML_ELEMENT@35..51
@@ -396,19 +365,10 @@ HtmlRoot {
         1: EACH_KW@63..67 "each" [] []
         2: HTML_TEXT_EXPRESSION@67..83
           0: HTML_LITERAL@67..83 " items as const " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@83..98
+        3: SVELTE_EACH_BINDING_CLAUSE@83..98
           0: AS_KW@83..86 "as" [] [Whitespace(" ")]
-          1: SVELTE_CURLY_DESTRUCTURED_NAME@86..98
-            0: L_CURLY@86..88 "{" [] [Whitespace(" ")]
-            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@88..97
-              0: SVELTE_NAME@88..90
-                0: IDENT@88..90 "id" [] []
-              1: COMMA@90..92 "," [] [Whitespace(" ")]
-              2: SVELTE_NAME@92..97
-                0: IDENT@92..97 "name" [] [Whitespace(" ")]
-            2: R_CURLY@97..98 "}" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@86..98
+            0: HTML_LITERAL@86..98 "{ id, name }" [] []
         4: R_CURLY@98..99 "}" [] []
       1: HTML_ELEMENT_LIST@99..121
         0: HTML_ELEMENT@99..121
@@ -448,15 +408,10 @@ HtmlRoot {
         1: EACH_KW@133..137 "each" [] []
         2: HTML_TEXT_EXPRESSION@137..158
           0: HTML_LITERAL@137..158 " getItems() as const " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@158..168
+        3: SVELTE_EACH_BINDING_CLAUSE@158..168
           0: AS_KW@158..161 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@161..165
-            0: IDENT@161..165 "item" [] []
-          2: SVELTE_EACH_INDEX@165..168
-            0: COMMA@165..167 "," [] [Whitespace(" ")]
-            1: SVELTE_NAME@167..168
-              0: IDENT@167..168 "i" [] []
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@161..168
+            0: HTML_LITERAL@161..168 "item, i" [] []
         4: R_CURLY@168..169 "}" [] []
       1: HTML_ELEMENT_LIST@169..190
         0: HTML_ELEMENT@169..190
@@ -496,12 +451,10 @@ HtmlRoot {
         1: EACH_KW@202..206 "each" [] []
         2: HTML_TEXT_EXPRESSION@206..223
           0: HTML_LITERAL@206..223 " items as  const " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@223..230
+        3: SVELTE_EACH_BINDING_CLAUSE@223..230
           0: AS_KW@223..226 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@226..230
-            0: IDENT@226..230 "item" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@226..230
+            0: HTML_LITERAL@226..230 "item" [] []
         4: R_CURLY@230..231 "}" [] []
       1: HTML_ELEMENT_LIST@231..247
         0: HTML_ELEMENT@231..247
@@ -534,12 +487,10 @@ HtmlRoot {
         1: EACH_KW@259..263 "each" [] []
         2: HTML_TEXT_EXPRESSION@263..279
           0: HTML_LITERAL@263..279 " items as\tconst " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@279..286
+        3: SVELTE_EACH_BINDING_CLAUSE@279..286
           0: AS_KW@279..282 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@282..286
-            0: IDENT@282..286 "item" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@282..286
+            0: HTML_LITERAL@282..286 "item" [] []
         4: R_CURLY@286..287 "}" [] []
       1: HTML_ELEMENT_LIST@287..303
         0: HTML_ELEMENT@287..303
@@ -566,6 +517,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@303..306 "{/" [Newline("\n")] []
         1: EACH_KW@306..310 "each" [] []
         2: R_CURLY@310..311 "}" [] []
-  5: EOF@311..312 "" [Newline("\n")] []
+  3: EOF@311..312 "" [Newline("\n")] []
 
 ```

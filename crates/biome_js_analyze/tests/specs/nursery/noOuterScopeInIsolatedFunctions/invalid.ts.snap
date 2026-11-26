@@ -1,0 +1,281 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const value = 1;
+enum Color {
+	Red,
+}
+
+makeSynchronous((): number => value);
+makeSynchronous(() => Color.Red);
+makeSynchronous(() => (value as number) + 1);
+makeSynchronous((() => value) as () => number);
+
+// Decorators inside an isolated method run inside it.
+const dec = (value: unknown) => () => {};
+class Decorated {
+	/** @isolated */
+	method() {
+		@dec(value)
+		class Inner {
+			@dec(value)
+			field = 1;
+		}
+		return Inner;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:7:31 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable value is declared outside of this isolated function.
+  
+    5 │ }
+    6 │ 
+  > 7 │ makeSynchronous((): number => value);
+      │                               ^^^^^
+    8 │ makeSynchronous(() => Color.Red);
+    9 │ makeSynchronous(() => (value as number) + 1);
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = 1;
+      │       ^^^^^
+    3 │ enum Color {
+    4 │ 	Red,
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable Color is declared outside of this isolated function.
+  
+     7 │ makeSynchronous((): number => value);
+   > 8 │ makeSynchronous(() => Color.Red);
+       │                       ^^^^^
+     9 │ makeSynchronous(() => (value as number) + 1);
+    10 │ makeSynchronous((() => value) as () => number);
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const value = 1;
+  > 3 │ enum Color {
+      │      ^^^^^
+    4 │ 	Red,
+    5 │ }
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:24 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable value is declared outside of this isolated function.
+  
+     7 │ makeSynchronous((): number => value);
+     8 │ makeSynchronous(() => Color.Red);
+   > 9 │ makeSynchronous(() => (value as number) + 1);
+       │                        ^^^^^
+    10 │ makeSynchronous((() => value) as () => number);
+    11 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = 1;
+      │       ^^^^^
+    3 │ enum Color {
+    4 │ 	Red,
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:24 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable value is declared outside of this isolated function.
+  
+     8 │ makeSynchronous(() => Color.Red);
+     9 │ makeSynchronous(() => (value as number) + 1);
+  > 10 │ makeSynchronous((() => value) as () => number);
+       │                        ^^^^^
+    11 │ 
+    12 │ // Decorators inside an isolated method run inside it.
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = 1;
+      │       ^^^^^
+    3 │ enum Color {
+    4 │ 	Red,
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:4 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable dec is declared outside of this isolated function.
+  
+    15 │ 	/** @isolated */
+    16 │ 	method() {
+  > 17 │ 		@dec(value)
+       │ 		 ^^^
+    18 │ 		class Inner {
+    19 │ 			@dec(value)
+  
+  i The variable is declared here.
+  
+    12 │ // Decorators inside an isolated method run inside it.
+  > 13 │ const dec = (value: unknown) => () => {};
+       │       ^^^
+    14 │ class Decorated {
+    15 │ 	/** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:8 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable value is declared outside of this isolated function.
+  
+    15 │ 	/** @isolated */
+    16 │ 	method() {
+  > 17 │ 		@dec(value)
+       │ 		     ^^^^^
+    18 │ 		class Inner {
+    19 │ 			@dec(value)
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = 1;
+      │       ^^^^^
+    3 │ enum Color {
+    4 │ 	Red,
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:5 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable dec is declared outside of this isolated function.
+  
+    17 │ 		@dec(value)
+    18 │ 		class Inner {
+  > 19 │ 			@dec(value)
+       │ 			 ^^^
+    20 │ 			field = 1;
+    21 │ 		}
+  
+  i The variable is declared here.
+  
+    12 │ // Decorators inside an isolated method run inside it.
+  > 13 │ const dec = (value: unknown) => () => {};
+       │       ^^^
+    14 │ class Decorated {
+    15 │ 	/** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable value is declared outside of this isolated function.
+  
+    17 │ 		@dec(value)
+    18 │ 		class Inner {
+  > 19 │ 			@dec(value)
+       │ 			     ^^^^^
+    20 │ 			field = 1;
+    21 │ 		}
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = 1;
+      │       ^^^^^
+    3 │ enum Color {
+    4 │ 	Red,
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

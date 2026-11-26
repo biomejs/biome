@@ -1,0 +1,72 @@
+# Runs the tests of crates that contain hand-written `unsafe` code under Miri,
+# to detect undefined behavior.
+name: Miri
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - next
+    # Only the crates under test. Pushes to `main` run regardless, which also
+    # covers changes to the crates they depend on.
+    paths:
+      - 'crates/biome_formatter/**'
+      - 'crates/biome_js_parser/**'
+      - 'crates/biome_parser/**'
+      - 'crates/biome_plugin_loader/**'
+      - 'crates/biome_rowan/**'
+      - 'crates/biome_string_case/**'
+      - 'crates/biome_unicode_table/**'
+      - 'Cargo.lock'
+      - '.github/workflows/miri.yml'
+
+# Cancel jobs when the PR is updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  RUST_LOG: info
+  RUST_BACKTRACE: 1
+
+jobs:
+  miri:
+    name: Miri
+    runs-on: depot-ubuntu-24.04-arm-16
+    timeout-minutes: 60
+    env:
+      # Miri requires nightly, and this overrides the stable toolchain pinned
+      # by `rust-toolchain.toml`.
+      RUSTUP_TOOLCHAIN: nightly
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: nightly
+          components: miri,rust-src
+          bins: cargo-nextest
+          cache: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Miri
+        run: cargo miri setup
+      # Tests that can't run under Miri are marked `#[cfg_attr(miri, ignore)]`.
+      # Integration tests are skipped because they read fixtures from disk,
+      # which Miri blocks. Only the `biome_plugin_loader` tests covering its
+      # `unsafe` code are run.
+      - name: Run tests under Miri
+        run: >-
+          cargo miri nextest run --no-fail-fast --lib
+          -p biome_formatter
+          -p biome_js_parser
+          -p biome_parser
+          -p biome_plugin_loader
+          -p biome_rowan
+          -p biome_string_case
+          -p biome_unicode_table
+          --features biome_plugin_loader/js_plugin
+          -E 'not package(biome_plugin_loader) | test(/^thread_local::/)'

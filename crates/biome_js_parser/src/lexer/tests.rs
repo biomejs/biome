@@ -71,6 +71,9 @@ macro_rules! assert_lex {
 // This is for testing if the lexer is truly lossless
 // It parses random strings and puts them back together with the produced tokens and compares
 #[quickcheck]
+// Skipped under Miri. Lexing is slow enough there to exceed the two-second
+// timeout below, which makes the test fail.
+#[cfg_attr(miri, ignore)]
 fn losslessness(string: String) -> bool {
     // using an mpsc channel allows us to spawn a thread and spawn the lexer there, then if
     // it takes more than 2 seconds we panic because it is 100% infinite recursion
@@ -115,6 +118,42 @@ fn identifier() {
     assert_lex! {
         "Abcdefg",
         IDENT:7
+    }
+}
+
+#[test]
+fn identifier_starting_with_ascii() {
+    use JsSyntaxKind::{ASYNC_KW, IDENT, IF_KW};
+
+    // (source, kind of the first token, its length, whether it contains an escape)
+    let cases = [
+        ("if", IF_KW, 2, false),
+        ("if(", IF_KW, 2, false),
+        ("async", ASYNC_KW, 5, false),
+        ("asyncX", IDENT, 6, false),
+        ("constructorX", IDENT, 12, false),
+        ("$foo_1 ", IDENT, 6, false),
+        // An escape after an ASCII prefix is decoded before matching keywords
+        (r"as\u0079nc", ASYNC_KW, 10, true),
+        (r"a\u{62}c", IDENT, 8, true),
+        // A backslash that does not start an escape ends the identifier
+        (r"a\b", IDENT, 1, false),
+        // Non-ASCII identifier characters after an ASCII prefix
+        ("ifé", IDENT, 4, false),
+        ("aé b", IDENT, 3, false),
+    ];
+
+    for (source, kind, len, escaped) in cases {
+        let mut lexer = JsLexer::from_str(source);
+        lexer.next_token(JsLexContext::default());
+
+        assert_eq!(lexer.current(), kind, "kind of {source:?}");
+        assert_eq!(
+            lexer.current_range(),
+            TextRange::new(TextSize::from(0), TextSize::from(len)),
+            "range of {source:?}"
+        );
+        assert_eq!(lexer.has_unicode_escape(), escaped, "escape in {source:?}");
     }
 }
 

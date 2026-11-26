@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, JsCaseClause, JsCatchClause, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
     JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSwitchStatement,
-    JsUnaryOperator, JsWhileStatement, inner_string_text,
+    JsUnaryOperator, JsWhileStatement, T, inner_string_text,
 };
 use biome_js_type_info::InferredType;
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
@@ -100,6 +100,7 @@ declare_lint_rule! {
     /// When the type allows nullish or empty values, the check is meaningful.
     /// The rule also does not report bindings that are reassigned to values of
     /// different truthiness, since their narrowing cannot be inferred reliably.
+    /// Loops whose condition is the literal `true` are not reported either.
     ///
     /// ```ts
     /// function head<T>(items: T[] | null) {
@@ -123,6 +124,11 @@ declare_lint_rule! {
     /// let greeting = false;
     /// function update() { greeting = "Hello"; }
     /// if (greeting) {}
+    ///
+    /// // A loop that runs until it hits `break` or `return`
+    /// while (true) {
+    ///     if (Math.random() > 0.5) break;
+    /// }
     /// ```
     ///
     pub NoUnnecessaryConditions {
@@ -265,15 +271,15 @@ impl Rule for NoUnnecessaryConditions {
             }
             AnyConditionLike::JsWhileStatement(while_stmt) => {
                 let test = while_stmt.test().ok()?;
-                check_condition_necessity(&test, ctx)
+                check_loop_condition_necessity(&test, ctx)
             }
             AnyConditionLike::JsDoWhileStatement(do_while_stmt) => {
                 let test = do_while_stmt.test().ok()?;
-                check_condition_necessity(&test, ctx)
+                check_loop_condition_necessity(&test, ctx)
             }
             AnyConditionLike::JsForStatement(for_stmt) => {
                 let test = for_stmt.test()?;
-                check_condition_necessity(&test, ctx)
+                check_loop_condition_necessity(&test, ctx)
             }
             AnyConditionLike::JsCaseClause(case_clause) => {
                 check_case_clause_reachability(case_clause, ctx)
@@ -401,6 +407,24 @@ fn is_undefined_identifier(expr: &AnyJsExpression) -> bool {
         .and_then(|id| id.name().ok())
         .and_then(|n| n.value_token().ok())
         .is_some_and(|t| t.text_trimmed() == "undefined")
+}
+
+/// Checks the condition of a `while`, `do...while`, or `for` loop.
+///
+/// A literal `true` condition is the usual way to write a loop that runs until
+/// it hits a `break` or `return`, so it is not reported.
+fn check_loop_condition_necessity(
+    test: &AnyJsExpression,
+    ctx: &RuleContext<NoUnnecessaryConditions>,
+) -> Option<IssueKind> {
+    if let AnyJsExpression::AnyJsLiteralExpression(
+        AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+    ) = test
+        && literal.value_token().ok()?.kind() == T![true]
+    {
+        return None;
+    }
+    check_condition_necessity(test, ctx)
 }
 
 fn check_condition_necessity(

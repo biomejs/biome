@@ -48,3 +48,5 @@ const map = new Map();
 map.sort((a, b) => a - b)[0];
 const duplicateParameters = array.sort(function (a, a) { return a - a; })[0];
 const template = `${value}`.sort((a, b) => a - b)[0];
+const aliasedSet = map;
+aliasedSet.toSorted((a, b) => a - b)[0];

@@ -1,5 +1,6 @@
 use crate::cli_options::CliOptions;
 use crate::runner::CommandRunner;
+use crate::runner::crawler::EvaluatedPath;
 use crate::runner::execution::Execution;
 use crate::runner::impls::collectors::default::DefaultCollector;
 use crate::runner::impls::crawlers::default::DefaultCrawler;
@@ -11,7 +12,7 @@ use biome_configuration::Configuration;
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_diagnostics::Error;
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::FileSystem;
 use biome_service::configuration::load_editorconfig;
 use biome_service::workspace::ScanKind;
 use biome_service::{Workspace, WorkspaceError};
@@ -217,6 +218,7 @@ where
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: Vec<BiomePath>,
+    pub(crate) evaluated_paths: Vec<EvaluatedPath>,
     pub(crate) diagnostics: Vec<Error>,
+    pub(crate) traversal_errors: u32,
 }

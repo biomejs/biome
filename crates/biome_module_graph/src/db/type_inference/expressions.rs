@@ -5,12 +5,12 @@ use super::{
         evaluate_mapped_type_with_resolver, find_member_key_type_with_resolver,
         find_member_type_with_resolver, substitutions_for_instance,
     },
-    normalize_structural_type,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
-    CallArgumentTypeInput, CallableFunctionInput, ResolvedCallArgument, infer_call_argument_type,
-    infer_call_expression_return_type_from_args, infer_constructor_argument_type,
+    CallArgumentTypeInput, CallableFunctionInput, MemberTypeInput, ResolvedCallArgument,
+    infer_call_argument_type, infer_call_expression_return_type_from_args,
+    infer_constructor_argument_type, member_type_needs_normalization, normalize_member_type,
     resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
@@ -38,6 +38,9 @@ use rustc_hash::FxHashSet;
 
 const MAX_CONDITIONAL_TYPE_STEPS: usize = 1024;
 const MAX_CONDITIONAL_FILTER_STEPS: usize = 1024;
+/// Maximum number of conditional types whose branch is followed to find the
+/// type of a unary operand.
+const MAX_CONDITIONAL_BRANCH_STEPS: usize = 64;
 const MAX_PROMISE_UNWRAP_STEPS: usize = 64;
 const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
@@ -93,8 +96,13 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
             ty
         };
         let ty = apply_substitutions(db, ty, substitutions);
-        let Ok(ty) = normalize_structural_type(db, ty, |ty| ty) else {
-            return InferredTypeData::Unknown;
+        let ty = if member_type_needs_normalization(ty) {
+            match normalize_member_type(db, MemberTypeInput::new(db, ty)) {
+                Some(ty) => ty,
+                None => return InferredTypeData::Unknown,
+            }
+        } else {
+            ty
         };
         self.member_type(ty, is_optional)
     }
@@ -184,20 +192,36 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let alternate = self.resolve(&expression.alternate);
                 self.resolve_conditional_expression(test, consequent, alternate)
             }
+            RawTypeofExpression::DefaultedParameter(expression) => {
+                let ty = self.resolve(&expression.ty);
+                let default = self.resolve(&expression.default);
+                Some(self.defaulted_parameter_type(ty, default))
+            }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
-                    && let RawDestructureField::Name(name) = &expression.destructure_field
+                    && let RawDestructureField::Name {
+                        name,
+                        has_initializer,
+                    } = &expression.destructure_field
                     && let Some(ty) = self.resolve_namespace_import_member(&expression.ty, name)
                 {
-                    return Some(ty);
+                    return Some(self.destructured_type(ty, *has_initializer));
                 }
                 let subject = self.resolve(&expression.ty);
                 match &expression.destructure_field {
-                    RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(subject, *index)
+                    RawDestructureField::Index {
+                        index,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_element_type_at_index(subject, *index)?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
-                    RawDestructureField::Name(name) => {
-                        self.resolve_static_member_expression(subject, name.text())
+                    RawDestructureField::Name {
+                        name,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_static_member_expression(subject, name.text())?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
                     RawDestructureField::RestExcept(names) => {
                         Some(self.resolve_rest_except_expression(subject, names))
@@ -327,13 +351,25 @@ impl<'db> ResolutionCtx<'db, '_> {
                     expression.consequent,
                     expression.alternate,
                 ),
+            InferredTypeofExpression::DefaultedParameter(expression) => {
+                Some(self.defaulted_parameter_type(expression.ty, expression.default))
+            }
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
-                    RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(expression.ty, *index)
+                    RawDestructureField::Index {
+                        index,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_element_type_at_index(expression.ty, *index)?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
-                    RawDestructureField::Name(name) => {
-                        self.resolve_static_member_expression(expression.ty, name.text())
+                    RawDestructureField::Name {
+                        name,
+                        has_initializer,
+                    } => {
+                        let ty =
+                            self.resolve_static_member_expression(expression.ty, name.text())?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
                     RawDestructureField::RestExcept(names) => {
                         Some(self.resolve_rest_except_expression(expression.ty, names))
@@ -469,8 +505,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
+        self.resolve_call_expression_with_overrides(callee, arguments, &[])
+    }
+
+    pub(super) fn resolve_call_expression_with_overrides(
+        &mut self,
+        callee: InferredTypeData<'db>,
+        arguments: &[RawCallArgumentType],
+        overrides: &[Option<InferredTypeData<'db>>],
+    ) -> InferredTypeData<'db> {
         let callee = self.resolve_call_callee(callee);
-        let args = if self.has_const_call_parameters(callee) {
+        let mut args = if self.has_const_call_parameters(callee) {
             self.resolve_const_call_arguments(arguments)
         } else if let InferredTypeData::Function(function) = callee
             && arguments
@@ -485,6 +530,21 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             self.resolve_call_arguments(arguments)
         };
+        for (argument, replacement) in args.iter_mut().zip(overrides) {
+            if let Some(ty) = replacement {
+                *argument = match argument {
+                    ResolvedCallArgument::ConstArgument { .. } => {
+                        ResolvedCallArgument::ConstArgument {
+                            ty: *ty,
+                            const_ty: *ty,
+                        }
+                    }
+                    ResolvedCallArgument::Argument(_)
+                    | ResolvedCallArgument::Optional(_)
+                    | ResolvedCallArgument::Spread(_) => ResolvedCallArgument::Argument(*ty),
+                };
+            }
+        }
         infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
@@ -553,6 +613,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Intersection(_)
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::Literal(_)
@@ -666,6 +727,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | RawTypeData::Generic(_)
             | RawTypeData::IndexedAccess(_)
             | RawTypeData::MappedType(_)
+            | RawTypeData::Extends(_)
             | RawTypeData::Intersection(_)
             | RawTypeData::Union(_)
             | RawTypeData::TypeOperator(_)
@@ -863,6 +925,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
@@ -922,6 +985,52 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.optional_element_type(parameter.ty(), parameter.is_optional())
             }
         })
+    }
+
+    /// A default value in a destructuring pattern replaces `undefined`.
+    ///
+    /// A defaulted binding is a union of this type and the default's type, so a
+    /// value that is only `undefined` contributes `never` and leaves the default.
+    fn destructured_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        has_initializer: bool,
+    ) -> InferredTypeData<'db> {
+        if !has_initializer {
+            return ty;
+        }
+        let ty = self.resolve_inferred_type(ty);
+        if ty == InferredTypeData::Undefined {
+            return InferredTypeData::NeverKeyword;
+        }
+        self.type_without_undefined(ty)
+    }
+
+    /// A parameter's default value replaces `undefined` in its declared type
+    /// `ty`, unless the type of `default` may be `undefined` itself or is
+    /// unknown.
+    fn defaulted_parameter_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        default: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let default = self.resolve_inferred_type(default);
+        let default_may_be_undefined = if let InferredTypeData::Union(union) = default {
+            union
+                .types(self.db)
+                .iter()
+                .any(|variant| self.resolve_inferred_type(*variant) == InferredTypeData::Undefined)
+        } else {
+            default == InferredTypeData::Undefined || default == InferredTypeData::Unknown
+        };
+        if default_may_be_undefined {
+            return ty;
+        }
+        let ty = self.resolve_inferred_type(ty);
+        if ty == InferredTypeData::Undefined {
+            return InferredTypeData::NeverKeyword;
+        }
+        self.type_without_undefined(ty)
     }
 
     fn type_without_undefined(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
@@ -1059,6 +1168,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -1141,6 +1251,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -1191,6 +1302,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
@@ -1484,6 +1596,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
@@ -1532,6 +1645,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
@@ -1547,7 +1661,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn resolve_computed_member_expression(
+    pub(super) fn resolve_computed_member_expression(
         &mut self,
         object: InferredTypeData<'db>,
         member: InferredTypeData<'db>,
@@ -1580,6 +1694,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::RegExp(_)
                 | InferredLiteral::Template(_) => {}
             }
+        }
+        if member == InferredTypeData::Number {
+            return self.resolve_element_type_at_unknown_index(object);
         }
         None
     }
@@ -1691,6 +1808,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         | InferredTypeData::TypeOperator(_)
                         | InferredTypeData::IndexedAccess(_)
                         | InferredTypeData::MappedType(_)
+                        | InferredTypeData::Extends(_)
                         | InferredTypeData::Literal(_)
                         | InferredTypeData::InstanceOf(_)
                         | InferredTypeData::MergedReference(_)
@@ -1761,6 +1879,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -1885,6 +2004,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | RawTypeData::TypeOperator(_)
             | RawTypeData::IndexedAccess(_)
             | RawTypeData::MappedType(_)
+            | RawTypeData::Extends(_)
             | RawTypeData::InstanceOf(_)
             | RawTypeData::Reference(_)
             | RawTypeData::MergedReference(_)
@@ -2120,7 +2240,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn optional_chain_result(
+    pub(super) fn optional_chain_result(
         &mut self,
         object: InferredTypeData<'db>,
         result: InferredTypeData<'db>,
@@ -2154,6 +2274,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    // Either branch may be nullish.
+                    None => return true,
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2197,6 +2323,28 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     /// Resolves the type held at a fixed index of `subject`.
     ///
+    /// See [`Self::resolve_element_type`] for how unions contribute.
+    fn resolve_element_type_at_index(
+        &mut self,
+        subject: InferredTypeData<'db>,
+        index: usize,
+    ) -> Option<InferredTypeData<'db>> {
+        self.resolve_element_type(subject, Some(index))
+    }
+
+    /// Resolves the type read by indexing `subject` with a `number` whose value
+    /// is not known, such as `items[i]`. Every element of a tuple can be read,
+    /// and the index may be out of bounds, so the result includes `undefined`.
+    fn resolve_element_type_at_unknown_index(
+        &mut self,
+        subject: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        self.resolve_element_type(subject, None)
+    }
+
+    /// Resolves the type held at `index` of `subject`, or at any index when
+    /// `index` is `None`.
+    ///
     /// Each member of a union contributes the type it holds at that index, and
     /// the contributions are collected into a union. A member that holds
     /// nothing there, which includes `null` and `undefined`, contributes
@@ -2211,10 +2359,10 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// The result is `None` when nothing contributes. Nesting deeper than the
     /// work limit yields `Unknown`, because the unvisited members may hold any
     /// type.
-    fn resolve_element_type_at_index(
+    fn resolve_element_type(
         &mut self,
         subject: InferredTypeData<'db>,
-        index: usize,
+        index: Option<usize>,
     ) -> Option<InferredTypeData<'db>> {
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([subject]);
@@ -2236,15 +2384,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             remaining_steps -= 1;
 
             match subject {
-                InferredTypeData::Tuple(tuple) => {
-                    if let Some(element) = tuple.elements(self.db).get(index) {
-                        let element_ty = self.optional_element_type(
-                            element.ty,
-                            element.is_optional || element.is_rest,
-                        );
-                        types.push(element_ty);
+                InferredTypeData::Tuple(tuple) => match index {
+                    Some(index) => {
+                        if let Some(element) = tuple.elements(self.db).get(index) {
+                            let element_ty = self.optional_element_type(
+                                element.ty,
+                                element.is_optional || element.is_rest,
+                            );
+                            types.push(element_ty);
+                        }
                     }
-                }
+                    None => {
+                        for element in tuple.elements(self.db) {
+                            let element_ty = self.optional_element_type(element.ty, true);
+                            types.push(element_ty);
+                        }
+                    }
+                },
                 InferredTypeData::InstanceOf(instance)
                     if self
                         .resolve_inferred_type(instance.ty(self.db))
@@ -2258,6 +2414,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().copied());
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    None => return Some(InferredTypeData::Unknown),
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2359,6 +2520,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
@@ -2422,6 +2584,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -2512,6 +2675,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                         pending.push(prototype);
                     }
                 }
+                InferredTypeData::Extends(extends) => match self.select_conditional_branch(extends)
+                {
+                    Some(branch) => pending.push(branch),
+                    None => return InferredTypeData::Unknown,
+                },
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -2550,18 +2718,86 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::object_from_members(self.db, members)
     }
 
+    /// Returns the type of the values that `for...of` produces from `subject`.
     fn resolve_iterable_value_type(
         &mut self,
         subject: InferredTypeData<'db>,
     ) -> Option<InferredTypeData<'db>> {
         let subject = self.resolve_inferred_type(subject);
-        let InferredTypeData::InstanceOf(instance) = subject else {
-            return None;
+        if let InferredTypeData::InstanceOf(instance) = subject
+            && self
+                .resolve_inferred_type(instance.ty(self.db))
+                .is_array_class(self.db)
+        {
+            return instance.type_parameters(self.db).first().copied();
+        }
+        self.resolve_iterator_protocol_value_type(subject)
+    }
+
+    /// Follows the iteration protocol, `subject[Symbol.iterator]().next()`, and
+    /// returns the `value` of the results that are not marked `done: true`.
+    fn resolve_iterator_protocol_value_type(
+        &mut self,
+        subject: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let symbol = biome_js_type_info::interned_types::well_known_symbol_type("iterator")?;
+        let iterator_method = self.resolve_computed_member_expression(subject, symbol)?;
+        let iterator = self.resolve_inferred_call_expression(iterator_method, &[]);
+        let next = self.resolve_static_member_expression(iterator, "next")?;
+        let result = self.resolve_inferred_call_expression(next, &[]);
+        let result = self.expand_generic_alias_instance(result);
+        let results = if let InferredTypeData::Union(union) = result {
+            union.types(self.db).to_vec()
+        } else {
+            Vec::from([result])
         };
-        self.resolve_inferred_type(instance.ty(self.db))
-            .is_array_class(self.db)
-            .then(|| instance.type_parameters(self.db).first().copied())
-            .flatten()
+
+        let mut values = Vec::new();
+        for result in results {
+            let done = self
+                .resolve_static_member_expression(result, "done")
+                .map(|done| self.resolve_inferred_type(done));
+            if let Some(InferredTypeData::Literal(literal)) = done
+                && matches!(literal.literal(self.db), InferredLiteral::Boolean(done) if done.as_bool())
+            {
+                continue;
+            }
+            values.push(self.resolve_static_member_expression(result, "value")?);
+        }
+        match <[_; 1]>::try_from(values) {
+            Ok([value]) => Some(value),
+            Err(values) if values.is_empty() => None,
+            Err(values) => Some(InferredTypeData::union_from_types(self.db, values)),
+        }
+    }
+
+    /// Expands an instance of a generic type alias, such as
+    /// `IteratorResult<T, TReturn>`, into the aliased type with the instance's
+    /// type arguments substituted. Other types are returned resolved.
+    fn expand_generic_alias_instance(
+        &mut self,
+        ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let ty = self.resolve_inferred_type(ty);
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            return ty;
+        };
+        let alias = self.resolve_inferred_type(instance.ty(self.db));
+        let InferredTypeData::InstanceOf(alias_instance) = alias else {
+            return ty;
+        };
+        if alias_instance.type_parameters(self.db).is_empty() {
+            return ty;
+        }
+        let substitutions = super::lookup::substitutions_for_instance(
+            self.db,
+            alias,
+            instance.type_parameters(self.db),
+            &[],
+        );
+        let expanded =
+            super::lookup::apply_substitutions(self.db, alias_instance.ty(self.db), &substitutions);
+        self.resolve_inferred_type(expanded)
     }
 
     fn optional_element_type(
@@ -2580,7 +2816,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn resolve_addition_expression(
+    pub(super) fn resolve_addition_expression(
         &mut self,
         left: InferredTypeData<'db>,
         right: InferredTypeData<'db>,
@@ -2649,6 +2885,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
             | InferredTypeData::TypeofType(_)
@@ -2665,52 +2902,68 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         argument: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
-        match self.resolve_inferred_type(argument) {
-            InferredTypeData::BigInt => InferredTypeData::BigInt,
-            InferredTypeData::Literal(literal)
-                if matches!(literal.literal(self.db), InferredLiteral::BigInt(_)) =>
-            {
-                InferredTypeData::BigInt
+        let mut argument = argument;
+        for _ in 0..MAX_CONDITIONAL_BRANCH_STEPS {
+            match self.resolve_inferred_type(argument) {
+                // Annotations such as `bigint` are instances of the keyword.
+                InferredTypeData::InstanceOf(instance)
+                    if instance.type_parameters(self.db).is_empty() =>
+                {
+                    argument = instance.ty(self.db);
+                }
+                InferredTypeData::Extends(extends) => {
+                    match self.select_conditional_branch(extends) {
+                        Some(branch) => argument = branch,
+                        None => return InferredTypeData::Unknown,
+                    }
+                }
+                InferredTypeData::BigInt => return InferredTypeData::BigInt,
+                InferredTypeData::Literal(literal)
+                    if matches!(literal.literal(self.db), InferredLiteral::BigInt(_)) =>
+                {
+                    return InferredTypeData::BigInt;
+                }
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return InferredTypeData::Number,
             }
-            InferredTypeData::Unknown
-            | InferredTypeData::Global
-            | InferredTypeData::GlobalType(_)
-            | InferredTypeData::GlobalLocal(_)
-            | InferredTypeData::Boolean
-            | InferredTypeData::Null
-            | InferredTypeData::Number
-            | InferredTypeData::String
-            | InferredTypeData::Symbol
-            | InferredTypeData::Undefined
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Function(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Object(_)
-            | InferredTypeData::Tuple(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::IndexedAccess(_)
-            | InferredTypeData::MappedType(_)
-            | InferredTypeData::Literal(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => InferredTypeData::Number,
         }
+        InferredTypeData::Unknown
     }
 
     fn resolve_typeof_operator(
@@ -2757,6 +3010,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -2848,6 +3102,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     | InferredTypeData::TypeOperator(_)
                     | InferredTypeData::IndexedAccess(_)
                     | InferredTypeData::MappedType(_)
+                    | InferredTypeData::Extends(_)
                     | InferredTypeData::Literal(_)
                     | InferredTypeData::AnyKeyword
                     | InferredTypeData::NeverKeyword
@@ -2930,6 +3185,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     | InferredTypeData::TypeOperator(_)
                     | InferredTypeData::IndexedAccess(_)
                     | InferredTypeData::MappedType(_)
+                    | InferredTypeData::Extends(_)
                     | InferredTypeData::Literal(_)
                     | InferredTypeData::MergedReference(_)
                     | InferredTypeData::AnyKeyword
@@ -2953,15 +3209,18 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> FilterAction<'db> {
         match subset {
             ConditionalSubset::Falsy => match ty {
+                // `0n`, `false`, and `""` are the only falsy values of their
+                // types. `number` stays broad because `-0` and `NaN` are falsy
+                // as well as `0`.
                 InferredTypeData::BigInt => FilterAction::Mapped(self.bigint_literal("0n")),
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(false)),
-                InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Null
+                | InferredTypeData::Number
                 | InferredTypeData::Symbol
                 | InferredTypeData::Undefined
                 | InferredTypeData::Conditional
@@ -2980,6 +3239,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
@@ -3030,6 +3290,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::InstanceOf(_)
                 | InferredTypeData::MergedReference(_)
@@ -3076,13 +3337,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::Literal(InferredInternedLiteral::new(
             self.db,
             InferredLiteral::Boolean(value.into()),
-        ))
-    }
-
-    fn number_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
-            self.db,
-            InferredLiteral::Number(NumberLiteral::new(Text::new_static(value))),
         ))
     }
 

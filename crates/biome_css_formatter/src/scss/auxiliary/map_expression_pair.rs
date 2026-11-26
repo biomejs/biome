@@ -100,7 +100,6 @@ impl Format<CssFormatContext> for FormatScssMapPairLayout<'_> {
         // `/* c */ key: (nested: value)` keeps the nested map in the pair group.
         if is_self_breaking_value(&value)
             && !is_self_breaking_value(&key)
-            && f.comments().leading_comments(self.node.syntax()).is_empty()
             && !is_in_control_variable_map(self.node)
         {
             return write!(
@@ -178,11 +177,7 @@ fn should_group_leading_comments_with_pair(node: &ScssMapExpressionPair, f: &Css
         return false;
     };
 
-    if is_self_breaking_value(&value) {
-        return false;
-    }
-
-    true
+    !is_self_breaking_value(&value)
 }
 
 fn is_map_pair_group_leading_comment(comment: &SourceComment<CssLanguage>) -> bool {

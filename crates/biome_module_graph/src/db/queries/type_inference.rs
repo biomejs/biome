@@ -46,15 +46,16 @@ pub use interned::{
     LocalTypeInput, NormalizeTypeInput,
 };
 pub(crate) use interned::{
-    BindingTypeWithImportBudgetInput, CallableFunctionInput, LocalTypeWithImportBudgetInput,
-    TypeSubstitutionInput,
+    BindingTypeWithImportBudgetInput, CallableFunctionInput, FlowSubjectRootInput,
+    FlowSubjectTypeInput, LocalTypeWithImportBudgetInput, MemberTypeInput, TypeSubstitutionInput,
 };
 pub use lookups::{
     find_member_type, find_value_member_type, infer_binding_type, infer_expression_type,
     infer_local_type, resolve_callable_type,
 };
 pub(crate) use lookups::{
-    infer_binding_type_with_import_budget, infer_local_type_with_import_budget,
+    infer_binding_type_with_import_budget, infer_flow_binding_baseline, infer_flow_expression_type,
+    infer_flow_subject_states, infer_flow_subject_type, infer_local_type_with_import_budget,
 };
 pub use module_types::{infer_module_types, infer_module_types_bottom_up};
 pub(crate) use module_types::{
@@ -62,7 +63,10 @@ pub(crate) use module_types::{
     inference_module_sccs,
 };
 pub use normalization::normalize_type;
-pub(crate) use normalization::substitute_types;
+pub(crate) use normalization::{
+    member_type_needs_normalization, normalize_member_type, substitute_types,
+    substitute_types_in_root_body,
+};
 pub use promises::{
     function_returns_promise, infer_expression_function_returns_promise,
     infer_expression_is_array_of_promises, infer_expression_is_promise, is_array_of_promise_type,

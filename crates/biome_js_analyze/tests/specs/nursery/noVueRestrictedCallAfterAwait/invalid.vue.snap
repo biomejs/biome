@@ -1,0 +1,433 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import { useI18n, useI18n as useTranslation } from "vue-i18n";
+import * as i18n from "vue-i18n";
+import { bar } from "foo";
+import useDefault, { default as renamedDefault } from "default-export";
+import explicitDefault from "explicit-default";
+import { useLocal } from "./local";
+import { useThing } from "with-message";
+
+export default {
+	async setup() {
+		await doSomething();
+
+		useI18n();
+		useTranslation();
+		i18n.useI18n();
+		i18n["useI18n"]();
+		bar.baz();
+		useDefault();
+		renamedDefault();
+		explicitDefault();
+		useLocal();
+		useThing();
+
+		useI18n?.();
+		(useI18n)();
+		useI18n(await doSomething());
+
+		if (ready) {
+			useI18n();
+		}
+	},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:15:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    13 │ 		await doSomething();
+    14 │ 
+  > 15 │ 		useI18n();
+       │ 		^^^^^^^^^
+    16 │ 		useTranslation();
+    17 │ 		i18n.useI18n();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    15 │ 		useI18n();
+  > 16 │ 		useTranslation();
+       │ 		^^^^^^^^^^^^^^^^
+    17 │ 		i18n.useI18n();
+    18 │ 		i18n["useI18n"]();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    15 │ 		useI18n();
+    16 │ 		useTranslation();
+  > 17 │ 		i18n.useI18n();
+       │ 		^^^^^^^^^^^^^^
+    18 │ 		i18n["useI18n"]();
+    19 │ 		bar.baz();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    16 │ 		useTranslation();
+    17 │ 		i18n.useI18n();
+  > 18 │ 		i18n["useI18n"]();
+       │ 		^^^^^^^^^^^^^^^^^
+    19 │ 		bar.baz();
+    20 │ 		useDefault();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to bar.baz() from foo comes after an await in setup().
+  
+    17 │ 		i18n.useI18n();
+    18 │ 		i18n["useI18n"]();
+  > 19 │ 		bar.baz();
+       │ 		^^^^^^^^^
+    20 │ 		useDefault();
+    21 │ 		renamedDefault();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to default() from default-export comes after an await in setup().
+  
+    18 │ 		i18n["useI18n"]();
+    19 │ 		bar.baz();
+  > 20 │ 		useDefault();
+       │ 		^^^^^^^^^^^^
+    21 │ 		renamedDefault();
+    22 │ 		explicitDefault();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:21:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to default() from default-export comes after an await in setup().
+  
+    19 │ 		bar.baz();
+    20 │ 		useDefault();
+  > 21 │ 		renamedDefault();
+       │ 		^^^^^^^^^^^^^^^^
+    22 │ 		explicitDefault();
+    23 │ 		useLocal();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to default() from explicit-default comes after an await in setup().
+  
+    20 │ 		useDefault();
+    21 │ 		renamedDefault();
+  > 22 │ 		explicitDefault();
+       │ 		^^^^^^^^^^^^^^^^^
+    23 │ 		useLocal();
+    24 │ 		useThing();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useLocal() from ./local comes after an await in setup().
+  
+    21 │ 		renamedDefault();
+    22 │ 		explicitDefault();
+  > 23 │ 		useLocal();
+       │ 		^^^^^^^^^^
+    24 │ 		useThing();
+    25 │ 
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Call useThing() before the first await.
+  
+    22 │ 		explicitDefault();
+    23 │ 		useLocal();
+  > 24 │ 		useThing();
+       │ 		^^^^^^^^^^
+    25 │ 
+    26 │ 		useI18n?.();
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    24 │ 		useThing();
+    25 │ 
+  > 26 │ 		useI18n?.();
+       │ 		^^^^^^^^^^^
+    27 │ 		(useI18n)();
+    28 │ 		useI18n(await doSomething());
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:27:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    26 │ 		useI18n?.();
+  > 27 │ 		(useI18n)();
+       │ 		^^^^^^^^^^^
+    28 │ 		useI18n(await doSomething());
+    29 │ 
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:28:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    26 │ 		useI18n?.();
+    27 │ 		(useI18n)();
+  > 28 │ 		useI18n(await doSomething());
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ 		if (ready) {
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:31:4 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    30 │ 		if (ready) {
+  > 31 │ 			useI18n();
+       │ 			^^^^^^^^^
+    32 │ 		}
+    33 │ 	},
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    11 │ export default {
+    12 │ 	async setup() {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 
+    15 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,14 +1,9 @@
-use std::{
-    borrow::Borrow,
-    fmt,
-    mem::{self, ManuallyDrop},
-    ops, ptr,
-};
+use std::{fmt, ptr};
 
 use crate::green::trivia::GreenTrivia;
 use crate::{
     TextSize,
-    arc::{Arc, HeaderSlice, ThinArc},
+    arc::{ThinArc, ThinArcBorrow},
     green::{GreenElementFlags, RawSyntaxKind},
 };
 
@@ -27,14 +22,18 @@ pub(crate) fn has_live() -> bool {
     countme::get::<GreenToken>().live > 0
 }
 
-type Repr = HeaderSlice<GreenTokenHead, [u8]>;
-type ReprThin = HeaderSlice<GreenTokenHead, [u8; 0]>;
-#[repr(transparent)]
-pub(crate) struct GreenTokenData {
-    data: ReprThin,
+/// A [GreenToken] borrowed for `'a`.
+///
+/// Stands in for a `&'a GreenToken` and is `Copy` like one. A copy is another
+/// borrow of the same token, not a new owner: it leaves the reference count
+/// alone and can't outlive `'a`. [Self::to_owned] returns an owned
+/// [GreenToken].
+#[derive(Clone, Copy)]
+pub(crate) struct GreenTokenRef<'a> {
+    ptr: ThinArcBorrow<'a, GreenTokenHead, u8>,
 }
 
-impl PartialEq for GreenTokenData {
+impl PartialEq for GreenTokenRef<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.kind() == other.kind() && self.text() == other.text()
     }
@@ -47,27 +46,7 @@ pub(crate) struct GreenToken {
     ptr: ThinArc<GreenTokenHead, u8>,
 }
 
-impl ToOwned for GreenTokenData {
-    type Owned = GreenToken;
-
-    #[inline]
-    fn to_owned(&self) -> GreenToken {
-        unsafe {
-            let green = GreenToken::from_raw(ptr::NonNull::from(self));
-            let green = ManuallyDrop::new(green);
-            GreenToken::clone(&green)
-        }
-    }
-}
-
-impl Borrow<GreenTokenData> for GreenToken {
-    #[inline]
-    fn borrow(&self) -> &GreenTokenData {
-        self
-    }
-}
-
-impl fmt::Debug for GreenTokenData {
+impl fmt::Debug for GreenTokenRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("GreenToken")
             .field("kind", &self.kind())
@@ -80,74 +59,111 @@ impl fmt::Debug for GreenTokenData {
 
 impl fmt::Debug for GreenToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenTokenData = self;
-        fmt::Debug::fmt(data, f)
+        fmt::Debug::fmt(&self.as_ref(), f)
     }
 }
 
 impl fmt::Display for GreenToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data: &GreenTokenData = self;
-        fmt::Display::fmt(data, f)
+        fmt::Display::fmt(&self.as_ref(), f)
     }
 }
 
-impl fmt::Display for GreenTokenData {
+impl fmt::Display for GreenTokenRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.text())
     }
 }
 
-impl GreenTokenData {
+impl<'a> GreenTokenRef<'a> {
+    /// Returns an owned handle to the token, incrementing its reference count.
+    #[inline]
+    pub(crate) fn to_owned(self) -> GreenToken {
+        GreenToken {
+            ptr: self.ptr.to_owned(),
+        }
+    }
+
+    /// Returns the address of the token, which identifies it for as long as
+    /// it is alive. [GreenToken::into_raw] returns the same pointer.
+    #[inline]
+    pub(crate) fn as_ptr(self) -> ptr::NonNull<()> {
+        self.ptr.as_ptr()
+    }
+
+    /// Creates a borrow from a pointer returned by [Self::as_ptr] or
+    /// [GreenToken::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must point to a green token that stays alive for `'a`.
+    #[inline]
+    pub(crate) unsafe fn from_ptr(ptr: ptr::NonNull<()>) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: unsafe { ThinArcBorrow::from_ptr(ptr) },
+        }
+    }
+
+    #[inline]
+    fn header(self) -> &'a GreenTokenHead {
+        self.ptr.header()
+    }
+
     /// Kind of this Token.
     #[inline]
-    pub fn kind(&self) -> RawSyntaxKind {
-        self.data.header.kind
+    pub fn kind(self) -> RawSyntaxKind {
+        self.header().kind
     }
 
     /// Whole text of this Token, including all trivia.
     #[inline]
-    pub fn text(&self) -> &str {
-        unsafe { std::str::from_utf8_unchecked(self.data.slice()) }
+    pub fn text(self) -> &'a str {
+        unsafe { std::str::from_utf8_unchecked(self.ptr.slice()) }
     }
 
-    pub(crate) fn leading_trailing_total_len(&self) -> (TextSize, TextSize, TextSize) {
-        let leading_len = self.data.header.leading.text_len();
-        let trailing_len = self.data.header.trailing.text_len();
-        let total_len = self.data.slice().len() as u32;
+    pub(crate) fn leading_trailing_total_len(self) -> (TextSize, TextSize, TextSize) {
+        let leading_len = self.header().leading.text_len();
+        let trailing_len = self.header().trailing.text_len();
+        let total_len = self.ptr.slice().len() as u32;
         (leading_len, trailing_len, total_len.into())
     }
 
     /// Text of this Token, excluding all trivia.
     #[inline]
-    pub fn text_trimmed(&self) -> &str {
+    pub fn text_trimmed(self) -> &'a str {
         let (leading_len, trailing_len, total_len) = self.leading_trailing_total_len();
 
         let start: usize = leading_len.into();
         let end: usize = (total_len - trailing_len).into();
-        let text = unsafe { std::str::from_utf8_unchecked(self.data.slice()) };
-        &text[start..end]
+        &self.text()[start..end]
     }
 
     /// Returns the length of the text covered by this token.
     #[inline]
-    pub fn text_len(&self) -> TextSize {
+    pub fn text_len(self) -> TextSize {
         TextSize::of(self.text())
     }
 
     #[inline]
-    pub fn leading_trivia(&self) -> &GreenTrivia {
-        &self.data.header.leading
+    pub fn leading_trivia(self) -> &'a GreenTrivia {
+        &self.header().leading
     }
 
     #[inline]
-    pub fn trailing_trivia(&self) -> &GreenTrivia {
-        &self.data.header.trailing
+    pub fn trailing_trivia(self) -> &'a GreenTrivia {
+        &self.header().trailing
+    }
+
+    /// Whether the leading or trailing trivia of this token has a comment.
+    #[inline]
+    pub(crate) fn has_comments(self) -> bool {
+        self.flags().contains(GreenElementFlags::HAS_COMMENTS)
     }
 
     #[inline]
-    pub(crate) fn flags(&self) -> GreenElementFlags {
-        self.data.header.flags
+    pub(crate) fn flags(self) -> GreenElementFlags {
+        self.header().flags
     }
 }
 
@@ -187,34 +203,37 @@ impl GreenToken {
             #[cfg(feature = "countme")]
             _c: countme::Count::new(),
         };
-        let ptr = ThinArc::from_header_and_iter(head, text.bytes());
+        let ptr = ThinArc::from_header_and_slice(head, text.as_bytes());
         Self { ptr }
     }
 
+    /// Borrows the token without incrementing its reference count.
     #[inline]
-    pub(crate) fn into_raw(self) -> ptr::NonNull<GreenTokenData> {
-        Arc::from_thin(self.ptr).into_raw().cast()
+    pub(crate) fn as_ref(&self) -> GreenTokenRef<'_> {
+        GreenTokenRef {
+            ptr: self.ptr.borrow_arc(),
+        }
     }
 
+    /// Converts the token into a pointer without decrementing its reference
+    /// count. The reference leaks unless the pointer is passed to
+    /// [Self::from_raw].
     #[inline]
-    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenTokenData>) -> Self {
-        let arc = unsafe {
-            let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
-            mem::transmute::<Arc<ReprThin>, ThinArc<GreenTokenHead, u8>>(arc)
-        };
-        Self { ptr: arc }
+    pub(crate) fn into_raw(self) -> ptr::NonNull<()> {
+        self.ptr.into_raw()
     }
-}
 
-impl ops::Deref for GreenToken {
-    type Target = GreenTokenData;
-
+    /// Reconstructs the token from a pointer returned by [Self::into_raw].
+    ///
+    /// # Safety
+    ///
+    /// `ptr` must come from [Self::into_raw], and each call to
+    /// [Self::into_raw] allows a single call to this function.
     #[inline]
-    fn deref(&self) -> &GreenTokenData {
-        unsafe {
-            let repr: &Repr = &self.ptr;
-            let repr: &ReprThin = &*(repr as *const Repr as *const ReprThin);
-            mem::transmute::<&ReprThin, &GreenTokenData>(repr)
+    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<()>) -> Self {
+        Self {
+            // SAFETY: Guaranteed by the caller.
+            ptr: unsafe { ThinArc::from_raw(ptr) },
         }
     }
 }
@@ -233,10 +252,10 @@ mod tests {
             GreenTrivia::whitespace(3),
         );
 
-        assert_eq!("\n\t let \t\t", t.text());
-        assert_eq!(TextSize::from(9), t.text_len());
+        assert_eq!("\n\t let \t\t", t.as_ref().text());
+        assert_eq!(TextSize::from(9), t.as_ref().text_len());
 
-        assert_eq!("let", t.text_trimmed());
+        assert_eq!("let", t.as_ref().text_trimmed());
 
         assert_eq!("\n\t let \t\t", format!("{t}"));
     }

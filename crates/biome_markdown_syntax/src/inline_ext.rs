@@ -67,6 +67,14 @@ impl MdInlineCode {
 }
 
 impl MdInlineItemList {
+    /// Whether the last item is a line ending (`\n`, `\r\n` or `\r`).
+    pub fn ends_with_newline(&self) -> bool {
+        self.last().is_some_and(|item| {
+            item.as_md_textual()
+                .is_some_and(|textual| textual.is_newline().unwrap_or_default())
+        })
+    }
+
     /// Reconstructs literal text represented by this inline list.
     ///
     /// Document-level fenced blocks may store their entire body in one

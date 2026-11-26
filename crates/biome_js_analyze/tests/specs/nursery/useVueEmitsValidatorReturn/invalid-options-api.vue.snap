@@ -1,0 +1,317 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  emits: {
+    methodWithoutReturn() {
+    },
+    functionWithoutReturn: function () {
+    },
+    arrowWithoutReturn: () => {
+    },
+    arrowReturningFalse: () => false,
+    arrowReturningParenthesizedNull: () => (null),
+    bareReturn() {
+      return;
+    },
+    nestedFunctionReturn: function () {
+      function bar() {
+        return this.baz * 2;
+      }
+      const qux = () => true;
+      bar();
+    },
+    nestedClassReturn() {
+      class Foo {
+        method() {
+          return true;
+        }
+      }
+    },
+    onlyFalsyReturns: function () {
+      if (a) {
+        return false;
+      } else if (b) {
+        return 0;
+      } else if (c) {
+        return null;
+      } else if (d) {
+        return '';
+      } else if (e) {
+        return undefined;
+      } else if (f) {
+        return NaN;
+      } else if (g) {
+        return 0n;
+      } else if (h) {
+        return ``;
+      } else if (i) {
+        return 0.0;
+      } else if (j) {
+        return 0x0;
+      } else if (k) {
+        return 0e0;
+      }
+    },
+    falsyReturnsInLoops(items) {
+      for (const item of items) {
+        if (!item) {
+          return false;
+        }
+      }
+      try {
+        check(items);
+      } catch {
+        return false;
+      }
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event methodWithoutReturn never returns a value.
+  
+    3 │ export default {
+    4 │   emits: {
+  > 5 │     methodWithoutReturn() {
+      │     ^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │     },
+      │     ^
+    7 │     functionWithoutReturn: function () {
+    8 │     },
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:28 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event functionWithoutReturn never returns a value.
+  
+     5 │     methodWithoutReturn() {
+     6 │     },
+   > 7 │     functionWithoutReturn: function () {
+       │                            ^^^^^^^^^^^^^
+   > 8 │     },
+       │     ^
+     9 │     arrowWithoutReturn: () => {
+    10 │     },
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:9:25 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event arrowWithoutReturn never returns a value.
+  
+     7 │     functionWithoutReturn: function () {
+     8 │     },
+   > 9 │     arrowWithoutReturn: () => {
+       │                         ^^^^^^^
+  > 10 │     },
+       │     ^
+    11 │     arrowReturningFalse: () => false,
+    12 │     arrowReturningParenthesizedNull: () => (null),
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:11:26 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event arrowReturningFalse never returns a true value.
+  
+     9 │     arrowWithoutReturn: () => {
+    10 │     },
+  > 11 │     arrowReturningFalse: () => false,
+       │                          ^^^^^^^^^^^
+    12 │     arrowReturningParenthesizedNull: () => (null),
+    13 │     bareReturn() {
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:12:38 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event arrowReturningParenthesizedNull never returns a true value.
+  
+    10 │     },
+    11 │     arrowReturningFalse: () => false,
+  > 12 │     arrowReturningParenthesizedNull: () => (null),
+       │                                      ^^^^^^^^^^^^
+    13 │     bareReturn() {
+    14 │       return;
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:13:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event bareReturn never returns a value.
+  
+    11 │     arrowReturningFalse: () => false,
+    12 │     arrowReturningParenthesizedNull: () => (null),
+  > 13 │     bareReturn() {
+       │     ^^^^^^^^^^^^^^
+  > 14 │       return;
+  > 15 │     },
+       │     ^
+    16 │     nestedFunctionReturn: function () {
+    17 │       function bar() {
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:16:27 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event nestedFunctionReturn never returns a value.
+  
+    14 │       return;
+    15 │     },
+  > 16 │     nestedFunctionReturn: function () {
+       │                           ^^^^^^^^^^^^^
+  > 17 │       function bar() {
+        ...
+  > 21 │       bar();
+  > 22 │     },
+       │     ^
+    23 │     nestedClassReturn() {
+    24 │       class Foo {
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:23:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event nestedClassReturn never returns a value.
+  
+    21 │       bar();
+    22 │     },
+  > 23 │     nestedClassReturn() {
+       │     ^^^^^^^^^^^^^^^^^^^^^
+  > 24 │       class Foo {
+        ...
+  > 28 │       }
+  > 29 │     },
+       │     ^
+    30 │     onlyFalsyReturns: function () {
+    31 │       if (a) {
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:30:23 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event onlyFalsyReturns never returns a true value.
+  
+    28 │       }
+    29 │     },
+  > 30 │     onlyFalsyReturns: function () {
+       │                       ^^^^^^^^^^^^^
+  > 31 │       if (a) {
+        ...
+  > 53 │       }
+  > 54 │     },
+       │     ^
+    55 │     falsyReturnsInLoops(items) {
+    56 │       for (const item of items) {
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:55:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event falsyReturnsInLoops never returns a true value.
+  
+    53 │       }
+    54 │     },
+  > 55 │     falsyReturnsInLoops(items) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 56 │       for (const item of items) {
+        ...
+  > 65 │       }
+  > 66 │     },
+       │     ^
+    67 │   },
+    68 │ };
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

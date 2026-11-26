@@ -12,8 +12,8 @@ use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_service::settings::Settings;
 use biome_test_utils::{
-    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
-    validate_text_trimmed_ranges,
+    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots,
+    validate_borrowed_tokens_with_comments, validate_eof_token, validate_text_trimmed_ranges,
 };
 use camino::Utf8Path;
 use std::fmt::Write;
@@ -104,6 +104,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     if file_name.ends_with(".styled.css") {
         source_type = source_type.with_embedding_kind(CssEmbeddingKind::Styled);
+    } else if file_name.ends_with(".style-attribute.css") {
+        source_type = source_type.with_embedding_kind(CssEmbeddingKind::HtmlStyleAttribute);
     }
 
     if css_modules_enabled {
@@ -124,6 +126,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let parsed = parse_css_with_metavariables(&content, source_type, options, &metavariables);
     validate_eof_token(parsed.syntax());
     validate_text_trimmed_ranges(&parsed.syntax());
+    validate_borrowed_tokens_with_comments(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 

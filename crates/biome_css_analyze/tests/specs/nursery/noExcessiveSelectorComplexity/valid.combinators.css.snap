@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.combinators.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+ul > li {}
+nav a {}
+:has(> img) {}
+
+```

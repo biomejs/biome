@@ -540,6 +540,57 @@ fn css_property_query_only_exposes_global_html_importer_styles() {
         .is_empty()
     );
 }
+
+#[test]
+fn css_property_query_treats_open_astro_define_vars_as_definitions() {
+    assert_eq!(
+        workspace_definitions(
+            &[(
+                "/Component.astro",
+                "<style define:vars={{ ...dynamic }}></style><style>.card {}</style>"
+            )],
+            "/Component.astro"
+        ),
+        ["/Component.astro"]
+    );
+    assert!(
+        workspace_definitions(
+            &[(
+                "/Component.astro",
+                "<style define:vars={{ foreground }}></style><style>.card {}</style>"
+            )],
+            "/Component.astro"
+        )
+        .is_empty()
+    );
+    assert_eq!(
+        workspace_definitions(
+            &[
+                (
+                    "/Global.astro",
+                    "<style is:global define:vars={{ ...dynamic }}></style><link rel='stylesheet' href='./leaf.css'>"
+                ),
+                ("/leaf.css", ".leaf{}")
+            ],
+            "/leaf.css"
+        ),
+        ["/Global.astro"]
+    );
+    assert!(
+        workspace_definitions(
+            &[
+                (
+                    "/Local.astro",
+                    "<style define:vars={{ ...dynamic }}></style><link rel='stylesheet' href='./leaf.css'>"
+                ),
+                ("/leaf.css", ".leaf{}")
+            ],
+            "/leaf.css"
+        )
+        .is_empty()
+    );
+}
+
 #[test]
 fn css_property_query_follows_stylesheets_linked_from_html() {
     assert_eq!(

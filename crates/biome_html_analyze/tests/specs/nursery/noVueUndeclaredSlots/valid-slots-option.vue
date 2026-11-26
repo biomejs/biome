@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+<script lang="ts">
+import { defineComponent, type SlotsType } from "vue";
+
+export default defineComponent({
+    slots: Object as SlotsType<{
+        default: { msg: string };
+        footer(props: {}): any;
+    }>,
+});
+</script>
+
+<template>
+    <slot msg="hello" />
+    <slot name="footer" />
+</template>

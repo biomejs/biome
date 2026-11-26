@@ -1,0 +1,373 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: {
+    label: String,
+    count: { type: Number },
+    flag: [Boolean, String],
+  },
+  data() {
+    return { text: "hello", items: [1, 2] };
+  },
+  computed: {
+    fromData() {
+      return this.text;
+    },
+    fromProp() {
+      return this.label;
+    },
+    fromOptionsProp() {
+      return this.count;
+    },
+    fromPropTypes() {
+      return this.flag;
+    },
+    literal() {
+      return "literal";
+    },
+    fromComputed() {
+      return this.literal;
+    },
+    object() {
+      return { inside() {} };
+    },
+    empty() {
+      return;
+    },
+    arrowGetter: {
+      get: () => 42,
+    },
+    branches() {
+      return this.label ? this.fromMethod() : "fallback";
+    },
+    usesOther() {
+      return this.literal();
+    },
+    list() {
+      return this.items;
+    },
+  },
+  methods: {
+    fromMethod() {
+      return 1;
+    },
+    run() {
+      this.fromData();
+      this.fromProp();
+      this.fromOptionsProp();
+      this.fromPropTypes();
+      this.literal();
+      this.fromComputed();
+      this.object().inside();
+      this.empty();
+      this.arrowGetter();
+      this.branches();
+      (this.literal)();
+      this.list.map(() => [...this.list(), ...this.object()]);
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:44:14 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property literal is called like a method, but its value is not a function.
+  
+    42 │     },
+    43 │     usesOther() {
+  > 44 │       return this.literal();
+       │              ^^^^^^^^^^^^^^
+    45 │     },
+    46 │     list() {
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:55:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property fromData is called like a method, but its value is not a function.
+  
+    53 │     },
+    54 │     run() {
+  > 55 │       this.fromData();
+       │       ^^^^^^^^^^^^^^^
+    56 │       this.fromProp();
+    57 │       this.fromOptionsProp();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:56:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property fromProp is called like a method, but its value is not a function.
+  
+    54 │     run() {
+    55 │       this.fromData();
+  > 56 │       this.fromProp();
+       │       ^^^^^^^^^^^^^^^
+    57 │       this.fromOptionsProp();
+    58 │       this.fromPropTypes();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:57:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property fromOptionsProp is called like a method, but its value is not a function.
+  
+    55 │       this.fromData();
+    56 │       this.fromProp();
+  > 57 │       this.fromOptionsProp();
+       │       ^^^^^^^^^^^^^^^^^^^^^^
+    58 │       this.fromPropTypes();
+    59 │       this.literal();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:58:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property fromPropTypes is called like a method, but its value is not a function.
+  
+    56 │       this.fromProp();
+    57 │       this.fromOptionsProp();
+  > 58 │       this.fromPropTypes();
+       │       ^^^^^^^^^^^^^^^^^^^^
+    59 │       this.literal();
+    60 │       this.fromComputed();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:59:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property literal is called like a method, but its value is not a function.
+  
+    57 │       this.fromOptionsProp();
+    58 │       this.fromPropTypes();
+  > 59 │       this.literal();
+       │       ^^^^^^^^^^^^^^
+    60 │       this.fromComputed();
+    61 │       this.object().inside();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:60:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property fromComputed is called like a method, but its value is not a function.
+  
+    58 │       this.fromPropTypes();
+    59 │       this.literal();
+  > 60 │       this.fromComputed();
+       │       ^^^^^^^^^^^^^^^^^^^
+    61 │       this.object().inside();
+    62 │       this.empty();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:61:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property object is called like a method, but its value is not a function.
+  
+    59 │       this.literal();
+    60 │       this.fromComputed();
+  > 61 │       this.object().inside();
+       │       ^^^^^^^^^^^^^
+    62 │       this.empty();
+    63 │       this.arrowGetter();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:62:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property empty is called like a method, but its value is not a function.
+  
+    60 │       this.fromComputed();
+    61 │       this.object().inside();
+  > 62 │       this.empty();
+       │       ^^^^^^^^^^^^
+    63 │       this.arrowGetter();
+    64 │       this.branches();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:63:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property arrowGetter is called like a method, but its value is not a function.
+  
+    61 │       this.object().inside();
+    62 │       this.empty();
+  > 63 │       this.arrowGetter();
+       │       ^^^^^^^^^^^^^^^^^^
+    64 │       this.branches();
+    65 │       (this.literal)();
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:64:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property branches is called like a method, but its value is not a function.
+  
+    62 │       this.empty();
+    63 │       this.arrowGetter();
+  > 64 │       this.branches();
+       │       ^^^^^^^^^^^^^^^
+    65 │       (this.literal)();
+    66 │       this.list.map(() => [...this.list(), ...this.object()]);
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:65:7 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property literal is called like a method, but its value is not a function.
+  
+    63 │       this.arrowGetter();
+    64 │       this.branches();
+  > 65 │       (this.literal)();
+       │       ^^^^^^^^^^^^^^^^
+    66 │       this.list.map(() => [...this.list(), ...this.object()]);
+    67 │     },
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:66:31 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property list is called like a method, but its value is not a function.
+  
+    64 │       this.branches();
+    65 │       (this.literal)();
+  > 66 │       this.list.map(() => [...this.list(), ...this.object()]);
+       │                               ^^^^^^^^^^^
+    67 │     },
+    68 │   },
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:66:47 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property object is called like a method, but its value is not a function.
+  
+    64 │       this.branches();
+    65 │       (this.literal)();
+  > 66 │       this.list.map(() => [...this.list(), ...this.object()]);
+       │                                               ^^^^^^^^^^^^^
+    67 │     },
+    68 │   },
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

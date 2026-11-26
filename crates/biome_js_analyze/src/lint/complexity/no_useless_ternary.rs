@@ -199,10 +199,7 @@ impl Rule for NoUselessTernary {
 
 fn is_boolean_literal(expression: &AnyJsExpression) -> bool {
     let expr_kind = expression.syntax().kind();
-    if expr_kind == JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION {
-        return true;
-    }
-    false
+    expr_kind == JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION
 }
 
 fn is_boolean_expression(expression: &AnyJsExpression) -> Option<bool> {

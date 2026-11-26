@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-method-or-inline.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="foo" />
+  <template v-for="e in list">
+    <button @click="e" />
+    <button @click="foo(e)" />
+    <button @click="foo(e, $event)" />
+  </template>
+</template>
+
+```

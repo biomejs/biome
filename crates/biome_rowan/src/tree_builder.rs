@@ -221,7 +221,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
 mod tests {
     use crate::green::GreenElementRef;
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{GreenNodeData, GreenTokenData, NodeCache, NodeOrToken};
+    use crate::{NodeCache, NodeOrToken};
 
     // Builds a "Condition" like structure where the closing ) is missing
     fn build_condition_with_missing_closing_parenthesis(builder: &mut RawSyntaxTreeBuilder) {
@@ -248,6 +248,7 @@ mod tests {
         builder.finish_node();
 
         let root = builder.finish_green();
+        let root = root.as_ref();
 
         let first = root.children().next().unwrap();
         let last = root.children().next_back().unwrap();
@@ -281,6 +282,7 @@ mod tests {
         builder.finish_node();
 
         let root = builder.finish_green();
+        let root = root.as_ref();
         let first_condition = root.children().next().unwrap();
         let last_condition = root.children().next_back().unwrap();
 
@@ -340,11 +342,36 @@ mod tests {
         drop(builder);
     }
 
+    #[test]
+    fn handles_taken_from_a_tree_outlive_it() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        build_literal_list(&mut builder, &["a", "b"]);
+        // Drops the cache that the builder owns, so the tree is the only owner
+        // of its green elements.
+        let root = builder.finish();
+        assert_eq!(root.text_with_trivia().to_string(), "ab");
+
+        let first = root.first_child().unwrap();
+        let detached = first.clone().detach();
+        let subtree = root.last_child().unwrap().clone_subtree();
+        let token_text = first.first_token().unwrap().token_text();
+
+        // The remaining handles are now the last owners of their green
+        // elements and release them when they drop.
+        drop(first);
+        drop(root);
+        assert_eq!(detached.to_string(), "a");
+        assert_eq!(subtree.to_string(), "b");
+        // Leaves `token_text` as the only owner of its token.
+        drop(detached);
+        assert_eq!(token_text.text(), "a");
+    }
+
     fn assert_same_elements(left: GreenElementRef<'_>, right: GreenElementRef<'_>) {
-        fn element_id(element: GreenElementRef<'_>) -> *const () {
+        fn element_id(element: GreenElementRef<'_>) -> std::ptr::NonNull<()> {
             match element {
-                NodeOrToken::Node(node) => node as *const GreenNodeData as *const (),
-                NodeOrToken::Token(token) => token as *const GreenTokenData as *const (),
+                NodeOrToken::Node(node) => node.as_ptr(),
+                NodeOrToken::Token(token) => token.as_ptr(),
             }
         }
 

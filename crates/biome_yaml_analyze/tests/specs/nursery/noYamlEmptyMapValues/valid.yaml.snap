@@ -1,0 +1,37 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+plain: value
+null_value: null
+tilde: ~
+empty_string: ""
+empty_single_quoted: ''
+tagged: !!str value
+tagged_null: !!null null
+anchored: &anchor value
+alias: *anchor
+nested:
+  child: value
+sequence:
+  - a
+  - b
+empty_flow_map: {}
+empty_flow_sequence: []
+flow: { a: 1, b: null }
+flow_sequence: [a, b]
+literal: |
+  text
+folded: >
+  text
+? explicit
+: value
+tagged_mapping: !!map
+  child: value
+anchored_sequence: &items
+  - a
+
+```

@@ -31,6 +31,10 @@ declare function consumeAfterSpread(prefix: number, callback: () => void): void;
 const prefixes: number[] = [];
 consumeAfterSpread(...prefixes, async () => {});
 
+function forEachWithDefault(callback: () => Promise<void> = async () => {}) {
+	[1].forEach(callback);
+}
+
 ```
 
 # Diagnostics
@@ -143,6 +147,25 @@ checksVoidReturnInvalid.ts:26:33 lint/nursery/noMisusedPromises ━━━━━�
   > 26 │ consumeAfterSpread(...prefixes, async () => {});
        │                                 ^^^^^^^^^^^^^^
     27 │ 
+    28 │ function forEachWithDefault(callback: () => Promise<void> = async () => {}) {
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksVoidReturnInvalid.ts:29:14 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    28 │ function forEachWithDefault(callback: () => Promise<void> = async () => {}) {
+  > 29 │ 	[1].forEach(callback);
+       │ 	            ^^^^^^^^
+    30 │ }
+    31 │ 
   
   i This may not have the desired result if you expect the Promise to be `await`-ed.
   

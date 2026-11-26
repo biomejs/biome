@@ -1,0 +1,177 @@
+/* should not generate diagnostics */
+
+// Non-null assertions on values that can be null or undefined.
+function nullable(x: number | undefined): number {
+	return x!;
+}
+
+declare const nullValue: string | null;
+nullValue!;
+
+declare const optional: { value?: string };
+optional.value!;
+
+declare const maybe: { value: string } | undefined;
+maybe?.value!;
+
+declare const map: Map<string, number>;
+map.get("key")!;
+
+declare const array: string[];
+array[0]!;
+
+declare const anyValue: any;
+anyValue!;
+
+declare const unknownValue: unknown;
+unknownValue!;
+
+function generic<T>(value: T) {
+	return value!;
+}
+
+// Values read through an index signature.
+declare const record: Record<string, number>;
+record.key!;
+record["key"]!;
+
+declare const indexed: { [key: string]: number };
+indexed.key!;
+
+// Variables that may be read before they receive a value.
+let unassigned: number;
+unassigned!;
+
+function varInBlock() {
+	if (Math.random() > 0.5) {
+		var inBlock: number = 1;
+	} else {
+		inBlock!;
+	}
+}
+
+undeclaredGlobal!;
+
+// The right side of an assignment narrows the assigned variable.
+let narrowed: string | undefined;
+declare const source: string;
+narrowed = source!;
+narrowed = (source)!;
+
+// Values read through an index signature, then stored in a variable.
+const stored = record.key;
+stored!;
+const { key: destructured } = record;
+destructured!;
+declare const strings: string[];
+const [head] = strings;
+head!;
+declare const word: string;
+word[0]!;
+
+// Compound assignments read the target.
+let compound: number | undefined;
+compound! += 1;
+
+// Variables and properties may have a more specific type where they are used.
+declare const declaredText: string;
+declaredText as string;
+<string>declaredText;
+function narrowedToLiteral(mode: string) {
+	if (mode === "a") {
+		const asserted = mode as string;
+	}
+}
+declare const holder: { text: string };
+holder.text as string;
+declare const maybeText: string | undefined;
+(maybeText ?? declaredText) as string;
+(declaredText || declaredText) as string;
+typeof declaredText as string;
+!declaredText as boolean;
+
+// Arithmetic on values that may be a `bigint`.
+declare const numeric: number | bigint;
+-numeric as number;
+~numeric as number;
+declare const big: bigint;
+(big * 2n) as unknown as number;
+
+// Destructured parameters and loop variables may read through an index signature.
+function destructuredParameter({ key }: Record<string, number>) {
+	return key!;
+}
+declare const records: Record<string, number>[];
+for (const { key } of records) {
+	key!;
+}
+
+// Type assertions that change the type.
+const angleBracketLiteral = <number>3;
+const asLiteral = 3 as number;
+let asConst = "foo" as const;
+const objectConst = { a: 1 } as const;
+
+declare const text: string;
+text as String;
+text as unknown;
+text as any;
+`${text}` as string;
+[text] as string[];
+({ text }) as { text: string };
+(() => text) as () => string;
+
+declare const union: string | number;
+union as string;
+
+const literal = 3;
+literal as number;
+
+declare const object: { a: string };
+object as { a: string };
+
+declare const letter: "a";
+const constLetter = letter as "a";
+let letLetter = letter as "a";
+
+// Literal types aren't checked, because a variable declared with `let` has a
+// wider type than its initial value.
+let mode = "a";
+const narrowedMode = mode as "a";
+declare const flag: boolean;
+let direction = flag ? "left" : "right";
+direction as "left" | "right";
+
+// Variables and properties may have a narrower type where they are used.
+function narrowing(value: string | number) {
+	if (typeof value === "string") {
+		let copy = value as string | number;
+		copy = 1;
+	}
+}
+type Status = "idle" | "busy";
+let status: Status = "idle";
+if ((status as Status) === "busy") {
+}
+declare const booleanValue: boolean;
+booleanValue as boolean;
+declare const optionalProperty: { value: string | undefined };
+optionalProperty.value as string | undefined;
+
+class MutableLetter {
+	value = letter as "a";
+}
+
+// Calls that may infer type arguments from the assertion.
+declare function parse<T>(): T;
+parse() as number;
+
+declare function identity<T>(value: T): T;
+identity(text) as string;
+
+declare const anyValueForChain: any;
+anyValueForChain as unknown as string;
+text as unknown as number;
+let chainedLiteral = "a" as unknown as "a";
+parse() as unknown as number;
+(`${text}`) as string;

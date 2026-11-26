@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_semantic::Binding;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsName, AnyJsNamedImportSpecifier, JsCallExpression,
     JsDefaultImportSpecifier, JsLanguage, JsNamedImportSpecifierList, JsReferenceIdentifier,
@@ -176,13 +177,7 @@ impl Rule for UseConsistentTestIt {
         let node = ctx.query();
         let options = ctx.options();
 
-        // Get the required function kind based on context (inside/outside describe)
-        let within_describe = is_within_describe(node);
-        let required_kind = if within_describe {
-            options.within_describe()
-        } else {
-            options.function()
-        };
+        let required_kind = get_required_kind(node, options);
 
         let callee = node.callee().ok()?;
 
@@ -303,6 +298,10 @@ impl Rule for UseConsistentTestIt {
 /// ```js
 /// import { test as it } from "foo";
 /// ```
+///
+/// The import is renamed in place only when every reference to it is renamed
+/// along with it. Otherwise, the alias is added next to the original specifier,
+/// which remains for the references that keep the original name.
 fn update_import(
     ctx: &RuleContext<UseConsistentTestIt>,
     callee: &AnyJsExpression,
@@ -329,7 +328,7 @@ fn update_import(
         return None;
     }
     let parent = binding.syntax().parent()?;
-    let single_reference = binding.all_references().count() == 1;
+    let renamed_references = get_renamed_references(ctx, &binding, target, target_binding.as_ref());
     let specifier = AnyJsNamedImportSpecifier::cast(parent.clone());
     if let Some(target_binding) = target_binding {
         let target_specifier = AnyJsNamedImportSpecifier::cast(target_binding.syntax().parent()?)?;
@@ -341,7 +340,9 @@ fn update_import(
         {
             return None;
         }
-        if single_reference && !specifier.syntax().parent()?.has_comments_descendants() {
+        if let Some(references) = &renamed_references
+            && !specifier.syntax().parent()?.has_comments_descendants()
+        {
             let list = JsNamedImportSpecifierList::cast(specifier.syntax().parent()?)?;
             let mut items = Vec::new();
             let mut separators = Vec::new();
@@ -358,6 +359,9 @@ fn update_import(
                 list,
                 make::js_named_import_specifier_list(items, separators),
             );
+            for reference in references {
+                mutation.replace_token(reference.clone(), make::ident(target));
+            }
         }
         return Some(());
     }
@@ -370,11 +374,14 @@ fn update_import(
     }) {
         return None;
     }
+    for reference in renamed_references.iter().flatten() {
+        mutation.replace_token(reference.clone(), make::ident(target));
+    }
     if let Some(specifier) = specifier {
         if specifier.imports_only_types() {
             return None;
         }
-        if single_reference
+        if renamed_references.is_some()
             && let AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named) = &specifier
         {
             mutation.replace_token(
@@ -413,13 +420,16 @@ fn update_import(
         )
         .build()
         .into();
-        if single_reference {
+        if renamed_references.is_some() {
             mutation.replace_node(specifier, alias);
         } else {
             let list = JsNamedImportSpecifierList::cast(specifier.syntax().parent()?)?;
             let mut items = list.iter().collect::<Result<Vec<_>, _>>().ok()?;
             let mut separators = list.separators().collect::<Result<Vec<_>, _>>().ok()?;
             if separators.len() < items.len() {
+                // The trailing trivia of the list moves to the appended alias.
+                let last = items.pop()?.with_trailing_trivia_pieces([])?;
+                items.push(last);
                 separators.push(make::token(T![,]).with_trailing_space());
             }
             items.push(alias);
@@ -428,12 +438,72 @@ fn update_import(
                 make::js_named_import_specifier_list(items, separators),
             );
         }
-    } else if JsDefaultImportSpecifier::can_cast(parent.kind()) && single_reference {
+    } else if JsDefaultImportSpecifier::can_cast(parent.kind()) && renamed_references.is_some() {
         mutation.replace_token(binding.syntax().first_token()?, make::ident(target));
     } else {
         return None;
     }
     Some(())
+}
+
+/// Returns the base identifier tokens of all references to `binding` when every
+/// reference is a test call that the rule renames to `target`, and `None`
+/// otherwise.
+///
+/// Renaming all of them in each fix keeps the fixes consistent when the
+/// analyzer merges every fix of the rule into a single batch.
+///
+/// `target_binding` is the binding that `target` resolves to at the call being
+/// fixed. A reference where `target` resolves to a different binding yields
+/// `None`, since renaming it would capture that binding.
+fn get_renamed_references(
+    ctx: &RuleContext<UseConsistentTestIt>,
+    binding: &Binding,
+    target: &str,
+    target_binding: Option<&Binding>,
+) -> Option<Vec<JsSyntaxToken>> {
+    let model = ctx.model();
+    let required_kind = get_required_kind(ctx.query(), ctx.options());
+    binding
+        .all_references()
+        .map(|reference| {
+            let resolved = model
+                .scope(&reference.syntax())
+                .ancestors()
+                .find_map(|scope| scope.get_binding(target));
+            if resolved.as_ref().map(Binding::syntax) != target_binding.map(Binding::syntax) {
+                return None;
+            }
+            let token = JsReferenceIdentifier::cast(reference.syntax().clone())?
+                .value_token()
+                .ok()?;
+            reference
+                .syntax()
+                .ancestors()
+                .filter_map(JsCallExpression::cast)
+                .find(|call| {
+                    call.callee()
+                        .ok()
+                        .and_then(|callee| get_base_identifier(&callee))
+                        .is_some_and(|base| base == token)
+                })
+                .filter(|call| get_required_kind(call, ctx.options()) == required_kind)?;
+            Some(token)
+        })
+        .collect()
+}
+
+/// Returns the test function required for `node`, which depends on whether it
+/// is inside a `describe` block.
+fn get_required_kind(
+    node: &JsCallExpression,
+    options: &UseConsistentTestItOptions,
+) -> TestFunctionKind {
+    if is_within_describe(node) {
+        options.within_describe()
+    } else {
+        options.function()
+    }
 }
 
 /// The recognized JS test function identifier names.

@@ -1,0 +1,203 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOptionalChainReceivers.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare function assert(condition: unknown): asserts condition;
+type Options = { v: string | null; w: number; f(): boolean };
+
+function bareArgument(value: string | null) {
+	assert(value?.length);
+	return value?.length;
+}
+
+function truthy(o: Options | undefined) {
+	if (o?.v) {
+		return o?.w;
+	}
+}
+
+function strict(o: Options | undefined) {
+	if (o?.w === 1) {
+		return o?.v;
+	}
+}
+
+function call(o: Options | undefined) {
+	if (o?.f()) {
+		return o?.w;
+	}
+}
+
+function typeOf(o: Options | undefined) {
+	if (typeof o?.v === "string") {
+		return o?.w;
+	}
+}
+
+function earlyReturn(o: Options | undefined) {
+	if (o?.v == null) return;
+	return o?.w;
+}
+
+```
+
+# Diagnostics
+```
+invalidOptionalChainReceivers.ts:8:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     6 │ function bareArgument(value: string | null) {
+     7 │ 	assert(value?.length);
+   > 8 │ 	return value?.length;
+       │ 	       ^^^^^
+     9 │ }
+    10 │ 
+  
+  i Replace ?. with ..
+  
+     6 │ function bareArgument(value: string | null) {
+     7 │ 	assert(value?.length);
+   > 8 │ 	return value?.length;
+       │ 	            ^^
+     9 │ }
+    10 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOptionalChainReceivers.ts:13:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    11 │ function truthy(o: Options | undefined) {
+    12 │ 	if (o?.v) {
+  > 13 │ 		return o?.w;
+       │ 		       ^
+    14 │ 	}
+    15 │ }
+  
+  i Replace ?. with ..
+  
+    11 │ function truthy(o: Options | undefined) {
+    12 │ 	if (o?.v) {
+  > 13 │ 		return o?.w;
+       │ 		        ^^
+    14 │ 	}
+    15 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOptionalChainReceivers.ts:19:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    17 │ function strict(o: Options | undefined) {
+    18 │ 	if (o?.w === 1) {
+  > 19 │ 		return o?.v;
+       │ 		       ^
+    20 │ 	}
+    21 │ }
+  
+  i Replace ?. with ..
+  
+    17 │ function strict(o: Options | undefined) {
+    18 │ 	if (o?.w === 1) {
+  > 19 │ 		return o?.v;
+       │ 		        ^^
+    20 │ 	}
+    21 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOptionalChainReceivers.ts:25:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    23 │ function call(o: Options | undefined) {
+    24 │ 	if (o?.f()) {
+  > 25 │ 		return o?.w;
+       │ 		       ^
+    26 │ 	}
+    27 │ }
+  
+  i Replace ?. with ..
+  
+    23 │ function call(o: Options | undefined) {
+    24 │ 	if (o?.f()) {
+  > 25 │ 		return o?.w;
+       │ 		        ^^
+    26 │ 	}
+    27 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOptionalChainReceivers.ts:31:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    29 │ function typeOf(o: Options | undefined) {
+    30 │ 	if (typeof o?.v === "string") {
+  > 31 │ 		return o?.w;
+       │ 		       ^
+    32 │ 	}
+    33 │ }
+  
+  i Replace ?. with ..
+  
+    29 │ function typeOf(o: Options | undefined) {
+    30 │ 	if (typeof o?.v === "string") {
+  > 31 │ 		return o?.w;
+       │ 		        ^^
+    32 │ 	}
+    33 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+invalidOptionalChainReceivers.ts:37:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    35 │ function earlyReturn(o: Options | undefined) {
+    36 │ 	if (o?.v == null) return;
+  > 37 │ 	return o?.w;
+       │ 	       ^
+    38 │ }
+    39 │ 
+  
+  i Replace ?. with ..
+  
+    35 │ function earlyReturn(o: Options | undefined) {
+    36 │ 	if (o?.v == null) return;
+  > 37 │ 	return o?.w;
+       │ 	        ^^
+    38 │ }
+    39 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

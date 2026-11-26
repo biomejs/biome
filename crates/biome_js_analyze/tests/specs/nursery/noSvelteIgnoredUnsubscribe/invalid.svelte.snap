@@ -1,0 +1,198 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { onMount } from "svelte";
+	import { writable } from "svelte/store";
+
+	const foo = writable(0);
+
+	foo.subscribe(() => {
+		console.log("foo changed");
+	});
+
+	foo?.subscribe(() => {});
+	foo.subscribe?.(() => {});
+	foo["subscribe"](() => {});
+	(foo.subscribe)(() => {});
+	(foo.subscribe(() => {}));
+	stores.foo.subscribe(() => {});
+
+	onMount(() => {
+		foo.subscribe(() => {});
+	});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:8:6 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+     6 │ 	const foo = writable(0);
+     7 │ 
+   > 8 │ 	foo.subscribe(() => {
+       │ 	    ^^^^^^^^^
+     9 │ 		console.log("foo changed");
+    10 │ 	});
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:7 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    10 │ 	});
+    11 │ 
+  > 12 │ 	foo?.subscribe(() => {});
+       │ 	     ^^^^^^^^^
+    13 │ 	foo.subscribe?.(() => {});
+    14 │ 	foo["subscribe"](() => {});
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:13:6 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    12 │ 	foo?.subscribe(() => {});
+  > 13 │ 	foo.subscribe?.(() => {});
+       │ 	    ^^^^^^^^^
+    14 │ 	foo["subscribe"](() => {});
+    15 │ 	(foo.subscribe)(() => {});
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:14:6 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    12 │ 	foo?.subscribe(() => {});
+    13 │ 	foo.subscribe?.(() => {});
+  > 14 │ 	foo["subscribe"](() => {});
+       │ 	    ^^^^^^^^^^^
+    15 │ 	(foo.subscribe)(() => {});
+    16 │ 	(foo.subscribe(() => {}));
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:7 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    13 │ 	foo.subscribe?.(() => {});
+    14 │ 	foo["subscribe"](() => {});
+  > 15 │ 	(foo.subscribe)(() => {});
+       │ 	     ^^^^^^^^^
+    16 │ 	(foo.subscribe(() => {}));
+    17 │ 	stores.foo.subscribe(() => {});
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:16:7 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    14 │ 	foo["subscribe"](() => {});
+    15 │ 	(foo.subscribe)(() => {});
+  > 16 │ 	(foo.subscribe(() => {}));
+       │ 	     ^^^^^^^^^
+    17 │ 	stores.foo.subscribe(() => {});
+    18 │ 
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:13 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    15 │ 	(foo.subscribe)(() => {});
+    16 │ 	(foo.subscribe(() => {}));
+  > 17 │ 	stores.foo.subscribe(() => {});
+       │ 	           ^^^^^^^^^
+    18 │ 
+    19 │ 	onMount(() => {
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:7 lint/nursery/noSvelteIgnoredUnsubscribe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function returned by subscribe() is ignored.
+  
+    19 │ 	onMount(() => {
+  > 20 │ 		foo.subscribe(() => {});
+       │ 		    ^^^^^^^^^
+    21 │ 	});
+    22 │ </script>
+  
+  i Without this function, the subscription can't be stopped, so the store keeps calling the callback and keeps it in memory after it's no longer needed.
+  
+  i Save the returned function and call it when you no longer need the subscription, for example when the component is destroyed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

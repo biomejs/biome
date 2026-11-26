@@ -1,0 +1,495 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+describe("sum", () => {
+	beforeAll(() => {});
+	beforeEach(() => {
+		jest.useFakeTimers();
+	});
+	afterEach(() => {});
+	afterAll(() => {});
+
+	it("adds two numbers", () => {
+		expect(1 + 2).toBe(3);
+	});
+	test.each([1, 2])("accepts %i", (value) => {});
+});
+
+fdescribe("focused", () => {
+	fit("runs", () => {});
+});
+
+xdescribe("skipped", () => {
+	xit("is skipped", () => {});
+	xtest("is skipped", () => {});
+});
+
+// A use that isn't a call needs the global variable too.
+const alias = describe;
+const helpers = { expect };
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API describe is used as a global variable.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ describe("sum", () => {
+      │ ^^^^^^^^
+    4 │ 	beforeAll(() => {});
+    5 │ 	beforeEach(() => {
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import describe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import describe from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·describe·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:4:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API beforeAll is used as a global variable.
+  
+    3 │ describe("sum", () => {
+  > 4 │ 	beforeAll(() => {});
+      │ 	^^^^^^^^^
+    5 │ 	beforeEach(() => {
+    6 │ 		jest.useFakeTimers();
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import beforeAll from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import beforeAll from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·beforeAll·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:5:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API beforeEach is used as a global variable.
+  
+    3 │ describe("sum", () => {
+    4 │ 	beforeAll(() => {});
+  > 5 │ 	beforeEach(() => {
+      │ 	^^^^^^^^^^
+    6 │ 		jest.useFakeTimers();
+    7 │ 	});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import beforeEach from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import beforeEach from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·beforeEach·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:6:3 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API jest is used as a global variable.
+  
+    4 │ 	beforeAll(() => {});
+    5 │ 	beforeEach(() => {
+  > 6 │ 		jest.useFakeTimers();
+      │ 		^^^^
+    7 │ 	});
+    8 │ 	afterEach(() => {});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import jest from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import jest from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·jest·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:8:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API afterEach is used as a global variable.
+  
+     6 │ 		jest.useFakeTimers();
+     7 │ 	});
+   > 8 │ 	afterEach(() => {});
+       │ 	^^^^^^^^^
+     9 │ 	afterAll(() => {});
+    10 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import afterEach from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import afterEach from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·afterEach·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:9:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API afterAll is used as a global variable.
+  
+     7 │ 	});
+     8 │ 	afterEach(() => {});
+   > 9 │ 	afterAll(() => {});
+       │ 	^^^^^^^^
+    10 │ 
+    11 │ 	it("adds two numbers", () => {
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import afterAll from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import afterAll from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·afterAll·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API it is used as a global variable.
+  
+     9 │ 	afterAll(() => {});
+    10 │ 
+  > 11 │ 	it("adds two numbers", () => {
+       │ 	^^
+    12 │ 		expect(1 + 2).toBe(3);
+    13 │ 	});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import it from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import it from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·it·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:12:3 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API expect is used as a global variable.
+  
+    11 │ 	it("adds two numbers", () => {
+  > 12 │ 		expect(1 + 2).toBe(3);
+       │ 		^^^^^^
+    13 │ 	});
+    14 │ 	test.each([1, 2])("accepts %i", (value) => {});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import expect from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import expect from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·expect·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:14:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API test is used as a global variable.
+  
+    12 │ 		expect(1 + 2).toBe(3);
+    13 │ 	});
+  > 14 │ 	test.each([1, 2])("accepts %i", (value) => {});
+       │ 	^^^^
+    15 │ });
+    16 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import test from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import test from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·test·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API fdescribe is used as a global variable.
+  
+    15 │ });
+    16 │ 
+  > 17 │ fdescribe("focused", () => {
+       │ ^^^^^^^^^
+    18 │ 	fit("runs", () => {});
+    19 │ });
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import fdescribe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import fdescribe from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·fdescribe·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:18:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API fit is used as a global variable.
+  
+    17 │ fdescribe("focused", () => {
+  > 18 │ 	fit("runs", () => {});
+       │ 	^^^
+    19 │ });
+    20 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import fit from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import fit from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·fit·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API xdescribe is used as a global variable.
+  
+    19 │ });
+    20 │ 
+  > 21 │ xdescribe("skipped", () => {
+       │ ^^^^^^^^^
+    22 │ 	xit("is skipped", () => {});
+    23 │ 	xtest("is skipped", () => {});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import xdescribe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import xdescribe from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·xdescribe·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:22:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API xit is used as a global variable.
+  
+    21 │ xdescribe("skipped", () => {
+  > 22 │ 	xit("is skipped", () => {});
+       │ 	^^^
+    23 │ 	xtest("is skipped", () => {});
+    24 │ });
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import xit from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import xit from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·xit·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API xtest is used as a global variable.
+  
+    21 │ xdescribe("skipped", () => {
+    22 │ 	xit("is skipped", () => {});
+  > 23 │ 	xtest("is skipped", () => {});
+       │ 	^^^^^
+    24 │ });
+    25 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import xtest from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import xtest from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·xtest·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:27:15 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API describe is used as a global variable.
+  
+    26 │ // A use that isn't a call needs the global variable too.
+  > 27 │ const alias = describe;
+       │               ^^^^^^^^
+    28 │ const helpers = { expect };
+    29 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import describe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import describe from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·describe·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```
+
+```
+invalid.js:28:19 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API expect is used as a global variable.
+  
+    26 │ // A use that isn't a call needs the global variable too.
+    27 │ const alias = describe;
+  > 28 │ const helpers = { expect };
+       │                   ^^^^^^
+    29 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import expect from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import expect from @jest/globals.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+        3 │ + import·{·expect·}·from·"@jest/globals";
+     3  4 │   describe("sum", () => {
+     4  5 │   	beforeAll(() => {});
+  
+
+```

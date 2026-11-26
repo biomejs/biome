@@ -1,0 +1,11 @@
+---
+var constant = 1;
+var written = 1;
+function nested() {
+    var nestedConstant = 1;
+    return nestedConstant;
+}
+---
+<!-- should generate diagnostics -->
+{constant}
+{written = 2}

@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: validHtml.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<template>
+  <slot name="foo-bar"></slot>
+</template>
+
+```

@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validNestedTemplate.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <template functional><div /></template>
+</template>
+
+```

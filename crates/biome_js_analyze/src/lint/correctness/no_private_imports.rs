@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_fs::BiomePath;
+use biome_fs::is_node_modules_path;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{
@@ -185,7 +185,7 @@ impl Rule for NoPrivateImports {
         let Some(target_path) = resolved
             .path()
             .as_path()
-            .filter(|path| !BiomePath::new(path).is_dependency())
+            .filter(|path| !is_node_modules_path(path))
         else {
             return Vec::new();
         };
@@ -217,8 +217,7 @@ impl Rule for NoPrivateImports {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let cwd = Utf8PathBuf::from(
             std::env::current_dir()
-                .map(|cwd| cwd.to_string_lossy().to_string())
-                .unwrap_or_default(),
+                .map_or_default(|cwd| cwd.to_string_lossy().to_string()),
         );
 
         // Use the relative path if possible.

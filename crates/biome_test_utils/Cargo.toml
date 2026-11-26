@@ -42,8 +42,8 @@ biome_service        = { workspace = true, features = ["testing"] }
 biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-json_comments        = "0.2.2"
-owo-colors           = { version = "4.3.0" }
+json_comments        = { workspace = true }
+owo-colors           = { workspace = true }
 serde_json           = { workspace = true }
 similar              = { workspace = true }
 ureq                 = { workspace = true }

@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+expect(fn).toBeCalledTimes(1);
+expect(fn).toHaveBeenCalledTimes(1);
+expect(fn).toBeCalledTimes(2);
+expect(fn).toHaveBeenCalledTimes(2);
+expect(fn).toBeCalledTimes(expect.anything());
+expect(fn).toHaveBeenCalledTimes(expect.anything());
+expect(fn).not.toBeCalledTimes(2);
+expect(fn).rejects.not.toBeCalledTimes(1);
+expect(fn).not.toHaveBeenCalledTimes(1);
+expect(fn).resolves.not.toHaveBeenCalledTimes(1);
+expect(fn).toBeCalledTimes(0);
+expect(fn).toHaveBeenCalledTimes(0);
+expect(fn).toHaveBeenCalledExactlyOnceWith(1);
+expect(fn);
+
+// The matcher isn't called
+expect(fn).toHaveBeenCalledOnce;
+expect(fn).toBeCalledOnce.name;
+
+// Not an `expect()` assertion
+toHaveBeenCalledOnce();
+fn.toHaveBeenCalledOnce();
+assert(fn).toHaveBeenCalledOnce();
+expect.toHaveBeenCalledOnce();
+expect.extend(fn).toHaveBeenCalledOnce();
+expect(fn).unknown.toHaveBeenCalledOnce();
+expect(fn)[modifier].toHaveBeenCalledOnce();
+expect(fn)[matcher]();
+expect(fn)().toHaveBeenCalledOnce();
+wrapper.expect(fn).toHaveBeenCalledOnce();
+new expect(fn).toHaveBeenCalledOnce();
+
+```

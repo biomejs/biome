@@ -1,0 +1,386 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var foo = fs.fooSync();
+var foo = fooSync();
+var foo = fs.fooSync.apply();
+var foo = fooSync.apply();
+var foo = fooSync.call(null, "path");
+var foo = fs?.fooSync();
+var foo = fs["fooSync"]();
+var foo = (fs.fooSync)();
+fs.readFileSync(somePath).toString();
+if (true) { fs.fooSync(); }
+function someFunction() { fs.fooSync(); }
+var a = function someFunction() { fs.fooSync(); };
+var b = () => fooSync();
+class A {
+	method() { fs.fooSync(); }
+	static { fs.fooSync(); }
+	property = fs.fooSync();
+	static staticProperty = fs.fooSync();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var foo = fs.fooSync();
+      │           ^^^^^^^^^^^^
+    3 │ var foo = fooSync();
+    4 │ var foo = fs.fooSync.apply();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var foo = fs.fooSync();
+  > 3 │ var foo = fooSync();
+      │           ^^^^^^^^^
+    4 │ var foo = fs.fooSync.apply();
+    5 │ var foo = fooSync.apply();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    2 │ var foo = fs.fooSync();
+    3 │ var foo = fooSync();
+  > 4 │ var foo = fs.fooSync.apply();
+      │           ^^^^^^^^^^^^^^^^^^
+    5 │ var foo = fooSync.apply();
+    6 │ var foo = fooSync.call(null, "path");
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    3 │ var foo = fooSync();
+    4 │ var foo = fs.fooSync.apply();
+  > 5 │ var foo = fooSync.apply();
+      │           ^^^^^^^^^^^^^^^
+    6 │ var foo = fooSync.call(null, "path");
+    7 │ var foo = fs?.fooSync();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    4 │ var foo = fs.fooSync.apply();
+    5 │ var foo = fooSync.apply();
+  > 6 │ var foo = fooSync.call(null, "path");
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ var foo = fs?.fooSync();
+    8 │ var foo = fs["fooSync"]();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    5 │ var foo = fooSync.apply();
+    6 │ var foo = fooSync.call(null, "path");
+  > 7 │ var foo = fs?.fooSync();
+      │           ^^^^^^^^^^^^^
+    8 │ var foo = fs["fooSync"]();
+    9 │ var foo = (fs.fooSync)();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     6 │ var foo = fooSync.call(null, "path");
+     7 │ var foo = fs?.fooSync();
+   > 8 │ var foo = fs["fooSync"]();
+       │           ^^^^^^^^^^^^^^^
+     9 │ var foo = (fs.fooSync)();
+    10 │ fs.readFileSync(somePath).toString();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     7 │ var foo = fs?.fooSync();
+     8 │ var foo = fs["fooSync"]();
+   > 9 │ var foo = (fs.fooSync)();
+       │           ^^^^^^^^^^^^^^
+    10 │ fs.readFileSync(somePath).toString();
+    11 │ if (true) { fs.fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function readFileSync.
+  
+     8 │ var foo = fs["fooSync"]();
+     9 │ var foo = (fs.fooSync)();
+  > 10 │ fs.readFileSync(somePath).toString();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ if (true) { fs.fooSync(); }
+    12 │ function someFunction() { fs.fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:13 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+     9 │ var foo = (fs.fooSync)();
+    10 │ fs.readFileSync(somePath).toString();
+  > 11 │ if (true) { fs.fooSync(); }
+       │             ^^^^^^^^^^^^
+    12 │ function someFunction() { fs.fooSync(); }
+    13 │ var a = function someFunction() { fs.fooSync(); };
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:27 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    10 │ fs.readFileSync(somePath).toString();
+    11 │ if (true) { fs.fooSync(); }
+  > 12 │ function someFunction() { fs.fooSync(); }
+       │                           ^^^^^^^^^^^^
+    13 │ var a = function someFunction() { fs.fooSync(); };
+    14 │ var b = () => fooSync();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:35 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    11 │ if (true) { fs.fooSync(); }
+    12 │ function someFunction() { fs.fooSync(); }
+  > 13 │ var a = function someFunction() { fs.fooSync(); };
+       │                                   ^^^^^^^^^^^^
+    14 │ var b = () => fooSync();
+    15 │ class A {
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:15 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    12 │ function someFunction() { fs.fooSync(); }
+    13 │ var a = function someFunction() { fs.fooSync(); };
+  > 14 │ var b = () => fooSync();
+       │               ^^^^^^^^^
+    15 │ class A {
+    16 │ 	method() { fs.fooSync(); }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:13 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    14 │ var b = () => fooSync();
+    15 │ class A {
+  > 16 │ 	method() { fs.fooSync(); }
+       │ 	           ^^^^^^^^^^^^
+    17 │ 	static { fs.fooSync(); }
+    18 │ 	property = fs.fooSync();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:11 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    15 │ class A {
+    16 │ 	method() { fs.fooSync(); }
+  > 17 │ 	static { fs.fooSync(); }
+       │ 	         ^^^^^^^^^^^^
+    18 │ 	property = fs.fooSync();
+    19 │ 	static staticProperty = fs.fooSync();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:13 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    16 │ 	method() { fs.fooSync(); }
+    17 │ 	static { fs.fooSync(); }
+  > 18 │ 	property = fs.fooSync();
+       │ 	           ^^^^^^^^^^^^
+    19 │ 	static staticProperty = fs.fooSync();
+    20 │ }
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:26 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    17 │ 	static { fs.fooSync(); }
+    18 │ 	property = fs.fooSync();
+  > 19 │ 	static staticProperty = fs.fooSync();
+       │ 	                        ^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -298,11 +298,7 @@ impl MemberChain {
             .skip(1)
             .any(|group| group.needs_empty_line_before());
 
-        if has_empty_line_inside_tail {
-            return Ok(true);
-        }
-
-        Ok(false)
+        Ok(has_empty_line_inside_tail)
     }
 
     /// We retrieve all the call expressions inside the group and we check if

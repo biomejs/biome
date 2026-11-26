@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+import a = require("a")
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@7..9 "a" [] [Whitespace(" ")],
+                },
+                EQ@9..11 "=" [] [Whitespace(" ")],
+                TsExternalModuleReference {
+                    require_token: REQUIRE_KW@11..18 "require" [] [],
+                    l_paren_token: L_PAREN@18..19 "(" [] [],
+                    source: JsModuleSource {
+                        value_token: JS_STRING_LITERAL@19..22 "\"a\"" [] [],
+                    },
+                    r_paren_token: R_PAREN@22..23 ")" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..24
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..23
+    0: JS_BOGUS_STATEMENT@0..23
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IDENTIFIER_BINDING@7..9
+        0: IDENT@7..9 "a" [] [Whitespace(" ")]
+      2: EQ@9..11 "=" [] [Whitespace(" ")]
+      3: TS_EXTERNAL_MODULE_REFERENCE@11..23
+        0: REQUIRE_KW@11..18 "require" [] []
+        1: L_PAREN@18..19 "(" [] []
+        2: JS_MODULE_SOURCE@19..22
+          0: JS_STRING_LITERAL@19..22 "\"a\"" [] []
+        3: R_PAREN@22..23 ")" [] []
+  4: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+mdx_esm_import_equals.mdx_esm.jsx:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'import =' declarations are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ import a = require("a")
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i TypeScript only syntax
+  
+```

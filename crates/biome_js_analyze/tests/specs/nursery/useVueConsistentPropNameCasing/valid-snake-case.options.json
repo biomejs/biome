@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useVueConsistentPropNameCasing": {
+          "level": "error",
+          "options": {
+            "casing": "snake_case"
+          }
+        }
+      }
+    }
+  }
+}

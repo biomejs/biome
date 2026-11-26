@@ -4,6 +4,7 @@ use crate::references::{
     EmbeddedTypeReference, EmbeddedValueReference, is_potential_vue_directive_reference,
     svelte_store_reference_name, vue_directive_name_matches_reference_name,
 };
+use biome_astro_semantic::AstroSemanticModel;
 use biome_rowan::{TextRange, TokenText};
 
 /// The result of resolving a Vue custom directive in an embedded document.
@@ -114,14 +115,14 @@ impl VueDirectiveDeclarations {
     }
 }
 
-/// Bindings and references collected across a host document and its embedded
-/// language snippets.
+/// Cross-language semantic data for a host document and its embedded snippets.
 ///
-/// Binding and ordinary reference queries compare identifier text exactly.
-/// Framework-specific queries apply Svelte store and Vue custom-directive
-/// naming rules.
+/// Astro documents retain their native semantic model. Other documents retain
+/// collected binding and reference names; framework-specific queries apply
+/// Svelte store and Vue custom-directive naming rules.
 #[derive(Debug, Default)]
 pub struct EmbeddedData {
+    astro_model: Option<AstroSemanticModel>,
     /// Bindings created in embedded documents
     bindings: Vec<EmbeddedBinding>,
     /// Refernces that are used as values
@@ -136,6 +137,7 @@ pub struct EmbeddedData {
 
 impl EmbeddedData {
     pub(crate) fn new(
+        astro_model: Option<AstroSemanticModel>,
         bindings: Vec<EmbeddedBinding>,
         value_references: Vec<EmbeddedValueReference>,
         type_references: Vec<EmbeddedTypeReference>,
@@ -143,12 +145,18 @@ impl EmbeddedData {
         elements: Vec<EmbeddedElement>,
     ) -> Self {
         Self {
+            astro_model,
             bindings,
             value_references,
             type_references,
             vue_directive_declarations,
             elements,
         }
+    }
+
+    /// Returns the native semantic model when the host document is Astro.
+    pub fn astro_model(&self) -> Option<&AstroSemanticModel> {
+        self.astro_model.as_ref()
     }
 
     /// Returns whether a collected binding has the identifier text `name`.
@@ -313,6 +321,7 @@ mod tests {
     #[test]
     fn is_vue_directive_used_finds_custom_directive() {
         let data = EmbeddedData::new(
+            None,
             Vec::new(),
             vec![EmbeddedValueReference {
                 range: TextRange::default(),

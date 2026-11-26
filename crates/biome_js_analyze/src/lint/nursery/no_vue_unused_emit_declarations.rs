@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// ```vue,expect_diagnostic,ignore
+    /// ```vue,expect_diagnostic
     /// <script setup lang="ts">
     /// const emit = defineEmits<{
     ///   change: [value: string];

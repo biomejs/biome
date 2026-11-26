@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+cells: Record<string, typeof cellType> = { value: cellType }
+
+```
+
+
+## AST
+
+```
+JsSvelteLegacyConstRoot {
+    declarator: JsVariableDeclarator {
+        id: JsIdentifierBinding {
+            name_token: IDENT@0..5 "cells" [] [],
+        },
+        variable_annotation: TsTypeAnnotation {
+            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+            ty: TsReferenceType {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@7..13 "Record" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@13..14 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@14..20 "string" [] [],
+                        },
+                        COMMA@20..22 "," [] [Whitespace(" ")],
+                        TsTypeofType {
+                            typeof_token: TYPEOF_KW@22..29 "typeof" [] [Whitespace(" ")],
+                            expression_name: JsReferenceIdentifier {
+                                value_token: IDENT@29..37 "cellType" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@37..39 ">" [] [Whitespace(" ")],
+                },
+            },
+        },
+        initializer: JsInitializerClause {
+            eq_token: EQ@39..41 "=" [] [Whitespace(" ")],
+            expression: JsObjectExpression {
+                l_curly_token: L_CURLY@41..43 "{" [] [Whitespace(" ")],
+                members: JsObjectMemberList [
+                    JsPropertyObjectMember {
+                        name: JsLiteralMemberName {
+                            value: IDENT@43..48 "value" [] [],
+                        },
+                        colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                        value: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@50..59 "cellType" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@59..60 "}" [] [],
+            },
+        },
+    },
+    eof_token: EOF@60..61 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_LEGACY_CONST_ROOT@0..61
+  0: JS_VARIABLE_DECLARATOR@0..60
+    0: JS_IDENTIFIER_BINDING@0..5
+      0: IDENT@0..5 "cells" [] []
+    1: TS_TYPE_ANNOTATION@5..39
+      0: COLON@5..7 ":" [] [Whitespace(" ")]
+      1: TS_REFERENCE_TYPE@7..39
+        0: JS_REFERENCE_IDENTIFIER@7..13
+          0: IDENT@7..13 "Record" [] []
+        1: TS_TYPE_ARGUMENTS@13..39
+          0: L_ANGLE@13..14 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@14..37
+            0: TS_STRING_TYPE@14..20
+              0: STRING_KW@14..20 "string" [] []
+            1: COMMA@20..22 "," [] [Whitespace(" ")]
+            2: TS_TYPEOF_TYPE@22..37
+              0: TYPEOF_KW@22..29 "typeof" [] [Whitespace(" ")]
+              1: JS_REFERENCE_IDENTIFIER@29..37
+                0: IDENT@29..37 "cellType" [] []
+              2: (empty)
+          2: R_ANGLE@37..39 ">" [] [Whitespace(" ")]
+    2: JS_INITIALIZER_CLAUSE@39..60
+      0: EQ@39..41 "=" [] [Whitespace(" ")]
+      1: JS_OBJECT_EXPRESSION@41..60
+        0: L_CURLY@41..43 "{" [] [Whitespace(" ")]
+        1: JS_OBJECT_MEMBER_LIST@43..59
+          0: JS_PROPERTY_OBJECT_MEMBER@43..59
+            0: JS_LITERAL_MEMBER_NAME@43..48
+              0: IDENT@43..48 "value" [] []
+            1: COLON@48..50 ":" [] [Whitespace(" ")]
+            2: JS_IDENTIFIER_EXPRESSION@50..59
+              0: JS_REFERENCE_IDENTIFIER@50..59
+                0: IDENT@50..59 "cellType" [] [Whitespace(" ")]
+        2: R_CURLY@59..60 "}" [] []
+  1: EOF@60..61 "" [Newline("\n")] []
+
+```

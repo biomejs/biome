@@ -1,0 +1,43 @@
+/* should not generate diagnostics */
+for (const item of items) {
+	if (!item.visible) {
+		continue;
+	}
+}
+
+outer: for (const item of items) {
+	for (const child of item.children) {
+		continue outer;
+	}
+}
+
+outer: for (const item of items) {
+	switch (item.type) {
+		case "child":
+			continue outer;
+	}
+}
+
+for (const item of items) {
+	function processItem() {
+		for (const child of item.children) {
+			if (child.done) {
+				break;
+			}
+			continue;
+		}
+	}
+	processItem();
+}
+
+for (const item of items) {
+	const processItem = () => {
+		for (const child of item.children) {
+			if (child.done) {
+				break;
+			}
+			continue;
+		}
+	};
+	processItem();
+}

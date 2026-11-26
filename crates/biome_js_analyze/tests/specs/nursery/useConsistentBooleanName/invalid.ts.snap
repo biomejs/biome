@@ -1,0 +1,629 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Boolean type annotations without a prefix
+const annotated: boolean = getValue();
+declare const declared: boolean;
+const literal: true | false = true;
+const nullable: boolean | undefined = undefined;
+const asserted = value as boolean;
+const satisfied = value satisfies boolean;
+const angle = <boolean>value;
+function download(showProgress: boolean) {}
+function optional(completed?: boolean) {}
+class Account {
+	constructor(private active: boolean) {}
+}
+function annotatedReturn(): boolean {
+	return getValue();
+}
+async function promiseReturn(): Promise<boolean> {
+	return getValue();
+}
+function predicate(value: unknown): value is string {
+	return typeof value === "string";
+}
+const callback: () => boolean = getCallback();
+const nullableCallback: (() => boolean) | undefined = getCallback();
+declare function useMyFlag(): boolean;
+declare function ambient(): boolean;
+
+// Non-boolean type annotations with a prefix
+const isText: string = getValue();
+const isPromise: Promise<boolean> = getValue();
+function hasTitle(): string | false {
+	return false;
+}
+async function isReady(): Promise<string> {
+	return "yes";
+}
+function isAsserted(value: unknown): asserts value {}
+declare function useIsCool(): number;
+function isVoid(): void {}
+function setCount(isCount: number) {}
+
+// Overloads are reported once, on the implementation
+function overloaded(value: string): boolean;
+function overloaded(value: number): boolean;
+function overloaded(value: unknown): boolean {
+	return true;
+}
+
+// Default export overloads are reported once, on the implementation
+export default function defaultOverloaded(value: string): boolean;
+export default function defaultOverloaded(value: unknown): boolean {
+	return true;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i annotated holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    3 │ // Boolean type annotations without a prefix
+  > 4 │ const annotated: boolean = getValue();
+      │       ^^^^^^^^^
+    5 │ declare const declared: boolean;
+    6 │ const literal: true | false = true;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:15 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i declared holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    3 │ // Boolean type annotations without a prefix
+    4 │ const annotated: boolean = getValue();
+  > 5 │ declare const declared: boolean;
+      │               ^^^^^^^^
+    6 │ const literal: true | false = true;
+    7 │ const nullable: boolean | undefined = undefined;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i literal holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    4 │ const annotated: boolean = getValue();
+    5 │ declare const declared: boolean;
+  > 6 │ const literal: true | false = true;
+      │       ^^^^^^^
+    7 │ const nullable: boolean | undefined = undefined;
+    8 │ const asserted = value as boolean;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nullable holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    5 │ declare const declared: boolean;
+    6 │ const literal: true | false = true;
+  > 7 │ const nullable: boolean | undefined = undefined;
+      │       ^^^^^^^^
+    8 │ const asserted = value as boolean;
+    9 │ const satisfied = value satisfies boolean;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i asserted holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     6 │ const literal: true | false = true;
+     7 │ const nullable: boolean | undefined = undefined;
+   > 8 │ const asserted = value as boolean;
+       │       ^^^^^^^^
+     9 │ const satisfied = value satisfies boolean;
+    10 │ const angle = <boolean>value;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i satisfied holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     7 │ const nullable: boolean | undefined = undefined;
+     8 │ const asserted = value as boolean;
+   > 9 │ const satisfied = value satisfies boolean;
+       │       ^^^^^^^^^
+    10 │ const angle = <boolean>value;
+    11 │ function download(showProgress: boolean) {}
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i angle holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     8 │ const asserted = value as boolean;
+     9 │ const satisfied = value satisfies boolean;
+  > 10 │ const angle = <boolean>value;
+       │       ^^^^^
+    11 │ function download(showProgress: boolean) {}
+    12 │ function optional(completed?: boolean) {}
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:19 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i showProgress holds a boolean, but its name doesn't start with a boolean prefix.
+  
+     9 │ const satisfied = value satisfies boolean;
+    10 │ const angle = <boolean>value;
+  > 11 │ function download(showProgress: boolean) {}
+       │                   ^^^^^^^^^^^^
+    12 │ function optional(completed?: boolean) {}
+    13 │ class Account {
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:19 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i completed holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    10 │ const angle = <boolean>value;
+    11 │ function download(showProgress: boolean) {}
+  > 12 │ function optional(completed?: boolean) {}
+       │                   ^^^^^^^^^
+    13 │ class Account {
+    14 │ 	constructor(private active: boolean) {}
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:22 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i active holds a boolean, but its name doesn't start with a boolean prefix.
+  
+    12 │ function optional(completed?: boolean) {}
+    13 │ class Account {
+  > 14 │ 	constructor(private active: boolean) {}
+       │ 	                    ^^^^^^
+    15 │ }
+    16 │ function annotatedReturn(): boolean {
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i annotatedReturn returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    14 │ 	constructor(private active: boolean) {}
+    15 │ }
+  > 16 │ function annotatedReturn(): boolean {
+       │          ^^^^^^^^^^^^^^^
+    17 │ 	return getValue();
+    18 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:16 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i promiseReturn returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    17 │ 	return getValue();
+    18 │ }
+  > 19 │ async function promiseReturn(): Promise<boolean> {
+       │                ^^^^^^^^^^^^^
+    20 │ 	return getValue();
+    21 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i predicate returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    20 │ 	return getValue();
+    21 │ }
+  > 22 │ function predicate(value: unknown): value is string {
+       │          ^^^^^^^^^
+    23 │ 	return typeof value === "string";
+    24 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i callback returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    23 │ 	return typeof value === "string";
+    24 │ }
+  > 25 │ const callback: () => boolean = getCallback();
+       │       ^^^^^^^^
+    26 │ const nullableCallback: (() => boolean) | undefined = getCallback();
+    27 │ declare function useMyFlag(): boolean;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nullableCallback returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    24 │ }
+    25 │ const callback: () => boolean = getCallback();
+  > 26 │ const nullableCallback: (() => boolean) | undefined = getCallback();
+       │       ^^^^^^^^^^^^^^^^
+    27 │ declare function useMyFlag(): boolean;
+    28 │ declare function ambient(): boolean;
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:18 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i useMyFlag returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    25 │ const callback: () => boolean = getCallback();
+    26 │ const nullableCallback: (() => boolean) | undefined = getCallback();
+  > 27 │ declare function useMyFlag(): boolean;
+       │                  ^^^^^^^^^
+    28 │ declare function ambient(): boolean;
+    29 │ 
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that the part of its name after use starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:18 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i ambient returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    26 │ const nullableCallback: (() => boolean) | undefined = getCallback();
+    27 │ declare function useMyFlag(): boolean;
+  > 28 │ declare function ambient(): boolean;
+       │                  ^^^^^^^
+    29 │ 
+    30 │ // Non-boolean type annotations with a prefix
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isText starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    30 │ // Non-boolean type annotations with a prefix
+  > 31 │ const isText: string = getValue();
+       │       ^^^^^^
+    32 │ const isPromise: Promise<boolean> = getValue();
+    33 │ function hasTitle(): string | false {
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:7 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isPromise starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    30 │ // Non-boolean type annotations with a prefix
+    31 │ const isText: string = getValue();
+  > 32 │ const isPromise: Promise<boolean> = getValue();
+       │       ^^^^^^^^^
+    33 │ function hasTitle(): string | false {
+    34 │ 	return false;
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:33:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i hasTitle starts with the boolean prefix has, but doesn't return a boolean.
+  
+    31 │ const isText: string = getValue();
+    32 │ const isPromise: Promise<boolean> = getValue();
+  > 33 │ function hasTitle(): string | false {
+       │          ^^^^^^^^
+    34 │ 	return false;
+    35 │ }
+  
+  i Readers expect a name that starts with has to be either true or false.
+  
+  i Rename it so that it doesn't start with has.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:16 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isReady starts with the boolean prefix is, but doesn't return a boolean.
+  
+    34 │ 	return false;
+    35 │ }
+  > 36 │ async function isReady(): Promise<string> {
+       │                ^^^^^^^
+    37 │ 	return "yes";
+    38 │ }
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:39:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isAsserted starts with the boolean prefix is, but doesn't return a boolean.
+  
+    37 │ 	return "yes";
+    38 │ }
+  > 39 │ function isAsserted(value: unknown): asserts value {}
+       │          ^^^^^^^^^^
+    40 │ declare function useIsCool(): number;
+    41 │ function isVoid(): void {}
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:18 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i useIsCool starts with the boolean prefix Is, but doesn't return a boolean.
+  
+    38 │ }
+    39 │ function isAsserted(value: unknown): asserts value {}
+  > 40 │ declare function useIsCool(): number;
+       │                  ^^^^^^^^^
+    41 │ function isVoid(): void {}
+    42 │ function setCount(isCount: number) {}
+  
+  i Readers expect a name that starts with Is to be either true or false.
+  
+  i Rename it so that it doesn't start with Is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isVoid starts with the boolean prefix is, but doesn't return a boolean.
+  
+    39 │ function isAsserted(value: unknown): asserts value {}
+    40 │ declare function useIsCool(): number;
+  > 41 │ function isVoid(): void {}
+       │          ^^^^^^
+    42 │ function setCount(isCount: number) {}
+    43 │ 
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:42:19 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i isCount starts with the boolean prefix is, but doesn't hold a boolean.
+  
+    40 │ declare function useIsCool(): number;
+    41 │ function isVoid(): void {}
+  > 42 │ function setCount(isCount: number) {}
+       │                   ^^^^^^^
+    43 │ 
+    44 │ // Overloads are reported once, on the implementation
+  
+  i Readers expect a name that starts with is to be either true or false.
+  
+  i Rename it so that it doesn't start with is.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:47:10 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i overloaded returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    45 │ function overloaded(value: string): boolean;
+    46 │ function overloaded(value: number): boolean;
+  > 47 │ function overloaded(value: unknown): boolean {
+       │          ^^^^^^^^^^
+    48 │ 	return true;
+    49 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:53:25 lint/nursery/useConsistentBooleanName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i defaultOverloaded returns a boolean, but its name doesn't start with a boolean prefix.
+  
+    51 │ // Default export overloads are reported once, on the implementation
+    52 │ export default function defaultOverloaded(value: string): boolean;
+  > 53 │ export default function defaultOverloaded(value: unknown): boolean {
+       │                         ^^^^^^^^^^^^^^^^^
+    54 │ 	return true;
+    55 │ }
+  
+  i A boolean prefix tells readers that the value is either true or false.
+  
+  i Rename it so that its name starts with one of these prefixes: are, can, did, does, has, have, is, requires, should, was, were, will.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

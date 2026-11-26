@@ -1,0 +1,597 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import { h } from "vue";
+
+export default {
+  render() {
+    var children = this.$slots.default;
+    var filtered = this.$slots.default.filter(test);
+    return h("div", [...children, filtered]);
+  },
+  methods: {
+    members() {
+      this.$slots.foo.length;
+      this.$slots.foo[0];
+      this.$slots["foo"].length;
+      this["$slots"].foo.length;
+      this.$slots[name].length;
+    },
+    optionalChains() {
+      this.$slots.foo?.bar;
+      (this.$slots?.foo)?.bar;
+      (this?.$slots)?.foo?.bar;
+    },
+    wrappers() {
+      (this.$slots.foo).length;
+      (0, this.$slots.foo).length;
+    },
+    arrays() {
+      return [this.$slots.foo, ...this.$slots.bar];
+    },
+    spreadArguments() {
+      return Math.max(...this.$slots.foo);
+    },
+    destructuring() {
+      const [first] = this.$slots.foo;
+      const { length } = this.$slots.bar;
+      return [first, length];
+    },
+    assignedVariable() {
+      let children;
+      children = this.$slots.foo;
+      return children.length;
+    },
+    chainedVariables() {
+      const first = this.$slots.foo;
+      const second = first;
+      return second.length;
+    },
+    writes() {
+      this.$slots.foo.bar = value;
+      this.$slots.foo[0] = value;
+      this.$slots.foo.count++;
+      delete this.$slots.foo.bar;
+      const children = this.$slots.bar;
+      children.length = 0;
+    },
+    thisAlias() {
+      const vm = this;
+      return vm.$slots.foo.length;
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:7:32 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    5 │ export default {
+    6 │   render() {
+  > 7 │     var children = this.$slots.default;
+      │                                ^^^^^^^
+    8 │     var filtered = this.$slots.default.filter(test);
+    9 │     return h("div", [...children, filtered]);
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:32 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+     6 │   render() {
+     7 │     var children = this.$slots.default;
+   > 8 │     var filtered = this.$slots.default.filter(test);
+       │                                ^^^^^^^
+     9 │     return h("div", [...children, filtered]);
+    10 │   },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    11 │   methods: {
+    12 │     members() {
+  > 13 │       this.$slots.foo.length;
+       │                   ^^^
+    14 │       this.$slots.foo[0];
+    15 │       this.$slots["foo"].length;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    12 │     members() {
+    13 │       this.$slots.foo.length;
+  > 14 │       this.$slots.foo[0];
+       │                   ^^^
+    15 │       this.$slots["foo"].length;
+    16 │       this["$slots"].foo.length;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    13 │       this.$slots.foo.length;
+    14 │       this.$slots.foo[0];
+  > 15 │       this.$slots["foo"].length;
+       │                   ^^^^^
+    16 │       this["$slots"].foo.length;
+    17 │       this.$slots[name].length;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:22 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    14 │       this.$slots.foo[0];
+    15 │       this.$slots["foo"].length;
+  > 16 │       this["$slots"].foo.length;
+       │                      ^^^
+    17 │       this.$slots[name].length;
+    18 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    15 │       this.$slots["foo"].length;
+    16 │       this["$slots"].foo.length;
+  > 17 │       this.$slots[name].length;
+       │                   ^^^^
+    18 │     },
+    19 │     optionalChains() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    18 │     },
+    19 │     optionalChains() {
+  > 20 │       this.$slots.foo?.bar;
+       │                   ^^^
+    21 │       (this.$slots?.foo)?.bar;
+    22 │       (this?.$slots)?.foo?.bar;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:21:21 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    19 │     optionalChains() {
+    20 │       this.$slots.foo?.bar;
+  > 21 │       (this.$slots?.foo)?.bar;
+       │                     ^^^
+    22 │       (this?.$slots)?.foo?.bar;
+    23 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:23 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    20 │       this.$slots.foo?.bar;
+    21 │       (this.$slots?.foo)?.bar;
+  > 22 │       (this?.$slots)?.foo?.bar;
+       │                       ^^^
+    23 │     },
+    24 │     wrappers() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:20 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    23 │     },
+    24 │     wrappers() {
+  > 25 │       (this.$slots.foo).length;
+       │                    ^^^
+    26 │       (0, this.$slots.foo).length;
+    27 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:23 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    24 │     wrappers() {
+    25 │       (this.$slots.foo).length;
+  > 26 │       (0, this.$slots.foo).length;
+       │                       ^^^
+    27 │     },
+    28 │     arrays() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:27 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    27 │     },
+    28 │     arrays() {
+  > 29 │       return [this.$slots.foo, ...this.$slots.bar];
+       │                           ^^^
+    30 │     },
+    31 │     spreadArguments() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:47 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    27 │     },
+    28 │     arrays() {
+  > 29 │       return [this.$slots.foo, ...this.$slots.bar];
+       │                                               ^^^
+    30 │     },
+    31 │     spreadArguments() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:32:38 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    30 │     },
+    31 │     spreadArguments() {
+  > 32 │       return Math.max(...this.$slots.foo);
+       │                                      ^^^
+    33 │     },
+    34 │     destructuring() {
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:35:35 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    33 │     },
+    34 │     destructuring() {
+  > 35 │       const [first] = this.$slots.foo;
+       │                                   ^^^
+    36 │       const { length } = this.$slots.bar;
+    37 │       return [first, length];
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:36:38 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    34 │     destructuring() {
+    35 │       const [first] = this.$slots.foo;
+  > 36 │       const { length } = this.$slots.bar;
+       │                                      ^^^
+    37 │       return [first, length];
+    38 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:41:30 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    39 │     assignedVariable() {
+    40 │       let children;
+  > 41 │       children = this.$slots.foo;
+       │                              ^^^
+    42 │       return children.length;
+    43 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:45:33 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    43 │     },
+    44 │     chainedVariables() {
+  > 45 │       const first = this.$slots.foo;
+       │                                 ^^^
+    46 │       const second = first;
+    47 │       return second.length;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:50:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    48 │     },
+    49 │     writes() {
+  > 50 │       this.$slots.foo.bar = value;
+       │                   ^^^
+    51 │       this.$slots.foo[0] = value;
+    52 │       this.$slots.foo.count++;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:51:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    49 │     writes() {
+    50 │       this.$slots.foo.bar = value;
+  > 51 │       this.$slots.foo[0] = value;
+       │                   ^^^
+    52 │       this.$slots.foo.count++;
+    53 │       delete this.$slots.foo.bar;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:52:19 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    50 │       this.$slots.foo.bar = value;
+    51 │       this.$slots.foo[0] = value;
+  > 52 │       this.$slots.foo.count++;
+       │                   ^^^
+    53 │       delete this.$slots.foo.bar;
+    54 │       const children = this.$slots.bar;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:53:26 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    51 │       this.$slots.foo[0] = value;
+    52 │       this.$slots.foo.count++;
+  > 53 │       delete this.$slots.foo.bar;
+       │                          ^^^
+    54 │       const children = this.$slots.bar;
+    55 │       children.length = 0;
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:54:36 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    52 │       this.$slots.foo.count++;
+    53 │       delete this.$slots.foo.bar;
+  > 54 │       const children = this.$slots.bar;
+       │                                    ^^^
+    55 │       children.length = 0;
+    56 │     },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:59:24 lint/nursery/useVueSlotsAsFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is used as its content instead of being called.
+  
+    57 │     thisAlias() {
+    58 │       const vm = this;
+  > 59 │       return vm.$slots.foo.length;
+       │                        ^^^
+    60 │     },
+    61 │   },
+  
+  i In Vue 3, each property of $slots is a function that returns the content of the slot, so reading or iterating it directly doesn't work.
+  
+  i Call the slot to get its content, for example this.$slots.default().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

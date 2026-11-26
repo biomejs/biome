@@ -2,24 +2,25 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use biome_astro_semantic::{AstroSemanticModel, AstroSnippet, astro_model};
 use biome_db::Source;
 use biome_html_syntax::{
-    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
-    AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
-    AnySvelteDirective, AnySvelteEachName, AnyVueDirective, AnyVueDirectiveArgument,
+    AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingProperty, AnySvelteBlock,
+    AnySvelteBlockItem, AnySvelteDirective, AnyVueDirective, AnyVueDirectiveArgument,
     AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding, HtmlElement,
     HtmlRoot, HtmlSelfClosingElement, VueDirective, VueVForIdentifierBinding, VueVForValue,
 };
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
     AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyJsVueGenericTypeParameters,
-    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsIdentifierAssignment, JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier,
-    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxToken,
-    JsVariableStatement, JsxReferenceIdentifier,
+    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsIdentifierAssignment,
+    JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsSvelteDeclarationRoot, JsSvelteEachBindingRoot, JsSvelteLegacyConstRoot, JsSvelteSnippetRoot,
+    JsSyntaxToken, JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -63,10 +64,22 @@ pub fn collect_embedded_data<'a>(
     host_parse: &AnyParse,
     snippets: Vec<EmbeddedSnippet<'a>>,
 ) -> EmbeddedData {
+    if matches!(host_source, DocumentFileSource::Html(html) if html.is_astro()) {
+        return EmbeddedData::new(
+            collect_astro_model(host_source, host_parse, &snippets),
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            VueDirectiveDeclarations::default(),
+            collect_embedded_elements(host_source, host_parse),
+        );
+    }
+
     let collected_bindings = collect_embedded_bindings(host_source, host_parse, &snippets);
     let references = collect_embedded_references(host_source, host_parse, &snippets);
 
     EmbeddedData::new(
+        None,
         collected_bindings.bindings,
         references
             .as_ref()
@@ -77,6 +90,51 @@ pub fn collect_embedded_data<'a>(
         collected_bindings.vue_directive_declarations,
         collect_embedded_elements(host_source, host_parse),
     )
+}
+
+fn collect_astro_model(
+    host_source: DocumentFileSource,
+    host_parse: &AnyParse,
+    snippets: &[EmbeddedSnippet<'_>],
+) -> Option<AstroSemanticModel> {
+    let DocumentFileSource::Html(html) = host_source else {
+        return None;
+    };
+    if !html.is_astro() {
+        return None;
+    }
+
+    let host: HtmlRoot = host_parse.tree();
+    let parsed: Vec<_> = snippets
+        .iter()
+        .filter_map(|snippet| {
+            let source = snippet.file_source.to_js_file_source()?;
+            let root: AnyJsRoot = snippet.parse.tree();
+            let js = semantic_model(&root, SemanticModelOptions::from(&source));
+            Some((
+                root,
+                js,
+                source,
+                snippet.content_range,
+                snippet.parse.has_errors(),
+            ))
+        })
+        .collect();
+    let snippets: Vec<_> = parsed
+        .iter()
+        .map(
+            |(root, js, source, content_range, has_errors)| AstroSnippet {
+                root,
+                js,
+                source: *source,
+                content_range: *content_range,
+                content_offset: content_range.start(),
+                has_errors: *has_errors,
+            },
+        )
+        .collect();
+
+    Some(astro_model(&host, &snippets))
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -172,6 +230,10 @@ fn collect_embedded_bindings(
     host_parse: &AnyParse,
     snippets: &[EmbeddedSnippet],
 ) -> CollectedEmbeddedBindings {
+    if is_mdx_document(snippets) {
+        return collect_mdx_bindings(snippets);
+    }
+
     let Some(host_file_source) = host_source.to_html_file_source() else {
         return CollectedEmbeddedBindings::default();
     };
@@ -183,7 +245,7 @@ fn collect_embedded_bindings(
         builder.visit_vue_html_root(&html_root, snippets);
         builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
-        builder.visit_svelte_html_root(&html_root);
+        builder.visit_svelte_html_root(&html_root, snippets);
     }
 
     for snippet in snippets {
@@ -221,6 +283,46 @@ fn collect_embedded_bindings(
             builder.vue_directive_option_names,
             builder.has_unknown_vue_directive_options,
         ),
+    }
+}
+
+/// Returns whether `snippets` come from an MDX document, whose JavaScript is
+/// split into ESM, expression, and tag snippets.
+fn is_mdx_document(snippets: &[EmbeddedSnippet]) -> bool {
+    snippets.iter().any(|snippet| {
+        snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx())
+    })
+}
+
+/// Collects the bindings of an MDX document: the imports and declarations of
+/// its ESM snippets, which its expressions and JSX tags can reference.
+fn collect_mdx_bindings(snippets: &[EmbeddedSnippet]) -> CollectedEmbeddedBindings {
+    let mut builder = EmbeddedBindingsBuilder::new();
+    for snippet in snippets {
+        let is_esm = snippet
+            .file_source
+            .to_js_file_source()
+            .is_some_and(|source| source.as_embedding_kind().is_mdx_esm());
+        if let AnyJsRoot::JsModule(module) = snippet.parse.tree()
+            && is_esm
+        {
+            builder.visit_module_item_list(module.items());
+        }
+    }
+    CollectedEmbeddedBindings {
+        bindings: builder
+            .js_bindings
+            .into_iter()
+            .map(|(range, text, source)| EmbeddedBinding {
+                range,
+                text,
+                source,
+            })
+            .collect(),
+        vue_directive_declarations: VueDirectiveDeclarations::default(),
     }
 }
 
@@ -284,9 +386,12 @@ fn collect_embedded_references(
     let is_svelte = host_source
         .to_html_file_source()
         .is_some_and(|s| s.is_svelte());
+    // An MDX document compiles to one module, so a binding of one ESM block
+    // counts as used when another ESM block references it.
+    let is_mdx = is_mdx_document(snippets);
 
     let mut builder = EmbeddedReferencesBuilder::new();
-    let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
+    let generic_names: Vec<_> = generic_parameter_names(snippets)
         .map(|token| token.token_text_trimmed())
         .collect();
 
@@ -298,7 +403,13 @@ fn collect_embedded_references(
         // A Svelte component's `<script module>` and `<script>` compile to
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte {
+        // In an MDX document, only the snippets of MDX constructs are part of
+        // the module: code fences are examples.
+        if is_mdx {
+            if js_file_source.as_embedding_kind().is_mdx() {
+                builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+            }
+        } else if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
         } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
             builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);
@@ -337,11 +448,9 @@ fn build_type_references(builder: &EmbeddedReferencesBuilder) -> Vec<EmbeddedTyp
         .collect()
 }
 
-/// Returns the name tokens of the type parameters declared by the `generic` attribute of a
-/// Vue `<script setup>`.
-///
-/// A `generic` attribute that fails to parse declares no names.
-fn vue_generic_parameter_names<'a>(
+/// Returns the names declared by Vue `generic` and Svelte `generics`
+/// attributes. An attribute that fails to parse declares no names.
+fn generic_parameter_names<'a>(
     snippets: &'a [EmbeddedSnippet],
 ) -> impl Iterator<Item = JsSyntaxToken> + 'a {
     snippets
@@ -350,7 +459,7 @@ fn vue_generic_parameter_names<'a>(
             snippet
                 .file_source
                 .to_js_file_source()
-                .is_some_and(|source| source.is_vue_generics_list())
+                .is_some_and(|source| source.is_generics_list())
         })
         .filter_map(|snippet| {
             let root = snippet.parse.tree::<AnyJsRoot>();
@@ -529,48 +638,27 @@ impl EmbeddedBindingsBuilder {
             }
         }
 
-        for token in vue_generic_parameter_names(snippets) {
+        for token in generic_parameter_names(snippets) {
             self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
-    fn visit_svelte_html_root(&mut self, root: &HtmlRoot) {
+    fn visit_svelte_html_root(&mut self, root: &HtmlRoot, snippets: &[EmbeddedSnippet]) {
         for node in root.syntax().descendants() {
-            let Some(block) = AnySvelteBlock::cast_ref(&node) else {
-                continue;
-            };
-            if let AnySvelteBlock::SvelteEachBlock(each_block) = block
+            if let Some(AnySvelteBlock::SvelteEachBlock(each_block)) =
+                AnySvelteBlock::cast_ref(&node)
                 && let Ok(opening_block) = each_block.opening_block()
-                && let Some(item) = opening_block.item()
+                && let Some(AnySvelteBlockItem::SvelteEachKeyedItem(keyed)) = opening_block.item()
+                && let Some(index) = keyed.index()
+                && let Ok(value) = index.value()
+                && let Ok(token) = value.ident_token()
             {
-                match item {
-                    AnySvelteBlockItem::SvelteEachAsKeyedItem(as_keyed) => {
-                        if let Ok(name) = as_keyed.name() {
-                            self.register_svelte_each_name_bindings(name);
-                        }
-                        if let Some(index) = as_keyed.index()
-                            && let Ok(value) = index.value()
-                            && let Ok(token) = value.ident_token()
-                        {
-                            self.register_binding(
-                                token.text_trimmed_range(),
-                                token.token_text_trimmed(),
-                            );
-                        }
-                    }
-                    AnySvelteBlockItem::SvelteEachKeyedItem(keyed) => {
-                        if let Some(index) = keyed.index()
-                            && let Ok(value) = index.value()
-                            && let Ok(token) = value.ident_token()
-                        {
-                            self.register_binding(
-                                token.text_trimmed_range(),
-                                token.token_text_trimmed(),
-                            );
-                        }
-                    }
-                }
+                self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
             }
+        }
+
+        for token in generic_parameter_names(snippets) {
+            self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
@@ -654,84 +742,6 @@ impl EmbeddedBindingsBuilder {
         Some(())
     }
 
-    fn register_svelte_each_name_bindings(&mut self, name: AnySvelteEachName) {
-        match name {
-            AnySvelteEachName::SvelteName(ident) => {
-                if let Ok(token) = ident.ident_token() {
-                    self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-                }
-            }
-            AnySvelteEachName::AnySvelteDestructuredName(destructured) => {
-                self.register_svelte_destructured_bindings(destructured);
-            }
-            AnySvelteEachName::HtmlTextExpression(_) => {}
-        }
-    }
-
-    fn register_svelte_destructured_bindings(
-        &mut self,
-        destructured: AnySvelteDestructuredName,
-    ) -> Option<()> {
-        let mut queue: VecDeque<AnySvelteDestructuredName> = VecDeque::new();
-        queue.push_back(destructured);
-
-        while let Some(current) = queue.pop_front() {
-            let list = match current {
-                AnySvelteDestructuredName::SvelteCurlyDestructuredName(n) => n.names(),
-                AnySvelteDestructuredName::SvelteSquareDestructuredName(n) => n.names(),
-            };
-            for binding in list.iter().flatten() {
-                match binding {
-                    AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
-                        let token = ident.ident_token().ok()?;
-                        self.register_binding(
-                            token.text_trimmed_range(),
-                            token.token_text_trimmed(),
-                        );
-                    }
-                    AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(nested) => {
-                        queue.push_back(nested);
-                    }
-                    AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
-                        let name = rest.name().ok()?;
-                        let token = name.ident_token().ok()?;
-                        self.register_binding(
-                            token.text_trimmed_range(),
-                            token.token_text_trimmed(),
-                        );
-                    }
-                    AnySvelteBindingAssignmentBinding::SvelteRenameBinding(rename) => {
-                        match rename.name().ok()? {
-                            AnySvelteBindingAssignmentBinding::SvelteName(ident) => {
-                                let token = ident.ident_token().ok()?;
-                                self.register_binding(
-                                    token.text_trimmed_range(),
-                                    token.token_text_trimmed(),
-                                );
-                            }
-                            AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(
-                                nested,
-                            ) => {
-                                queue.push_back(nested);
-                            }
-                            AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
-                                let name = rest.name().ok()?;
-                                let token = name.ident_token().ok()?;
-                                self.register_binding(
-                                    token.text_trimmed_range(),
-                                    token.token_text_trimmed(),
-                                );
-                            }
-                            AnySvelteBindingAssignmentBinding::SvelteRenameBinding(_) => {}
-                        }
-                    }
-                }
-            }
-        }
-
-        Some(())
-    }
-
     fn visit_js_source_snippet(
         &mut self,
         root: &AnyJsRoot,
@@ -746,8 +756,9 @@ impl EmbeddedBindingsBuilder {
 
         let kinds = JsModuleItemList::KIND_SET
             .union(JsCallExpression::KIND_SET)
-            .union(JsAssignmentExpression::KIND_SET)
             .union(JsSvelteSnippetRoot::KIND_SET)
+            .union(JsSvelteEachBindingRoot::KIND_SET)
+            .union(JsSvelteLegacyConstRoot::KIND_SET)
             .union(JsSvelteDeclarationRoot::KIND_SET);
 
         for event in root.syntax().preorder_of_kinds(kinds) {
@@ -767,18 +778,22 @@ impl EmbeddedBindingsBuilder {
                             // TODO: Angular support
                             HtmlVariant::Angular => {}
                         }
-                    } else if let Some(assign) = JsAssignmentExpression::cast_ref(&node)
-                        && host_file_source.is_svelte()
-                    {
-                        self.visit_svelte_const_assignment(&assign, embed_block_kind);
                     } else if let Some(root) = JsSvelteSnippetRoot::cast_ref(&node)
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_snippet_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteEachBindingRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_each_binding(&root);
                     } else if let Some(root) = JsSvelteDeclarationRoot::cast_ref(&node)
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_declaration(&root, embed_block_kind);
+                    } else if let Some(root) = JsSvelteLegacyConstRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_legacy_const_declaration(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -787,21 +802,6 @@ impl EmbeddedBindingsBuilder {
 
         self.is_vue_source = previous_is_vue_source;
         self.is_vue_setup = previous_is_vue_setup;
-    }
-
-    fn visit_svelte_const_assignment(
-        &mut self,
-        assign: &JsAssignmentExpression,
-        embed_block_kind: Option<&EmbeddedBlockKind>,
-    ) -> Option<()> {
-        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Const) = embed_block_kind? else {
-            return None;
-        };
-        let left = assign.left().ok()?;
-        let ident = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
-        let token = ident.name_token().ok()?;
-        self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-        Some(())
     }
 
     fn visit_svelte_snippet_declaration(
@@ -820,7 +820,9 @@ impl EmbeddedBindingsBuilder {
             self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
 
-        if let Ok(parameters) = root.parameters() {
+        if let Ok(parameters) = root.parameters()
+            && let Some(parameters) = parameters.as_js_parameters()
+        {
             for param in parameters.items().iter().flatten() {
                 if let Some(formal) = param
                     .as_any_js_formal_parameter()
@@ -833,6 +835,14 @@ impl EmbeddedBindingsBuilder {
         }
 
         None
+    }
+
+    fn visit_svelte_each_binding(&mut self, root: &JsSvelteEachBindingRoot) -> Option<()> {
+        self.visit_any_js_binding_pattern(&root.context().ok()?)?;
+        if let Some(index) = root.index() {
+            self.register_js_binding(index.binding())?;
+        }
+        Some(())
     }
 
     fn visit_parameter_list_bindings(&mut self, parameters: &JsParameterList) {
@@ -866,6 +876,19 @@ impl EmbeddedBindingsBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_svelte_legacy_const_declaration(
+        &mut self,
+        root: &JsSvelteLegacyConstRoot,
+        embed_block_kind: Option<&EmbeddedBlockKind>,
+    ) -> Option<()> {
+        let EmbeddedBlockKind::Svelte(SvelteBlockKind::Const) = embed_block_kind? else {
+            return None;
+        };
+        let declarator = root.declarator().ok()?;
+        let declarator = declarator.as_js_variable_declarator()?;
+        self.visit_any_js_binding_pattern(&declarator.id().ok()?)
     }
 
     fn visit_svelte_block_call_expressions(
@@ -1980,11 +2003,54 @@ mod tests {
     use crate::components::component_at;
     use crate::references::{InternedReference, is_reference_used};
     use crate::testing::{
-        TestDb, TestSnippet, document, parse_html_source_with_js_snippet, parse_js_source,
-        parse_vue_source, token_text,
+        SVELTE_EACH_BINDING_SOURCE_INDEX, SVELTE_SOURCE_INDEX, TestDb, TestSnippet, document,
+        parse_html_source_with_js_snippet, parse_js_source, parse_vue_source, token_text,
     };
     use biome_languages::has_embedded_content;
     use biome_rowan::TextSize;
+
+    #[test]
+    fn svelte_each_binding_clause_declares_its_pattern_and_index() {
+        let db = TestDb::new();
+        let clause = "{ [key]: [value = fallback, ...rest] }, index (value)";
+        let host = format!("{{#each items as {clause}}}{{value}}{{/each}}");
+        let content_range = TextRange::at(
+            TextSize::try_from(host.find(clause).unwrap()).unwrap(),
+            TextSize::of(clause),
+        );
+        let path = camino::Utf8Path::new("src/App.svelte");
+        db.insert_document(
+            path,
+            &host,
+            SVELTE_SOURCE_INDEX,
+            vec![TestSnippet {
+                text: clause.to_string(),
+                element_range: content_range,
+                content_range,
+                content_offset: content_range.start(),
+                source_index: SVELTE_EACH_BINDING_SOURCE_INDEX,
+            }],
+        );
+        let file = document(&db, path);
+        assert!(!file.parsed(&db).has_errors());
+        let binding = |name| {
+            get_binding_by_name(
+                &db,
+                InternedBindingTokenText::new(&db, file, token_text(name)),
+            )
+        };
+        let is_used =
+            |name| is_reference_used(&db, InternedReference::new(&db, file, token_text(name)));
+
+        for name in ["value", "rest", "index"] {
+            assert!(binding(name).is_some(), "{name} should be declared");
+        }
+        // A computed key and a default value read names from the enclosing scope.
+        for name in ["key", "fallback"] {
+            assert!(binding(name).is_none(), "{name} should not be declared");
+            assert!(is_used(name), "{name} should count as used");
+        }
+    }
 
     #[test]
     fn has_embedded_content_is_false_for_a_plain_script() {

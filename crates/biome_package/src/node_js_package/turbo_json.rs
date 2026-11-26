@@ -71,8 +71,7 @@ impl Clone for TurboJson {
                 .env_vars_cache
                 .get()
                 .cloned()
-                .map(OnceLock::from)
-                .unwrap_or_default(),
+                .map_or_default(OnceLock::from),
         }
     }
 }

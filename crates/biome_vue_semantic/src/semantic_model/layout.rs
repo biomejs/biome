@@ -9,8 +9,8 @@ use super::model::*;
 use biome_html_syntax::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
     AnyVueDirective, AnyVueDirectiveArgument, HtmlAttributeInitializerClause, HtmlAttributeList,
-    HtmlElementList, HtmlRoot, HtmlSyntaxKind, VueDirectiveArgument, VueModifierList,
-    VueVForIdentifierBinding, VueVForValue,
+    HtmlElementList, HtmlRoot, HtmlSyntaxKind, HtmlSyntaxNode, VueDirectiveArgument,
+    VueModifierList, VueVForIdentifierBinding, VueVForValue,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
 
@@ -37,13 +37,14 @@ pub(crate) struct Layout {
 
 pub(crate) fn collect_layout(builder: &mut ModelBuilder, root: &HtmlRoot) -> Layout {
     let mut layout = Layout::default();
-    visit_children(builder, &mut layout, &root.html(), None);
+    visit_children(builder, &mut layout, root.elements(), None);
     layout
 }
 
 /// The parts of an element the layout pass reads, for both `<a></a>` and
 /// `<a />`.
 struct Tag {
+    node: HtmlSyntaxNode,
     range: TextRange,
     start_tag: TextRange,
     name: AnyHtmlTagName,
@@ -67,6 +68,7 @@ impl Tag {
                         closing.syntax().text_trimmed_range().start()
                     });
                 Some(Self {
+                    node: element.syntax().clone(),
                     range: element.syntax().text_trimmed_range(),
                     start_tag,
                     name: opening.name().ok()?,
@@ -79,6 +81,7 @@ impl Tag {
             AnyHtmlElement::HtmlSelfClosingElement(element) => {
                 let range = element.syntax().text_trimmed_range();
                 Some(Self {
+                    node: element.syntax().clone(),
                     range,
                     start_tag: range,
                     name: element.name().ok()?,
@@ -96,11 +99,11 @@ impl Tag {
 fn visit_children(
     builder: &mut ModelBuilder,
     layout: &mut Layout,
-    children: &HtmlElementList,
+    children: impl IntoIterator<Item = AnyHtmlElement>,
     parent: Option<ElementId>,
 ) {
     let mut chain: Vec<(ElementId, BranchKind, Option<AttrId>)> = Vec::new();
-    for child in children.iter() {
+    for child in children {
         let Some(tag) = Tag::from_element(&child) else {
             // Whitespace between two branches does not break a chain. Any
             // other content does.
@@ -200,11 +203,15 @@ fn visit_tag(
     .or_else(|| tag.name.token_text_trimmed())
     .filter(|name| name.text() == tag_text)
     .unwrap_or_else(|| synthetic_name(&tag_text));
-    let is_component =
-        !matches!(tag.name, AnyHtmlTagName::HtmlTagName(_)) || tag_text.contains('-');
+    // Known tags such as `annotation-xml` are native even though they contain a `-`.
+    let is_component = tag
+        .name
+        .tag_name_kind()
+        .is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG && tag_text.contains('-'));
 
     let parent_scope = parent.map(|parent| builder.data.elements[parent.index()].scope);
     let scope = builder.add_scope(ScopeKind::Element(id), parent_scope);
+    let node = builder.add_html_node(&tag.node, HtmlRow::Element(id));
 
     builder.data.elements.push(ElementData {
         range: tag.range,
@@ -219,6 +226,7 @@ fn visit_tag(
         chain: None,
         self_closing: tag.self_closing,
         class_open: false,
+        node,
     });
 
     let first_attr = builder.data.attrs.len() as u32;
@@ -234,7 +242,7 @@ fn visit_tag(
     // The content of `<script>` and `<style>` is not HTML, so the parser
     // gives those elements no element children.
     if let Some(children) = &tag.children {
-        visit_children(builder, layout, children, Some(id));
+        visit_children(builder, layout, children.iter(), Some(id));
     }
     id
 }
@@ -333,12 +341,15 @@ fn visit_attribute(
                     _ => {}
                 }
             }
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,
                 name: AttrName::Plain(name),
                 value,
                 value_range,
+                node,
             });
         }
         AnyHtmlAttribute::AnyVueDirective(directive) => {
@@ -370,6 +381,8 @@ fn visit_attribute(
                 }
                 Some(_) => (AttrValueData::Unparsed, None),
             };
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,
@@ -383,6 +396,7 @@ fn visit_attribute(
                 },
                 value,
                 value_range,
+                node,
             });
         }
         _ => {}

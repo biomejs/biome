@@ -1,22 +1,29 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_declaration};
+use super::stmt::{
+    VariableDeclarationParent, parse_statements, parse_svelte_legacy_const_declarator,
+    parse_variable_declaration,
+};
 use crate::JsParser;
+use crate::JsSyntaxFeature::TypeScript;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
-use crate::syntax::binding::parse_binding;
+use crate::syntax::binding::{parse_binding, parse_binding_pattern};
 use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::function::{
     ParameterContext, parse_parameter_list, parse_vue_slot_parameters_list,
 };
 use crate::syntax::js_parse_error;
-use crate::syntax::jsx::skip_astro_html_comments;
+use crate::syntax::jsx::{parse_jsx_single_tag, skip_astro_html_comments};
 use crate::syntax::stmt::parse_directives;
-use crate::syntax::typescript::{TypeContext, parse_vue_generic_type_parameters};
+use crate::syntax::typescript::{
+    TypeContext, parse_generic_type_parameters, parse_ts_type_annotation, parse_ts_type_parameters,
+};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
+use biome_parser::diagnostic::expected_node;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -42,6 +49,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_event_handler(p, m);
     }
 
+    if p.source_type().is_svelte_each_binding() {
+        return parse_svelte_each_binding(p, m);
+    }
+
+    if p.source_type().is_svelte_const_block() {
+        return parse_svelte_legacy_const(p, m);
+    }
+
     if p.source_type().is_svelte_declaration() {
         return parse_svelte_declaration(p, m);
     }
@@ -50,8 +65,12 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_slot_props(p, m);
     }
 
-    if p.source_type().is_vue_generics_list() {
-        return parse_vue_generic(p, m);
+    if p.source_type().is_generics_list() {
+        return parse_generic(p, m);
+    }
+
+    if p.source_type().as_embedding_kind().is_mdx_tag() {
+        return parse_mdx_tag(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -60,7 +79,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_template_expression(p, m);
     }
 
-    let (statement_list, strict_snapshot) = parse_directives(p);
+    // An MDX ESM block holds only imports and exports, so a leading string is
+    // a statement that the module item list reports, not a directive.
+    let (statement_list, strict_snapshot) = if p.source_type().as_embedding_kind().is_mdx_esm() {
+        p.start().complete(p, JS_DIRECTIVE_LIST);
+        (p.start(), None)
+    } else {
+        parse_directives(p)
+    };
 
     let result = match p.source_type().module_kind() {
         ModuleKind::Script => {
@@ -120,6 +146,96 @@ fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
     m.complete(p, JS_SVELTE_DECLARATION_ROOT)
 }
 
+fn parse_svelte_legacy_const(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let declarator_recovery = p.start();
+    let declarator = parse_svelte_legacy_const_declarator(p)
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if !p.at(EOF) {
+        let recovery = if let Some(declarator) = declarator {
+            declarator_recovery.abandon(p);
+            declarator.undo_completion(p)
+        } else {
+            declarator_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS);
+    } else {
+        declarator_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_LEGACY_CONST_ROOT)
+}
+
+fn parse_svelte_each_binding(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let binding_recovery = p.start();
+    let binding = parse_binding_pattern(p, ExpressionContext::default())
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if let ParsedSyntax::Present(annotation) = parse_ts_type_annotation(p, TypeContext::default())
+        && TypeScript.is_unsupported(p)
+    {
+        p.error(p.err_builder(
+            "type annotations can only be used in TypeScript files",
+            annotation.range(p),
+        ));
+    }
+
+    parse_svelte_each_index(p).ok();
+    parse_svelte_each_key(p).ok();
+
+    if !p.at(EOF) {
+        let recovery = if let Some(binding) = binding {
+            binding_recovery.abandon(p);
+            binding.undo_completion(p)
+        } else {
+            binding_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS_BINDING);
+    } else {
+        binding_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_EACH_BINDING_ROOT)
+}
+
+fn parse_svelte_each_index(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![,]) {
+        return ParsedSyntax::Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![,]);
+    parse_binding(p).or_add_diagnostic(p, js_parse_error::expected_identifier);
+    ParsedSyntax::Present(m.complete(p, JS_SVELTE_EACH_INDEX))
+}
+
+fn parse_svelte_each_key(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return ParsedSyntax::Absent;
+    }
+
+    let m = p.start();
+    p.bump(T!['(']);
+    parse_expression(p, ExpressionContext::default())
+        .or_add_diagnostic(p, js_parse_error::template_expression_expected_expression);
+    p.expect(T![')']);
+    ParsedSyntax::Present(m.complete(p, JS_SVELTE_EACH_KEY))
+}
+
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.
 /// These should always parse as expressions, never as statements.
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
@@ -141,11 +257,14 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
 
     let has_expression = !expr_result.is_absent();
 
-    // Astro renders a body that holds only comments as nothing, the way JSX does
-    // for `{/* c */}` children.
-    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro_template();
+    // Astro and MDX render a body that holds only comments as nothing, the way
+    // JSX does for `{/* c */}` children.
+    let is_empty_body = p.at(EOF)
+        && p.source_type()
+            .as_embedding_kind()
+            .allows_empty_expression();
 
-    if !has_expression && is_empty_astro_body {
+    if !has_expression && is_empty_body {
         expr_marker.abandon(p);
         return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
     }
@@ -183,6 +302,28 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     // Always complete as JS_EXPRESSION_TEMPLATE_ROOT
     // The expression child might be bogus, but the root should always be this type
     m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT)
+}
+
+/// Parses the single JSX tag of an MDX tag snippet: an opening, closing, or
+/// self-closing tag, or a fragment tag. The children of an MDX element are
+/// Markdown, so they never belong to the snippet.
+fn parse_mdx_tag(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let tag =
+        parse_jsx_single_tag(p).or_add_diagnostic(p, |p, range| expected_node("JSX tag", range, p));
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::mdx_tag_trailing_code(p, p.cur_range()));
+        let bogus = match tag {
+            Some(tag) => tag.precede(p),
+            None => p.start(),
+        };
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        bogus.complete(p, JS_BOGUS);
+    }
+
+    m.complete(p, JSX_SINGLE_TAG_ROOT)
 }
 
 fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
@@ -242,19 +383,34 @@ fn parse_vue_slot_props(p: &mut JsParser, m: Marker) -> CompletedMarker {
     m.complete(p, JS_VUE_SLOT_PROPS_ROOT)
 }
 
-/// Parses the value of the `generic` attribute of a Vue `<script setup>`: `generic="T extends Item"`.
-/// Vue compiles the value as the type parameters of the component function, so the
-/// value is a type parameter list without the surrounding angle brackets.
-fn parse_vue_generic(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    parse_vue_generic_type_parameters(p);
+/// Parses component type parameters from a Vue `generic` attribute or a Svelte
+/// `generics` attribute. Both frameworks omit the surrounding angle brackets.
+fn parse_generic(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    parse_generic_type_parameters(p);
     m.complete(p, JS_VUE_GENERIC_ROOT)
 }
 
-/// Parses a Svelte snippet declaration: `add(a: any, b: float)`.
-/// Produces a JsIdentifierBinding for the name and JsParameters for the
-/// parameter list, wrapped in a JsSnippetSignatureTemplateRoot.
+/// Parses a Svelte snippet declaration: `add<T>(a: T, b: float)`.
+/// Produces a JsIdentifierBinding for the name, optional TsTypeParameters,
+/// and JsParameters for the parameter list, wrapped in a JsSvelteSnippetRoot.
 fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
     parse_binding(p).or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    // Type parameters outside TypeScript and trailing code don't fit the root's
+    // slots, so they are wrapped together with the parameters in a bogus node
+    // to keep the root a valid `AnyJsRoot`.
+    let recovery = p.start();
+    let type_parameters = TypeScript.parse_exclusive_syntax(
+        p,
+        |p| parse_ts_type_parameters(p, TypeContext::default().and_allow_const_modifier(true)),
+        |p, marker| {
+            p.err_builder(
+                "type parameters can only be used in TypeScript files",
+                marker.range(p),
+            )
+        },
+    );
+    let mut is_bogus = type_parameters.is_present() && TypeScript.is_unsupported(p);
 
     // These are not mandatory
     parse_parameter_list(
@@ -273,6 +429,13 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
         while !p.at(EOF) {
             p.bump_any();
         }
+        is_bogus = true;
+    }
+
+    if is_bogus {
+        recovery.complete(p, JS_BOGUS);
+    } else {
+        recovery.abandon(p);
     }
 
     m.complete(p, JS_SVELTE_SNIPPET_ROOT)

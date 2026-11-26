@@ -37,13 +37,12 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_parser::prelude::{CompletedMarker, Marker, ParseDiagnostic, TokenSet};
-use biome_parser::{Parser, token_set};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use biome_unicode_table::{
     Dispatch::{BTO, DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
     lookup_byte,
 };
 
-use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::OpenListItem;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
@@ -53,8 +52,8 @@ use crate::syntax::link_block::{at_link_block, at_link_block_start, parse_link_b
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
-    emit_optional_marker_space, has_quote_prefix, open_quote, parse_quote_block_list,
-    parse_quote_in_container,
+    emit_optional_marker_space, has_quote_prefix, line_has_quote_prefix_at_current, open_quote,
+    parse_quote_block_list, parse_quote_in_container,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
@@ -65,6 +64,7 @@ use crate::syntax::{
     parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 use biome_rowan::{TextRange, TextSize};
 use std::rc::Rc;
 
@@ -666,10 +666,7 @@ impl ParseNodeList for BulletList {
                 if next_is_bullet_at_indent {
                     // Per CommonMark §5.3, a change in bullet marker across
                     // a blank line starts a new list.
-                    if marker_changes_after_newline(p, marker_kind) {
-                        return Some(true);
-                    }
-                    Some(false)
+                    Some(marker_changes_after_newline(p, marker_kind))
                 } else {
                     // Check if bullet after blank lines is at correct indent
                     let has_item = p.lookahead(|p| {
@@ -1736,9 +1733,13 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         return outcome;
     }
 
-    // Phases 4-5 share a quote-prefix check.
+    // Phases 4-5 share a quote-prefix check. A nested list item can consume
+    // the prefixes of a line that it then leaves to this item. Probing again
+    // would take a `>` in the line's content for a continuation prefix, as in
+    // the second `>` of `> - one\n>   - nested\n> > quoted`.
     let line_has_quote_prefix = quote_depth > 0
         && (p.is_at_line_start() || p.has_preceding_line_break())
+        && !line_has_quote_prefix_at_current(p, quote_depth)
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
@@ -2360,19 +2361,39 @@ fn parse_first_line_blocks(
         }
         state.first_line = false;
 
-        p.state_mut().virtual_line_start = prev_virtual;
+        restore_virtual_line_start_after_nested_list(p, prev_virtual);
         p.state_mut().list_item_required_indent = prev_required;
         return LoopAction::Continue;
     }
 
-    // Indent code block (spaces_after_marker > INDENT_CODE_BLOCK_SPACES)
-    if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
+    // Indent code block (spaces_after_marker > INDENT_CODE_BLOCK_SPACES).
+    // MDX has no indented code.
+    if spaces_after_marker > INDENT_CODE_BLOCK_SPACES
+        && MarkdownSyntaxFeatures::Mdx.is_unsupported(p)
+    {
         parse_indent_code_block_in_list_first_line(p);
         state.record_first_line_block();
         return LoopAction::Continue;
     }
 
     LoopAction::FallThrough
+}
+
+/// Restore `virtual_line_start` to `prev_virtual` after parsing a nested list,
+/// unless the list stopped at a virtual line start.
+///
+/// A list item consumes the block quote prefix of the next line before it
+/// checks whether the line continues the item. When the line belongs to an
+/// enclosing list instead, as `- two` does in `> - one\n>   - nested\n> - two`,
+/// the virtual line start set after that prefix is the only record that the
+/// cursor sits at the start of the line's content.
+fn restore_virtual_line_start_after_nested_list(
+    p: &mut MarkdownParser,
+    prev_virtual: Option<TextSize>,
+) {
+    if p.state().virtual_line_start != Some(p.cur_range().start()) {
+        p.state_mut().virtual_line_start = prev_virtual;
+    }
 }
 
 fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
@@ -2807,7 +2828,7 @@ fn check_continuation_indent(
                 if state.last_was_blank {
                     state.has_blank_line = true;
                 }
-                p.state_mut().virtual_line_start = prev_virtual;
+                restore_virtual_line_start_after_nested_list(p, prev_virtual);
                 return ContinuationResult {
                     action: LoopAction::Continue,
                     restore: VirtualLineRestore::None,
@@ -3430,15 +3451,17 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Consumes one blank line after any container prefixes.
+///
+/// Each `MD_TEXTUAL_LITERAL` made only of spaces and tabs becomes whitespace
+/// trivia, and the following `NEWLINE` becomes an `MdNewline` node. At EOF only
+/// the whitespace is consumed. Any other token stops consumption without an
+/// error, so callers must classify the line as blank first; otherwise a caller
+/// loop can stop advancing.
 fn consume_blank_line(p: &mut MarkdownParser) {
     // Consume blank-line whitespace as whitespace trivia (structural, no skipped trivia).
-    while p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " || text == "\t" {
-            p.consume_as_whitespace_trivia();
-        } else {
-            break;
-        }
+    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        p.consume_as_whitespace_trivia();
     }
 
     if p.at(NEWLINE) {

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validBarrel.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import * as importedDeep from "./validDeep.js";
+import { e as renamedE } from "./validDeep.js";
+export * from "./validNamedExports.js";
+export { importedDeep, renamedE };
+
+```

@@ -1,0 +1,20 @@
+/* should generate diagnostics */
+a { font-weight: normal; }
+a { font-weight: bold; }
+a { fOnT-wEiGhT: normal; }
+a { FONT-WEIGHT: NORMAL; }
+a { font-weight: BoLd; }
+a { font-weight: /* bold */ normal; }
+a { font-weight: bolder; }
+a { font-weight: lighter; }
+a { font: italic small-caps bold 16px/3 cursive; }
+a { font: italic small-caps bolder 16px/3 cursive; }
+a { font: normal 16px/3 cursive; }
+a { font: normal normal 16px/3 cursive; }
+a { font: italic normal 20px sans-serif; }
+a { font: normal bold 16px serif; }
+a { FONT: bold 16px serif; }
+@font-face { font-weight: normal bold; }
+@font-face { font-weight: 400 bold; }
+@font-face { font-weight: normal 700; }
+@font-face { font-weight: /* 400 */ normal 700; }

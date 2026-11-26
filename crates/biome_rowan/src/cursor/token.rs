@@ -1,58 +1,50 @@
+use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
-use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent, green};
+use crate::{Direction, GreenToken, GreenTokenRef, NodeOrToken, RawSyntaxKind, TokenText, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
-use std::rc::Rc;
 use std::{fmt, iter};
 
-use super::{GreenElement, NodeKind, WeakGreenElement};
+use super::GreenElement;
 
 #[derive(Clone, Debug)]
 pub(crate) struct SyntaxToken {
-    ptr: Rc<NodeData>,
+    ptr: NodeRc,
 }
 
 impl SyntaxToken {
     pub(super) fn new(
-        green: &GreenTokenData,
+        green: GreenTokenRef<'_>,
         parent: SyntaxNode,
         index: u32,
         offset: TextSize,
     ) -> Self {
         Self {
-            ptr: NodeData::new(
-                NodeKind::Child {
-                    green: WeakGreenElement::new(GreenElementRef::Token(green)),
-                    parent: parent.ptr,
-                },
+            ptr: NodeRc::new(NodeData::new_child(
+                GreenElementRef::Token(green),
+                parent.ptr,
                 index,
                 offset,
-            ),
+            )),
         }
     }
 
     pub(crate) fn new_detached(green: GreenToken) -> Self {
         Self {
-            ptr: NodeData::new(
-                NodeKind::Root {
-                    green: GreenElement::Token(green),
-                },
-                0,
-                TextSize::from(0),
-            ),
+            ptr: NodeRc::new(NodeData::new_root(GreenElement::Token(green))),
         }
     }
 
     #[inline]
-    pub(crate) fn green(&self) -> &GreenTokenData {
-        match self.data().green().as_token() {
-            Some(token) => token,
-            None => {
+    pub(crate) fn green(&self) -> GreenTokenRef<'_> {
+        match self.data().green() {
+            NodeOrToken::Token(token) => token,
+            NodeOrToken::Node(node) => {
                 panic!(
                     "corrupted tree: a node thinks it is a token: {:?}",
-                    self.data().green().as_node().unwrap().to_string()
+                    node.to_string()
                 );
             }
         }
@@ -64,7 +56,7 @@ impl SyntaxToken {
 
     #[inline]
     pub(super) fn data(&self) -> &NodeData {
-        self.ptr.as_ref()
+        &self.ptr
     }
 
     #[inline]
@@ -130,6 +122,11 @@ impl SyntaxToken {
         std::iter::successors(self.parent(), SyntaxNode::parent)
     }
 
+    #[inline]
+    pub fn tree_top(&self) -> Option<SyntaxNode> {
+        self.ancestors().last()
+    }
+
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().next_sibling_or_token()
     }
@@ -153,65 +150,11 @@ impl SyntaxToken {
     }
 
     pub fn next_token(&self) -> Option<Self> {
-        self.next_token_impl(Direction::Next)
+        SyntaxElement::Token(self.clone()).next_token()
     }
 
     pub fn prev_token(&self) -> Option<Self> {
-        self.next_token_impl(Direction::Prev)
-    }
-
-    /// Returns the token preceding or following this token depending on the passed `direction`.
-    fn next_token_impl(&self, direction: Direction) -> Option<Self> {
-        let mut current: WalkEvent<SyntaxElement> =
-            WalkEvent::Leave(SyntaxElement::Token(self.clone()));
-
-        loop {
-            current = match current {
-                WalkEvent::Enter(element) => match element {
-                    SyntaxElement::Token(token) => break Some(token),
-                    SyntaxElement::Node(node) => {
-                        let first_child = match direction {
-                            Direction::Next => node.first_child_or_token(),
-                            Direction::Prev => node.last_child_or_token(),
-                        };
-
-                        match first_child {
-                            // If node is empty, leave parent
-                            None => WalkEvent::Leave(SyntaxElement::Node(node)),
-                            // Otherwise traverse full sub-tree
-                            Some(child) => WalkEvent::Enter(child),
-                        }
-                    }
-                },
-                WalkEvent::Leave(element) => {
-                    let mut current_element = element;
-
-                    loop {
-                        // Only traverse the left (pref) / right (next) siblings of the parent
-                        // to avoid traversing into the same children again.
-                        let sibling = match direction {
-                            Direction::Next => current_element.next_sibling_or_token(),
-                            Direction::Prev => current_element.prev_sibling_or_token(),
-                        };
-
-                        match sibling {
-                            // Traverse all children of the sibling
-                            Some(sibling) => break WalkEvent::Enter(sibling),
-                            None => {
-                                match current_element.parent() {
-                                    Some(node) => {
-                                        current_element = SyntaxElement::Node(node);
-                                    }
-                                    None => {
-                                        return None; // Reached root, no token found
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        SyntaxElement::Token(self.clone()).prev_token()
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]

@@ -7,35 +7,35 @@ expression: scss-contexts.valid.scss
 /* should not generate diagnostics */
 $condition: true;
 @if $condition {
-  .branch-parent .branch-target {}
+  .branch-parent .branch-target { color: red; }
 } @else {
-  .branch-target {}
+  .branch-target { color: red; }
 }
 
 @mixin conditional-output {
-  .mixin-parent .mixin-external-target {}
+  .mixin-parent .mixin-external-target { color: red; }
 }
-.mixin-external-target {}
+.mixin-external-target { color: red; }
 
-%placeholder .placeholder-target {}
-.placeholder-target {}
+%placeholder .placeholder-target { color: red; }
+.placeholder-target { color: red; }
 
 %nested-placeholder {
-  .nested-placeholder-target {}
+  .nested-placeholder-target { color: red; }
 }
-.nested-placeholder-target {}
+.nested-placeholder-target { color: red; }
 
 .outer {
   @at-root {
-    .at-root-target {}
+    .at-root-target { color: red; }
   }
 }
-.at-root-target {}
+.at-root-target { color: red; }
 
-#{$dynamic-selector} .dynamic-target {}
-.dynamic-target {}
+#{$dynamic-selector} .dynamic-target { color: red; }
+.dynamic-target { color: red; }
 
-.#{$dynamic-parent} .dynamic-class-target {}
-.dynamic-class-target {}
+.#{$dynamic-parent} .dynamic-class-target { color: red; }
+.dynamic-class-target { color: red; }
 
 ```

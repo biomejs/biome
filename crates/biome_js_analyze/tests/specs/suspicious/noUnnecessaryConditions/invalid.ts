@@ -102,8 +102,7 @@ const comp3 = 5 > 3;  // Always true
 const comp4 = "a" === "b";  // Always false
 
 // While loops with constant conditions
-while (true) {
-  console.log("infinite loop");
+while (1) {
   break;
 }
 
@@ -117,10 +116,6 @@ do {
 } while (false);
 
 // For loops with constant conditions
-for (; true;) {
-  break;
-}
-
 for (; false;) {
   console.log("never runs");
 }
@@ -140,14 +135,14 @@ const mixed1 = true || false;  // Left side makes right irrelevant
 const mixed2 = false && true;  // Left side makes right irrelevant
 const mixed3 = null ?? "default";  // Left side is always nullish
 
-// Always truthy Pick/Omit object
+// Pick/Omit object shapes can also describe primitives, so they are not flagged
 declare const pickedObj: Pick<{a: string}, "a">;
 if (pickedObj) console.log(pickedObj.a);
 
 declare const omitObj: Omit<{a: string, b: number}, "b">;
 if (omitObj) console.log();
 
-// Always truthy Readonly/Partial object
+// Readonly/Partial object shapes are not flagged either
 declare const ro: Readonly<{a: string}>;
 if (ro) console.log();
 

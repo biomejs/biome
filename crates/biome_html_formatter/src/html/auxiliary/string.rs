@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::verbatim::format_html_source_node_preserving_line_endings;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_html_syntax::{HtmlString, HtmlStringFields};
 use biome_rowan::TextRange;
@@ -7,6 +8,19 @@ pub(crate) struct FormatHtmlString {
     compact: bool,
 }
 impl FormatNodeRule<HtmlString> for FormatHtmlString {
+    fn fmt_verbatim_embedded_node(
+        &self,
+        node: &HtmlString,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        let value_token = node.value_token()?;
+        if self.compact {
+            format_removed(&value_token).fmt(f)
+        } else {
+            format_html_source_node_preserving_line_endings(node.syntax()).fmt(f)
+        }
+    }
+
     /// The code in a value, such as the expression of a Vue directive, is
     /// written between the quotes. Its formatted code replaces the whole value,
     /// quotes included.
@@ -182,6 +196,34 @@ fn requote(value_text: &str) -> Option<String> {
     Some(result)
 }
 
+/// Returns the quoted `class` attribute value with its class names separated by
+/// single spaces, or `None` when the value should be printed as written.
+///
+/// `value_text` is the value token including its quotes, and `content` is the
+/// text between them. Template literal values and values that contain no class
+/// name, such as `"  "`, return `None`. Keeping whitespace-only values as
+/// written matches Prettier.
+pub(crate) fn normalize_class_attribute(value_text: &str, content: &str) -> Option<String> {
+    if value_text.starts_with('`') {
+        return None;
+    }
+
+    let normalized = content
+        .split_ascii_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    if normalized.is_empty() {
+        return None;
+    }
+    let delimiter = match (value_text.as_bytes().first(), value_text.as_bytes().last()) {
+        (Some(b'\''), Some(b'\'')) => '\'',
+        _ => '"',
+    };
+    let candidate = std::format!("{delimiter}{normalized}{delimiter}");
+    let quoted = requote(&candidate).unwrap_or(candidate);
+    (quoted != value_text).then_some(quoted)
+}
+
 impl FormatRuleWithOptions<HtmlString> for FormatHtmlString {
     type Options = bool;
     fn with_options(mut self, options: Self::Options) -> Self {
@@ -192,7 +234,7 @@ impl FormatRuleWithOptions<HtmlString> for FormatHtmlString {
 
 #[cfg(test)]
 mod tests {
-    use super::requote;
+    use super::{normalize_class_attribute, requote};
 
     #[test]
     fn returns_none_for_values_that_need_no_changes() {
@@ -238,5 +280,28 @@ mod tests {
     #[test]
     fn leaves_other_entities_alone() {
         assert_eq!(requote("\"&amp;&lt;&#39;\""), None);
+    }
+
+    #[test]
+    fn normalizes_class_attribute_whitespace() {
+        assert_eq!(
+            normalize_class_attribute("\"  foo  bar  \"", "  foo  bar  ").as_deref(),
+            Some("\"foo bar\"")
+        );
+        assert_eq!(
+            normalize_class_attribute("'  foo   \"bar\"  '", "  foo   \"bar\"  ").as_deref(),
+            Some("'foo \"bar\"'")
+        );
+        assert_eq!(normalize_class_attribute("\"foo bar\"", "foo bar"), None);
+        assert_eq!(
+            normalize_class_attribute("`foo ${bar}`", "`foo ${bar}`"),
+            None
+        );
+    }
+
+    #[test]
+    fn keeps_class_attributes_without_class_names() {
+        assert_eq!(normalize_class_attribute("\"  \"", "  "), None);
+        assert_eq!(normalize_class_attribute("\"\"", ""), None);
     }
 }

@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: with_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"vue/no-undef-properties": [
+			"error",
+			{ "ignores": ["/^\\$/", "i18n", "/^_/u", "store"] }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"noVueUndeclaredProperties": {
+					"level": "error",
+					"options": { "ignore": ["i18n", "store"] }
+				}
+			}
+		}
+	}
+}
+
+```

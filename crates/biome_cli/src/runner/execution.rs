@@ -2,7 +2,8 @@ use crate::cli_options::{CliOptions, CliReporter};
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
-use biome_fs::BiomePath;
+use biome_flags::{CiProvider, Environment};
+use biome_fs::FileSystem;
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
     FeatureName, FeaturesSupported, FixFileMode, PatternId, ScanKind, SearchLanguage, SupportKind,
@@ -59,14 +60,14 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
     fn compute_scan_kind(
         &self,
         target_known_paths: &[String],
-        working_dir: &Utf8Path,
+        fs: &dyn FileSystem,
         scan_kind: ScanKind,
     ) -> ScanKind {
         match scan_kind {
             ScanKind::KnownFiles => {
                 let target_paths = target_known_paths
                     .iter()
-                    .map(|path| BiomePath::new(working_dir.join(path)))
+                    .map(|path| fs.biome_path(Utf8Path::new(path)))
                     .collect();
                 ScanKind::TargetedKnownFiles {
                     target_paths,
@@ -219,4 +220,20 @@ impl From<(bool, bool)> for VcsTargeted {
 #[derive(Debug, Clone, Copy)]
 pub enum ExecutionEnvironment {
     GitHub,
+}
+
+impl ExecutionEnvironment {
+    /// Returns the CI environment whose reporter `biome ci` enables
+    /// automatically, or `None` when no such environment is detected.
+    pub(crate) fn from_environment(environment: &dyn Environment) -> Option<Self> {
+        match CiProvider::from_environment(environment)? {
+            CiProvider::GithubActions => Some(Self::GitHub),
+            CiProvider::Gitlab
+            | CiProvider::Circleci
+            | CiProvider::AzurePipelines
+            | CiProvider::Buildkite
+            | CiProvider::Jenkins
+            | CiProvider::Other => None,
+        }
+    }
 }

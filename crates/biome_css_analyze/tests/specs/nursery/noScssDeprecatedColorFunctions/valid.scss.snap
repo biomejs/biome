@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@use "sass:color";
+
+a {
+  opacity: color.channel(#e1d7d2, "alpha");
+  color: scale-color(blue, $alpha: -40%);
+  color: color.adjust($brand, $hue: 10deg);
+  filter: opacity(50%);
+  filter: drop-shadow(0 0 5px black) opacity(50%);
+  filter: opacity(color.alpha($brand));
+  filter: hue-rotate(hue($brand));
+  opacity: c.alpha($brand);
+  opacity: math.alpha($brand);
+  color: color.opacity($brand);
+  color: whiteness($brand);
+  color: RED($brand);
+  color: color.ALPHA($brand);
+  color: -hue($brand);
+  color: rgb(alpha, red, blue);
+  content: "alpha($brand)";
+  content: "#{alpha($brand)}";
+  background: url(alpha.png);
+  --namespaced: c.alpha($brand);
+  --detached: color .alpha($brand);
+  @include mix(alpha($brand));
+  width: #{alpha($brand)};
+  --interpolated: #{alpha($brand)};
+  width: [alpha($brand)];
+  width: $amount*alpha($brand);
+  width: (2*alpha($brand));
+  --bracketed: [color.alpha($brand)];
+  --glued: 1px+color.alpha($brand);
+  _filter: opacity(50%);
+}
+
+@function half-alpha($color) {
+  @return color.alpha($color) * 0.5;
+}
+
+@if alpha($brand) > 0 {
+  a {
+    color: black;
+  }
+}
+
+@supports (opacity: alpha($brand)) {
+  a {
+    color: black;
+  }
+}
+
+.icon-#{hue($brand)} {
+  color: black;
+}
+
+```

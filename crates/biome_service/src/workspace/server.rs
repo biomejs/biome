@@ -1,5 +1,6 @@
 use super::{
     document::{Document, DocumentView},
+    views::new_views_map,
     *,
 };
 use crate::Watcher;
@@ -51,8 +52,9 @@ use crate::scanner::{
 #[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
 use crate::settings::ServiceLanguage;
 use crate::settings::{
-    EditorFeature, EditorFeatures, ModuleGraphResolutionKind, SettingsEditorState, SettingsHandle,
-    SettingsQuery, SettingsWithEditor,
+    EditorFeature, EditorFeatures, GitIgnoreMatcher, ModuleGraphResolutionKind,
+    SettingsEditorState, SettingsHandle, SettingsQuery, SettingsSelectionKey, SettingsWithEditor,
+    VcsIgnoredPatterns, settings_without_overrides,
 };
 #[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
 use crate::workspace::FeatureKind;
@@ -97,7 +99,7 @@ use biome_formatter::rowan::Printed;
 use biome_frameworks::{Activation, DeclarationKind, Facet, LOADERS};
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_fs::is_node_modules_path;
-use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
+use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path, resolve_symbolic_link_target};
 #[cfg(all(
     feature = "module_graph",
     feature = "lang_js",
@@ -116,6 +118,8 @@ use biome_js_syntax::JsLanguage;
 use biome_json_parser::JsonParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_languages::CssFileSource;
+#[cfg(feature = "lang_html")]
+use biome_languages::HtmlFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::JsFileSource;
 #[cfg(feature = "lang_js")]
@@ -199,6 +203,9 @@ pub struct WorkspaceServer {
     /// settings, because the frameworks render them on every page.
     framework_files: papaya::HashSet<Utf8PathBuf, FxBuildHasher>,
 
+    /// Tracks which clients still use each project so one client cannot unload another's context.
+    project_clients: Mutex<FxHashMap<ProjectKey, FxHashSet<ClientId>>>,
+
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
 
@@ -206,6 +213,14 @@ pub struct WorkspaceServer {
     /// after it reads the document and before it publishes the change.
     #[cfg(test)]
     close_client_files_before_change_publish: AtomicBool,
+
+    /// Pauses a close after it updates the document views.
+    #[cfg(test)]
+    pause_close_after_document_update: AtomicBool,
+
+    /// Counts closes that reached the pause after updating document views.
+    #[cfg(test)]
+    close_document_updates: AtomicUsize,
 
     #[cfg(test)]
     scanner_test_state: ScannerTestState,
@@ -254,6 +269,10 @@ struct ScannerTestState {
     project_scan_attempts: AtomicUsize,
     /// Whether the first project scan should be cancelled before it starts.
     cancel_first_scan_attempt: AtomicBool,
+    /// Number of VCS ignore refreshes that read their ignore files and are about to publish.
+    vcs_ignore_publish_attempts: AtomicUsize,
+    /// Whether VCS ignore refreshes should pause after reading their ignore files.
+    pause_vcs_ignore_publish: AtomicBool,
 }
 
 #[cfg(test)]
@@ -273,6 +292,15 @@ impl ScannerTestState {
             while self.pause_file_settings_read.load(Ordering::Acquire) {
                 std::thread::yield_now();
             }
+        }
+    }
+
+    /// Records a VCS ignore refresh that read its ignore files and is about to publish them.
+    fn enter_vcs_ignore_publish(&self) {
+        self.vcs_ignore_publish_attempts
+            .fetch_add(1, Ordering::AcqRel);
+        while self.pause_vcs_ignore_publish.load(Ordering::Acquire) {
+            std::thread::yield_now();
         }
     }
 
@@ -350,7 +378,7 @@ impl ProcessFileState {
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| snippet.has_errors())
     }
 
@@ -369,7 +397,7 @@ impl ProcessFileState {
             || !self.parsed.diagnostics(&self.db).is_empty()
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| {
                     !snippet.diagnostics().is_empty()
                         || snippet
@@ -381,16 +409,22 @@ impl ProcessFileState {
     /// Counts the syntax errors of the document and of the snippets whose errors
     /// count for it: the snippets that stop formatting the document, and when
     /// `analyzed` is `true`, the snippets that the linter analyzes.
-    fn error_count(&self, settings: &Settings, path: &Utf8Path, analyzed: bool) -> usize {
+    fn error_count(&self, settings: &Settings, path: &BiomePath, analyzed: bool) -> usize {
         let mut counted: FxHashSet<_> = self
             .iter_snippets()
-            .blocking_formatting(self.file_source)
+            .blocking_formatting(self.file_source, &self.db)
             .map(|snippet| snippet.content_range())
             .collect();
         if analyzed {
             counted.extend(
                 self.iter_snippets()
-                    .for_analysis(&self.parsed, self.file_source, settings, path, &self.db)
+                    .for_analysis(
+                        &self.parsed,
+                        self.file_source,
+                        settings,
+                        path.as_path(),
+                        &self.db,
+                    )
                     .map(|snippet| snippet.content_range()),
             );
         }
@@ -446,19 +480,143 @@ fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
     normalize_path(&resolved_path)
 }
 
-fn read_git_info_exclude_patterns(
+fn resolve_git_info_exclude_path(
     fs: &dyn FsWithResolverProxy,
     directory: &Utf8Path,
-) -> Option<Vec<String>> {
+) -> Option<Utf8PathBuf> {
     let git_dir = resolve_git_dir(fs, directory)?;
     let git_common_dir = resolve_git_common_dir(fs, &git_dir);
 
     // Git treats `$GIT_DIR/info/exclude` as repository-local ignore rules. In a
     // linked worktree, Git resolves this path through `commondir`, so the
     // exclude file is shared from the common Git directory.
-    fs.read_file_from_path(git_common_dir.join("info/exclude").as_ref())
+    Some(git_common_dir.join("info/exclude"))
+}
+
+fn read_git_info_exclude_patterns(
+    fs: &dyn FsWithResolverProxy,
+    path: &Utf8Path,
+) -> Option<Vec<String>> {
+    fs.read_file_from_path(path)
         .map(|content| content.lines().map(String::from).collect())
         .ok()
+}
+
+fn read_ignore_file_patterns(
+    fs: &dyn FsWithResolverProxy,
+    directory: &Utf8Path,
+) -> Option<Vec<String>> {
+    let mut patterns = Vec::new();
+    let mut found = false;
+    for file_name in VcsClientKind::Git.ignore_files() {
+        if let Ok(content) = fs.read_file_from_path(&directory.join(file_name)) {
+            found = true;
+            patterns.extend(content.lines().map(String::from));
+        }
+    }
+    found.then_some(patterns)
+}
+
+fn vcs_ignore_ancestor_directories(
+    vcs_root: &Utf8Path,
+    project_path: &Utf8Path,
+) -> Vec<Utf8PathBuf> {
+    let mut directories = vec![vcs_root.to_path_buf()];
+    let Ok(relative_path) = project_path.strip_prefix(vcs_root) else {
+        return directories;
+    };
+
+    let mut directory = vcs_root.to_path_buf();
+    for component in relative_path.components() {
+        directory.push(component.as_str());
+        directories.push(directory.clone());
+    }
+    directories
+}
+
+fn read_root_git_ignore_patterns(
+    fs: &dyn FsWithResolverProxy,
+    directory: &Utf8Path,
+) -> Vec<String> {
+    let mut patterns = resolve_git_info_exclude_path(fs, directory)
+        .as_deref()
+        .and_then(|path| read_git_info_exclude_patterns(fs, path))
+        .unwrap_or_default();
+    patterns.extend(read_ignore_file_patterns(fs, directory).unwrap_or_default());
+    patterns
+}
+
+/// The ignore rules of a project, read from its VCS root and from the directories between the VCS
+/// root and the project folder.
+struct ProjectGitIgnores {
+    /// The matchers of every ignore file that was read.
+    matches: VcsIgnoredPatterns,
+    /// The patterns of the ignore files between the VCS root and the project folder, keyed by
+    /// their directory.
+    ancestor_patterns: Vec<(Utf8PathBuf, Vec<String>)>,
+    /// Whether the ignore files of the VCS root contain no pattern.
+    root_is_empty: bool,
+}
+
+/// Reads the ignore files of `vcs_root` and of the directories between `vcs_root` and
+/// `project_path`.
+///
+/// The walk stops at the first directory that the patterns read so far ignore, because Git doesn't
+/// read the ignore files of ignored directories.
+fn read_project_git_ignores(
+    fs: &dyn FsWithResolverProxy,
+    vcs_root: &BiomePath,
+    project_path: Option<&Utf8Path>,
+) -> Result<ProjectGitIgnores, WorkspaceError> {
+    let root_patterns = read_root_git_ignore_patterns(fs, vcs_root.as_path());
+    let root_pattern_refs = root_patterns.iter().map(String::as_str).collect::<Vec<_>>();
+    let mut matches = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(vcs_root, root_pattern_refs.as_slice())?,
+        nested: vec![],
+    };
+
+    let mut ancestor_patterns = Vec::new();
+    if let Some(project_path) = project_path {
+        for ignore_directory in vcs_ignore_ancestor_directories(vcs_root.as_path(), project_path)
+            .into_iter()
+            .skip(1)
+        {
+            let ignore_directory = fs.biome_path(&ignore_directory);
+            if matches.is_ignored(&ignore_directory, true, IgnoreKind::Ancestors) {
+                break;
+            }
+            if let Some(patterns) = read_ignore_file_patterns(fs, ignore_directory.as_path()) {
+                let pattern_refs = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+                matches.insert_git_match(VcsIgnoredPatterns::git_ignore(
+                    &ignore_directory,
+                    pattern_refs.as_slice(),
+                )?);
+                ancestor_patterns.push((ignore_directory.to_path_buf(), patterns));
+            }
+        }
+    }
+
+    Ok(ProjectGitIgnores {
+        matches,
+        ancestor_patterns,
+        root_is_empty: root_patterns.is_empty(),
+    })
+}
+
+/// Replaces the Git ignore matchers of `settings` with the ignore files of the project.
+///
+/// Returns whether the ignore files of the VCS root contain no pattern.
+fn load_project_git_ignore_patterns(
+    fs: &dyn FsWithResolverProxy,
+    vcs_root: &BiomePath,
+    project_path: Option<&Utf8Path>,
+    settings: &mut Settings,
+) -> Result<bool, WorkspaceError> {
+    let ignores = read_project_git_ignores(fs, vcs_root, project_path)?;
+    if settings.vcs_settings.client_kind == Some(VcsClientKind::Git) {
+        settings.vcs_settings.ignore_matches = Some(ignores.matches);
+    }
+    Ok(ignores.root_is_empty)
 }
 
 fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<Utf8PathBuf> {
@@ -525,17 +683,22 @@ impl WorkspaceServer {
             project_layout: Default::default(),
             #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
-            documents: Default::default(),
+            documents: new_views_map(FxBuildHasher),
             search_provider,
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
             closed_clients: Default::default(),
             framework_files: Default::default(),
+            project_clients: Default::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
             close_client_files_before_change_publish: AtomicBool::new(false),
+            #[cfg(test)]
+            pause_close_after_document_update: AtomicBool::new(false),
+            #[cfg(test)]
+            close_document_updates: AtomicUsize::new(0),
             #[cfg(test)]
             scanner_test_state: ScannerTestState::default(),
         }
@@ -634,7 +797,7 @@ impl LocalWorkspace {
 
     #[cfg(test)]
     fn get_parse(&self, path: &Utf8Path) -> Result<Source, WorkspaceError> {
-        self.as_workspace().get_parse(path)
+        self.as_workspace().get_parse(&self.fs.biome_path(path))
     }
 
     pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
@@ -648,7 +811,7 @@ impl LocalWorkspace {
         experimental_full_html_support: bool,
     ) -> DocumentFileSource {
         self.as_workspace()
-            .get_file_source(path, experimental_full_html_support)
+            .get_file_source(&self.fs.biome_path(path), experimental_full_html_support)
     }
 
     #[cfg(test)]
@@ -749,8 +912,8 @@ impl WorkspaceServerWithDb<'_> {
         )
     }
 
-    /// LSP language ids cover broad languages (`javascript`, `typescript`) but
-    /// not path-specific framework variants like `.svelte.ts`.
+    /// LSP language ids cover broad languages (`javascript`, `typescript`,
+    /// `markdown`) but not path-specific variants like `.svelte.ts` or `.mdx`.
     fn should_prefer_path_source(
         document_file_source: DocumentFileSource,
         path_source: DocumentFileSource,
@@ -766,7 +929,29 @@ impl WorkspaceServerWithDb<'_> {
             (DocumentFileSource::Json(_), DocumentFileSource::Json(path_source)) => {
                 !path_source.kind().is_regular()
             }
+            #[cfg(feature = "lang_mdx")]
+            (
+                DocumentFileSource::Markdown(document_source),
+                DocumentFileSource::Markdown(path_source),
+            ) => !document_source.is_mdx() && path_source.is_mdx(),
             _ => false,
+        }
+    }
+
+    #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+    fn virtual_full_html_source(source: DocumentFileSource) -> DocumentFileSource {
+        let DocumentFileSource::Js(js) = source else {
+            return source;
+        };
+        let embedding_kind = js.as_embedding_kind();
+        if embedding_kind.is_astro() {
+            HtmlFileSource::astro().into()
+        } else if embedding_kind.is_vue() {
+            HtmlFileSource::vue().into()
+        } else if embedding_kind.is_svelte() {
+            HtmlFileSource::svelte().into()
+        } else {
+            source
         }
     }
 
@@ -853,17 +1038,17 @@ impl WorkspaceServerWithDb<'_> {
     /// path.
     fn build_capability_error<'a>(
         &'a self,
-        path: &'a Utf8Path,
+        path: &'a BiomePath,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
             // For simplicity and avoid too many changes, we hardcode the support to false
             let file_source = self.get_file_source(path, false);
 
-            let language = DocumentFileSource::from_path(path, false).or(file_source);
+            let language = DocumentFileSource::from_path(path.as_path(), false).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
                 path.to_string(),
-                path.extension().map(|s| s.to_string()),
+                path.extension().map(str::to_string),
             )
         }
     }
@@ -878,6 +1063,10 @@ impl WorkspaceServerWithDb<'_> {
         reason: OpenFileReason,
         params: OpenFileParams,
     ) -> Result<InternalOpenFileResult, WorkspaceError> {
+        if params.path.is_virtual() && matches!(&params.content, FileContent::FromServer) {
+            return Err(WorkspaceError::not_found(params.path.to_string()));
+        }
+
         #[cfg(test)]
         self.scanner_test_state.enter_file_indexing(reason);
 
@@ -894,7 +1083,7 @@ impl WorkspaceServerWithDb<'_> {
 
         // Detecting the source of a path is costly enough that this function
         // does it at most once without and once with full HTML support.
-        let default_path_source = DocumentFileSource::from_path(&path, false);
+        let default_path_source = self.file_source_from_path(&path, false);
 
         if document_file_source.is_none() && !default_path_source.is_readable() {
             if reason.is_index()
@@ -908,28 +1097,37 @@ impl WorkspaceServerWithDb<'_> {
             return Ok(Default::default());
         }
 
-        let (_, settings, _) = {
+        let (_, settings, query) = {
             #[cfg(test)]
             self.scanner_test_state.enter_file_settings_read(reason);
             let db = self.get_db();
-            self.project_get_settings_query(&db, project_key, &path, None)
+            self.project_get_settings_query(&db, project_key, &biome_path, inline_config.clone())
         }
         .ok_or_else(WorkspaceError::no_project)?;
+        let effective_settings = query.effective_settings(&settings);
 
-        let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled()
+        let html_ish_supported = effective_settings.experimental_full_html_support_enabled()
             || self.framework_files.pin().contains(&path);
         let path_source = if html_ish_supported {
-            DocumentFileSource::from_path(&path, true)
+            self.file_source_from_path(&path, true)
         } else {
             default_path_source
         };
 
         #[cfg_attr(not(feature = "lang_js"), expect(unused_mut))]
         let mut source = if let Some(document_file_source) = document_file_source {
-            // LSP language ids cannot encode path-specific framework variants like
-            // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
-            // JS-like hints to HTML. Prefer the path-derived source only when it
-            // carries richer semantics than the editor-provided JS hint.
+            #[cfg(all(feature = "lang_js", feature = "lang_html"))]
+            let document_file_source =
+                if html_ish_supported && self.is_virtual_document(&biome_path) {
+                    Self::virtual_full_html_source(document_file_source)
+                } else {
+                    document_file_source
+                };
+
+            // LSP language ids cannot encode path-specific variants like
+            // `.svelte.ts` / `.svelte.js` or `.mdx`, and HTML full support can
+            // also upgrade JS-like hints to HTML. Prefer the path-derived source
+            // only when it carries richer semantics than the editor-provided hint.
             if Self::should_prefer_path_source(document_file_source, path_source) {
                 path_source
             } else {
@@ -977,7 +1175,7 @@ impl WorkspaceServerWithDb<'_> {
         };
 
         let size = content.len();
-        let limit = settings.as_ref().get_max_file_size(&path);
+        let limit = effective_settings.get_max_file_size(&path);
 
         let text = if size > limit {
             Err(FileTooLarge { size, limit })
@@ -990,7 +1188,7 @@ impl WorkspaceServerWithDb<'_> {
                 .get_deprecated_capabilities(source)
                 .parser
                 .parse
-                .ok_or_else(self.build_capability_error(&path))?;
+                .ok_or_else(self.build_capability_error(&biome_path))?;
             if persist_node_cache {
                 self.db_state.retain_node_cache(&path);
             }
@@ -1020,7 +1218,7 @@ impl WorkspaceServerWithDb<'_> {
                         view,
                         text,
                         file_source_index,
-                        inline_config,
+                        inline_config.clone(),
                     )
                 } else {
                     Some(self.db_state.update_file_view(
@@ -1028,12 +1226,28 @@ impl WorkspaceServerWithDb<'_> {
                         view,
                         text,
                         file_source_index,
-                        inline_config,
+                        inline_config.clone(),
                     ))
                 };
                 Some(Ok(()))
             }
         };
+
+        let virtual_source = if self.is_virtual_document(&biome_path) && parsed_source.is_some() {
+            self.db_state
+                .fork()
+                .get_client_parsed_source(path.as_path(), self.client)
+        } else {
+            None
+        };
+        if let Some(source) = virtual_source {
+            self.db_state.associate_source_with_project(
+                path.as_path(),
+                self.client,
+                source,
+                project_key,
+            );
+        }
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -1057,6 +1271,7 @@ impl WorkspaceServerWithDb<'_> {
                 content: content.clone(),
                 version,
                 file_source_index,
+                inline_config: inline_config.map(Arc::from),
                 syntax: syntax.clone(),
             };
             self.documents.pin().update_or_insert_with(
@@ -1067,7 +1282,7 @@ impl WorkspaceServerWithDb<'_> {
 
             // `open_file_internal` must update project data for both index
             // requests and client requests for files that are already indexed.
-            reason.is_index() || self.should_update_service_data(&path)
+            reason.is_index() || self.should_update_service_data(&biome_path)
         };
 
         if view == ViewId::Editor(self.client) && self.is_client_closed() {
@@ -1081,7 +1296,7 @@ impl WorkspaceServerWithDb<'_> {
         if is_indexed {
             if let Some(root) = parsed_source {
                 let (dependencies, diagnostics) = self.update_service_data(
-                    &path,
+                    &biome_path,
                     UpdateKind::AddedOrChanged(reason, root.into()),
                     project_key,
                 )?;
@@ -1112,23 +1327,57 @@ impl WorkspaceServerWithDb<'_> {
     ///
     /// This is the case for indexed files, and for the documents the resolver
     /// reads, such as a TypeScript configuration referenced by an indexed one.
-    fn should_update_service_data(&self, path: &Utf8Path) -> bool {
+    fn should_update_service_data(&self, path: &BiomePath) -> bool {
         #[cfg(feature = "module_graph")]
-        if self.db_state.is_resolver_manifest(path) {
+        if self.db_state.is_resolver_manifest(path.as_path()) {
             return true;
         }
-        self.is_indexed(path)
+        self.is_indexed(path.as_path())
+    }
+
+    fn associate_virtual_document_with_project(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+    ) -> Result<(), WorkspaceError> {
+        if !self.is_virtual_document(path) {
+            return Ok(());
+        }
+        let source = {
+            let db = self.db_state.fork();
+            if db.get_project(&project_key).is_none() {
+                return Err(WorkspaceError::no_project());
+            }
+            db.get_client_parsed_source(path.as_path(), self.client)
+                .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(path)))?
+        };
+        self.db_state.associate_source_with_project(
+            path.as_path(),
+            self.client,
+            source,
+            project_key,
+        );
+        Ok(())
     }
 
     /// Retrieves the parser result for a given file.
     ///
     /// Returns an error if no file exists in the workspace with this path.
-    fn get_parse(&self, path: &Utf8Path) -> Result<Source, WorkspaceError> {
+    fn get_parse(&self, path: &BiomePath) -> Result<Source, WorkspaceError> {
         self.assert_parse(path)?;
 
         let db = self.db_state.fork();
-        db.get_client_parsed_source(path, self.client)
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
+        db.get_client_parsed_source(path.as_path(), self.client)
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(path)))
+    }
+
+    fn get_parse_for_project(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+    ) -> Result<Source, WorkspaceError> {
+        self.associate_virtual_document_with_project(project_key, path)?;
+        self.get_parse(path)
     }
 
     /// Tries to resolve a binding reference at the given cursor offset.
@@ -1280,16 +1529,18 @@ impl WorkspaceServerWithDb<'_> {
 
     fn process_file_state_from_server(
         &self,
+        project_key: ProjectKey,
         path: &BiomePath,
     ) -> Result<ProcessFileState, WorkspaceError> {
+        self.associate_virtual_document_with_project(project_key, path)?;
         self.assert_parse(path)?;
         let db = self.get_db().into_untracked_db();
         let parsed = db
             .get_client_parsed_source(path.as_path(), self.client)
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(path)))?;
         let file_source = db
             .source_from_index(parsed.document_source_index(&db))
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(path)))?;
         Ok(ProcessFileState {
             parsed: parsed.into(),
             file_source,
@@ -1330,10 +1581,7 @@ impl WorkspaceServerWithDb<'_> {
         let file_source = language.unwrap_or(file_source);
 
         let mut snippet_cache = NodeCache::default();
-        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
-            path.as_path(),
-            settings.as_ref().experimental_full_html_support_enabled(),
-        ) {
+        let embedded_snippets = if file_source.may_contain_embeds() {
             self.parse_embedded_language_snippets(
                 path,
                 &file_source,
@@ -1452,7 +1700,7 @@ impl WorkspaceServerWithDb<'_> {
                 if rule_categories.contains(biome_analyze::RuleCategory::Lint) {
                     self.get_analyzer_plugins_for_project(
                         settings.source_path().unwrap_or_default().as_path(),
-                        &settings.get_plugins_for_path(&path),
+                        &settings.get_plugins_for_path(path.as_path()),
                     )
                     .map_err(WorkspaceError::plugin_errors)?
                 } else {
@@ -1479,7 +1727,7 @@ impl WorkspaceServerWithDb<'_> {
                     &state.parsed,
                     state.file_source,
                     settings.as_ref(),
-                    &path,
+                    path.as_path(),
                     &state.db,
                 )
                 .collect();
@@ -1661,7 +1909,9 @@ impl WorkspaceServerWithDb<'_> {
             .project_get_settings_query(&state.db, project_key, path, None)
             .ok_or_else(WorkspaceError::no_project)?;
         if respect_format_with_errors
-            && !settings.format_with_errors_enabled_for_this_file_path(path)
+            && !query_context
+                .effective_settings(&settings)
+                .format_with_errors_enabled_for_this_file_path(path.as_path())
             && state.has_errors_for_formatting()
         {
             return Ok(None);
@@ -1740,7 +1990,7 @@ impl WorkspaceServerWithDb<'_> {
                     if categories.is_lint() {
                         self.get_analyzer_plugins_for_project(
                             settings.source_path().unwrap_or_default().as_path(),
-                            &settings.get_plugins_for_path(&path),
+                            &settings.get_plugins_for_path(path.as_path()),
                         )
                         .map_err(WorkspaceError::plugin_errors)?
                     } else {
@@ -1768,6 +2018,7 @@ impl WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 language: state.file_source,
                 categories,
+                rule_execution: Default::default(),
                 workspace_db: state.db.clone(),
                 #[cfg(feature = "html_embeds")]
                 embedded_data,
@@ -1795,7 +2046,10 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in state.iter_snippets().blocking_formatting(state.file_source) {
+            for embedded_node in state
+                .iter_snippets()
+                .blocking_formatting(state.file_source, &state.db)
+            {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics()
                     .into_iter()
@@ -1814,7 +2068,8 @@ impl WorkspaceServerWithDb<'_> {
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| {
-                    let diagnostic = diagnostic.with_file_path(path.to_string());
+                    let diagnostic =
+                        diagnostic.with_file_path(self.public_document_path_string(&path));
                     SerdeDiagnostic::new(diagnostic)
                 })
                 .collect(),
@@ -1863,7 +2118,7 @@ impl WorkspaceServerWithDb<'_> {
     ) -> Result<biome_analyze::AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
-            None => Ok(Vec::new()),
+            None => PluginCache::default().get_analyzer_plugins(plugins),
         }
     }
 
@@ -1877,6 +2132,7 @@ impl WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
         if self.project_is_force_ignored(project_key, path) {
             return Ok(true);
@@ -1884,12 +2140,51 @@ impl WorkspaceServerWithDb<'_> {
 
         // Determine the ignore kind based on the kind of request.
         let ignore_kind = match request_kind {
-            // For an initial scan, we don't descend into ignored folders.
-            // Therefore, we don't need to check if any of the ancestors of the
-            // given `path` are ignored. If they were, we wouldn't have been
-            // scanning them in the first place. So checking whether the path
-            // itself is ignored is enough.
-            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Path,
+            IndexRequestKind::IgnoreFileDiscovery => {
+                let path = self.fs.biome_path(path);
+                let path_kind = if let Some(path_kind) = path_kind {
+                    path_kind
+                } else {
+                    self.fs.symlink_path_kind(path.as_path())?
+                };
+                let is_ignored = match path_kind {
+                    PathKind::Directory { .. } => {
+                        path.is_dependency()
+                            || self.project_is_ignored_by_files_config(
+                                project_key,
+                                path.as_path(),
+                                true,
+                                IgnoreKind::Ancestors,
+                            )
+                            || matches!(
+                                scan_kind,
+                                ScanKind::TargetedKnownFiles {
+                                    target_paths,
+                                    descend_from_targets,
+                                } if !target_paths.iter().any(|target_path| {
+                                    target_path.starts_with(path.as_path())
+                                        || (*descend_from_targets
+                                            && path.starts_with(target_path.as_path()))
+                                })
+                            )
+                    }
+                    PathKind::File { is_symlink } => is_symlink || !path.is_ignore(),
+                };
+                return Ok(is_ignored);
+            }
+
+            // A traversal that checked every folder containing `path` already
+            // skipped the ignored ones, so checking `path` itself is enough.
+            // File systems that don't check folders before their files, such
+            // as the in-memory one, don't report checked ancestors, and the
+            // ancestors of `path` are checked here instead.
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => {
+                if ancestors_checked {
+                    IgnoreKind::Path
+                } else {
+                    IgnoreKind::Ancestors
+                }
+            }
 
             // For a (watcher) update, we can't rely on the above reasoning.
             // Even though we only install watchers on folders that contain
@@ -1913,7 +2208,7 @@ impl WorkspaceServerWithDb<'_> {
             //   Runtime JavaScript may be minified and isn't indexed.
             // - The path shouldn't be indexed yet, to avoid double indexing.
             IndexRequestKind::Dependency(_) => {
-                let path = BiomePath::new(path);
+                let path = self.fs.biome_path(path);
                 if path.is_dependency()
                     && !path.is_package_json()
                     && !path.is_type_declaration()
@@ -1922,15 +2217,15 @@ impl WorkspaceServerWithDb<'_> {
                     return Ok(true);
                 }
 
-                return Ok(self.is_indexed(&path));
+                return Ok(self.is_indexed(path.as_path()));
             }
         };
 
-        let path = BiomePath::new(path);
+        let path = self.fs.biome_path(path);
         let path_kind = if let Some(path_kind) = path_kind {
             path_kind
         } else {
-            self.fs.symlink_path_kind(&path)?
+            self.fs.symlink_path_kind(path.as_path())?
         };
         let is_ignored = match path_kind {
             PathKind::Directory { .. } => {
@@ -1941,7 +2236,7 @@ impl WorkspaceServerWithDb<'_> {
 
                 if self.project_is_ignored_by_top_level_config(
                     project_key,
-                    &path,
+                    path.as_path(),
                     true,
                     ignore_kind,
                 ) {
@@ -1968,18 +2263,20 @@ impl WorkspaceServerWithDb<'_> {
                 }
 
                 match scan_kind {
-                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
-                    {
-                        IgnoreKind::Path => !path.is_required_during_scan(),
-                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                            self.project_is_ignored_by_top_level_config(
-                                project_key,
-                                folder_path,
-                                true,
-                                ignore_kind,
-                            )
-                        }),
-                    },
+                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                        if request_kind.trigger() == IndexTrigger::InitialScan {
+                            !path.is_required_during_scan()
+                        } else {
+                            path.parent().is_none_or(|folder_path| {
+                                self.project_is_ignored_by_top_level_config(
+                                    project_key,
+                                    folder_path,
+                                    true,
+                                    ignore_kind,
+                                )
+                            })
+                        }
+                    }
                     ScanKind::Project | ScanKind::TypeAware => {
                         if path.is_dependency() {
                             // During the initial scan, we only care about
@@ -1993,21 +2290,19 @@ impl WorkspaceServerWithDb<'_> {
                             request_kind.trigger() != IndexTrigger::InitialScan
                                 || !path.is_package_json()
                         } else if path.is_required_during_scan() {
-                            match ignore_kind {
-                                IgnoreKind::Path => false,
-                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                            request_kind.trigger() != IndexTrigger::InitialScan
+                                && path.parent().is_none_or(|folder_path| {
                                     self.project_is_ignored_by_top_level_config(
                                         project_key,
                                         folder_path,
                                         true,
                                         ignore_kind,
                                     )
-                                }),
-                            }
+                                })
                         } else {
                             self.project_is_ignored_by_top_level_config(
                                 project_key,
-                                &path,
+                                path.as_path(),
                                 false,
                                 ignore_kind,
                             )
@@ -2048,8 +2343,9 @@ impl WorkspaceServerWithDb<'_> {
         project_key: ProjectKey,
         package_path: &Utf8Path,
     ) {
+        let package_biome_path = self.fs.biome_path(package_path);
         let use_pnpm_workspace_catalogs = self
-            .project_get_settings_for_path(project_key, package_path)
+            .project_get_settings_for_path(project_key, &package_biome_path)
             .is_some_and(|settings| settings.use_pnpm_workspace_catalogs());
 
         if let Some(mut manifest) = self
@@ -2084,7 +2380,7 @@ impl WorkspaceServerWithDb<'_> {
     #[instrument(level = "debug", skip(self))]
     fn update_project_layout(
         &self,
-        path: &Utf8Path,
+        path: &BiomePath,
         update_kind: &UpdateKind,
         project_key: ProjectKey,
     ) -> Result<(), WorkspaceError> {
@@ -2155,10 +2451,7 @@ impl WorkspaceServerWithDb<'_> {
                 }
             }
         } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
-            let workspace_root = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .unwrap_or_default();
+            let workspace_root = path.parent().map_or_default(|parent| parent.to_path_buf());
 
             for package_path in self.project_layout.package_paths() {
                 if !package_path.starts_with(&workspace_root) {
@@ -2264,8 +2557,7 @@ impl WorkspaceServerWithDb<'_> {
             } => {
                 let ambient_modules = kind
                     .as_js_module_info()
-                    .map(|info| info.ambient_modules.clone())
-                    .unwrap_or_default();
+                    .map_or_default(|info| info.ambient_modules.clone());
                 self.db_state.upsert_module_kind(path.to_path_buf(), kind);
                 for (index, ambient_module) in ambient_modules.iter().enumerate() {
                     let module_path = ambient_module_path(path, index);
@@ -2286,7 +2578,7 @@ impl WorkspaceServerWithDb<'_> {
                 Ok((dependencies, diagnostics))
             }
             ResolvedModuleGraphUpdate::Remove => {
-                self.db_state.remove_module(path);
+                self.db_state.remove_module(path.as_path());
                 for index in 0..previous_ambient_modules {
                     self.db_state
                         .remove_module(&ambient_module_path(path, index));
@@ -2320,11 +2612,10 @@ impl WorkspaceServerWithDb<'_> {
     /// are determined.
     fn update_service_data(
         &self,
-        path: &Utf8Path,
+        path: &BiomePath,
         update_kind: UpdateKind,
         project_key: ProjectKey,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
-        let path = BiomePath::from(path);
         // Index requests don't refresh dependencies: an initial scan indexes
         // them itself, and watcher updates are refreshed by the watcher
         // bridge.
@@ -2332,12 +2623,12 @@ impl WorkspaceServerWithDb<'_> {
         let refresh_dependencies = matches!(
             &update_kind,
             UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, _)
-        ) && self.is_manifest_for_resolution(&path);
+        ) && self.is_manifest_for_resolution(path);
         // The resolver prefers the parsed source of a manifest to the
         // filesystem, so a removed manifest must not outlive its file unless
         // the client still has it open.
         #[cfg(feature = "module_graph")]
-        if matches!(&update_kind, UpdateKind::Removed) && self.is_manifest_for_resolution(&path) {
+        if matches!(&update_kind, UpdateKind::Removed) && self.is_manifest_for_resolution(path) {
             self.documents
                 .pin()
                 .compute(path.to_path_buf(), |entry| match entry {
@@ -2347,13 +2638,13 @@ impl WorkspaceServerWithDb<'_> {
                         .map_or(Operation::Remove, Operation::Insert),
                     None => Operation::Abort(()),
                 });
-            self.db_state.remove_file_view(&path, ViewId::Disk);
+            self.db_state.remove_file_view(path.as_path(), ViewId::Disk);
         }
         if path.is_manifest() {
-            self.update_project_layout(&path, &update_kind, project_key)?;
+            self.update_project_layout(path, &update_kind, project_key)?;
         }
         let settings = self
-            .project_get_settings_for_path(project_key, &path)
+            .project_get_settings_for_path(project_key, path)
             .ok_or_else(WorkspaceError::no_project)?;
 
         match &update_kind {
@@ -2365,7 +2656,7 @@ impl WorkspaceServerWithDb<'_> {
             }
         }
         let result = self.update_module_graph_internal(
-            &path,
+            path,
             update_kind,
             settings.module_graph_resolution_kind.is_modules_and_types(),
         )?;
@@ -2382,7 +2673,7 @@ impl WorkspaceServerWithDb<'_> {
     /// Returns whether the content of `path` can affect module resolution.
     #[cfg(feature = "module_graph")]
     fn is_manifest_for_resolution(&self, path: &BiomePath) -> bool {
-        path.is_manifest() || self.db_state.is_resolver_manifest(path)
+        path.is_manifest() || self.db_state.is_resolver_manifest(path.as_path())
     }
 
     /// Refreshes the resolver path info of `path`, and of the known paths inside
@@ -2413,7 +2704,7 @@ impl WorkspaceServerWithDb<'_> {
         // the paths inside it identify.
         let manifest_changed = changes
             .iter()
-            .any(|(path, _)| self.is_manifest_for_resolution(&BiomePath::new(path)));
+            .any(|(path, _)| self.is_manifest_for_resolution(&self.fs.biome_path(path)));
         self.db_state.sync_resolver_paths(changes);
         manifest_changed
     }
@@ -2711,25 +3002,23 @@ impl WorkspaceServerWithDb<'_> {
         kind: &ModuleInfoKind,
         names: &[&str],
     ) -> bool {
+        let biome_path = self.fs.biome_path(path);
         let Some((_, settings, query)) =
-            self.project_get_settings_query(db, project_key, path, None)
+            self.project_get_settings_query(db, project_key, &biome_path, None)
         else {
             return false;
         };
-        if settings.is_path_ignored_for_feature(path, FeatureKind::Lint) {
+        let settings = query.effective_settings(&settings);
+        if settings.is_path_ignored_for_feature(path, false, FeatureKind::Lint) {
             return false;
         }
         let linter_enabled = match kind {
-            ModuleInfoKind::Css(_) => {
-                CssLanguage::linter_enabled_for_file_path(settings.as_ref(), path)
-            }
-            ModuleInfoKind::Js(_) => {
-                JsLanguage::linter_enabled_for_file_path(settings.as_ref(), path)
-            }
+            ModuleInfoKind::Css(_) => CssLanguage::linter_enabled_for_file_path(settings, path),
+            ModuleInfoKind::Js(_) => JsLanguage::linter_enabled_for_file_path(settings, path),
             ModuleInfoKind::Html(_) => {
                 #[cfg(feature = "lang_html")]
                 {
-                    HtmlLanguage::linter_enabled_for_file_path(settings.as_ref(), path)
+                    HtmlLanguage::linter_enabled_for_file_path(settings, path)
                 }
                 #[cfg(not(feature = "lang_html"))]
                 {
@@ -2761,8 +3050,9 @@ impl WorkspaceServerWithDb<'_> {
         names: &[&str],
     ) -> bool {
         let db = self.get_db();
+        let biome_path = self.fs.biome_path(path);
         let Some(configuration) = self
-            .project_get_settings_query(&db, project_key, path, None)
+            .project_get_settings_query(&db, project_key, &biome_path, None)
             .and_then(|(_, settings, _)| settings.source())
         else {
             return false;
@@ -2822,31 +3112,34 @@ impl WorkspaceServerWithDb<'_> {
     pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
         let db = self.get_db();
         db.get_client_parsed_source(path, self.client)
-            .map(|parsed_source| {
+            .map_or_default(|parsed_source| {
                 let mut diagnostics = Vec::new();
                 diagnostics.extend(parsed_source.parse_diagnostics(&*db).clone());
                 diagnostics.extend(parsed_source.snippets_parse_diagnostics(&*db).clone());
 
                 diagnostics
             })
-            .unwrap_or_default()
     }
 
     /// Makes sure that the file was parsed and it is within the configured file limit
-    fn assert_parse(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn assert_parse(&self, path: &BiomePath) -> Result<(), WorkspaceError> {
         let syntax = self
             .documents
             .pin()
-            .get(path)
+            .get(path.as_path())
             .and_then(|doc| doc.syntax(self.client))
             .transpose();
 
         match syntax {
             Ok(syntax) => match syntax {
-                None => Err(WorkspaceError::not_found(path.to_string())),
+                None => Err(WorkspaceError::not_found(
+                    self.public_document_path_string(path),
+                )),
                 Some(_) => Ok(()),
             },
-            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(
+                self.public_document_path_string(path),
+            )),
         }
     }
 
@@ -2857,12 +3150,12 @@ impl WorkspaceServerWithDb<'_> {
     fn get_parsed_snippets_and_parse_source(
         &self,
         db: &WorkspaceDb,
-        path: &Utf8Path,
+        path: &BiomePath,
     ) -> Result<(Source, Vec<SnippetRef>), WorkspaceError> {
         self.assert_parse(path)?;
         let parsed_source = db
-            .get_client_parsed_source(path, self.client)
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+            .get_client_parsed_source(path.as_path(), self.client)
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(path)))?;
         let snippets = parsed_source
             .snippets(db)
             .iter()
@@ -2871,32 +3164,51 @@ impl WorkspaceServerWithDb<'_> {
         Ok((parsed_source, snippets))
     }
 
-    /// Retrieves the supported language of a file.
-    fn get_file_source(
+    fn file_source_from_path(
         &self,
         path: &Utf8Path,
         experimental_full_html_support: bool,
     ) -> DocumentFileSource {
+        let source = DocumentFileSource::from_path(path, experimental_full_html_support);
+        if source != DocumentFileSource::Unknown {
+            return source;
+        }
+
+        resolve_symbolic_link_target(self.fs.as_ref(), path)
+            .ok()
+            .flatten()
+            .map_or(source, |target| {
+                DocumentFileSource::from_path(&target, experimental_full_html_support)
+            })
+    }
+
+    /// Retrieves the supported language of a file.
+    fn get_file_source(
+        &self,
+        path: &BiomePath,
+        experimental_full_html_support: bool,
+    ) -> DocumentFileSource {
         let db = self.db_state.fork();
-        db.get_client_parsed_source(path, self.client)
+        db.get_client_parsed_source(path.as_path(), self.client)
             .and_then(|parsed_source| {
                 db.source_from_index(parsed_source.document_source_index(&*db))
             })
-            .unwrap_or_else(|| DocumentFileSource::from_path(path, experimental_full_html_support))
+            .unwrap_or_else(|| {
+                self.file_source_from_path(path.as_path(), experimental_full_html_support)
+            })
     }
 
     #[cfg(test)]
     fn get_snippets(&self, path: &Utf8Path) -> Vec<SnippetRef> {
         let db = self.db_state.fork();
         db.get_client_parsed_source(path, self.client)
-            .map(|source| {
+            .map_or_default(|source| {
                 source
                     .snippets(&*db)
                     .iter()
                     .map(|snippet| snippet.to_ref(&*db))
                     .collect()
             })
-            .unwrap_or_default()
     }
 
     // #endregion
@@ -2906,6 +3218,89 @@ impl WorkspaceServerWithDb<'_> {
         let db = self.db_state.fork();
         let project_db: &dyn ProjectDb = db.deref();
         project_db.get_project_path(project_key)
+    }
+
+    /// Returns VCS ignore files that require exact filesystem watches for a project.
+    pub fn project_vcs_watch_paths(&self, project_key: ProjectKey) -> Vec<BiomePath> {
+        if let Some(settings) = self.project_get_root_settings(project_key)
+            && settings.is_vcs_enabled()
+            && settings.vcs_settings.should_use_ignore_file()
+            && let Some(client_kind) = settings.vcs_settings.client_kind
+            && let Some(vcs_root) = settings
+                .vcs_settings
+                .ignore_matches
+                .as_ref()
+                .map(|matches| matches.root_path())
+        {
+            let project_path = self.project_get_path(project_key);
+            let mut paths = project_path
+                .as_deref()
+                .map_or_else(
+                    || vec![vcs_root.to_path_buf()],
+                    |project_path| {
+                        vcs_ignore_ancestor_directories(vcs_root.as_path(), project_path)
+                    },
+                )
+                .into_iter()
+                .flat_map(|directory| {
+                    client_kind
+                        .ignore_files()
+                        .iter()
+                        .map(move |file_name| self.fs.biome_path(&directory.join(file_name)))
+                })
+                .collect::<Vec<_>>();
+            if client_kind == VcsClientKind::Git
+                && let Some(path) =
+                    resolve_git_info_exclude_path(self.fs.as_ref(), vcs_root.as_path())
+            {
+                paths.push(self.fs.biome_path(&path));
+            }
+            paths
+        } else {
+            Vec::new()
+        }
+    }
+
+    /// Rereads the ignore files of the VCS root and of the directories between the VCS root and
+    /// the project folder.
+    ///
+    /// Only the matchers are published, on top of the settings that are current at publication,
+    /// so a concurrent settings update isn't overwritten.
+    fn refresh_project_vcs_ignore_settings(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError> {
+        let settings = self
+            .project_get_root_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        if !settings.is_vcs_enabled()
+            || !settings.vcs_settings.should_use_ignore_file()
+            || settings.vcs_settings.client_kind != Some(VcsClientKind::Git)
+        {
+            return Ok(());
+        }
+        let Some(vcs_root) = settings
+            .vcs_settings
+            .ignore_matches
+            .as_ref()
+            .map(|matches| matches.root_path().clone())
+        else {
+            return Ok(());
+        };
+        let project_path = self.project_get_path(project_key);
+        let ProjectGitIgnores {
+            matches: VcsIgnoredPatterns::Git { root, .. },
+            ancestor_patterns,
+            ..
+        } = read_project_git_ignores(self.fs.as_ref(), &vcs_root, project_path.as_deref())?;
+        #[cfg(test)]
+        self.scanner_test_state.enter_vcs_ignore_publish();
+        self.store_git_ignores(
+            project_key,
+            Some(root),
+            vcs_root.to_path_buf(),
+            ancestor_patterns,
+        )
     }
 
     pub(crate) fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
@@ -2951,6 +3346,18 @@ impl WorkspaceServerWithDb<'_> {
         project_db.is_ignored_by_top_level_config(project_key, path, is_dir, ignore_kind)
     }
 
+    fn project_is_ignored_by_files_config(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        is_dir: bool,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
+        let db = self.db_state.fork();
+        let project_db: &dyn ProjectDb = db.deref();
+        project_db.is_ignored_by_files_config(project_key, path, is_dir, ignore_kind)
+    }
+
     fn project_is_ignored(
         &self,
         project_key: ProjectKey,
@@ -2978,14 +3385,35 @@ impl WorkspaceServerWithDb<'_> {
         db.get_file_features(params)
     }
 
+    fn public_document_path_string(&self, path: &BiomePath) -> String {
+        path.to_string()
+    }
+
+    fn document_exists(&self, path: &BiomePath) -> bool {
+        self.documents
+            .pin()
+            .get(path.as_path())
+            .is_some_and(|document| document.for_client(self.client).is_some())
+    }
+
+    fn is_virtual_document(&self, path: &BiomePath) -> bool {
+        path.is_virtual()
+    }
+
     fn project_get_settings_for_path(
         &self,
         project_key: ProjectKey,
-        path: &Utf8Path,
+        path: &BiomePath,
     ) -> Option<Arc<Settings>> {
         let db = self.db_state.fork();
         let project_db: &dyn ProjectDb = db.deref();
-        project_db.get_settings_based_on_path(project_key, path)
+        if self.is_virtual_document(path) {
+            project_db
+                .get_root_settings(project_key)
+                .map(|settings| Arc::new(settings_without_overrides(settings.as_ref())))
+        } else {
+            project_db.get_settings_based_on_path(project_key, path.as_path())
+        }
     }
 
     /// Resolves the project settings used to process `path`.
@@ -3003,15 +3431,38 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         db: &WorkspaceDb,
         project_key: ProjectKey,
-        path: &Utf8Path,
-        inline_config: Option<Configuration>,
+        path: &BiomePath,
+        inline_config: Option<Box<Configuration>>,
     ) -> Option<(Utf8PathBuf, Arc<Settings>, SettingsQuery)> {
+        if self.is_virtual_document(path) {
+            let project = db.get_project(&project_key)?;
+            let working_directory = project.path(db).to_path_buf();
+            let settings = Arc::new(settings_without_overrides(
+                project.root_settings(db).as_ref(),
+            ));
+            let inline_settings = inline_config.map(|inline_config| {
+                settings_without_overrides(&settings.with_inline_configuration(*inline_config))
+            });
+            let query = SettingsQuery::new_without_overrides(
+                project,
+                SettingsSelectionKey::Root,
+                inline_settings,
+            );
+            return Some((working_directory, settings, query));
+        }
+
         let (project, selection, working_directory, settings) =
-            db.get_settings_context_for_path(project_key, path)?;
+            db.get_settings_context_for_path(project_key, path.as_path())?;
         let settings = settings.clone_arc();
         let inline_settings =
-            inline_config.map(|inline_config| settings.with_inline_configuration(inline_config));
-        let query = SettingsQuery::new(project, selection, &settings, inline_settings, path);
+            inline_config.map(|inline_config| settings.with_inline_configuration(*inline_config));
+        let query = SettingsQuery::new(
+            project,
+            selection,
+            &settings,
+            inline_settings,
+            path.as_path(),
+        );
         Some((working_directory, settings, query))
     }
 
@@ -3046,13 +3497,15 @@ impl WorkspaceServerWithDb<'_> {
         self.db_state.insert_root_settings(project_key, settings)
     }
 
-    fn store_nested_ignore_patterns(
+    fn store_git_ignores(
         &self,
         project_key: ProjectKey,
+        root_git_ignore: Option<GitIgnoreMatcher>,
+        scope: Utf8PathBuf,
         payload: Vec<(Utf8PathBuf, Vec<String>)>,
     ) -> Result<(), WorkspaceError> {
         self.db_state
-            .store_nested_ignore_patterns(project_key, payload)
+            .store_git_ignores(project_key, root_git_ignore, scope, payload)
     }
 
     // #endregion
@@ -3152,6 +3605,21 @@ impl WorkspaceServerWithDb<'_> {
         }
     }
 
+    /// Discovers ignore files before the setup phase of a project scan.
+    fn prepare_project_scan(
+        &self,
+        params: &ScanProjectParams,
+    ) -> Result<(Vec<SerdeDiagnostic>, Duration), WorkspaceError> {
+        let scan_options = ScanOptions {
+            scan_kind: params.scan_kind.clone(),
+            force: params.force,
+            verbose: params.verbose,
+            watch: params.watch,
+        };
+        self.scanner
+            .prepare_project_ignore_files(self, params.project_key, &scan_options)
+    }
+
     /// Runs the setup phase of a project scan: reads the configuration files,
     /// manifests and ignore files of the project.
     fn set_up_project_scan(
@@ -3174,7 +3642,7 @@ impl WorkspaceServerWithDb<'_> {
             if self.fs.path_exists(&manifest) {
                 let trigger = IndexTrigger::InitialScan;
                 let (_, manifest_diagnostics) =
-                    self.index_file(project_key, manifest.clone(), trigger)?;
+                    self.index_file(project_key, self.fs.biome_path(&manifest), trigger)?;
                 diagnostics.extend(
                     manifest_diagnostics
                         .into_iter()
@@ -3280,8 +3748,17 @@ impl WorkspaceServerWithDb<'_> {
             result,
             Compute::Updated { new: (_, document), .. } if document.has_editors()
         );
-        // Another client may open the file meanwhile, so whether the file is
-        // still open is decided from the views in the database.
+        #[cfg(test)]
+        {
+            self.close_document_updates.fetch_add(1, Ordering::AcqRel);
+            while self
+                .pause_close_after_document_update
+                .load(Ordering::Acquire)
+            {
+                std::thread::yield_now();
+            }
+        }
+        // Removing this client's database view preserves views published by concurrent opens.
         self.db_state.remove_editor_view(path, client, is_indexed);
         if !is_open {
             self.db_state.remove_node_cache(path);
@@ -3319,7 +3796,12 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.find_project_root(params.path)?
         };
 
+        let mut project_clients = self.project_clients.lock();
         let project_key = self.insert_project(path);
+        project_clients
+            .entry(project_key)
+            .or_default()
+            .insert(self.client);
 
         Ok(OpenProjectResult { project_key })
     }
@@ -3331,6 +3813,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let project_key = params.project_key;
         let watch = params.watch;
         let session = self.db_state.scan_session();
+        let preparation = self
+            .with_db_state(session.view())
+            .prepare_project_scan(&params);
+        let (session, _) = session.commit();
+        let (preparation_diagnostics, preparation_duration) = preparation?;
         let setup = self
             .with_db_state(session.view())
             .set_up_project_scan(params);
@@ -3338,11 +3825,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let workspace = self.with_db_state(session.view());
         let scan = match setup? {
             ScanSetupOutcome::Done(mut result) => {
+                result.diagnostics.extend(preparation_diagnostics);
+                result.duration += preparation_duration;
                 // Without a files phase, the setup phase indexes only the root
                 // manifest, so it's indexed again here if it was deferred.
                 for path in deferred_setup_paths {
-                    let (_, diagnostics) =
-                        workspace.index_file(project_key, path, IndexTrigger::InitialScan)?;
+                    let (_, diagnostics) = workspace.index_file(
+                        project_key,
+                        workspace.fs.biome_path(&path),
+                        IndexTrigger::InitialScan,
+                    )?;
                     result.diagnostics.extend(
                         diagnostics
                             .into_iter()
@@ -3364,6 +3856,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let mut result = self
             .scanner
             .finish_project_scan(&workspace, scan, deferred_setup_paths);
+        result.diagnostics.extend(preparation_diagnostics);
+        result.duration += preparation_duration;
         let (session, deferred_paths) = session.commit();
         if deferred_paths.is_empty() {
             return Ok(result);
@@ -3417,8 +3911,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
             if let Some(workspace_directory) = &workspace_directory {
                 self.project_get_nested_settings(project_key, workspace_directory.as_path())
-                    .map(|settings| (*settings).clone())
-                    .unwrap_or_default()
+                    .map_or_default(|settings| (*settings).clone())
             } else {
                 return Err(WorkspaceError::no_workspace_directory());
             }
@@ -3539,50 +4032,28 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         } else {
             // If the configuration is a root one, we also load the ignore files
             if settings.is_vcs_enabled() && settings.vcs_settings.should_use_ignore_file() {
-                let directory = settings
-                    .vcs_settings
-                    .to_base_path(workspace_directory.as_deref())
-                    .map(|p| normalize_path(&p))
-                    .unwrap_or_default();
+                let directory = self.fs.biome_path(
+                    &settings
+                        .vcs_settings
+                        .to_base_path(workspace_directory.as_deref())
+                        .unwrap_or_default(),
+                );
                 match settings.vcs_settings.client_kind {
                     None => {}
                     Some(VcsClientKind::Git) => {
-                        let gitignore = directory.join(".gitignore");
-                        let ignore = directory.join(".ignore");
-                        let mut ignore_file_contents = Vec::new();
-                        let git_info_exclude =
-                            read_git_info_exclude_patterns(self.fs.as_ref(), directory.as_ref());
-
-                        let result = self
-                            .fs
-                            .read_file_from_path(gitignore.as_ref())
-                            .ok()
-                            .or_else(|| self.fs.read_file_from_path(ignore.as_ref()).ok());
-                        if let Some(content) = result {
-                            ignore_file_contents.push(content);
-                        }
-
-                        let mut ignore_file_patterns = ignore_file_contents
-                            .iter()
-                            .flat_map(|content| content.lines())
-                            .collect::<Vec<_>>();
-                        if let Some(git_info_exclude) = git_info_exclude.as_ref() {
-                            ignore_file_patterns
-                                .extend(git_info_exclude.iter().map(String::as_str));
-                        }
-
-                        if ignore_file_patterns.is_empty() {
+                        let project_path = self.project_get_path(project_key);
+                        if load_project_git_ignore_patterns(
+                            self.fs.as_ref(),
+                            &directory,
+                            project_path.as_deref(),
+                            &mut settings,
+                        )? {
                             diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                                 VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
                                     path: directory.to_string(),
                                 }),
                             ));
-                        } else {
-                            settings.vcs_settings.store_root_ignore_patterns(
-                                directory.as_ref(),
-                                ignore_file_patterns.as_slice(),
-                            )?;
-                        };
+                        }
                     }
                 }
             }
@@ -3597,9 +4068,18 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        let mut project_clients = self.project_clients.lock();
         let project_path = self
             .project_get_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+
+        if let Some(clients) = project_clients.get_mut(&params.project_key) {
+            clients.remove(&self.client);
+            if !clients.is_empty() {
+                return Ok(());
+            }
+            project_clients.remove(&params.project_key);
+        }
 
         self.remove_project(params.project_key);
         self.scanner
@@ -3639,24 +4119,28 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 
     fn file_exists(&self, params: FileExistsParams) -> Result<bool, WorkspaceError> {
-        Ok(self
-            .documents
-            .pin()
-            .get(params.file_path.as_path())
-            .is_some_and(|document| document.for_client(self.client).is_some()))
+        Ok(self.document_exists(&params.file_path))
     }
 
     fn file_features(
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
+        let is_virtual = params.path.is_virtual();
+        let path = params.path.clone();
+        // Missing filesystem paths that skip configuration ignore checks are stdin path hints.
+        // They still honor VCS ignore files.
+        let check_vcs_ignore =
+            params.skip_ignore_check && !is_virtual && !self.fs.path_exists(path.as_path());
         let db = self.get_db();
         let (_, settings, query) = self
-            .project_get_settings_query(&db, params.project_key, &params.path, params.inline_config)
+            .project_get_settings_query(&db, params.project_key, &path, params.inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
         let language = self.get_file_source(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            query
+                .effective_settings(&settings)
+                .experimental_full_html_support_enabled(),
         );
         let capabilities = self.features.get_deprecated_capabilities(language);
 
@@ -3666,18 +4150,24 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             GetFileFeaturesParams {
                 fs: self.fs.as_ref(),
                 project_key: params.project_key,
-                path: &params.path,
+                path: path.as_path(),
                 requested_features: params.features,
                 language,
                 capabilities: &capabilities,
                 handle: &settings,
-                skip_ignore_check: params.skip_ignore_check,
+                skip_ignore_check: params.skip_ignore_check || is_virtual,
+                check_vcs_ignore,
                 not_requested_features: params.not_requested_features,
+                ignore_kind: params.ignore_kind,
             },
         )
     }
 
     fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
+        if self.is_virtual_document(&params.path) {
+            return Ok(false);
+        }
+
         // Never ignore Biome's top-level config file regardless of `includes`.
         if params.path.file_name().is_some_and(|file_name| {
             file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
@@ -3690,7 +4180,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         Ok(self.project_is_ignored(
             params.project_key,
-            &params.path,
+            params.path.as_path(),
             params.is_dir,
             params.features,
             params.ignore_kind,
@@ -3701,25 +4191,20 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: GetSyntaxTreeParams,
     ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_syntax_tree = capabilities
             .debug
             .debug_syntax_tree
-            .ok_or_else(self.build_capability_error(&params.path))?;
+            .ok_or_else(self.build_capability_error(&path))?;
 
         // The feature name here can be any feature, in theory
-        let parse = self.get_parse(&params.path)?;
-        let printed = debug_syntax_tree(
-            &params.path,
-            parse.into(),
-            self.get_db().into_untracked_db(),
-        );
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
+        let printed = debug_syntax_tree(&path, parse.into(), self.get_db().into_untracked_db());
 
         Ok(printed)
     }
@@ -3728,19 +4213,18 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: GetControlFlowGraphParams,
     ) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_control_flow = capabilities
             .debug
             .debug_control_flow
-            .ok_or_else(self.build_capability_error(&params.path))?;
+            .ok_or_else(self.build_capability_error(&path))?;
 
-        let parse = self.get_parse(&params.path)?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
         let printed = debug_control_flow(
             parse.into(),
             params.cursor,
@@ -3751,33 +4235,33 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
+        self.associate_virtual_document_with_project(params.project_key, &path)?;
         let db = self.get_db();
         let (_, settings, query_context) = self
-            .project_get_settings_query(&db, params.project_key, &params.path, None)
+            .project_get_settings_query(&db, params.project_key, &path, None)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_formatter_ir = capabilities
             .debug
             .debug_formatter_ir
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
+        if !query_context
+            .effective_settings(&settings)
+            .format_with_errors_enabled_for_this_file_path(path.as_path())
             && parse.has_errors(&*db)
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-        let document_file_source = self.get_file_source(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let document_file_source =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         // Currently we don't inject inline configuration for debugging methods, review if we need it
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         debug_formatter_ir(
-            &params.path,
+            &path,
             &document_file_source,
             parse.into(),
             &settings,
@@ -3786,18 +4270,17 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_type_info = capabilities
             .debug
             .debug_type_info
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
 
         debug_type_info(parse.into(), self.module_db().into_untracked_db())
     }
@@ -3806,51 +4289,42 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: GetRegisteredTypesParams,
     ) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_registered_types = capabilities
             .debug
             .debug_registered_types
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
 
-        debug_registered_types(
-            &params.path,
-            parse.into(),
-            self.get_db().into_untracked_db(),
-        )
+        debug_registered_types(&path, parse.into(), self.get_db().into_untracked_db())
     }
 
     fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let debug_semantic_model = capabilities
             .debug
             .debug_semantic_model
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
 
-        debug_semantic_model(
-            &params.path,
-            parse.into(),
-            self.get_db().into_untracked_db(),
-        )
+        debug_semantic_model(&path, parse.into(), self.get_db().into_untracked_db())
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
+        let path = params.path.clone();
         self.documents
             .pin()
-            .get(params.path.as_path())
+            .get(path.as_path())
             .and_then(|document| document.content(self.client))
             .map(ToString::to_string)
             .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))
@@ -3860,19 +4334,30 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
-        let documents = self.documents.pin();
-        let Some(content) = documents
-            .get(params.path.as_path())
-            .and_then(|document| document.content(self.client))
-        else {
-            return Err(WorkspaceError::not_found(params.path.to_string()));
+        let path = params.path.clone();
+        let (file_size, inline_config) = {
+            let documents = self.documents.pin();
+            let Some(view) = documents
+                .get(path.as_path())
+                .and_then(|document| document.for_client(self.client))
+            else {
+                return Err(WorkspaceError::not_found(params.path.to_string()));
+            };
+            (
+                view.content.len(),
+                view.inline_config.as_deref().cloned().map(Box::new),
+            )
         };
-        let file_size = content.len();
+        let db = self.get_db();
         let limit = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_query(&db, params.project_key, &path, inline_config)
             .map_or_else(
                 || MaxSize::default().into(),
-                |settings| settings.get_max_file_size(&params.path),
+                |(_, settings, query)| {
+                    query
+                        .effective_settings(&settings)
+                        .get_max_file_size(path.as_path())
+                },
             );
         Ok(CheckFileSizeResult { file_size, limit })
     }
@@ -3889,6 +4374,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             editor_features: _,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
+        let is_virtual = path.is_virtual();
         let is_indexed = self.should_update_service_data(&path);
         let documents = self.documents.pin();
         let (existing_version, same_content, file_source_index, is_open) = documents
@@ -3903,7 +4389,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     document.editor(self.client).is_some(),
                 )
             })
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(&path)))?;
 
         // Once the views of a client are closed, a change it sent before must
         // not be recorded as the content on disk.
@@ -3924,12 +4410,18 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }
 
         if existing_version == Some(version) {
-            let parsed = {
-                let db = self.get_db();
-                db.get_parsed_source(path.as_path())
-                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
-            };
-            return self.finish_change_file(project_key, &path, parsed);
+            let db = self.get_db();
+            let parsed = db
+                .get_client_parsed_source(path.as_path(), self.client)
+                .ok_or_else(|| {
+                    WorkspaceError::not_found(self.public_document_path_string(&path))
+                })?;
+            let project_is_current =
+                !is_virtual || db.project_key_for_source(parsed) == Some(project_key);
+            drop(db);
+            if project_is_current {
+                return self.finish_change_file(project_key, &path, parsed);
+            }
         }
 
         if self.get_db().get_project(&project_key).is_none() {
@@ -3969,13 +4461,29 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             view,
             content.clone(),
             file_source_index,
-            inline_config,
+            inline_config.clone(),
         );
+        let virtual_source = if is_virtual {
+            self.db_state
+                .fork()
+                .get_client_parsed_source(path.as_path(), self.client)
+        } else {
+            None
+        };
+        if let Some(source) = virtual_source {
+            self.db_state.associate_source_with_project(
+                path.as_path(),
+                self.client,
+                source,
+                project_key,
+            );
+        }
 
         let document_view = DocumentView {
             content: content.clone(),
             version: matches!(view, ViewId::Editor(_)).then_some(version),
             file_source_index,
+            inline_config: inline_config.map(Arc::from),
             syntax: Some(Ok(())),
         };
         let updated = documents.update(path.to_path_buf(), |document| {
@@ -3986,9 +4494,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         // outlive it.
         if updated.is_none() {
             if view == ViewId::Editor(self.client) {
-                self.close_editor_view(&path, Some(project_key))?;
+                self.close_editor_view(path.as_path(), Some(project_key))?;
             }
-            return Err(WorkspaceError::not_found(path.to_string()));
+            return Err(WorkspaceError::not_found(
+                self.public_document_path_string(&path),
+            ));
         }
 
         #[cfg(test)]
@@ -4000,7 +4510,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }
 
         if view == ViewId::Editor(self.client) && self.is_client_closed() {
-            self.close_editor_view(&path, Some(project_key))?;
+            self.close_editor_view(path.as_path(), Some(project_key))?;
             return Ok(ChangeFileResult {
                 diagnostics: Vec::new(),
             });
@@ -4058,7 +4568,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 ) > 0);
             let format_with_errors_disabled = can_transform
                 && format
-                && !settings.format_with_errors_enabled_for_this_file_path(&path)
+                && !settings.format_with_errors_enabled_for_this_file_path(path.as_path())
                 && state.has_errors_for_formatting();
             let should_format = can_transform && format && !format_with_errors_disabled;
 
@@ -4207,8 +4717,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 let source = documents
                     .get(path.as_path())
                     .and_then(|document| document.content(self.client))
-                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-                process(source, self.process_file_state_from_server(&path)?, true)
+                    .ok_or_else(|| {
+                        WorkspaceError::not_found(self.public_document_path_string(&path))
+                    })?;
+                process(
+                    source,
+                    self.process_file_state_from_server(project_key, &path)?,
+                    true,
+                )
             }
             FileContent::FromClient { content, .. } => {
                 let file_source = DocumentFileSource::from_path(
@@ -4243,7 +4759,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         &self,
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
-        let state = self.process_file_state_from_server(&params.path)?;
+        let path = params.path.clone();
+        let state = self.process_file_state_from_server(params.project_key, &path)?;
         #[cfg(feature = "module_graph")]
         let module_db = state.db.rc_module_db();
         self.pull_diagnostics_for_state(
@@ -4267,15 +4784,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             enabled_rules,
             inline_config,
         } = params;
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
-        let parse = self.get_parse(&path)?;
+        let parse = self.get_parse_for_project(project_key, &path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_deprecated_capabilities(language);
-        let result = if (categories.is_lint() || categories.is_assist())
+        let mut result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
         {
@@ -4284,7 +4802,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     if categories.is_lint() {
                         self.get_analyzer_plugins_for_project(
                             settings.source_path().unwrap_or_default().as_path(),
-                            &settings.get_plugins_for_path(&path),
+                            &settings.get_plugins_for_path(path.as_path()),
                         )
                         .map_err(WorkspaceError::plugin_errors)?
                     } else {
@@ -4318,7 +4836,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 &parse.into(),
                 language,
                 handle.as_ref(),
-                &path,
+                path.as_path(),
                 &workspace_db,
             ) {
                 let ParsedSnippetOrigin::Workspace(embedded_node) = embedded_node else {
@@ -4363,6 +4881,12 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             }
         };
 
+        let public_path = self.public_document_path_string(&path);
+        for (diagnostic, _) in &mut result.diagnostics {
+            *diagnostic =
+                SerdeDiagnostic::new(diagnostic.clone().with_file_path(public_path.as_str()));
+        }
+
         Ok(result)
     }
 
@@ -4390,6 +4914,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             inline_config,
             compute_actions,
         } = params;
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
@@ -4405,7 +4930,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
-        let parsed_source = self.get_parse(&path)?;
+        let parsed_source = self.get_parse_for_project(project_key, &path)?;
 
         let plugins = cfg_select! {
             feature = "plugins" => {
@@ -4416,7 +4941,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                             .source_path()
                             .unwrap_or_default()
                             .as_path(),
-                        &settings.as_ref().get_plugins_for_path(&path),
+                        &settings.as_ref().get_plugins_for_path(path.as_path()),
                     )
                     .map_err(WorkspaceError::plugin_errors)?
                 } else {
@@ -4462,7 +4987,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 &parsed_source.into(),
                 language,
                 settings.as_ref(),
-                &path,
+                path.as_path(),
                 &workspace_db,
             )
         {
@@ -4525,37 +5050,39 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         )
     )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
+        let FormatFileParams {
+            project_key,
+            path,
+            inline_config,
+        } = params;
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (_, settings, query_context) = self
-            .project_get_settings_query(
-                &workspace_db,
-                params.project_key,
-                &params.path,
-                params.inline_config,
-            )
+            .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
+        let effective_settings = query_context.effective_settings(&settings);
         let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
 
         let format = capabilities
             .formatter
             .format
-            .ok_or_else(self.build_capability_error(&params.path))?;
+            .ok_or_else(self.build_capability_error(&path))?;
 
         let format_embedded = capabilities.formatter.format_embedded;
         let (parse, embedded_nodes) =
-            self.get_parsed_snippets_and_parse_source(&workspace_db, &params.path)?;
+            self.get_parsed_snippets_and_parse_source(&workspace_db, &path)?;
         let document_file_source = self.get_file_source(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
 
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+        if !effective_settings.format_with_errors_enabled_for_this_file_path(path.as_path())
             && (parse.parsed(&*workspace_db).has_errors()
                 || SnippetsIterator::from_source(parse, &workspace_db)
-                    .blocking_formatting(document_file_source)
+                    .blocking_formatting(document_file_source, &workspace_db)
                     .any(|snippet| snippet.has_errors()))
         {
             return Err(WorkspaceError::format_with_errors_disabled());
@@ -4565,14 +5092,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
 
         if !embedded_nodes.is_empty() {
-            let format_embedded =
-                format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
+            let format_embedded = format_embedded.ok_or_else(self.build_capability_error(&path))?;
             let embedded_nodes = embedded_nodes
                 .into_iter()
                 .map(ParsedSnippetOrigin::Workspace)
                 .collect();
             return format_embedded(
-                &params.path,
+                &path,
                 &document_file_source,
                 parse.into(),
                 &settings,
@@ -4581,7 +5107,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             );
         }
         format(
-            &params.path,
+            &path,
             &document_file_source,
             parse.into(),
             &settings,
@@ -4591,83 +5117,89 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
     #[instrument(level = "debug", skip(self, params))]
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
+        let FormatRangeParams {
+            project_key,
+            path,
+            range,
+            inline_config,
+        } = params;
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (_, settings, query_context) = self
-            .project_get_settings_query(
-                &workspace_db,
-                params.project_key,
-                &params.path,
-                params.inline_config,
-            )
+            .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
+        let effective_settings = query_context.effective_settings(&settings);
         let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
         let format_range = capabilities
             .formatter
             .format_range
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse_for_project(project_key, &path)?;
+        if !effective_settings.format_with_errors_enabled_for_this_file_path(path.as_path())
             && parse.has_errors(&*workspace_db)
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         format_range(
-            &params.path,
+            &path,
             &document_file_source,
             parse.into(),
             &settings,
-            params.range,
+            range,
             workspace_db.into_untracked_db(),
         )
     }
 
     #[instrument(level = "debug", skip(self, params))]
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
+        let FormatOnTypeParams {
+            project_key,
+            path,
+            offset,
+            inline_config,
+        } = params;
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (_, settings, query_context) = self
-            .project_get_settings_query(
-                &workspace_db,
-                params.project_key,
-                &params.path,
-                params.inline_config,
-            )
+            .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
+        let effective_settings = query_context.effective_settings(&settings);
         let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
         let format_on_type = capabilities
             .formatter
             .format_on_type
-            .ok_or_else(self.build_capability_error(&params.path))?;
+            .ok_or_else(self.build_capability_error(&path))?;
 
-        let parse = self.get_parse(&params.path)?;
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+        let parse = self.get_parse_for_project(project_key, &path)?;
+        if !effective_settings.format_with_errors_enabled_for_this_file_path(path.as_path())
             && parse.has_errors(&*workspace_db)
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
+            &path,
+            effective_settings.experimental_full_html_support_enabled(),
         );
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         format_on_type(
-            &params.path,
+            &path,
             &document_file_source,
             parse.into(),
             &settings,
-            params.offset,
+            offset,
             workspace_db.into_untracked_db(),
         )
     }
@@ -4690,19 +5222,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let source = documents
             .get(path.as_path())
             .and_then(|document| document.content(self.client))
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-        let mut state = self.process_file_state_from_server(&path)?;
+            .ok_or_else(|| WorkspaceError::not_found(self.public_document_path_string(&path)))?;
+        let mut state = self.process_file_state_from_server(project_key, &path)?;
         let (_, settings, query) = self
             .project_get_settings_query(&state.db, project_key, &path, params.inline_config.clone())
             .ok_or_else(WorkspaceError::no_project)?;
-        let format_with_errors = query.inline_settings().map_or_else(
-            || settings.format_with_errors_enabled_for_this_file_path(&path),
-            |settings| {
-                settings
-                    .as_ref()
-                    .format_with_errors_enabled_for_this_file_path(&path)
-            },
-        );
+        let format_with_errors = query
+            .effective_settings(&settings)
+            .format_with_errors_enabled_for_this_file_path(path.as_path());
         let should_format =
             params.should_format && (format_with_errors || !state.has_errors_for_formatting());
         params.should_format = should_format;
@@ -4752,22 +5279,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     }
 
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
+        let path = params.path.clone();
         let settings = self
-            .project_get_settings_for_path(params.project_key, &params.path)
+            .project_get_settings_for_path(params.project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities = self.get_file_capabilities(
-            &params.path,
-            settings.experimental_full_html_support_enabled(),
-        );
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let rename = capabilities
             .analyzer
             .rename
-            .ok_or_else(self.build_capability_error(&params.path))?;
+            .ok_or_else(self.build_capability_error(&path))?;
 
-        let parse = self.get_parse(&params.path)?;
+        let parse = self.get_parse_for_project(params.project_key, &path)?;
         let workspace_db = self.get_db();
         let result = rename(
-            &params.path,
+            &path,
             parse.into(),
             params.symbol_at,
             params.new_name,
@@ -4782,6 +5308,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         params: GoToDefinitionParams,
     ) -> Result<Option<GoToDefinitionResult>, WorkspaceError> {
         let path = &params.path;
+        self.associate_virtual_document_with_project(params.project_key, path)?;
         let cursor_offset = params.cursor_range.start();
         let workspace_db = self.get_db();
         let (_, settings, query) = self
@@ -4803,7 +5330,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }
 
         let (parse, embedded_snippets) =
-            self.get_parsed_snippets_and_parse_source(&workspace_db, path.as_path())?;
+            self.get_parsed_snippets_and_parse_source(&workspace_db, path)?;
 
         let language = self.get_file_source(
             path,
@@ -4877,7 +5404,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         {
             // The module graph is shared by the clients, so it reads the view
             // they share.
-            self.assert_parse(params.path.as_path())?;
+            self.associate_virtual_document_with_project(params.project_key, &params.path)?;
+            self.assert_parse(&params.path)?;
             let parsed = self
                 .get_db()
                 .get_parsed_source(params.path.as_path())
@@ -4931,6 +5459,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             pattern,
         }: SearchPatternParams,
     ) -> Result<SearchResults, WorkspaceError> {
+        self.associate_virtual_document_with_project(project_key, &path)?;
         let workspace_db = self.get_db();
         let (_, settings, query) = self
             .project_get_settings_query(&workspace_db, project_key, &path, None)
@@ -4941,7 +5470,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .search
             .search
             .ok_or_else(self.build_capability_error(&path))?;
-        let parse = self.get_parse(&path)?;
+        let parse = self.get_parse_for_project(project_key, &path)?;
 
         let document_file_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
@@ -5015,6 +5544,28 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[inline]
+    fn get_vcs_watch_paths(&self, project_key: ProjectKey) -> Vec<BiomePath> {
+        self.project_vcs_watch_paths(project_key)
+    }
+
+    #[inline]
+    fn get_vcs_root(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
+        self.project_get_root_settings(project_key)?
+            .vcs_settings
+            .ignore_matches
+            .as_ref()
+            .map(|ignore_matches| ignore_matches.root_path().to_path_buf())
+    }
+
+    #[inline]
+    fn refresh_project_vcs_ignore_settings(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError> {
+        self.refresh_project_vcs_ignore_settings(project_key)
+    }
+
+    #[inline]
     fn is_ignored(
         &self,
         project_key: ProjectKey,
@@ -5022,8 +5573,16 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
-        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind, path_kind)
+        self.is_ignored_by_scanner(
+            project_key,
+            scan_kind,
+            path,
+            request_kind,
+            path_kind,
+            ancestors_checked,
+        )
     }
 
     #[inline]
@@ -5054,10 +5613,9 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
-        let path = path.into();
         let open_file = |path| {
             self.open_file_internal(
                 OpenFileReason::Index(trigger),
@@ -5153,11 +5711,13 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             let scan_kind = ProjectScanComputer::new(&nested_configuration).compute();
             let params = UpdateSettingsParams {
                 project_key,
-                workspace_directory: nested_directory_path.map(BiomePath::from),
+                workspace_directory: nested_directory_path
+                    .as_ref()
+                    .map(|path| self.fs.biome_path(path)),
                 configuration: nested_configuration,
                 extended_configurations: extended_configurations
                     .into_iter()
-                    .map(|(path, config)| (BiomePath::from(path), config))
+                    .map(|(path, config)| (self.fs.biome_path(&path), config))
                     .collect(),
                 module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
             };
@@ -5172,11 +5732,9 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     fn update_project_ignore_files(
         &self,
         project_key: ProjectKey,
+        scanned_directory: &Utf8Path,
         paths: &[BiomePath],
     ) -> Result<(), WorkspaceError> {
-        let project_path = self
-            .project_get_path(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
         let settings = self
             .project_get_root_settings(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -5187,27 +5745,69 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             return Ok(());
         }
 
-        let filtered_paths = paths.iter().filter(|path| path.is_ignore()).filter(|path| {
-            // We filter out the root ignore file, because it's stored when calling `update_settings`
-            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
-            project_path != path.parent().unwrap()
+        let Some(mut applicable_matches) = vcs_settings.ignore_matches.clone() else {
+            return Ok(());
+        };
+        let root_ignore_path = applicable_matches.root_path().clone();
+        let root_git_ignore = if vcs_settings.client_kind == Some(VcsClientKind::Git)
+            && root_ignore_path.as_path() == scanned_directory
+        {
+            let patterns =
+                read_root_git_ignore_patterns(self.fs.as_ref(), root_ignore_path.as_path());
+            let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+            let git_ignore = VcsIgnoredPatterns::git_ignore(&root_ignore_path, &patterns)?;
+            applicable_matches.replace_root_git_match(git_ignore.clone());
+            Some(git_ignore)
+        } else {
+            None
+        };
+
+        let scope = self.fs.biome_path(scanned_directory);
+        applicable_matches.replace_git_matches(&scope, &[]);
+        let mut filtered_paths = paths
+            .iter()
+            .filter_map(|path| {
+                let parent = path.parent()?;
+                (path.is_ignore() && root_ignore_path.as_path() != parent).then_some((path, parent))
+            })
+            .collect::<Vec<_>>();
+        filtered_paths.sort_unstable_by(|(left_path, left_parent), (right_path, right_parent)| {
+            left_parent
+                .components()
+                .count()
+                .cmp(&right_parent.components().count())
+                .then_with(|| left_path.cmp(right_path))
         });
 
         let mut payload = vec![];
-        for path in filtered_paths {
-            let is_in_project_path = path.starts_with(&project_path);
-
-            // We need to pass the **directory** that contains the ignore file.
-            let dir_ignore_file = path.parent().unwrap_or(path);
-
-            if vcs_settings.is_ignore_file(path) && is_in_project_path {
-                let content = self.fs.read_file_from_path(path)?;
-                let patterns = content.lines().map(String::from).collect::<Vec<_>>();
-                payload.push((dir_ignore_file.to_path_buf(), patterns));
+        for (path, dir_ignore_file) in filtered_paths {
+            if !vcs_settings.is_ignore_file(path.as_path())
+                || !path.starts_with(root_ignore_path.as_path())
+            {
+                continue;
             }
+
+            let matcher_root = self.fs.biome_path(dir_ignore_file);
+            if applicable_matches.is_ignored(&matcher_root, true, IgnoreKind::Ancestors) {
+                continue;
+            }
+
+            let content = self.fs.read_file_from_path(path.as_path())?;
+            let patterns = content.lines().map(String::from).collect::<Vec<_>>();
+            let pattern_refs = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+            applicable_matches.insert_git_match(VcsIgnoredPatterns::git_ignore(
+                &matcher_root,
+                &pattern_refs,
+            )?);
+            payload.push((dir_ignore_file.to_path_buf(), patterns));
         }
 
-        self.store_nested_ignore_patterns(project_key, payload)?;
+        self.store_git_ignores(
+            project_key,
+            root_git_ignore,
+            scanned_directory.to_path_buf(),
+            payload,
+        )?;
 
         Ok(())
     }
@@ -5221,7 +5821,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
-        self.update_service_data(path, UpdateKind::Removed, project_key)
+        self.update_service_data(&self.fs.biome_path(path), UpdateKind::Removed, project_key)
             .map(|(_, diagnostics)| {
                 diagnostics
                     .into_iter()
@@ -5235,12 +5835,11 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
-        // Note that we cannot check the kind of the path, because the watcher
-        // would only attempt to unload a file or folder after it has been
-        // removed. So asking the filesystem wouldn't work anymore. So we just
-        // pretend it's a folder and if it turns out the path didn't belong to a
-        // folder, the scanner will ignore it.
-        self.scanner.unload_folder(path.to_path_buf());
+        // Removed paths may have been watched folders. Existing paths are being
+        // rescanned and must retain their watcher registrations.
+        if !self.fs.path_exists(path) {
+            self.scanner.unload_folder(path.to_path_buf());
+        }
 
         // Unloads all descendants of the path. The files that a client has
         // open keep the content of the client.
@@ -5248,7 +5847,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.
-        self.update_service_data(path, UpdateKind::Removed, project_key)
+        self.update_service_data(&self.fs.biome_path(path), UpdateKind::Removed, project_key)
             .map(|(_, diagnostics)| {
                 diagnostics
                     .into_iter()
@@ -5458,6 +6057,30 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     }
 
     #[inline]
+    fn get_vcs_watch_paths(&self, project_key: ProjectKey) -> Vec<BiomePath> {
+        self.as_workspace().project_vcs_watch_paths(project_key)
+    }
+
+    #[inline]
+    fn get_vcs_root(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
+        self.as_workspace()
+            .project_get_root_settings(project_key)?
+            .vcs_settings
+            .ignore_matches
+            .as_ref()
+            .map(|ignore_matches| ignore_matches.root_path().to_path_buf())
+    }
+
+    #[inline]
+    fn refresh_project_vcs_ignore_settings(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError> {
+        self.as_workspace()
+            .refresh_project_vcs_ignore_settings(project_key)
+    }
+
+    #[inline]
     fn is_ignored(
         &self,
         project_key: ProjectKey,
@@ -5465,9 +6088,16 @@ impl WorkspaceScannerBridge for LocalWorkspace {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
         path_kind: Option<PathKind>,
+        ancestors_checked: bool,
     ) -> Result<bool, WorkspaceError> {
-        self.as_workspace()
-            .is_ignored(project_key, scan_kind, path, request_kind, path_kind)
+        self.as_workspace().is_ignored(
+            project_key,
+            scan_kind,
+            path,
+            request_kind,
+            path_kind,
+            ancestors_checked,
+        )
     }
 
     #[inline]
@@ -5478,7 +6108,7 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        path: impl Into<BiomePath>,
+        path: BiomePath,
         trigger: IndexTrigger,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         self.as_workspace().index_file(project_key, path, trigger)
@@ -5496,10 +6126,11 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     fn update_project_ignore_files(
         &self,
         project_key: ProjectKey,
+        scanned_directory: &Utf8Path,
         files: &[BiomePath],
     ) -> Result<(), WorkspaceError> {
         self.as_workspace()
-            .update_project_ignore_files(project_key, files)
+            .update_project_ignore_files(project_key, scanned_directory, files)
     }
 
     #[inline]
@@ -5628,3 +6259,7 @@ mod tests;
 #[cfg(all(test, feature = "md_embeds"))]
 #[path = "md_embeds.tests.rs"]
 mod md_embeds_tests;
+
+#[cfg(all(test, feature = "plugins"))]
+#[path = "server_plugin_cache.tests.rs"]
+mod plugin_cache_tests;

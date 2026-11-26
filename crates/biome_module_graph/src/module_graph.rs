@@ -58,9 +58,14 @@ pub fn resolve_js_module_with_inference_mode(
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     inference_mode: TypeInferenceMode,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    let visitor = JsModuleVisitor::new(root, path.to_path_buf(), semantic_model, inference_mode);
+    let visitor = JsModuleVisitor::new(
+        root,
+        path.as_path().to_path_buf(),
+        semantic_model,
+        inference_mode,
+    );
     let module_info = visitor.collect_info();
-    let dependencies = js_dependencies(db, path, &module_info);
+    let dependencies = js_dependencies(db, path.as_path(), &module_info);
     let diagnostics = module_info.diagnostics().to_vec();
     (module_info, dependencies, diagnostics)
 }
@@ -71,7 +76,7 @@ pub fn resolve_css_module(
     path: &BiomePath,
 ) -> (CssModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     let module = CssModuleVisitor::new(root).visit();
-    let dependencies = css_dependencies(db, path, &module);
+    let dependencies = css_dependencies(db, path.as_path(), &module);
     (module, dependencies, Vec::new())
 }
 
@@ -79,7 +84,7 @@ pub fn resolve_html_module(
     db: &dyn ModuleDb,
     path: &BiomePath,
 ) -> Option<(HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>)> {
-    let parsed_source = db.parsed_source_for_path(path)?;
+    let parsed_source = db.parsed_source_for_path(path.as_path())?;
     let prepared = prepare_html_module(db, parsed_source);
     Some(resolve_prepared_html_module(db, prepared, path))
 }
@@ -89,8 +94,8 @@ pub fn resolve_prepared_html_module(
     prepared: PreparedHtmlModule,
     path: &BiomePath,
 ) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    let module = HtmlModuleVisitor::new(prepared, path.to_path_buf()).visit();
-    let dependencies = html_dependencies(db, path, &module);
+    let module = HtmlModuleVisitor::new(prepared, path.as_path().to_path_buf()).visit();
+    let dependencies = html_dependencies(db, path.as_path(), &module);
     (module, dependencies, Vec::new())
 }
 

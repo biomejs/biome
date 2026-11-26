@@ -56,6 +56,7 @@
 	// https://github.com/eslint/eslint/issues/8308
 	"let predicate; [typeNode.returnType, predicate] = foo();",
 	"let predicate; [typeNode.returnType, ...predicate] = foo();",
+	"let predicate; [(typeNode.returnType), ...predicate] = foo();",
 	
 	// intentionally testing empty slot in destructuring assignment
 	"let predicate; [typeNode.returnType,, predicate] = foo();",
@@ -67,6 +68,7 @@
 	"let predicate; [, {foo:typeNode.returnType, predicate}] = foo();",
 	"let predicate; [, {foo:typeNode.returnType, ...predicate}] = foo();",
 	"let a; const b = {}; ({ a, c: b.c } = func());",
+	"let a; const b = {}; ({ a, c: ((b.c)) } = func());",
 
 	// https://github.com/eslint/eslint/issues/10520
 	"const x = [1,2]; let y; [,y] = x; y = 0;",

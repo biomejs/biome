@@ -158,17 +158,42 @@ pub enum SvelteEmbeddingKind {
     TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
-    /// The payload of a `{@const ...}` block parsed as an assignment expression.
+    /// The binding, optional index, and optional key after `as` in an each block.
+    EachBinding,
+    /// The payload of a `{@const ...}` block parsed as a variable declarator.
     ///
     /// The HTML syntax stores the `const` token separately, so this mode receives
-    /// only the assignment payload. It must retain expression-root parsing for
-    /// compatibility with that representation.
+    /// only the binding, optional type annotation, and initializer.
     LegacyConst,
     /// The payload of a `{let ...}` or `{const ...}` tag parsed as a Svelte declaration root.
     ///
     /// The snippet includes the keyword and must contain one `let` or `const`
     /// variable declaration, an optional semicolon, and no trailing code.
     Declaration,
+    /// Type parameters from a Svelte `<script generics="...">` attribute, parsed
+    /// without surrounding angle brackets.
+    Generics,
+}
+
+/// Identifies the JavaScript construct an MDX snippet comes from.
+///
+/// MDX keeps the Markdown between an opening and a closing JSX tag outside
+/// JavaScript, so each construct is a separate snippet with its own root.
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum MdxEmbeddingKind {
+    /// Top-level `import` and `export` statements, parsed as a module that
+    /// may only contain imports and exports. This is where the bindings of
+    /// the document are defined.
+    #[default]
+    Esm,
+    /// The content of a `{...}` expression, parsed as a single expression
+    /// that may be empty or hold only comments.
+    Expression,
+    /// A single JSX tag, such as `<Note type="tip">` or `</Note>`.
+    Tag,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -218,6 +243,8 @@ pub enum JsEmbeddingKind {
         /// `<script context="module">` block.
         is_module_script: bool,
     },
+    /// JavaScript embedded in an MDX document.
+    Mdx { kind: MdxEmbeddingKind },
     #[default]
     None,
 }
@@ -272,17 +299,54 @@ impl JsEmbeddingKind {
             }
         )
     }
-    pub const fn is_vue_generics_list(&self) -> bool {
+    pub const fn is_generics_list(&self) -> bool {
         matches!(
             self,
             Self::Vue {
                 generics_list: true,
+                ..
+            } | Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::Generics,
                 ..
             }
         )
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_mdx(&self) -> bool {
+        matches!(self, Self::Mdx { .. })
+    }
+    pub const fn is_mdx_esm(&self) -> bool {
+        matches!(
+            self,
+            Self::Mdx {
+                kind: MdxEmbeddingKind::Esm
+            }
+        )
+    }
+    /// Returns `true` when the snippet is a single JSX tag from an MDX
+    /// document.
+    pub const fn is_mdx_tag(&self) -> bool {
+        matches!(
+            self,
+            Self::Mdx {
+                kind: MdxEmbeddingKind::Tag
+            }
+        )
+    }
+    /// Returns `true` when an expression snippet may be empty or hold only
+    /// comments, as Astro and MDX allow for `{/* comment */}`.
+    pub const fn allows_empty_expression(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: false,
+                ..
+            } | Self::Mdx {
+                kind: MdxEmbeddingKind::Expression
+            }
+        )
     }
     pub const fn is_class_attribute(&self) -> bool {
         matches!(
@@ -350,6 +414,16 @@ impl JsEmbeddingKind {
             }
         )
     }
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::EachBinding,
+                ..
+            }
+        )
+    }
+
     pub const fn is_svelte_const_block(&self) -> bool {
         matches!(
             self,
@@ -554,6 +628,7 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte { .. }
                 | JsEmbeddingKind::Vue { .. }
                 | JsEmbeddingKind::Astro { .. }
+                | JsEmbeddingKind::Mdx { .. }
         )
     }
 
@@ -570,6 +645,8 @@ impl JsFileSource {
             } | JsEmbeddingKind::Astro {
                 frontmatter: true,
                 ..
+            } | JsEmbeddingKind::Mdx {
+                kind: MdxEmbeddingKind::Esm
             }
         )
     }
@@ -584,8 +661,7 @@ impl JsFileSource {
             JsEmbeddingKind::Svelte {
                 embedding_kind: SvelteEmbeddingKind::Expression
                     | SvelteEmbeddingKind::TextInterpolation
-                    | SvelteEmbeddingKind::SnippetSignature
-                    | SvelteEmbeddingKind::LegacyConst,
+                    | SvelteEmbeddingKind::SnippetSignature,
                 ..
             } | JsEmbeddingKind::Vue {
                 allow_statements: false,
@@ -593,6 +669,8 @@ impl JsFileSource {
             } | JsEmbeddingKind::Astro {
                 frontmatter: false,
                 ..
+            } | JsEmbeddingKind::Mdx {
+                kind: MdxEmbeddingKind::Expression
             }
         )
     }
@@ -607,9 +685,14 @@ impl JsFileSource {
         self.embedding_kind.is_vue_slot_props()
     }
 
-    /// Returns true if this is the value of the `generic` attribute of a Vue `<script setup>`
-    pub const fn is_vue_generics_list(&self) -> bool {
-        self.embedding_kind.is_vue_generics_list()
+    /// Returns `true` for type parameters from a Vue `generic` attribute or a
+    /// Svelte `generics` attribute.
+    pub const fn is_generics_list(&self) -> bool {
+        self.embedding_kind.is_generics_list()
+    }
+
+    pub const fn is_svelte_each_binding(&self) -> bool {
+        self.embedding_kind.is_svelte_each_binding()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
@@ -885,6 +968,19 @@ mod tests {
         });
         assert!(source.is_template_expression());
         assert!(source.as_embedding_kind().is_svelte_text_interpolation());
+        assert!(!source.is_embedded_source());
+    }
+
+    #[test]
+    fn svelte_generics_are_a_type_parameter_list() {
+        let source = JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
+            is_class_attribute: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::Generics,
+        });
+        assert!(source.is_generics_list());
+        assert!(!source.is_template_expression());
         assert!(!source.is_embedded_source());
     }
 

@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+row foo(item)
+
+```
+
+
+## AST
+
+```
+JsSvelteSnippetRoot {
+    name: JsIdentifierBinding {
+        name_token: IDENT@0..4 "row" [] [Whitespace(" ")],
+    },
+    type_parameters: missing (optional),
+    parameters: JsBogus {
+        items: [
+            IDENT@4..7 "foo" [] [],
+            L_PAREN@7..8 "(" [] [],
+            IDENT@8..12 "item" [] [],
+            R_PAREN@12..13 ")" [] [],
+        ],
+    },
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_SNIPPET_ROOT@0..14
+  0: JS_IDENTIFIER_BINDING@0..4
+    0: IDENT@0..4 "row" [] [Whitespace(" ")]
+  1: (empty)
+  2: JS_BOGUS@4..13
+    0: IDENT@4..7 "foo" [] []
+    1: L_PAREN@7..8 "(" [] []
+    2: IDENT@8..12 "item" [] []
+    3: R_PAREN@12..13 ")" [] []
+  3: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing.svelte_snippet.ts:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a class parameters but instead found 'foo'.
+  
+  > 1 │ row foo(item)
+      │     ^^^
+    2 │ 
+  
+  i Expected a class parameters here.
+  
+  > 1 │ row foo(item)
+      │     ^^^
+    2 │ 
+  
+```

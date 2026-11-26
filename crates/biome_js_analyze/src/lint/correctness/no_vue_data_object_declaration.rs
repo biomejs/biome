@@ -5,16 +5,15 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsObjectExpression, T};
-use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsObjectMember, AnyJsStatement, JsObjectExpression, T,
+};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TriviaPieceKind};
 use biome_rowan::{BatchMutationExt, SyntaxNodeCast};
 use biome_rule_options::no_vue_data_object_declaration::NoVueDataObjectDeclarationOptions;
 
 use crate::JsRuleAction;
-use crate::frameworks::vue::vue_component::{
-    AnyVueDataDeclarationsGroup, VueComponent, VueComponentDeclarations, VueComponentQuery,
-};
+use crate::services::vue::VueComponent;
 
 declare_lint_rule! {
     /// Enforce that Vue component `data` options are declared as functions.
@@ -117,33 +116,37 @@ pub struct State {
 }
 
 impl Rule for NoVueDataObjectDeclaration {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = State;
     type Signals = Option<Self::State>;
     type Options = NoVueDataObjectDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let component = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        )?;
-
-        let data_decl = component.data_declarations_group()?;
-
-        let data_decl_range = data_decl.range();
-        match data_decl {
-            AnyVueDataDeclarationsGroup::JsPropertyObjectMember(object_member) => object_member
-                .value()
-                .ok()
-                .and_then(|value| value.omit_parentheses().as_js_object_expression().cloned())
-                .map(|object_expression| State {
-                    data_decl_range,
-                    object_expression,
-                }),
-            AnyVueDataDeclarationsGroup::JsMethodObjectMember(_) => None,
-        }
+        let options = ctx.vue_model().node(&ctx.query().options_object_node()?)?;
+        let data_decl = JsObjectExpression::cast(options)?
+            .members()
+            .iter()
+            .flatten()
+            .find(|member| {
+                matches!(
+                    member,
+                    AnyJsObjectMember::JsPropertyObjectMember(_)
+                        | AnyJsObjectMember::JsMethodObjectMember(_)
+                ) && member.name().is_some_and(|name| name.text() == "data")
+            })?;
+        let AnyJsObjectMember::JsPropertyObjectMember(property) = &data_decl else {
+            return None;
+        };
+        let object_expression = property
+            .value()
+            .ok()?
+            .omit_parentheses()
+            .as_js_object_expression()
+            .cloned()?;
+        Some(State {
+            data_decl_range: data_decl.range(),
+            object_expression,
+        })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -168,31 +171,33 @@ impl Rule for NoVueDataObjectDeclaration {
             .clone()
             .cast::<AnyJsExpression>()?;
 
-        let data_function = make::js_function_expression(
-            make::token(T![function]),
-            make::js_parameters(
-                make::token(T!['(']),
-                make::js_parameter_list(None, None),
-                make::token(T![')']).with_trailing_space(),
-            ),
-            make::js_function_body(
-                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
-                make::js_directive_list(None),
-                make::js_statement_list([AnyJsStatement::JsReturnStatement(
-                    make::js_return_statement(make::token(T![return]).with_trailing_space())
-                        .with_argument(data_expr.clone())
-                        .build(),
-                )]),
-                make::token(T!['}']).with_leading_newline(),
-            ),
-        )
-        .build();
-
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(
-            data_expr,
-            AnyJsExpression::JsFunctionExpression(data_function),
-        );
+        mutation.wrap_node(data_expr, |data_expr| {
+            AnyJsExpression::JsFunctionExpression(
+                make::js_function_expression(
+                    make::token(T![function]),
+                    make::js_parameters(
+                        make::token(T!['(']),
+                        make::js_parameter_list(None, None),
+                        make::token(T![')']).with_trailing_space(),
+                    ),
+                    make::js_function_body(
+                        make::token(T!['{'])
+                            .with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
+                        make::js_directive_list(None),
+                        make::js_statement_list([AnyJsStatement::JsReturnStatement(
+                            make::js_return_statement(
+                                make::token(T![return]).with_trailing_space(),
+                            )
+                            .with_argument(data_expr)
+                            .build(),
+                        )]),
+                        make::token(T!['}']).with_leading_newline(),
+                    ),
+                )
+                .build(),
+            )
+        });
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

@@ -1,0 +1,8 @@
+/* should not generate diagnostics */
+var a = (function () { this.foo(); } as Callback).bind(bar);
+var b = function (this: Foo) { return this.x; }.bind(bar);
+var c = function () {
+    class A {
+        @dec(this.options) method() {}
+    }
+}.bind(bar);

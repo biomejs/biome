@@ -6,11 +6,11 @@ expression: scss-at-root-selector.invalid.scss
 ```css
 /* should generate diagnostics */
 .outer {
-  @at-root .direct-parent .direct-target, .direct-target {}
+  @at-root .direct-parent .direct-target, .direct-target { color: red; }
 
   @at-root .direct-root {
-    .nested-parent .nested-target {}
-    .nested-target {}
+    .nested-parent .nested-target { color: red; }
+    .nested-target { color: red; }
   }
 }
 
@@ -24,7 +24,7 @@ scss-at-root-selector.invalid.scss:3:43 lint/style/noDescendingSpecificity ━�
   
     1 │ /* should generate diagnostics */
     2 │ .outer {
-  > 3 │   @at-root .direct-parent .direct-target, .direct-target {}
+  > 3 │   @at-root .direct-parent .direct-target, .direct-target { color: red; }
       │                                           ^^^^^^^^^^^^^^
     4 │ 
     5 │   @at-root .direct-root {
@@ -33,7 +33,7 @@ scss-at-root-selector.invalid.scss:3:43 lint/style/noDescendingSpecificity ━�
   
     1 │ /* should generate diagnostics */
     2 │ .outer {
-  > 3 │   @at-root .direct-parent .direct-target, .direct-target {}
+  > 3 │   @at-root .direct-parent .direct-target, .direct-target { color: red; }
       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
     5 │   @at-root .direct-root {
@@ -49,8 +49,8 @@ scss-at-root-selector.invalid.scss:7:5 lint/style/noDescendingSpecificity ━━
   ! Descending specificity selector found. This selector specificity is (0, 2, 0)
   
     5 │   @at-root .direct-root {
-    6 │     .nested-parent .nested-target {}
-  > 7 │     .nested-target {}
+    6 │     .nested-parent .nested-target { color: red; }
+  > 7 │     .nested-target { color: red; }
       │     ^^^^^^^^^^^^^^
     8 │   }
     9 │ }
@@ -58,9 +58,9 @@ scss-at-root-selector.invalid.scss:7:5 lint/style/noDescendingSpecificity ━━
   i This selector specificity is (0, 3, 0)
   
     5 │   @at-root .direct-root {
-  > 6 │     .nested-parent .nested-target {}
+  > 6 │     .nested-parent .nested-target { color: red; }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │     .nested-target {}
+    7 │     .nested-target { color: red; }
     8 │   }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.

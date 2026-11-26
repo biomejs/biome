@@ -1,4 +1,4 @@
-use crate::context::{MarkdownFormatContext, UnorderedListMarker};
+use crate::context::{MarkdownFormatContext, ProseWrap, UnorderedListMarker};
 use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentOptions;
 use crate::markdown::auxiliary::fenced_code_block::FormatMdFencedCodeBlockOptions;
 use crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlockOptions;
@@ -6,19 +6,21 @@ use crate::markdown::auxiliary::list_marker_prefix::{
     FormatMdListMarkerPrefixOptions, OrderedMarker, TargetMarker,
 };
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
-use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
+use crate::markdown::auxiliary::paragraph::{FormatMdParagraph, FormatMdParagraphOptions};
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::markdown::auxiliary::setext_header::setext_header_keeps_underline;
 use crate::markdown::lists::block_list::list_ends_with_line_break;
 use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
-use crate::{AsFormat, MarkdownFormatter, prelude::format_suppressed_node};
+use crate::words::is_block_marker_word;
+use crate::{AsFormat, FormatNodeRule, MarkdownFormatter, prelude::format_suppressed_node};
 use biome_formatter::rowan::prelude::*;
-use biome_formatter::{Format, FormatResult, format_args, write};
+use biome_formatter::{Format, FormatOptions, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList,
-    MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
-    MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage,
+    MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
+    MdIndentTokenList, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError};
 use std::collections::VecDeque;
@@ -39,7 +41,16 @@ impl FmtAnyList {
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         if f.context().comments().is_suppressed(self.node.syntax()) {
-            Format::fmt(&format_suppressed_node(self.node.syntax()), f)?;
+            let source = format_suppressed_node(self.node.syntax());
+            // The quote prefix at the end of the list belongs to the next
+            // line, whose formatter prints it again.
+            match list_trailing_quote_prefix(&self.node) {
+                Some(prefix) => Format::fmt(
+                    &source.until(prefix.syntax().text_range_with_trivia().start()),
+                    f,
+                )?,
+                None => Format::fmt(&source, f)?,
+            }
             if !list_ends_with_line_break(&self.node) {
                 write!(f, [hard_line_break()])?;
             }
@@ -167,7 +178,7 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
 
         for item in &self.bullets {
             if let Some(previous) = previous
-                && content_ends_with_quote_prefix(&previous.node)
+                && content_trailing_quote_prefix(&previous.node).is_some()
             {
                 let line_prefix = quote_line_prefix(item.node.syntax())?;
                 if !line_prefix.is_empty() {
@@ -189,14 +200,33 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
     }
 }
 
-/// A trailing [MdQuotePrefix] in a bullet's content is the `> ` of the line
-/// that starts the next bullet: the parser attaches continuation-line
-/// prefixes to the previous sibling's content.
-fn content_ends_with_quote_prefix(bullet: &MdBullet) -> bool {
-    matches!(
-        bullet.content().iter().last(),
-        Some(AnyMdBlock::MdQuotePrefix(_))
-    )
+/// Returns the [MdQuotePrefix] at the end of a bullet's content.
+///
+/// The parser attaches the `> ` of the line after a bullet to the end of the
+/// bullet's content. That line starts the next bullet, or the block after the
+/// list. When the content ends with a nested list, the prefix sits at the end
+/// of that list's last bullet, as in `> - one\n>   - nested\n> - two`.
+fn content_trailing_quote_prefix(bullet: &MdBullet) -> Option<MdQuotePrefix> {
+    match bullet.content().iter().last()? {
+        AnyMdBlock::MdQuotePrefix(prefix) => Some(prefix),
+        block => list_trailing_quote_prefix(&block.as_any_list_item()?),
+    }
+}
+
+/// Returns the quote prefix of the line after `list_item`, which the parser
+/// attaches to the end of the list's last bullet.
+fn list_trailing_quote_prefix(list_item: &AnyListItem) -> Option<MdQuotePrefix> {
+    content_trailing_quote_prefix(&list_item.list().iter().last()?)
+}
+
+/// Whether the last bullet of `list_item` ends with the quote prefix of the
+/// line after the list.
+///
+/// The list formatter doesn't print that prefix, so the formatter of the block
+/// on that line must print the quote prefix again, as for `> quoted` in
+/// `> - one\n> > quoted`.
+pub(crate) fn list_ends_with_quote_prefix(list_item: &AnyListItem) -> bool {
+    list_trailing_quote_prefix(list_item).is_some()
 }
 
 pub(crate) struct ListBullet {
@@ -266,7 +296,7 @@ fn should_keep_pre_marker(list: &MdBulletList) -> bool {
 }
 
 impl ListBullet {
-    fn prefix_layout(&self) -> FormatResult<(FormatMdListMarkerPrefixOptions, usize)> {
+    fn prefix_layout(&self) -> FormatResult<(FormatMdListMarkerPrefixOptions, ListPrefixWidth)> {
         let MdBulletFields { content, prefix } = self.node.as_fields();
 
         let prefix = prefix?;
@@ -329,22 +359,195 @@ impl ListBullet {
                 keep_pre_marker,
                 min_post_marker_len,
             },
-            alignment,
+            ListPrefixWidth {
+                printed: alignment,
+                single_space: pre_marker_width + marker_width + 1,
+            },
         ))
     }
+
+    /// Returns the spaces that indent the blocks after the bullet's first one
+    /// past the list marker prefix, so that they start at the indent width.
+    /// Prettier applies `tabWidth` the same way.
+    ///
+    /// Returns an empty string when the bullet can't indent its blocks.
+    fn block_indent(&self, prefix_width: ListPrefixWidth, f: &MarkdownFormatter) -> &'static str {
+        // A fourth space would turn a block into an indented code block.
+        const MAX_BLOCK_INDENT: &str = "   ";
+
+        // Without a space after the marker, the bullet's content starts on
+        // the line after the marker and keeps its alignment.
+        if prefix_width.printed < prefix_width.single_space {
+            return "";
+        }
+        let width = usize::from(f.options().indent_width().value())
+            .min(prefix_width.single_space + MAX_BLOCK_INDENT.len())
+            .saturating_sub(prefix_width.printed);
+        if width == 0 {
+            return "";
+        }
+
+        let is_quoted = self
+            .node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .any(|ancestor| MdQuote::can_cast(ancestor.kind()));
+        let content = self.node.content();
+        // The blocks after an unmoved nested list would line up with the
+        // content of its last item and become part of that item.
+        let has_unmoved_list = content.iter().any(|block| {
+            block.is_list()
+                && (is_first_block(&content, &block)
+                    || follows_quote(&block)
+                    || !list_follows_indent_width(&block, f))
+        });
+        if is_quoted || has_unmoved_list {
+            return "";
+        }
+
+        &MAX_BLOCK_INDENT[..width]
+    }
+}
+
+/// The width of the list marker prefix of a bullet.
+#[derive(Clone, Copy)]
+struct ListPrefixWidth {
+    /// The width of the prefix as it is printed. The bullet's first block
+    /// starts at this column, relative to the start of the bullet.
+    printed: usize,
+    /// The width that the prefix has with a single space after the marker.
+    single_space: usize,
+}
+
+/// Whether `block` can be indented past its bullet's list marker prefix.
+///
+/// A block that is printed with its source indentation can't: it would move
+/// further every time the document is formatted. Returns `false` for a list.
+fn leaf_follows_indent_width(block: &AnyMdBlock, f: &MarkdownFormatter) -> bool {
+    let AnyMdBlock::AnyMdLeafBlock(block) = block else {
+        return false;
+    };
+
+    match block {
+        AnyMdLeafBlock::MdParagraph(paragraph) => {
+            !paragraph.is_html_comment()
+                && !FormatMdParagraph::default().is_suppressed(paragraph, f)
+                && !(f.options().prose_wrap() == ProseWrap::Preserve
+                    && has_unindented_block_marker_line(paragraph))
+        }
+        AnyMdLeafBlock::MdSetextHeader(header) => {
+            !setext_header_keeps_underline(header, f)
+                && !f.context().comments().is_suppressed(header.syntax())
+        }
+        AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdFencedCodeBlock(_))
+        | AnyMdLeafBlock::GfmTable(_)
+        | AnyMdLeafBlock::MdHeader(_)
+        | AnyMdLeafBlock::MdThematicBreakBlock(_) => {
+            !f.context().comments().is_suppressed(block.syntax())
+        }
+        _ => false,
+    }
+}
+
+/// Whether a line of `paragraph` after the first one starts with a
+/// [block marker word](is_block_marker_word) at the content column of its
+/// list item. The formatter joins such a line to the previous one once it is
+/// indented.
+fn has_unindented_block_marker_line(paragraph: &MdParagraph) -> bool {
+    let mut at_line_start = false;
+
+    for item in paragraph.list().iter() {
+        match item {
+            AnyMdInline::MdTextual(textual) => {
+                let Ok(token) = textual.value_token() else {
+                    return false;
+                };
+                if textual.is_newline().unwrap_or_default() {
+                    at_line_start = true;
+                    continue;
+                }
+                // A word that follows whitespace is indented.
+                let text = token.text();
+                if at_line_start
+                    && text
+                        .split_ascii_whitespace()
+                        .next()
+                        .is_some_and(|word| text.starts_with(word) && is_block_marker_word(word))
+                {
+                    return true;
+                }
+                at_line_start = false;
+            }
+            // The indentation that the list item requires.
+            AnyMdInline::MdIndentToken(_) => {}
+            _ => at_line_start = false,
+        }
+    }
+
+    false
+}
+
+/// Whether `list` can be indented past its bullet's list marker prefix.
+///
+/// A block inside `list` that is printed with its source indentation would
+/// stay behind and could end up outside its list item.
+fn list_follows_indent_width(list: &AnyMdBlock, f: &MarkdownFormatter) -> bool {
+    list.syntax()
+        .descendants()
+        .filter_map(AnyMdBlock::cast)
+        .all(|block| {
+            if block.is_list() {
+                !f.context().comments().is_suppressed(block.syntax())
+            } else {
+                block.is_newline()
+                    || block.is_continuation_indent()
+                    || leaf_follows_indent_width(&block, f)
+            }
+        })
+}
+
+/// Whether `block` is the first block of `content` that isn't a line break or
+/// the indentation of a continuation line.
+fn is_first_block(content: &MdBlockList, block: &AnyMdBlock) -> bool {
+    content
+        .iter()
+        .find(|block| !block.is_newline() && !block.is_continuation_indent())
+        .is_some_and(|first| first == *block)
+}
+
+/// Whether `block` starts on the line after the last line of a blockquote.
+///
+/// Such a block isn't indented past the list marker prefix. The parser would
+/// read its first line, once it is indented past the quote marker, as text of
+/// the quote's last paragraph.
+fn follows_quote(block: &AnyMdBlock) -> bool {
+    block
+        .syntax()
+        .siblings(Direction::Prev)
+        .skip(1)
+        .filter_map(AnyMdBlock::cast)
+        .find(|block| !block.is_continuation_indent())
+        .is_some_and(|block| {
+            matches!(
+                block,
+                AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(_))
+            )
+        })
 }
 
 impl Format<MarkdownFormatContext> for ListBullet {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         f.context().comments().is_suppressed(self.node.syntax());
         let MdBulletFields { content, prefix } = self.node.as_fields();
-        let (prefix_options, alignment) = self.prefix_layout()?;
+        let (prefix_options, prefix_width) = self.prefix_layout()?;
         write!(f, [prefix?.format().with_options(prefix_options)])?;
 
         let content = ListBlockList {
             content: content.clone(),
+            block_indent: self.block_indent(prefix_width, f),
         };
-        write!(f, [align(" ".repeat(alignment), &content),])
+        write!(f, [align(" ".repeat(prefix_width.printed), &content),])
     }
 }
 
@@ -361,7 +564,9 @@ pub(crate) fn list_marker_alignment(bullet: &MdBullet) -> FormatResult<usize> {
         target_ordered_marker,
         keep_pre_marker: should_keep_pre_marker(&list),
     };
-    formatted.prefix_layout().map(|(_, alignment)| alignment)
+    formatted
+        .prefix_layout()
+        .map(|(_, prefix_width)| prefix_width.printed)
 }
 
 fn indent_width(indent: &MdIndentTokenList) -> FormatResult<usize> {
@@ -565,6 +770,9 @@ fn has_indented_code_block_after_content(content: &MdBlockList) -> bool {
 /// It's responsible for formatting a [MdBlockList] that is inside a bullet list
 struct ListBlockList {
     content: MdBlockList,
+    /// The spaces that indent the blocks after the first one past the list
+    /// marker prefix. See [ListBullet::block_indent].
+    block_indent: &'static str,
 }
 
 impl ListBlockList {
@@ -658,6 +866,80 @@ impl ListBlockList {
             _ => write!(f, [empty_line()])?,
         }
         Ok(())
+    }
+
+    /// Emits the normalized separation before `content`, then `content`
+    /// itself, indented by [Self::content_indent].
+    fn fmt_separated_list_content(
+        &self,
+        pending_breaks: u8,
+        pending_quote_continuation: &mut bool,
+        previous_content_was_fenced_code_block: bool,
+        previous_content_needs_blank_before_fenced_code_block: bool,
+        content: &AnyMdBlock,
+        f: &mut Formatter<MarkdownFormatContext>,
+    ) -> FormatResult<()> {
+        let content_indent = self.content_indent(content, pending_breaks, f);
+        let separated_content = format_once(|f| {
+            Self::emit_pending_breaks(
+                pending_breaks,
+                pending_quote_continuation,
+                previous_content_was_fenced_code_block,
+                previous_content_needs_blank_before_fenced_code_block,
+                content,
+                f,
+            )?;
+            Self::fmt_list_content(content, f)
+        });
+
+        if content_indent.is_empty() {
+            write!(f, [separated_content])
+        } else {
+            // The separation is inside the alignment, so that the line break
+            // before `content` indents its first line as well.
+            write!(f, [align(content_indent, &separated_content)])
+        }
+    }
+
+    /// Returns the spaces that indent `content` past the list marker prefix:
+    /// [Self::block_indent], or an empty string when `content` isn't indented.
+    ///
+    /// The bullet's first block starts right after the marker, so it isn't
+    /// indented. Among the other blocks, those that
+    /// [keep their source indentation](leaf_follows_indent_width) and those
+    /// that [follow a blockquote](follows_quote) aren't indented either.
+    fn content_indent(
+        &self,
+        content: &AnyMdBlock,
+        pending_breaks: u8,
+        f: &MarkdownFormatter,
+    ) -> &'static str {
+        // Without a pending line break, `content` continues the current line
+        // and has no indentation to change.
+        if self.block_indent.is_empty() || pending_breaks == 0 {
+            return "";
+        }
+        // `ListBullet::block_indent` is empty unless every nested list can
+        // move.
+        if content.is_list() {
+            return self.block_indent;
+        }
+        if is_first_block(&self.content, content)
+            || follows_quote(content)
+            || !leaf_follows_indent_width(content, f)
+        {
+            return "";
+        }
+
+        self.block_indent
+    }
+
+    /// Whether `content` is a list that removed the quote prefix of the line
+    /// after it, which the next content must print again.
+    fn ends_with_quote_prefix(content: &AnyMdBlock) -> bool {
+        content
+            .as_any_list_item()
+            .is_some_and(|list_item| list_ends_with_quote_prefix(&list_item))
     }
 
     fn fmt_list_content(content: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -811,7 +1093,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             )?;
                         }
                     } else {
-                        Self::emit_pending_breaks(
+                        self.fmt_separated_list_content(
                             pending_breaks,
                             &mut pending_quote_continuation,
                             last_content_was_fenced_code_block,
@@ -819,7 +1101,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             &content,
                             f,
                         )?;
-                        Self::fmt_list_content(&content, f)?;
+                        pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                     }
 
                     let middle_is_terminator = middle_block.is_newline()
@@ -929,7 +1211,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         continue;
                     }
 
-                    Self::emit_pending_breaks(
+                    self.fmt_separated_list_content(
                         pending_breaks,
                         &mut pending_quote_continuation,
                         last_content_was_fenced_code_block,
@@ -937,7 +1219,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         &content,
                         f,
                     )?;
-                    Self::fmt_list_content(&content, f)?;
+                    pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                     write!(
                         f,
                         [continuation
@@ -952,7 +1234,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     last_content_needs_blank_before_fenced_code_block =
                         content_needs_blank_before_fenced_code_block(&content);
                     last_content_has_trailing_newline = false;
-                    at_line_terminator = content.is_html_block() || content.is_fenced_block();
+                    at_line_terminator = content.is_html_block()
+                        || content.is_fenced_block()
+                        || content.is_mdx_block();
                     pending_quote_continuation |= has_following_quote_prefix;
                 }
 
@@ -1002,22 +1286,29 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             })]
                         )?;
                     } else {
-                        Self::emit_pending_breaks(
-                            pending_breaks,
-                            &mut pending_quote_continuation,
-                            last_content_was_fenced_code_block,
-                            last_content_needs_blank_before_fenced_code_block,
-                            &content,
-                            f,
-                        )?;
-                        Self::fmt_list_content(&content, f)?;
+                        // The constructs of an MDX flow line stay on one line.
+                        if content.continues_mdx_flow_line() {
+                            Self::fmt_list_content(&content, f)?;
+                        } else {
+                            self.fmt_separated_list_content(
+                                pending_breaks,
+                                &mut pending_quote_continuation,
+                                last_content_was_fenced_code_block,
+                                last_content_needs_blank_before_fenced_code_block,
+                                &content,
+                                f,
+                            )?;
+                        }
+                        pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                         pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
                         last_content_was_thematic_break = content.is_thematic_break();
                         last_content_was_fenced_code_block = content.is_fenced_block();
                         last_content_needs_blank_before_fenced_code_block =
                             content_needs_blank_before_fenced_code_block(&content);
                         last_content_has_trailing_newline = false;
-                        at_line_terminator = content.is_html_block() || content.is_fenced_block();
+                        at_line_terminator = content.is_html_block()
+                            || content.is_fenced_block()
+                            || content.is_mdx_block();
                     }
                 }
             }
@@ -1030,7 +1321,25 @@ impl Format<MarkdownFormatContext> for ListBlockList {
             ) {
                 (_, true) => write!(f, [hard_line_break()])?,
                 (1, false) => write!(f, [hard_line_break()])?,
-                (_, false) => write!(f, [empty_line()])?,
+                (_, false) => match self.content.syntax().ancestors().find_map(MdQuote::cast) {
+                    // A blank line without `>` ends a blockquote, so trailing
+                    // blank lines of an item inside a blockquote keep the
+                    // quote's markers.
+                    Some(quote) => {
+                        let line_prefix = quote_line_prefix(quote.content().syntax())?;
+                        write!(
+                            f,
+                            [
+                                dedent_to_root(&format_args![
+                                    hard_line_break(),
+                                    line_prefix.format(false)
+                                ]),
+                                hard_line_break()
+                            ]
+                        )?;
+                    }
+                    None => write!(f, [empty_line()])?,
+                },
             }
         }
         Ok(())

@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <p>{{ double() }}</p>
+  <p>{{ label() }}</p>
+</template>
+
+<script setup>
+import { computed } from "vue";
+
+const double = computed(() => 2);
+const label = computed({
+  get: () => "label",
+  set: (value) => {},
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup.vue:3:9 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property double is called like a method, but its value is not a function.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <p>{{ double() }}</p>
+      │         ^^^^^^^^
+    4 │   <p>{{ label() }}</p>
+    5 │ </template>
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:4:9 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property label is called like a method, but its value is not a function.
+  
+    2 │ <template>
+    3 │   <p>{{ double() }}</p>
+  > 4 │   <p>{{ label() }}</p>
+      │         ^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

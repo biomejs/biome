@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: comments/ends-line-of-opening-tag.html
+---
+
+# Input
+
+```html
+<div><!-- before element -->
+<i>x</i></div>
+<div><!-- trailing space --> 
+<i>x</i></div>
+<div> <!-- surrounded by spaces --> 
+<i>x</i></div>
+<div><!-- before text -->
+text</div>
+<div><!-- a --><!-- b -->
+<p>x</p></div>
+<pre><!-- verbatim -->
+foo</pre>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	<!-- before element -->
+	<i>x</i>
+</div>
+<div>
+	<!-- trailing space --> <i>x</i>
+</div>
+<div>
+	<!-- surrounded by spaces --> <i>x</i>
+</div>
+<div>
+	<!-- before text -->
+	text
+</div>
+<div>
+	<!-- a --><!-- b -->
+	<p>x</p>
+</div>
+<pre><!-- verbatim -->
+foo</pre>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"<!-- verbatim -->\nfoo" => 239..260

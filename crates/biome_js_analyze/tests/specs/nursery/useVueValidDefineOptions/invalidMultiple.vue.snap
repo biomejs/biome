@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidMultiple.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineOptions({ name: "Foo" });
+defineOptions({ inheritAttrs: false });
+const options = defineOptions({ name: "Bar" });
+</script>
+
+```
+
+# Diagnostics
+```
+invalidMultiple.vue:4:1 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() is called more than once.
+  
+    2 │ <script setup>
+    3 │ defineOptions({ name: "Foo" });
+  > 4 │ defineOptions({ inheritAttrs: false });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const options = defineOptions({ name: "Bar" });
+    6 │ </script>
+  
+  i It is first called here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineOptions({ name: "Foo" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ defineOptions({ inheritAttrs: false });
+    5 │ const options = defineOptions({ name: "Bar" });
+  
+  i Vue accepts only one defineOptions() call per component, and reports an error when it compiles this one.
+  
+  i Move these options into the first call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMultiple.vue:5:17 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() is called more than once.
+  
+    3 │ defineOptions({ name: "Foo" });
+    4 │ defineOptions({ inheritAttrs: false });
+  > 5 │ const options = defineOptions({ name: "Bar" });
+      │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i It is first called here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineOptions({ name: "Foo" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ defineOptions({ inheritAttrs: false });
+    5 │ const options = defineOptions({ name: "Bar" });
+  
+  i Vue accepts only one defineOptions() call per component, and reports an error when it compiles this one.
+  
+  i Move these options into the first call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

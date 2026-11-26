@@ -1,0 +1,200 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" />;
+
+<script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />;
+
+<script async src={"https://www.googletagmanager.com/gtm.js?id=GTM-XYZ"} />;
+
+<script async src='https://www.google-analytics.com/analytics.js'></script>;
+
+<script
+	dangerouslySetInnerHTML={{
+		__html: `
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-XXXXX-Y', 'auto');
+			ga('send', 'pageview');
+		`,
+	}}
+/>;
+
+<script
+	dangerouslySetInnerHTML={{
+		__html: `
+			(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+			new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+			j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+			'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+			})(window,document,'script','dataLayer','${GTM_ID}');
+		`,
+	}}
+/>;
+
+<script dangerouslySetInnerHTML={{ __html: "j.src='https://www.googletagmanager.com/gtm.js?id=GTM-XYZ'" }} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Analytics.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />;
+  
+  i Loading Google Analytics with a plain script element can slow down your page.
+  
+  i Use the GoogleAnalytics component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Analytics.
+  
+    2 │ <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" />;
+    3 │ 
+  > 4 │ <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <script async src={"https://www.googletagmanager.com/gtm.js?id=GTM-XYZ"} />;
+  
+  i Loading Google Analytics with a plain script element can slow down your page.
+  
+  i Use the GoogleAnalytics component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Tag Manager.
+  
+    4 │ <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />;
+    5 │ 
+  > 6 │ <script async src={"https://www.googletagmanager.com/gtm.js?id=GTM-XYZ"} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <script async src='https://www.google-analytics.com/analytics.js'></script>;
+  
+  i Loading Google Tag Manager with a plain script element can slow down your page.
+  
+  i Use the GoogleTagManager component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Analytics.
+  
+     6 │ <script async src={"https://www.googletagmanager.com/gtm.js?id=GTM-XYZ"} />;
+     7 │ 
+   > 8 │ <script async src='https://www.google-analytics.com/analytics.js'></script>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <script
+  
+  i Loading Google Analytics with a plain script element can slow down your page.
+  
+  i Use the GoogleAnalytics component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Analytics.
+  
+     8 │ <script async src='https://www.google-analytics.com/analytics.js'></script>;
+     9 │ 
+  > 10 │ <script
+       │ ^^^^^^^
+  > 11 │ 	dangerouslySetInnerHTML={{
+        ...
+  > 20 │ 	}}
+  > 21 │ />;
+       │ ^^
+    22 │ 
+    23 │ <script
+  
+  i Loading Google Analytics with a plain script element can slow down your page.
+  
+  i Use the GoogleAnalytics component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Tag Manager.
+  
+    21 │ />;
+    22 │ 
+  > 23 │ <script
+       │ ^^^^^^^
+  > 24 │ 	dangerouslySetInnerHTML={{
+        ...
+  > 32 │ 	}}
+  > 33 │ />;
+       │ ^^
+    34 │ 
+    35 │ <script dangerouslySetInnerHTML={{ __html: "j.src='https://www.googletagmanager.com/gtm.js?id=GTM-XYZ'" }} />;
+  
+  i Loading Google Tag Manager with a plain script element can slow down your page.
+  
+  i Use the GoogleTagManager component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:1 lint/nursery/useNextScriptForGoogleAnalytics ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This script element loads Google Tag Manager.
+  
+    33 │ />;
+    34 │ 
+  > 35 │ <script dangerouslySetInnerHTML={{ __html: "j.src='https://www.googletagmanager.com/gtm.js?id=GTM-XYZ'" }} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+  
+  i Loading Google Tag Manager with a plain script element can slow down your page.
+  
+  i Use the GoogleTagManager component from @next/third-parties/google instead, which loads the script after the page becomes interactive. See the Next.js docs for more details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

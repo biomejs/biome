@@ -33,7 +33,7 @@ fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) ->
         //! and "touches" the corresponding group files to trigger recompilation.
 
         use std::env;
-        use std::fs;
+        use std::fs::{self, FileTimes};
         use std::io;
         use std::path::PathBuf;
         use std::time::SystemTime;
@@ -77,8 +77,7 @@ fn generate_build_script(categories_and_groups: &BTreeMap<&str, Vec<String>>) ->
                 return Ok(());
             }
 
-            let now = filetime::FileTime::from_system_time(SystemTime::now());
-            filetime::set_file_mtime(path, now)?;
+            fs::set_times(path, FileTimes::new().set_modified(SystemTime::now()))?;
 
             Ok(())
         }

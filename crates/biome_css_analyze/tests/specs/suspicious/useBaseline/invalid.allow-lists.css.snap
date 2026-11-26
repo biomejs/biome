@@ -6,21 +6,21 @@ expression: invalid.allow-lists.css
 ```css
 /* should generate diagnostics */
 
-/* allowProperties: only accent-color is allowed, backdrop-filter is still flagged */
-a { accent-color: red; backdrop-filter: blur(10px); }
+/* allowProperties: only accent-color is allowed, ime-mode is still flagged */
+a { accent-color: red; ime-mode: active; }
 
 /* allowSelectors: only "has" is allowed, fullscreen is still flagged */
 h1:has(+ h2) { margin: 0; }
 h1:fullscreen { color: red; }
 
-/* allowFunctions: only color-mix is allowed, abs is still flagged */
-a { width: abs(20% - 100px); }
+/* allowFunctions: only color-mix is allowed, paint is still flagged */
+a { background-image: paint(checkerboard); }
 
 /* allowMediaConditions: only scripting is allowed, inverted-colors is still flagged */
 @media (inverted-colors: inverted) { a { color: red; } }
 
-/* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
-a { clip-path: stroke-box; }
+/* allowPropertyValues: only writing-mode:lr is allowed, tb is still flagged */
+a { writing-mode: tb; }
 
 ```
 
@@ -28,11 +28,11 @@ a { clip-path: stroke-box; }
 ```
 invalid.allow-lists.css:4:24 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS property backdrop-filter isn't part of the chosen Baseline.
+  ! CSS property ime-mode isn't part of the chosen Baseline.
   
-    3 │ /* allowProperties: only accent-color is allowed, backdrop-filter is still flagged */
-  > 4 │ a { accent-color: red; backdrop-filter: blur(10px); }
-      │                        ^^^^^^^^^^^^^^^
+    3 │ /* allowProperties: only accent-color is allowed, ime-mode is still flagged */
+  > 4 │ a { accent-color: red; ime-mode: active; }
+      │                        ^^^^^^^^
     5 │ 
     6 │ /* allowSelectors: only "has" is allowed, fullscreen is still flagged */
   
@@ -42,7 +42,7 @@ invalid.allow-lists.css:4:24 lint/suspicious/useBaseline ━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature backdrop-filter.
+  i Check caniuse.com for more information about the feature ime-mode.
   
 
 ```
@@ -57,7 +57,7 @@ invalid.allow-lists.css:8:4 lint/suspicious/useBaseline ━━━━━━━━
    > 8 │ h1:fullscreen { color: red; }
        │    ^^^^^^^^^^
      9 │ 
-    10 │ /* allowFunctions: only color-mix is allowed, abs is still flagged */
+    10 │ /* allowFunctions: only color-mix is allowed, paint is still flagged */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -71,13 +71,13 @@ invalid.allow-lists.css:8:4 lint/suspicious/useBaseline ━━━━━━━━
 ```
 
 ```
-invalid.allow-lists.css:11:12 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.allow-lists.css:11:23 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS function abs isn't part of the chosen Baseline.
+  ! CSS function paint isn't part of the chosen Baseline.
   
-    10 │ /* allowFunctions: only color-mix is allowed, abs is still flagged */
-  > 11 │ a { width: abs(20% - 100px); }
-       │            ^^^
+    10 │ /* allowFunctions: only color-mix is allowed, paint is still flagged */
+  > 11 │ a { background-image: paint(checkerboard); }
+       │                       ^^^^^
     12 │ 
     13 │ /* allowMediaConditions: only scripting is allowed, inverted-colors is still flagged */
   
@@ -87,7 +87,7 @@ invalid.allow-lists.css:11:12 lint/suspicious/useBaseline ━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature abs.
+  i Check caniuse.com for more information about the feature paint.
   
 
 ```
@@ -101,7 +101,7 @@ invalid.allow-lists.css:14:9 lint/suspicious/useBaseline ━━━━━━━�
   > 14 │ @media (inverted-colors: inverted) { a { color: red; } }
        │         ^^^^^^^^^^^^^^^
     15 │ 
-    16 │ /* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
+    16 │ /* allowPropertyValues: only writing-mode:lr is allowed, tb is still flagged */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -115,13 +115,13 @@ invalid.allow-lists.css:14:9 lint/suspicious/useBaseline ━━━━━━━�
 ```
 
 ```
-invalid.allow-lists.css:17:16 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.allow-lists.css:17:19 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS property value clip-path: stroke-box isn't part of the chosen Baseline.
+  ! CSS property value writing-mode: tb isn't part of the chosen Baseline.
   
-    16 │ /* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
-  > 17 │ a { clip-path: stroke-box; }
-       │                ^^^^^^^^^^
+    16 │ /* allowPropertyValues: only writing-mode:lr is allowed, tb is still flagged */
+  > 17 │ a { writing-mode: tb; }
+       │                   ^^
     18 │ 
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
@@ -130,7 +130,7 @@ invalid.allow-lists.css:17:16 lint/suspicious/useBaseline ━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the value stroke-box for the property clip-path.Check caniuse.com for more information about the property clip-path.
+  i Check caniuse.com for more information about the value tb for the property writing-mode.Check caniuse.com for more information about the property writing-mode.
   
 
 ```

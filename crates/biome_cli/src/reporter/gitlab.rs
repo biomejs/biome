@@ -133,8 +133,7 @@ impl GitLabDiagnostics<'_> {
 
         let check_name = diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default();
+            .map_or_default(|category| category.name());
 
         calculate_hash(&Fingerprint {
             check_name,
@@ -216,8 +215,7 @@ impl<'a> GitLabDiagnostic<'a> {
         };
         let check_name = diagnostic
             .category()
-            .map(|category| category.name())
-            .unwrap_or_default();
+            .map_or_default(|category| category.name());
 
         Some(GitLabDiagnostic {
             severity: match diagnostic.severity() {

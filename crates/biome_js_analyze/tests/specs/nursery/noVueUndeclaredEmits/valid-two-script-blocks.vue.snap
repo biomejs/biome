@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-two-script-blocks.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+
+<script>
+export default {
+  emits: ["close"],
+};
+</script>
+
+<script setup>
+const label = "Close";
+</script>
+
+```

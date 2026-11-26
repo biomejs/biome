@@ -6,29 +6,33 @@ expression: invalid.css
 ```css
 /* should generate diagnostics */
 
-/* Limited/newly available properties - flagged with default "widely" */
-a { accent-color: bar; backdrop-filter: auto }
+/* The flagged features are limited and not expected to become Baseline soon.
+   Avoid newly available features here: they become widely available within 30
+   months. If a data update makes a feature pass, replace it with a limited one. */
+
+/* Limited properties - flagged with default "widely" */
+a { ime-mode: bar; speak: auto }
 
 /* @supports not (negated) - NOT suppressed */
-@supports not (accent-color: auto) { a { accent-color: auto } }
+@supports not (ime-mode: auto) { a { ime-mode: auto } }
 
 /* Outer @supports does not protect inner non-matching rule */
-@supports (accent-color: auto) {
-    @supports (backdrop-filter: auto) {
-        a { accent-color: red; }
+@supports (ime-mode: auto) {
+    @supports (speak: auto) {
+        a { ime-mode: active; }
     }
-    a { backdrop-filter: auto; }
+    a { speak: auto; }
 }
 
 /* Property value not yet widely available */
 @supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
 
 /* Function not yet widely available */
-a { width: abs(20% - 100px); }
-a { color: light-dark(black, white); }
+a { background-image: paint(checkerboard); }
+a { background-image: element(#foo); }
 
 /* Function inside @supports, but @supports condition uses different feature */
-@supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
+@supports (ime-mode: auto) { a { background-image: paint(checkerboard); } }
 
 /* Media conditions not widely available */
 @media (inverted-colors: inverted) { a { color: red; } }
@@ -51,23 +55,23 @@ h1:has(+ h2) { margin: 0 0 0.25rem 0; }
 }
 
 /* Pseudo-element not yet widely available */
-details::details-content { background-color: #a29bfe; }
+p::grammar-error { background-color: #a29bfe; }
 
 ```
 
-_Note: The parser emitted 1 diagnostics which are not shown here._
+_Note: The parser emitted 2 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid.css:4:5 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:5 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS property accent-color isn't part of the chosen Baseline.
+  ! CSS property ime-mode isn't part of the chosen Baseline.
   
-    3 │ /* Limited/newly available properties - flagged with default "widely" */
-  > 4 │ a { accent-color: bar; backdrop-filter: auto }
-      │     ^^^^^^^^^^^^
-    5 │ 
-    6 │ /* @supports not (negated) - NOT suppressed */
+     7 │ /* Limited properties - flagged with default "widely" */
+   > 8 │ a { ime-mode: bar; speak: auto }
+       │     ^^^^^^^^
+     9 │ 
+    10 │ /* @supports not (negated) - NOT suppressed */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -75,21 +79,21 @@ invalid.css:4:5 lint/suspicious/useBaseline ━━━━━━━━━━━━
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature accent-color.
+  i Check caniuse.com for more information about the feature ime-mode.
   
 
 ```
 
 ```
-invalid.css:4:24 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:20 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS property backdrop-filter isn't part of the chosen Baseline.
+  ! CSS property speak isn't part of the chosen Baseline.
   
-    3 │ /* Limited/newly available properties - flagged with default "widely" */
-  > 4 │ a { accent-color: bar; backdrop-filter: auto }
-      │                        ^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ /* @supports not (negated) - NOT suppressed */
+     7 │ /* Limited properties - flagged with default "widely" */
+   > 8 │ a { ime-mode: bar; speak: auto }
+       │                    ^^^^^
+     9 │ 
+    10 │ /* @supports not (negated) - NOT suppressed */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -97,21 +101,21 @@ invalid.css:4:24 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature backdrop-filter.
+  i Check caniuse.com for more information about the feature speak.
   
 
 ```
 
 ```
-invalid.css:7:16 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:16 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS property accent-color isn't part of the chosen Baseline.
+  ! CSS property ime-mode isn't part of the chosen Baseline.
   
-    6 │ /* @supports not (negated) - NOT suppressed */
-  > 7 │ @supports not (accent-color: auto) { a { accent-color: auto } }
-      │                ^^^^^^^^^^^^
-    8 │ 
-    9 │ /* Outer @supports does not protect inner non-matching rule */
+    10 │ /* @supports not (negated) - NOT suppressed */
+  > 11 │ @supports not (ime-mode: auto) { a { ime-mode: auto } }
+       │                ^^^^^^^^
+    12 │ 
+    13 │ /* Outer @supports does not protect inner non-matching rule */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -119,21 +123,21 @@ invalid.css:7:16 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature accent-color.
+  i Check caniuse.com for more information about the feature ime-mode.
   
 
 ```
 
 ```
-invalid.css:21:12 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:25:23 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS function abs isn't part of the chosen Baseline.
+  ! CSS function paint isn't part of the chosen Baseline.
   
-    20 │ /* Function not yet widely available */
-  > 21 │ a { width: abs(20% - 100px); }
-       │            ^^^
-    22 │ a { color: light-dark(black, white); }
-    23 │ 
+    24 │ /* Function not yet widely available */
+  > 25 │ a { background-image: paint(checkerboard); }
+       │                       ^^^^^
+    26 │ a { background-image: element(#foo); }
+    27 │ 
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -141,22 +145,22 @@ invalid.css:21:12 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature abs.
+  i Check caniuse.com for more information about the feature paint.
   
 
 ```
 
 ```
-invalid.css:22:12 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:23 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS function light-dark isn't part of the chosen Baseline.
+  ! CSS function element isn't part of the chosen Baseline.
   
-    20 │ /* Function not yet widely available */
-    21 │ a { width: abs(20% - 100px); }
-  > 22 │ a { color: light-dark(black, white); }
-       │            ^^^^^^^^^^
-    23 │ 
-    24 │ /* Function inside @supports, but @supports condition uses different feature */
+    24 │ /* Function not yet widely available */
+    25 │ a { background-image: paint(checkerboard); }
+  > 26 │ a { background-image: element(#foo); }
+       │                       ^^^^^^^
+    27 │ 
+    28 │ /* Function inside @supports, but @supports condition uses different feature */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -164,21 +168,21 @@ invalid.css:22:12 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature light-dark.
+  i Check caniuse.com for more information about the feature element.
   
 
 ```
 
 ```
-invalid.css:25:52 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:29:52 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS function abs isn't part of the chosen Baseline.
+  ! CSS function paint isn't part of the chosen Baseline.
   
-    24 │ /* Function inside @supports, but @supports condition uses different feature */
-  > 25 │ @supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
-       │                                                    ^^^
-    26 │ 
-    27 │ /* Media conditions not widely available */
+    28 │ /* Function inside @supports, but @supports condition uses different feature */
+  > 29 │ @supports (ime-mode: auto) { a { background-image: paint(checkerboard); } }
+       │                                                    ^^^^^
+    30 │ 
+    31 │ /* Media conditions not widely available */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -186,21 +190,21 @@ invalid.css:25:52 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature abs.
+  i Check caniuse.com for more information about the feature paint.
   
 
 ```
 
 ```
-invalid.css:28:9 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:32:9 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! CSS media condition inverted-colors isn't part of the chosen Baseline.
   
-    27 │ /* Media conditions not widely available */
-  > 28 │ @media (inverted-colors: inverted) { a { color: red; } }
+    31 │ /* Media conditions not widely available */
+  > 32 │ @media (inverted-colors: inverted) { a { color: red; } }
        │         ^^^^^^^^^^^^^^^
-    29 │ 
-    30 │ /* Multiple non-baseline media conditions in one rule */
+    33 │ 
+    34 │ /* Multiple non-baseline media conditions in one rule */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -214,15 +218,15 @@ invalid.css:28:9 lint/suspicious/useBaseline ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:31:29 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:29 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! CSS media condition inverted-colors isn't part of the chosen Baseline.
   
-    30 │ /* Multiple non-baseline media conditions in one rule */
-  > 31 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+    34 │ /* Multiple non-baseline media conditions in one rule */
+  > 35 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
        │                             ^^^^^^^^^^^^^^^
-    32 │ 
-    33 │ /* Unknown condition mixed with non-baseline */
+    36 │ 
+    37 │ /* Unknown condition mixed with non-baseline */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -236,15 +240,15 @@ invalid.css:31:29 lint/suspicious/useBaseline ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:31:61 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:61 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! CSS media condition device-posture isn't part of the chosen Baseline.
   
-    30 │ /* Multiple non-baseline media conditions in one rule */
-  > 31 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+    34 │ /* Multiple non-baseline media conditions in one rule */
+  > 35 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
        │                                                             ^^^^^^^^^^^^^^
-    32 │ 
-    33 │ /* Unknown condition mixed with non-baseline */
+    36 │ 
+    37 │ /* Unknown condition mixed with non-baseline */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -258,15 +262,15 @@ invalid.css:31:61 lint/suspicious/useBaseline ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:34:19 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:38:19 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! CSS media condition inverted-colors isn't part of the chosen Baseline.
   
-    33 │ /* Unknown condition mixed with non-baseline */
-  > 34 │ @media (foo) and (inverted-colors: inverted) { a { color: red; } }
+    37 │ /* Unknown condition mixed with non-baseline */
+  > 38 │ @media (foo) and (inverted-colors: inverted) { a { color: red; } }
        │                   ^^^^^^^^^^^^^^^
-    35 │ 
-    36 │ /* Pseudo-class not yet widely available */
+    39 │ 
+    40 │ /* Pseudo-class not yet widely available */
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -280,14 +284,14 @@ invalid.css:34:19 lint/suspicious/useBaseline ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:48:10 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:52:4 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS pseudo-element details-content isn't part of the chosen Baseline.
+  ! CSS pseudo-element grammar-error isn't part of the chosen Baseline.
   
-    47 │ /* Pseudo-element not yet widely available */
-  > 48 │ details::details-content { background-color: #a29bfe; }
-       │          ^^^^^^^^^^^^^^^
-    49 │ 
+    51 │ /* Pseudo-element not yet widely available */
+  > 52 │ p::grammar-error { background-color: #a29bfe; }
+       │    ^^^^^^^^^^^^^
+    53 │ 
   
   i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
   
@@ -295,7 +299,7 @@ invalid.css:48:10 lint/suspicious/useBaseline ━━━━━━━━━━━�
   
   i See MDN Baseline for more information.
   
-  i Check caniuse.com for more information about the feature details-content.
+  i Check caniuse.com for more information about the feature grammar-error.
   
 
 ```
