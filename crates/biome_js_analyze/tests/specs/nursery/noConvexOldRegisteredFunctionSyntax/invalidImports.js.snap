@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImports.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { query } from "./_generated/server";
+import { mutation } from "@/convex/_generated/server";
+import { action } from "../lib/functions";
+
+export const list = query(async (ctx) => {});
+
+export const send = mutation(async (ctx) => {});
+
+export const run = action(async (ctx) => {});
+
+```
+
+# Diagnostics
+```
+invalidImports.js:6:21 lint/nursery/noConvexOldRegisteredFunctionSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This Convex function is registered with a plain function instead of an object.
+  
+    4 │ import { action } from "../lib/functions";
+    5 │ 
+  > 6 │ export const list = query(async (ctx) => {});
+      │                     ^^^^^
+    7 │ 
+    8 │ export const send = mutation(async (ctx) => {});
+  
+  i This syntax has no place for an args validator, so Convex can't check the arguments that clients send.
+  
+  i Pass an object instead, with the function in its handler property and the expected arguments in its args property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the function into the handler property of an object.
+  
+    6 │ export·const·list·=·query({·args:·{},·handler:·async·(ctx)·=>·{}·});
+      │                           +++++++++++++++++++++                 ++  
+
+```
+
+```
+invalidImports.js:8:21 lint/nursery/noConvexOldRegisteredFunctionSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × This Convex function is registered with a plain function instead of an object.
+  
+     6 │ export const list = query(async (ctx) => {});
+     7 │ 
+   > 8 │ export const send = mutation(async (ctx) => {});
+       │                     ^^^^^^^^
+     9 │ 
+    10 │ export const run = action(async (ctx) => {});
+  
+  i This syntax has no place for an args validator, so Convex can't check the arguments that clients send.
+  
+  i Pass an object instead, with the function in its handler property and the expected arguments in its args property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the function into the handler property of an object.
+  
+    8 │ export·const·send·=·mutation({·args:·{},·handler:·async·(ctx)·=>·{}·});
+      │                              +++++++++++++++++++++                 ++  
+
+```
+
+```
+invalidImports.js:10:20 lint/nursery/noConvexOldRegisteredFunctionSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  × This Convex function is registered with a plain function instead of an object.
+  
+     8 │ export const send = mutation(async (ctx) => {});
+     9 │ 
+  > 10 │ export const run = action(async (ctx) => {});
+       │                    ^^^^^^
+    11 │ 
+  
+  i This syntax has no place for an args validator, so Convex can't check the arguments that clients send.
+  
+  i Pass an object instead, with the function in its handler property and the expected arguments in its args property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the function into the handler property of an object.
+  
+    10 │ export·const·run·=·action({·args:·{},·handler:·async·(ctx)·=>·{}·});
+       │                           +++++++++++++++++++++                 ++  
+
+```

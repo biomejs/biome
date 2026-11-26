@@ -1,0 +1,36 @@
+/* should not generate diagnostics */
+export const list = query({
+	args: {},
+	handler: async (ctx) => {
+		return await ctx.db.query("messages").collect();
+	},
+});
+
+export const send = mutation({
+	args: { body: v.string() },
+	handler: async (ctx, { body }) => {},
+});
+
+// Not exported, so Convex doesn't register it.
+const notExported = query(async (ctx) => {});
+
+// Not a Convex registration function.
+export const other = otherFunction(async (ctx) => {});
+
+// A member call isn't a registration function.
+export const member = db.query(async (ctx) => {});
+
+// Not a function argument.
+export const reference = query(handler);
+
+// More than one argument.
+export const twoArguments = query(async (ctx) => {}, options);
+
+// No arguments.
+export const empty = query();
+
+export function declared() {
+	return query(async (ctx) => {});
+}
+
+export default query(async (ctx) => {});

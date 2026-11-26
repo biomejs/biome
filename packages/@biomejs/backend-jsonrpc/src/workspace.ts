@@ -3055,6 +3055,11 @@ export interface Nursery {
 	 */
 	noConstantComparisons?: NoConstantComparisonsConfiguration;
 	/**
+	 * Require the object syntax when registering Convex queries, mutations, and actions.
+	 * See https://biomejs.dev/linter/rules/no-convex-old-registered-function-syntax
+	 */
+	noConvexOldRegisteredFunctionSyntax?: NoConvexOldRegisteredFunctionSyntaxConfiguration;
+	/**
 	 * Disallow scheduling Convex cron jobs at the start of the hour.
 	 * See https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons
 	 */
@@ -6998,6 +7003,9 @@ export type NoConsoleSpacesConfiguration =
 export type NoConstantComparisonsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantComparisonsOptions;
+export type NoConvexOldRegisteredFunctionSyntaxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexOldRegisteredFunctionSyntaxOptions;
 export type NoConvexTopOfHourCronsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexTopOfHourCronsOptions;
@@ -10222,6 +10230,14 @@ export interface RuleWithNoConsoleSpacesOptions {
 export interface RuleWithNoConstantComparisonsOptions {
 	level: RulePlainConfiguration;
 	options?: NoConstantComparisonsOptions;
+}
+export interface RuleWithNoConvexOldRegisteredFunctionSyntaxOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConvexOldRegisteredFunctionSyntaxOptions;
 }
 export interface RuleWithNoConvexTopOfHourCronsOptions {
 	level: RulePlainConfiguration;
@@ -14083,6 +14099,7 @@ export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
+export type NoConvexOldRegisteredFunctionSyntaxOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
@@ -16655,6 +16672,7 @@ export type Category =
 	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
+	| "lint/nursery/noConvexOldRegisteredFunctionSyntax"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
@@ -16819,10 +16837,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
