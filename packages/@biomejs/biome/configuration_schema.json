@@ -2051,6 +2051,26 @@
 				}
 			]
 		},
+		"DefaultExportStyle": {
+			"description": "Where a default-exported function or class is declared.",
+			"oneOf": [
+				{
+					"description": "Require the declaration inside the `export default` statement. This is the default.",
+					"type": "string",
+					"const": "inline"
+				},
+				{
+					"description": "Require a separate declaration, followed by `export default` with its name.\nFunctions must be declared as `const` arrow functions.",
+					"type": "string",
+					"const": "separate"
+				},
+				{
+					"description": "Don't check this kind of declaration.",
+					"type": "string",
+					"const": "ignore"
+				}
+			]
+		},
 		"DefineEmitsDeclarationStyle": {
 			"oneOf": [
 				{
@@ -11313,6 +11333,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentDefaultExportStyle": {
+					"description": "Enforce a consistent style for default-exported functions and classes.\nSee https://biomejs.dev/linter/rules/use-consistent-default-export-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentDefaultExportStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentExistenceIndexCheck": {
 					"description": "Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.\nSee https://biomejs.dev/linter/rules/use-consistent-existence-index-check",
 					"anyOf": [
@@ -19130,6 +19157,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentDefaultExportStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentDefaultExportStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentEnumValueTypeOptions": {
 			"type": "object",
 			"properties": {
@@ -25083,6 +25123,33 @@
 		},
 		"UseConsistentCurlyBracesOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentDefaultExportStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentDefaultExportStyleOptions" }
+			]
+		},
+		"UseConsistentDefaultExportStyleOptions": {
+			"description": "Configures the required declaration style for default-exported functions and classes.",
+			"type": "object",
+			"properties": {
+				"classes": {
+					"description": "The declaration style for default-exported classes. Default: `\"inline\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DefaultExportStyle" },
+						{ "type": "null" }
+					]
+				},
+				"functions": {
+					"description": "The declaration style for default-exported functions. Default: `\"inline\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DefaultExportStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentEnumValueTypeConfiguration": {
