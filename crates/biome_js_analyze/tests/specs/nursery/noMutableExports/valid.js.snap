@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export const a = 1;
+export function getCount() {}
+export class Counter {}
+export default count = 1;
+
+const b = 1;
+export { b, b as bAlias, b as "bString" };
+
+function c() {}
+export { c as cAlias };
+
+class D {}
+export { D };
+
+export { e } from "./mod.js";
+export * from "./mod.js";
+
+for (const f of []) {}
+export const g = () => {
+	let h = 1;
+	return h;
+};
+
+```

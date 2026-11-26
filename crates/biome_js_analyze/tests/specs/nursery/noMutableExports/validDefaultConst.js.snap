@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validDefaultConst.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const count = 1;
+export default count;
+
+```

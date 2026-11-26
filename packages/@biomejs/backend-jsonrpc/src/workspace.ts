@@ -3279,6 +3279,11 @@ export interface Nursery {
 	 */
 	noMisusedSpread?: NoMisusedSpreadConfiguration;
 	/**
+	 * Disallow exporting variables declared with let or var.
+	 * See https://biomejs.dev/linter/rules/no-mutable-exports
+	 */
+	noMutableExports?: NoMutableExportsConfiguration;
+	/**
 	 * Disallow negating the result of Array#some() or Array#every().
 	 * See https://biomejs.dev/linter/rules/no-negated-array-predicate
 	 */
@@ -7176,6 +7181,9 @@ export type NoMisusedPromisesConfiguration =
 export type NoMisusedSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedSpreadOptions;
+export type NoMutableExportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMutableExportsOptions;
 export type NoNegatedArrayPredicateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegatedArrayPredicateOptions;
@@ -10523,6 +10531,10 @@ export interface RuleWithNoMisusedPromisesOptions {
 export interface RuleWithNoMisusedSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisusedSpreadOptions;
+}
+export interface RuleWithNoMutableExportsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMutableExportsOptions;
 }
 export interface RuleWithNoNegatedArrayPredicateOptions {
 	/**
@@ -14404,6 +14416,7 @@ export type NoMissingScssInterpolationOptions = {};
 export type NoMissingThrowOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMisusedSpreadOptions = {};
+export type NoMutableExportsOptions = {};
 export type NoNegatedArrayPredicateOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
@@ -16851,6 +16864,7 @@ export type Category =
 	| "lint/nursery/noMissingThrow"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMisusedSpread"
+	| "lint/nursery/noMutableExports"
 	| "lint/nursery/noNegatedArrayPredicate"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
