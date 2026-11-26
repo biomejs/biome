@@ -245,6 +245,7 @@ define_categories! {
     "lint/nursery/noConsoleSpaces": "https://biomejs.dev/linter/rules/no-console-spaces",
     "lint/nursery/noConstantComparisons": "https://biomejs.dev/linter/rules/no-constant-comparisons",
     "lint/nursery/noConvexDuplicateIndexes": "https://biomejs.dev/linter/rules/no-convex-duplicate-indexes",
+    "lint/nursery/noConvexProcessEnv": "https://biomejs.dev/linter/rules/no-convex-process-env",
     "lint/nursery/noConvexQueryFilter": "https://biomejs.dev/linter/rules/no-convex-query-filter",
     "lint/nursery/noConvexTopOfHourCrons": "https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
     "lint/nursery/noDanglingUnderscore": "https://biomejs.dev/linter/rules/no-dangling-underscore",

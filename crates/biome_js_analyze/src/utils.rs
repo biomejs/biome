@@ -12,11 +12,13 @@ pub mod batch;
 pub mod builtin_collection;
 pub mod condition;
 pub mod function_return;
+pub mod import;
 pub mod indexed_collection;
 pub mod rename;
 pub mod same_reference;
 #[cfg(test)]
 pub mod tests;
+pub mod trivia;
 
 /// Verifies that both nodes are equal by checking their descendants (nodes included) kinds
 /// and tokens (same kind and inner token text).

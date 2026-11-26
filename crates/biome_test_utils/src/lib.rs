@@ -675,8 +675,29 @@ pub fn project_layout_for_test_file(
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
     let pnpm_catalog = find_pnpm_workspace_catalog(&fs, input_file);
 
-    let package_json_file = input_file.with_extension("package.json");
-    if let Ok(json) = std::fs::read_to_string(&package_json_file) {
+    // A `<test>.package.json` file is the manifest of the test's directory.
+    // Without one, a test inside a `specs` directory uses the nearest
+    // `package.json` between its directory and `specs`, so it can sit in a
+    // subdirectory of its package.
+    let sidecar_file = input_file.with_extension("package.json");
+    let is_in_specs = input_file
+        .ancestors()
+        .any(|directory| directory.file_name() == Some("specs"));
+    let package_json_file = if sidecar_file.is_file() {
+        Some((sidecar_file, input_file.parent()))
+    } else if !is_in_specs {
+        None
+    } else {
+        input_file
+            .ancestors()
+            .skip(1)
+            .take_while(|directory| directory.file_name() != Some("specs"))
+            .map(|directory| (directory.join("package.json"), Some(directory)))
+            .find(|(file, _)| file.is_file())
+    };
+    if let Some((package_json_file, package_path)) = package_json_file
+        && let Ok(json) = std::fs::read_to_string(&package_json_file)
+    {
         let deserialized = PackageJson::read_manifest(&fs, &package_json_file);
         if deserialized.has_errors() {
             diagnostics.extend(
@@ -698,9 +719,7 @@ pub fn project_layout_for_test_file(
             }
 
             project_layout.insert_node_manifest(
-                input_file
-                    .parent()
-                    .map_or_default(|dir_path| dir_path.to_path_buf()),
+                package_path.map_or_default(|dir_path| dir_path.to_path_buf()),
                 manifest,
             );
         }
