@@ -8,8 +8,8 @@ use crate::css_module_info::traverse::{
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
     CssClassReference, CssPropertyDefinition, FrameworkScope, GlobalStylesheetScope,
-    ImportTreeNode, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TailwindStylesheet,
+    ImportTreeNode, ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind,
+    TailwindStylesheet,
 };
 use biome_css_syntax::{TextRange, TextSize};
 use biome_fs::is_node_modules_path;
@@ -776,7 +776,6 @@ fn css_class_imports(db: &dyn ModuleDb, module: ModuleInfo) -> CssClassImports {
     }
 }
 
-
 /// Returns the classes that the pages of `package` use, or `None` when some
 /// pages can't be read.
 ///
@@ -1264,7 +1263,6 @@ fn framework_package_property_definitions<'db>(
     definitions.retain(|definition| seen.insert(definition.clone()));
     definitions
 }
-
 
 /// Checks if a class is used in a file or any of its imported components (transitively).
 #[salsa::tracked(returns(copy))]

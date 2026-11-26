@@ -278,11 +278,13 @@ impl Watcher {
             &event.kind,
             EventKind::Modify(ModifyKind::Name(RenameMode::Both))
         ) {
-            diagnostics.extend(Self::rename_paths(workspace, event.paths).unwrap_or_else(|error| {
-                // TODO: improve error propagation
-                warn!("Error processing watch event: {error}");
-                vec![]
-            }));
+            diagnostics.extend(Self::rename_paths(workspace, event.paths).unwrap_or_else(
+                |error| {
+                    // TODO: improve error propagation
+                    warn!("Error processing watch event: {error}");
+                    vec![]
+                },
+            ));
             return diagnostics;
         }
 
