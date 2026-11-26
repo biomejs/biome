@@ -1,0 +1,35 @@
+/* should not generate diagnostics */
+async function handler(ctx, db, items, query) {
+	await ctx.db.query("messages").take(10);
+	await ctx.db.query("messages").order("desc").take(10);
+	await ctx.db.query("messages").paginate(paginationOpts);
+	await ctx.db.query("messages").first();
+	await ctx.db.query("messages").unique();
+	// The result of a query is an array, not a query.
+	(await ctx.db.query("messages").take(10)).collect();
+	(await ctx.db.query("messages").first()).collect();
+	// Not a database query.
+	items.collect();
+	query("messages").collect();
+	ctx.query("messages").collect();
+	ctx.database.query("messages").collect();
+	stream.collect();
+	collect();
+	// The method isn't called on the query.
+	ctx.db.query("messages").collect;
+	ctx.db.query("messages")["collect"]();
+	// A query stored in a variable isn't checked.
+	const q = ctx.db.query("messages");
+	await q.collect();
+	// The database isn't directly the object of `query()`.
+	await db.system.query("_storage").collect();
+	await db.other.privateSystem.query("_storage").collect();
+}
+
+class Store {
+	#collect() {}
+	run() {
+		this.#collect();
+		ctx.db.query("messages").#collect();
+	}
+}
