@@ -1521,6 +1521,11 @@ export interface YamlFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	 * The exact number of spaces between content and a comment on the same line
+	 * (`key: value  # comment`). Defaults to 2, which yamllint's `comments` rule expects.
+	 */
+	commentSpacing?: CommentSpacing;
+	/**
 	 * Control the formatter for Yaml (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -1540,6 +1545,11 @@ export interface YamlFormatterConfiguration {
 	 * The type of quotes used in YAML code. Defaults to `double`.
 	 */
 	quoteStyle?: QuoteStyle;
+	/**
+	 * Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma
+	 * after their last entry. Defaults to `all`. ryl's formatter uses `none`.
+	 */
+	trailingCommas?: YamlTrailingCommas;
 	/**
 	 * Whether to add a trailing newline at the end of the file.
 	 *
@@ -1860,6 +1870,16 @@ export interface PluginWithOptions {
 	 */
 	resolutionKind?: PluginResolvePath;
 }
+/**
+ * The exact number of spaces between content and a comment that follows it on the same line.
+ *
+ * Accepted values range from 1 through 4.
+ */
+export type CommentSpacing = number;
+/**
+ * Controls whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma after their last entry.
+ */
+export type YamlTrailingCommas = "none" | "all";
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithNoDuplicateClassesOptions;

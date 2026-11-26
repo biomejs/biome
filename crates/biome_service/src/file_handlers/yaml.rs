@@ -25,7 +25,8 @@ use biome_configuration::yaml::YamlLinterEnabled;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
 use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    BracketSpacing, CommentSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
@@ -33,6 +34,7 @@ use biome_parser::NodeParse;
 use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache};
 use biome_yaml_analyze::{analyze, analyze_snippet};
+use biome_yaml_formatter::TrailingCommas;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
@@ -49,6 +51,8 @@ pub struct YamlFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub comment_spacing: Option<CommentSpacing>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<YamlFormatterEnabled>,
 }
@@ -63,6 +67,8 @@ impl From<YamlFormatterConfiguration> for YamlFormatterSettings {
             trailing_newline: configuration.trailing_newline,
             quote_style: configuration.quote_style,
             bracket_spacing: configuration.bracket_spacing,
+            comment_spacing: configuration.comment_spacing,
+            trailing_commas: configuration.trailing_commas,
             indent_style: Some(IndentStyle::Space),
         }
     }
@@ -135,6 +141,8 @@ impl ServiceLanguage for YamlLanguage {
             .with_line_width(line_width)
             .with_line_ending(line_ending)
             .with_quote_style(quote_style)
+            .with_comment_spacing(language.comment_spacing.unwrap_or_default())
+            .with_trailing_commas(language.trailing_commas.unwrap_or_default())
             .with_trailing_newline(trailing_newline);
 
         if let Some(bracket_spacing) = language.bracket_spacing.or(global.bracket_spacing) {

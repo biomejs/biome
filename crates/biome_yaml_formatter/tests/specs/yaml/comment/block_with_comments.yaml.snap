@@ -22,6 +22,6 @@ c: 30 # inline
 a: 10
 # between
 b: 20
-c: 30 # inline
+c: 30  # inline
 
 ```

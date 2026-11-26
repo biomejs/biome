@@ -1,8 +1,9 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    BracketSpacing, CommentSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
+use biome_yaml_formatter::TrailingCommas;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -78,6 +79,24 @@ pub struct YamlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// The exact number of spaces between content and a comment on the same line
+    /// (`key: value  # comment`). Defaults to 2, which yamllint's `comments` rule expects.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-comment-spacing"), argument("NUMBER"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment_spacing: Option<CommentSpacing>,
+
+    /// Whether multiline flow mappings (`{ ... }`) and sequences (`[ ... ]`) end with a comma
+    /// after their last entry. Defaults to `all`. ryl's formatter uses `none`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-trailing-commas"), argument("none|all"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

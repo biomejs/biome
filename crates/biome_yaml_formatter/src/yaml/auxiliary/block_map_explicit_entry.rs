@@ -1,4 +1,4 @@
-use crate::comments::{FormatCommentsSlice, SourceColumn};
+use crate::comments::{FormatCommentsSlice, FormatValueGap, SourceColumn};
 use crate::prelude::*;
 use crate::utils::flow_scalar_has_line_break;
 use crate::yaml::auxiliary::block_map_implicit_entry::FormatEntryValue;
@@ -289,7 +289,13 @@ impl FormatNodeRule<YamlBlockMapExplicitEntry> for FormatYamlBlockMapExplicitEnt
 
             if let Some(value) = &value {
                 if after_colon.is_empty() {
-                    write!(f, [space(), align("  ", &value.format())])?;
+                    write!(
+                        f,
+                        [
+                            FormatValueGap::new(value.syntax()),
+                            align("  ", &value.format())
+                        ]
+                    )?;
                 } else {
                     write!(
                         f,

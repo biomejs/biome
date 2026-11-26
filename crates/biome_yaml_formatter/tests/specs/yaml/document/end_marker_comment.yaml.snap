@@ -19,7 +19,7 @@ c: 3
 
 ```yaml
 a: 1
-... # end of first
+...  # end of first
 b: 2
 ...
 c: 3

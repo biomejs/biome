@@ -20,11 +20,11 @@ list:
 # Formatted
 
 ```yaml
-key: !tag # comment
+key: !tag  # comment
   |
     content
 list:
-  - !tag # comment
+  - !tag  # comment
     >
       folded
 

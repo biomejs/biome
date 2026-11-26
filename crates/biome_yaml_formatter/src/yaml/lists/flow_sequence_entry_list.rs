@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
-use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{format_args, write};
 use biome_yaml_syntax::YamlFlowSequenceEntryList;
 #[derive(Debug, Clone, Default)]
@@ -12,7 +11,7 @@ impl FormatRule<YamlFlowSequenceEntryList> for FormatYamlFlowSequenceEntryList {
 
         for (element, formatted) in node.elements().zip(
             node.format_separated(",")
-                .with_trailing_separator(TrailingSeparator::Allowed),
+                .with_trailing_separator(f.options().to_trailing_separator()),
         ) {
             let element = element.node()?;
 

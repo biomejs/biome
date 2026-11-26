@@ -1,5 +1,5 @@
 use super::flow_map_explicit_entry::FormatExplicitPair;
-use crate::comments::{YamlComments, subtree_has_comments};
+use crate::comments::{FormatValueGap, YamlComments, subtree_has_comments};
 use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key, needs_space_before_colon};
 use biome_formatter::{format_args, write};
@@ -161,7 +161,7 @@ impl Format<YamlFormatContext> for FormatBreakableKeyEntry<'_> {
                 if_group_breaks(&format_args![
                     hard_line_break(),
                     colon_format,
-                    space(),
+                    FormatValueGap::new(self.value.syntax()),
                     align("  ", &value_format)
                 ])
                 .with_group_id(Some(group_id)),
@@ -190,12 +190,18 @@ impl Format<YamlFormatContext> for FormatBreakableKeyEntry<'_> {
                         // ```yaml
                         // {
                         //   [key]: [
-                        //       a, # comment
-                        //       b,
-                        //     ],
+                        //       a,  # comment
+                        //       b
+                        //     ]
                         // }
                         // ```
-                        write!(f, [space(), align("  ", &value_format)])
+                        write!(
+                            f,
+                            [
+                                FormatValueGap::new(self.value.syntax()),
+                                align("  ", &value_format)
+                            ]
+                        )
                     } else {
                         // A value that fits stays on the key's line; one that
                         // doesn't moves as a whole to its own indented line
@@ -338,12 +344,24 @@ impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
 
         if let Some(value) = self.value {
             if !value.is_flow_collection() {
-                write!(f, [space(), align("  ", &value.format())])?;
+                write!(
+                    f,
+                    [
+                        FormatValueGap::new(value.syntax()),
+                        align("  ", &value.format())
+                    ]
+                )?;
             } else if self.key.is_none() || subtree_has_comments(f.comments(), value.syntax()) {
                 // With no key before it, the collection stays on the `:` line
                 // even when it breaks. The same goes for a collection that a
                 // comment forces to break
-                write!(f, [space(), align("  ", &value.format())])?;
+                write!(
+                    f,
+                    [
+                        FormatValueGap::new(value.syntax()),
+                        align("  ", &value.format())
+                    ]
+                )?;
             } else {
                 // A collection value that fits stays on the key's line; one
                 // that doesn't moves as a whole to its own indented line

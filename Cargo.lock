@@ -340,6 +340,7 @@ dependencies = [
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
+ "biome_yaml_formatter",
  "biome_yaml_syntax",
  "bpaf",
  "camino",
@@ -2404,6 +2405,7 @@ version = "0.7.3"
 dependencies = [
  "biome_configuration",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",

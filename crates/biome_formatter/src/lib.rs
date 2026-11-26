@@ -439,6 +439,145 @@ impl Debug for IndentWidth {
     }
 }
 
+/// The exact number of spaces between content and a comment that follows it on the same line.
+///
+/// Accepted values range from 1 through 4.
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Merge))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct CommentSpacing(u8);
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for CommentSpacing {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("CommentSpacing")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "The exact number of spaces between content and a comment that follows it on the same line.\n\nAccepted values range from 1 through 4.",
+            "type": "integer",
+            "format": "uint8",
+            "minimum": Self::MIN,
+            "maximum": Self::MAX
+        })
+    }
+}
+
+impl CommentSpacing {
+    pub const MIN: u8 = 1;
+
+    pub const MAX: u8 = 4;
+
+    /// Return the numeric value for this [CommentSpacing]
+    pub fn value(&self) -> u8 {
+        self.0
+    }
+}
+
+/// The YAML formatter default, which satisfies yamllint's `comments` rule
+impl Default for CommentSpacing {
+    fn default() -> Self {
+        Self(2)
+    }
+}
+
+#[cfg(feature = "deserialize")]
+impl Deserializable for CommentSpacing {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            return Some(value);
+        }
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
+            Self::MIN,
+            Self::MAX,
+            value.range(),
+        ));
+        None
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for CommentSpacing {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value: u8 = serde::Deserialize::deserialize(deserializer)?;
+        Self::try_from(value).map_err(serde::de::Error::custom)
+    }
+}
+
+impl FromStr for CommentSpacing {
+    type Err = ParseFormatNumberError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = u8::from_str(s).map_err(ParseFormatNumberError::ParseError)?;
+        let value =
+            Self::try_from(value).map_err(ParseFormatNumberError::TryFromCommentSpacingError)?;
+        Ok(value)
+    }
+}
+
+impl TryFrom<u8> for CommentSpacing {
+    type Error = CommentSpacingFromIntError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        if (Self::MIN..=Self::MAX).contains(&value) {
+            Ok(Self(value))
+        } else {
+            Err(CommentSpacingFromIntError(value))
+        }
+    }
+}
+
+#[cfg(feature = "diagnostics")]
+impl biome_console::fmt::Display for CommentSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_markup(markup! {{self.value()}})
+    }
+}
+
+impl Display for CommentSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = self.value();
+        f.write_str(&std::format!("{value}"))
+    }
+}
+
+impl Debug for CommentSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
+}
+
+/// Error type returned when converting a u8 to a [CommentSpacing] fails
+#[derive(Clone, Copy, Debug)]
+pub struct CommentSpacingFromIntError(pub u8);
+
+impl std::fmt::Display for CommentSpacingFromIntError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "The comment spacing should be between {} and {}, got {}",
+            CommentSpacing::MIN,
+            CommentSpacing::MAX,
+            self.0,
+        )
+    }
+}
+
+impl std::error::Error for CommentSpacingFromIntError {}
+
 /// Sets the preferred maximum line width used when deciding where to wrap code. Some content, such
 /// as long unbreakable strings, may still exceed this width.
 ///
@@ -547,6 +686,8 @@ pub enum ParseFormatNumberError {
     TryFromU16Error(LineWidthFromIntError),
     /// The `u8` value of the string is not a valid [IndentWidth]
     TryFromU8Error(IndentWidthFromIntError),
+    /// The `u8` value of the string is not a valid [CommentSpacing]
+    TryFromCommentSpacingError(CommentSpacingFromIntError),
 }
 
 impl From<IndentWidthFromIntError> for ParseFormatNumberError {
@@ -581,6 +722,7 @@ impl std::fmt::Display for ParseFormatNumberError {
             Self::ParseError(err) => std::fmt::Display::fmt(err, fmt),
             Self::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
             Self::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromCommentSpacingError(err) => std::fmt::Display::fmt(err, fmt),
         }
     }
 }
@@ -1082,6 +1224,12 @@ pub trait CstFormatContext: FormatContext<Source = RowanSource> {
 
     /// Returns a reference to the program's comments.
     fn comments(&self) -> &Comments<Self::Language>;
+
+    /// The number of spaces [format_inline_comment_space](crate::trivia::format_inline_comment_space)
+    /// writes between content and a comment on the same line.
+    fn comment_spacing(&self) -> CommentSpacing {
+        CommentSpacing(1)
+    }
 }
 
 /// A context that only holds the options needed to print a document.

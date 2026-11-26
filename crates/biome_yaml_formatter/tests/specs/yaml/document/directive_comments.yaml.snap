@@ -35,9 +35,9 @@ third
 # Formatted
 
 ```yaml
-%YAML 1.2 # on the first directive's line
+%YAML 1.2  # on the first directive's line
 # between the directives
-%TAG ! tag:example.com,2000: # on the last directive's line
+%TAG ! tag:example.com,2000:  # on the last directive's line
 # after the directives
 
 ---

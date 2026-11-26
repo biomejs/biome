@@ -2529,6 +2529,12 @@ impl OverrideSettingPattern {
         {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(comment_spacing) = yaml_formatter.comment_spacing {
+            options.set_comment_spacing(comment_spacing);
+        }
+        if let Some(trailing_commas) = yaml_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
+        }
     }
 
     #[cfg(feature = "lang_js")]

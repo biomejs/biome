@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/comment_spacing/comments.yaml
+---
+
+# Input
+
+```yaml
+%YAML 1.2 # directive
+--- # document start
+key: value # block mapping value
+one_space: value # one space
+three_spaces: value   # three spaces
+empty: # entry without value
+  # own-line comment in value slot
+nested:
+  child: 1 # nested value
+list:
+  - item # sequence item
+  - # valueless sequence entry
+  - &anchor # middle comment
+    a: 1
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+flow: [a, b] # after flow sequence
+flow_map: {a: 1} # after flow mapping
+multiline_flow: [ # after open bracket
+  a, # after entry
+  b
+]
+literal: | # literal header
+  text
+folded: > # folded header
+  text
+# own-line comment
+last: value # last
+
+```
+
+
+# Options
+
+```json
+{
+  "yaml": {
+    "formatter": {
+      "commentSpacing": 4
+    }
+  }
+}
+```
+
+# Formatted
+
+```yaml
+%YAML 1.2    # directive
+---    # document start
+key: value    # block mapping value
+one_space: value    # one space
+three_spaces: value    # three spaces
+empty:    # entry without value
+  # own-line comment in value slot
+nested:
+  child: 1    # nested value
+list:
+  - item    # sequence item
+  -    # valueless sequence entry
+  - &anchor    # middle comment
+    a: 1
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1    # v7.0.1
+flow: [a, b]    # after flow sequence
+flow_map: { a: 1 }    # after flow mapping
+multiline_flow:    # after open bracket
+  [
+    a,    # after entry
+    b,
+  ]
+literal: |    # literal header
+  text
+folded: >    # folded header
+  text
+# own-line comment
+last: value    # last
+
+```

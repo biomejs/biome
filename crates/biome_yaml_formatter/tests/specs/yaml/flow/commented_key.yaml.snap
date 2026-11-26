@@ -51,44 +51,44 @@ a:
 # Formatted
 
 ```yaml
-{ ? "key" # comment after the colon
+{ ? "key"  # comment after the colon
   : value }
 ---
-{ ? key # explicit
+{ ? key  # explicit
   : value }
 ---
 {
-  ? key # on the key line
+  ? key  # on the key line
   # on its own line
   : v,
 }
 ---
-{ ? [a, b] # collection
+{ ? [a, b]  # collection
   : v }
 ---
-{ ? "one" # 1
-  : value, ? "two" # 2
+{ ? "one"  # 1
+  : value, ? "two"  # 2
   : v2 }
 ---
 a:
-  b: { ? "key" # nested
+  b: { ? "key"  # nested
       : value }
 ---
-- { ? "key" # in a sequence
+- { ? "key"  # in a sequence
     : value }
 ---
-[? key # single pair
+[? key  # single pair
   : v]
 ---
-[? key # explicit single pair
+[? key  # explicit single pair
   : v]
 ---
-{ ? key # on the key line
-  : # on the colon line
+{ ? key  # on the key line
+  :  # on the colon line
     value }
 ---
-{ ? key # after the colon
-  : # on its own line
+{ ? key  # after the colon
+  :  # on its own line
     value }
 
 ```
