@@ -25,7 +25,7 @@
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::parser::MarkdownParser;
 use crate::syntax::quote::{
-    consume_quote_prefix, list_indent_inside_quote, skip_quote_prefixes_in_line,
+    QuotePrefixesEnd, consume_quote_prefix, list_indent_inside_quote, quote_prefixes_end_in_line,
 };
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
 use crate::token_source::find_line_start;
@@ -42,13 +42,23 @@ use biome_rowan::TextSize;
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
 
-/// Consume indent whitespace (spaces/tabs) from source bytes.
+/// Consume up to `limit` columns of indent whitespace (spaces/tabs) from
+/// source bytes.
 ///
-/// Tracks column width where tabs expand to next multiple of 4.
-/// Returns `Some(new_idx)` on success, or `None` if required indent wasn't met.
-fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -> Option<usize> {
-    let mut column = 0usize;
-    while column < limit {
+/// `column` is the absolute column of `idx`, which places the tab stops: a tab
+/// expands to the next multiple of 4. Indentation is measured from
+/// `base_column`, so `column - base_column` columns already count towards
+/// `limit`. Returns the new index together with its absolute column, or `None`
+/// if `required` is set and the line has less than `limit` columns of indent.
+fn consume_indent_from_column(
+    source: &[u8],
+    mut idx: usize,
+    mut column: usize,
+    base_column: usize,
+    limit: usize,
+    required: bool,
+) -> Option<(usize, usize)> {
+    while column - base_column < limit {
         match source.get(idx).copied() {
             Some(b' ') => {
                 column += 1;
@@ -57,7 +67,7 @@ fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -
             Some(b'\t') => {
                 let tab_width = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 // For optional indent, don't exceed limit with tab
-                if !required && column + tab_width > limit {
+                if !required && column + tab_width - base_column > limit {
                     break;
                 }
                 column += tab_width;
@@ -71,7 +81,7 @@ fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -
             }
         }
     }
-    Some(idx)
+    Some((idx, column))
 }
 
 /// Get parser source context with bounds checking.
@@ -199,10 +209,16 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
-        // Closing fence indent: strip list continuation indent plus the
-        // CommonMark-allowed 0-3 spaces before the fence itself.
-        let max = list_indent + MAX_BLOCK_PREFIX_INDENT;
-        p.emit_line_indent(max);
+        // Closing fence indent: the list continuation indent plus the
+        // CommonMark-allowed 0-3 spaces before the fence itself. The
+        // closing-fence probe measured it with column-dependent tab stops, so
+        // all the whitespace before the fence belongs to it.
+        let indent_len = p
+            .source_after_current()
+            .bytes()
+            .take_while(|byte| matches!(byte, b' ' | b'\t'))
+            .count();
+        p.parse_indent_token_list_bytes(indent_len);
         bump_fence(p, is_tilde_fence);
         // Closing-fence whitespace is structural, even when the regular lexer
         // bundles trailing spaces and a newline into a hard line break.
@@ -388,7 +404,7 @@ fn measure_document_code_content_end(
         } else {
             idx += 1;
         }
-        if closing_fence_from(source, idx, is_tilde_fence, fence_len, 0) {
+        if closing_fence_from(source, idx, 0, 0, is_tilde_fence, fence_len, 0) {
             return TextSize::from(idx as u32);
         }
     }
@@ -500,15 +516,18 @@ pub(crate) fn info_string_has_backtick(line: &str, fence_len: usize) -> bool {
 /// the current position, each after its quote's container indent plus up to
 /// three columns.
 ///
-/// Returns the byte offset just past the last prefix, or `None` if fewer than
+/// Returns where the last prefix ends, or `None` if fewer than
 /// `quote_depth` prefixes are present — in which case the missing-prefix path
 /// in [`consume_quote_prefixes_in_code_content`] handles ending the block.
-fn skip_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> Option<usize> {
+fn skip_code_content_quote_prefixes(
+    p: &MarkdownParser,
+    quote_depth: usize,
+) -> Option<QuotePrefixesEnd> {
     let (start, source) = get_source_context(p)?;
     let line_end = source[start..]
         .find(['\n', '\r'])
         .map_or(source.len(), |offset| start + offset);
-    skip_quote_prefixes_in_line(p, start, line_end, quote_depth)
+    quote_prefixes_end_in_line(p, start, line_end, quote_depth)
 }
 
 /// At a content line start, returns `true` when the line's leading indent —
@@ -517,8 +536,9 @@ fn skip_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> O
 ///
 /// The current position is the raw start of the line (set by
 /// [`MarkdownParser::set_virtual_line_start`] after the preceding newline), so
-/// indentation is measured from there with [`consume_indent`], the same helper
-/// the closing-fence probe uses. CommonMark block indentation is spaces and
+/// indentation is measured from there with [`consume_indent_from_column`],
+/// starting at the quote's content column so that the part of a tab after `>`
+/// that is not the marker's separator counts. CommonMark block indentation is spaces and
 /// tabs only (tabs to the next [`TAB_STOP_SPACES`] multiple) — deliberately not
 /// `biome_unicode_table`'s `WHS`, which also matches `\n\r\f\v` and would
 /// mis-measure indent. Blank lines (only whitespace before the end of line)
@@ -534,19 +554,33 @@ fn line_below_list_item_indent(p: &MarkdownParser, quote_depth: usize) -> bool {
     };
 
     let bytes = source.as_bytes();
-    let Some(content_start) = skip_code_content_quote_prefixes(p, quote_depth) else {
+    let Some(prefixes) = skip_code_content_quote_prefixes(p, quote_depth) else {
         return false;
     };
+    let QuotePrefixesEnd {
+        offset: content_start,
+        column,
+        content_column,
+    } = prefixes;
 
     // Enough indent to keep continuing the item?
-    if consume_indent(bytes, content_start, required, true).is_some() {
+    if consume_indent_from_column(bytes, content_start, column, content_column, required, true)
+        .is_some()
+    {
         return false;
     }
 
     // Below the required indent: break unless the line is blank, in which case
     // the remaining (under-required) indent runs straight into the line end.
-    let after_indent =
-        consume_indent(bytes, content_start, required, false).unwrap_or(content_start);
+    let after_indent = consume_indent_from_column(
+        bytes,
+        content_start,
+        column,
+        content_column,
+        required,
+        false,
+    )
+    .map_or(content_start, |(idx, _)| idx);
     !matches!(bytes.get(after_indent), None | Some(b'\n' | b'\r'))
 }
 
@@ -607,28 +641,84 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     }
 
+    // After the line's quote prefixes, measure the indentation from the
+    // quote's content column, so that the part of a tab after `>` that is not
+    // the marker's separator counts. The prefix tokens may or may not include
+    // that separator.
+    let quote_depth = p.state().block_quote_depth;
+    let indent_start = if quote_depth > 0 {
+        let line_end = source[line_start..]
+            .find(['\n', '\r'])
+            .map_or(source.len(), |offset| line_start + offset);
+        quote_prefixes_end_in_line(
+            p,
+            find_line_start(&source[..line_start]),
+            line_end,
+            quote_depth,
+        )
+        .filter(|prefixes| {
+            prefixes.offset == line_start
+                || (prefixes.offset == line_start + 1
+                    && matches!(source.as_bytes()[line_start], b' ' | b'\t'))
+        })
+    } else {
+        None
+    };
+    let (line_start, column, base_column) = indent_start.map_or((line_start, 0, 0), |prefixes| {
+        (prefixes.offset, prefixes.column, prefixes.content_column)
+    });
+
     let list_indent = list_indent_inside_quote(p);
-    closing_fence_from(source, line_start, is_tilde_fence, fence_len, list_indent)
+    closing_fence_from(
+        source,
+        line_start,
+        column,
+        base_column,
+        is_tilde_fence,
+        fence_len,
+        list_indent,
+    )
 }
 
 /// Whether the line starting at `line_start` is a closing fence: optional
 /// list continuation indent, up to 3 extra spaces, at least `fence_len`
 /// fence characters of the right type, and only whitespace after them.
+///
+/// `column` is the absolute column of `line_start`, and indentation is
+/// measured from `base_column`, as in [`consume_indent_from_column`].
 fn closing_fence_from(
     source: &str,
     line_start: usize,
+    column: usize,
+    base_column: usize,
     is_tilde_fence: bool,
     fence_len: usize,
     list_indent: usize,
 ) -> bool {
     // Skip required list indent (must have enough whitespace)
-    let Some(idx) = consume_indent(source.as_bytes(), line_start, list_indent, true) else {
+    let Some((idx, column)) = consume_indent_from_column(
+        source.as_bytes(),
+        line_start,
+        column,
+        base_column,
+        list_indent,
+        true,
+    ) else {
         return false;
     };
 
-    // Skip optional extra indent (up to 3 spaces per CommonMark)
+    // Skip optional extra indent (up to 3 spaces per CommonMark), counted
+    // from the list indent: a tab that ran past it already used some of them.
     // This always succeeds since required=false
-    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap_or(idx);
+    let idx = consume_indent_from_column(
+        source.as_bytes(),
+        idx,
+        column,
+        base_column + list_indent,
+        MAX_BLOCK_PREFIX_INDENT,
+        false,
+    )
+    .map_or(idx, |(idx, _)| idx);
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;
