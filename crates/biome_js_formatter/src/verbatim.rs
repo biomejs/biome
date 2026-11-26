@@ -123,21 +123,23 @@ impl Format<JsFormatContext> for FormatJsVerbatimNode<'_> {
             .next()
             .unwrap_or_else(|| verbatim_source_range.start());
 
-        let original_source = f.context().source_map().map_or_else(
-            || {
-                if preserve_outer_trivia {
-                    self.node.text_with_trivia().to_string()
-                } else {
-                    self.node.text_trimmed().to_string()
-                }
-            },
-            |source_map| {
-                source_map
-                    .source()
-                    .text_slice(verbatim_source_range.cover_offset(start_source))
+        let original_range = verbatim_source_range.cover_offset(start_source);
+        let original_source = match f.context().source_map() {
+            Some(source_map) => source_map.source().text_slice(original_range).to_string(),
+            // Without a source map, the tree is the source. Read the same range as the source map
+            // branch from the tree's root, so the text includes the skipped token trivia that
+            // `original_range` covers.
+            None => {
+                let root = self
+                    .node
+                    .ancestors()
+                    .last()
+                    .unwrap_or_else(|| self.node.clone());
+                root.text_with_trivia()
+                    .slice(original_range - root.text_range_with_trivia().start())
                     .to_string()
-            },
-        );
+            }
+        };
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
@@ -236,5 +238,56 @@ where
             }
             Err(err) => Err(err),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{JsFormatOptions, format_node};
+    use biome_js_parser::{JsParserOptions, parse_module};
+    use biome_js_syntax::JsSyntaxKind;
+    use biome_languages::JsFileSource;
+    use biome_rowan::{BatchMutation, Direction, TriviaPieceKind};
+
+    #[test]
+    fn keeps_leading_skipped_trivia_without_source_map() {
+        // The file has no parentheses or logical expressions, so the transform changes nothing
+        // and the formatter has no source map.
+        let root = parse_module(
+            "// biome-ignore format: test\na;",
+            JsParserOptions::default(),
+        )
+        .syntax();
+        let identifier = root
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.kind() == JsSyntaxKind::IDENT)
+            .unwrap();
+        let with_skipped = identifier.with_leading_trivia([
+            (
+                TriviaPieceKind::SingleLineComment,
+                "// biome-ignore format: test",
+            ),
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Skipped, "@"),
+        ]);
+        let mut mutation = BatchMutation::new(root);
+        mutation.replace_token_discard_trivia(identifier, with_skipped);
+        let root = mutation.commit();
+        assert_eq!(
+            root.text_with_trivia().to_string(),
+            "// biome-ignore format: test\n@a;"
+        );
+
+        let formatted = format_node(
+            JsFormatOptions::new(JsFileSource::js_module()),
+            &root,
+            Vec::new(),
+        )
+        .unwrap();
+
+        assert_eq!(
+            formatted.print().unwrap().as_code(),
+            "// biome-ignore format: test\n@a;\n"
+        );
     }
 }
