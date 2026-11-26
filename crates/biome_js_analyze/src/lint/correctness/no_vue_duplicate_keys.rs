@@ -226,13 +226,20 @@ fn is_derived_from_props(
     ) {
         return true;
     }
-    let Some(statement) = vue_model.node(symbol) else {
+    let Some(declaration) = vue_model.node(symbol) else {
         return false;
     };
-    let Some(initializer) = statement
-        .descendants()
-        .filter_map(JsVariableDeclarator::cast)
-        .find(|declarator| declarator.range().contains_range(symbol.range()))
+    // The declarator is looked for inside the declaration only. An exported
+    // variable has no statement of its own, so its declaration is its name
+    // and holds no declarator.
+    let Some(initializer) = symbol
+        .name_node()
+        .and_then(|name| vue_model.node(&name))
+        .and_then(|name| {
+            name.ancestors()
+                .take_while(|ancestor| *ancestor != declaration)
+                .find_map(JsVariableDeclarator::cast)
+        })
         .and_then(|declarator| declarator.initializer()?.expression().ok())
     else {
         return false;

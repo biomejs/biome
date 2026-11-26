@@ -5,11 +5,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::assign_ext::AnyJsMemberAssignment;
-use biome_js_syntax::{AnyJsMemberExpression, AnyJsRoot};
+use biome_js_syntax::{AnyJsMemberExpression, JsLanguage};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_vue_undeclared_properties::NoVueUndeclaredPropertiesOptions;
 use biome_vue_semantic::{
-    Access, Namespace, RefBase, RefSite, Reference, Resolution, SnippetHost,
+    Access, AnalyzedVueModel, Namespace, RefBase, RefSite, Reference, Resolution, SnippetHost,
 };
 
 declare_lint_rule! {
@@ -187,7 +187,7 @@ impl Rule for NoVueUndeclaredProperties {
                 }
                 Some(UndeclaredProperty::Member {
                     depth,
-                    range: member_range(&ctx.root(), reference, depth)
+                    range: member_range(ctx.vue_model(), reference, depth)
                         .unwrap_or_else(|| reference.range()),
                 })
             }
@@ -335,13 +335,17 @@ fn find_undeclared_member(reference: &Reference) -> Option<(usize, &str)> {
 ///
 /// Returns `None` for a name written as a string, whose members are part of
 /// the same string.
-fn member_range(root: &AnyJsRoot, reference: &Reference, depth: usize) -> Option<TextRange> {
+fn member_range(
+    vue_model: &AnalyzedVueModel<JsLanguage>,
+    reference: &Reference,
+    depth: usize,
+) -> Option<TextRange> {
     if reference.site() != RefSite::Identifier {
         return None;
     }
     let start = reference.range();
-    let element = root.syntax().covering_element(start);
-    let member = element
+    let member = vue_model
+        .node(reference)?
         .ancestors()
         .filter(|node| {
             (AnyJsMemberExpression::can_cast(node.kind())

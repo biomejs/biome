@@ -108,9 +108,8 @@ impl Rule for NoVueComputedPropertyCall {
         if computed.value_is_function() != Tri::No {
             return None;
         }
-        ctx.root()
-            .syntax()
-            .covering_element(reference.range())
+        ctx.vue_model()
+            .node(reference)?
             .ancestors()
             .find_map(JsCallExpression::cast)
     }

@@ -504,6 +504,7 @@ impl Collector<'_, '_> {
                     })
                     .unwrap_or_else(|| syntax.clone());
                 let node = self.builder.add_js_node(self.input.snippet, &declaration);
+                let name_node = self.builder.add_js_node(self.input.snippet, &syntax);
                 let id = self.builder.add_symbol(NewSymbol {
                     name: name_token.token_text_trimmed(),
                     range,
@@ -518,6 +519,7 @@ impl Collector<'_, '_> {
                     },
                     component,
                     node: Some(node),
+                    name_node: Some(name_node),
                 });
                 self.builder.symbol_mut(id).type_only = type_only;
             }
@@ -665,6 +667,7 @@ impl Collector<'_, '_> {
             kind,
             component: Some(component),
             node: Some(node),
+            name_node: None,
         })
     }
 
@@ -1602,12 +1605,18 @@ impl Collector<'_, '_> {
             let Some(name) = member.name() else {
                 continue;
             };
-            let range = member_name_range(&member);
-            if let Some(range) = range {
+            let name_node = member_name_node(&member);
+            if let Some(name_node) = &name_node {
                 // `'user.name'` watches the member `name` of `user`.
                 let mut segments = name.text().split('.').map(synthetic_name);
                 if let Some(first) = segments.next() {
-                    self.add_option_name(component, range, first, segments.collect(), Access::Read);
+                    self.add_option_name(
+                        component,
+                        name_node,
+                        first,
+                        segments.collect(),
+                        Access::Read,
+                    );
                 }
             }
             if let Some(value) = member_value(&member) {
@@ -1616,7 +1625,7 @@ impl Collector<'_, '_> {
             self.add_instance_symbol(
                 component,
                 name,
-                range,
+                name_node.map(|name| name.text_trimmed_range()),
                 member.syntax(),
                 Namespace::Option,
                 SymbolKind::Watcher,
@@ -1634,7 +1643,7 @@ impl Collector<'_, '_> {
                 if let Ok(name) = handler.inner_string_text() {
                     self.add_option_name(
                         component,
-                        handler.syntax().text_trimmed_range(),
+                        handler.syntax(),
                         name,
                         Box::default(),
                         Access::Call,
@@ -1681,7 +1690,7 @@ impl Collector<'_, '_> {
             {
                 self.add_option_name(
                     component,
-                    literal.syntax().text_trimmed_range(),
+                    literal.syntax(),
                     name,
                     Box::default(),
                     Access::Read,
@@ -1691,19 +1700,22 @@ impl Collector<'_, '_> {
     }
 
     /// Records a name of the component instance written as a string, for the
-    /// reference pass to resolve. `range` is in the coordinates of the tree.
+    /// reference pass to resolve. `node` is the node that holds the name: a
+    /// string, or the key of a `watch` entry.
     fn add_option_name(
         &mut self,
         component: ComponentId,
-        range: TextRange,
+        node: &JsSyntaxNode,
         name: TokenText,
         path: Box<[TokenText]>,
         access: Access,
     ) {
-        let range = self.host(range);
+        let range = self.host(node.text_trimmed_range());
+        let node = self.builder.add_js_node(self.input.snippet, node);
         self.builder.option_names.push(OptionName {
             component,
             range,
+            node,
             name,
             path,
             access,
@@ -2563,27 +2575,26 @@ fn member_value(member: &AnyJsObjectMember) -> Option<AnyJsExpression> {
 }
 
 fn member_name_range(member: &AnyJsObjectMember) -> Option<TextRange> {
+    member_name_node(member).map(|name| name.text_trimmed_range())
+}
+
+fn member_name_node(member: &AnyJsObjectMember) -> Option<JsSyntaxNode> {
     match member {
-        AnyJsObjectMember::JsPropertyObjectMember(property) => property
-            .name()
-            .ok()
-            .map(|name| name.syntax().text_trimmed_range()),
-        AnyJsObjectMember::JsMethodObjectMember(method) => method
-            .name()
-            .ok()
-            .map(|name| name.syntax().text_trimmed_range()),
-        AnyJsObjectMember::JsShorthandPropertyObjectMember(shorthand) => shorthand
-            .name()
-            .ok()
-            .map(|name| name.syntax().text_trimmed_range()),
-        AnyJsObjectMember::JsGetterObjectMember(getter) => getter
-            .name()
-            .ok()
-            .map(|name| name.syntax().text_trimmed_range()),
-        AnyJsObjectMember::JsSetterObjectMember(setter) => setter
-            .name()
-            .ok()
-            .map(|name| name.syntax().text_trimmed_range()),
+        AnyJsObjectMember::JsPropertyObjectMember(property) => {
+            property.name().ok().map(|name| name.into_syntax())
+        }
+        AnyJsObjectMember::JsMethodObjectMember(method) => {
+            method.name().ok().map(|name| name.into_syntax())
+        }
+        AnyJsObjectMember::JsShorthandPropertyObjectMember(shorthand) => {
+            shorthand.name().ok().map(|name| name.into_syntax())
+        }
+        AnyJsObjectMember::JsGetterObjectMember(getter) => {
+            getter.name().ok().map(|name| name.into_syntax())
+        }
+        AnyJsObjectMember::JsSetterObjectMember(setter) => {
+            setter.name().ok().map(|name| name.into_syntax())
+        }
         _ => None,
     }
 }

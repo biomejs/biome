@@ -1106,3 +1106,61 @@ fn elements_and_attributes_point_to_their_nodes() {
     // No row stands for the root of the document.
     assert_eq!(nodes.id(host.syntax()), None);
 }
+
+#[test]
+fn only_references_written_in_javascript_have_a_node() {
+    let model = sfc(r#"<script setup>
+import Card from './Card.vue'
+const title = 'a'
+</script>
+
+<template>
+  <Card v-focus :title="title">{{ title }}</Card>
+  <slot name="footer" />
+</template>
+"#);
+    let nodes: Vec<_> = model
+        .references()
+        .map(|reference| {
+            (
+                reference.name().to_string(),
+                reference.site(),
+                reference.js_node().is_some(),
+            )
+        })
+        .collect();
+    let card = model
+        .elements()
+        .find(|element| element.tag() == "Card")
+        .expect("an element");
+    let focus = card.attrs().next().expect("a directive");
+    let slot = model
+        .elements()
+        .find(|element| element.tag() == "slot")
+        .expect("an element");
+    assert_eq!(
+        nodes,
+        [
+            ("title".into(), RefSite::Identifier, true),
+            ("title".into(), RefSite::Identifier, true),
+            ("Card".into(), RefSite::TagName(card.id()), false),
+            ("v-focus".into(), RefSite::DirectiveName(focus.id()), false),
+            ("footer".into(), RefSite::SlotName(slot.id()), false),
+        ]
+    );
+}
+
+#[test]
+fn slot_parameters_point_to_the_node_of_their_name() {
+    let model = sfc(r#"<template>
+  <List v-slot="{ row }">{{ row }}</List>
+</template>
+"#);
+    let row = model
+        .symbols()
+        .find(|symbol| symbol.kind() == SymbolKind::SlotParam)
+        .expect("a slot parameter");
+    // The binding of a slot parameter is its whole declaration.
+    assert!(row.name_node().is_some());
+    assert_eq!(row.name_node(), row.js_node());
+}
