@@ -12,7 +12,7 @@ use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter};
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdContainerBlock, AnyMdInline, AnyMdLeafBlock, MarkdownSyntaxNode, MdBlockList,
-    MdBullet, MdParagraph, MdQuote, MdQuoteFields,
+    MdBullet, MdParagraph, MdQuote, MdQuoteFields, MdTextual,
 };
 use biome_rowan::AstNode;
 use biome_rowan::TextSize;
@@ -329,7 +329,17 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
         for (index, item) in self.paragraph.list().iter().enumerate() {
             match item {
                 AnyMdInline::MdTextual(textual) => {
-                    if after_removed_continuation_prefix
+                    if (after_quote_continuation_newline || after_removed_continuation_prefix)
+                        && is_setext_underline_line(self.paragraph, index)?
+                    {
+                        joiner.entry(&FormatEscapedLeadingMarker {
+                            textual: &textual,
+                            strip_leading_space: after_removed_continuation_prefix,
+                        });
+                        after_quote_continuation_newline = false;
+                        after_removed_continuation_prefix = false;
+                        after_indented_continuation_newline = false;
+                    } else if after_removed_continuation_prefix
                         && textual.value_token()?.text().starts_with(' ')
                     {
                         let token = textual.value_token()?;
@@ -447,6 +457,74 @@ impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
         }
 
         joiner.finish()
+    }
+}
+
+/// Whether the paragraph line starting at the item `start` consists of one run
+/// of `=` or `-` characters, the shape of a setext heading underline.
+///
+/// The parser keeps such a line in a quote paragraph only as a lazy
+/// continuation line, which doesn't continue the quote and so can't underline
+/// the paragraph. Printed after the quote's prefix, the line would turn the
+/// paragraph into a heading.
+fn is_setext_underline_line(paragraph: &MdParagraph, start: usize) -> FormatResult<bool> {
+    let mut marker = None;
+    for item in paragraph.list().iter().skip(start) {
+        let textual = match item {
+            AnyMdInline::MdTextual(textual) => textual,
+            // Trailing spaces before the line ending form a hard line break.
+            AnyMdInline::MdHardLine(_) => break,
+            _ => return Ok(false),
+        };
+        if textual.is_newline()? {
+            break;
+        }
+        let token = textual.value_token()?;
+        let text = token.text();
+        let trimmed = text.trim_matches([' ', '\t']);
+        if trimmed.is_empty() {
+            continue;
+        }
+        // Whitespace between markers, as in `= =`, ends the underline.
+        if marker.is_some() && (trimmed.len() != text.len() || text.starts_with([' ', '\t'])) {
+            return Ok(false);
+        }
+        for byte in trimmed.bytes() {
+            if !matches!(byte, b'=' | b'-') || marker.is_some_and(|marker| marker != byte) {
+                return Ok(false);
+            }
+            marker = Some(byte);
+        }
+    }
+
+    Ok(marker.is_some())
+}
+
+/// Prints a textual element with a backslash before its first non-whitespace
+/// character, so that a marker at the start of a line prints as literal text.
+struct FormatEscapedLeadingMarker<'a> {
+    textual: &'a MdTextual,
+    /// Drops one leading space, which the printed line prefix replaces.
+    strip_leading_space: bool,
+}
+
+impl Format<MarkdownFormatContext> for FormatEscapedLeadingMarker<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let token = self.textual.value_token()?;
+        let mut token_text = token.text();
+        let mut start = token.text_range().start();
+        if self.strip_leading_space
+            && let Some(rest) = token_text.strip_prefix(' ')
+        {
+            token_text = rest;
+            start = start.add(TextSize::from(1));
+        }
+        let leading = token_text.len() - token_text.trim_start_matches([' ', '\t']).len();
+        let escaped = std::format!("{}\\{}", &token_text[..leading], &token_text[leading..]);
+        f.context()
+            .comments()
+            .mark_suppression_checked(self.textual.syntax());
+        write!(f, [format_replaced(&token, &text(&escaped, Some(start)))])
     }
 }
 
