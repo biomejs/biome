@@ -1229,8 +1229,7 @@ impl WorkspaceDb {
     ) {
         let mut frameworks = self
             .frameworks(&package_path)
-            .map(|frameworks| (*frameworks).clone())
-            .unwrap_or_default();
+            .map_or_default(|frameworks| (*frameworks).clone());
         frameworks
             .resolved_global_stylesheets
             .insert(path, Arc::new(scope));

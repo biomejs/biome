@@ -2557,8 +2557,7 @@ impl WorkspaceServerWithDb<'_> {
             } => {
                 let ambient_modules = kind
                     .as_js_module_info()
-                    .map(|info| info.ambient_modules.clone())
-                    .unwrap_or_default();
+                    .map_or_default(|info| info.ambient_modules.clone());
                 self.db_state.upsert_module_kind(path.to_path_buf(), kind);
                 for (index, ambient_module) in ambient_modules.iter().enumerate() {
                     let module_path = ambient_module_path(path, index);
