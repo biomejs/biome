@@ -1,0 +1,119 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+export const asExpression = query({
+	handler: (async (ctx: QueryCtx) => Date.now()) as any,
+});
+
+export const satisfiesExpression = query({
+	args: {},
+	handler: async (ctx: QueryCtx) => (Date as DateConstructor).now(),
+} satisfies QueryOptions);
+
+export const nonNullAssertion = query({
+	handler: async (ctx: QueryCtx) => Math!.random(),
+});
+
+const helper = (<T>() => Date.now()) as () => number;
+
+export const wrappedHelper = query({
+	handler: async (ctx: QueryCtx) => helper(),
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:37 lint/nursery/noConvexTimeOrRandomInQueries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query reads the current time with Date.now().
+  
+    1 │ /* should generate diagnostics */
+    2 │ export const asExpression = query({
+  > 3 │ 	handler: (async (ctx: QueryCtx) => Date.now()) as any,
+      │ 	                                   ^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Convex caches the result of a query and reuses it until the data the query reads changes, so the time in a cached result can be outdated. Reading the time can also make Convex discard cached results more often than needed.
+  
+  i Pass the time to the query as an argument, rounded to a coarse unit such as a minute, or have a mutation or a scheduled function store time-based state in the database.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:36 lint/nursery/noConvexTimeOrRandomInQueries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query reads the current time with Date.now().
+  
+     6 │ export const satisfiesExpression = query({
+     7 │ 	args: {},
+   > 8 │ 	handler: async (ctx: QueryCtx) => (Date as DateConstructor).now(),
+       │ 	                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ } satisfies QueryOptions);
+    10 │ 
+  
+  i Convex caches the result of a query and reuses it until the data the query reads changes, so the time in a cached result can be outdated. Reading the time can also make Convex discard cached results more often than needed.
+  
+  i Pass the time to the query as an argument, rounded to a coarse unit such as a minute, or have a mutation or a scheduled function store time-based state in the database.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:36 lint/nursery/noConvexTimeOrRandomInQueries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query generates a random value with Math.random().
+  
+    11 │ export const nonNullAssertion = query({
+  > 12 │ 	handler: async (ctx: QueryCtx) => Math!.random(),
+       │ 	                                  ^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i Convex caches the result of a query, so the query keeps returning the same value until the data it reads changes, instead of a new random value each time.
+  
+  i Generate random values in a mutation or an action instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:36 lint/nursery/noConvexTimeOrRandomInQueries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query calls a function that reads the current time with Date.now().
+  
+    17 │ export const wrappedHelper = query({
+  > 18 │ 	handler: async (ctx: QueryCtx) => helper(),
+       │ 	                                  ^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i Date.now() is called here.
+  
+    13 │ });
+    14 │ 
+  > 15 │ const helper = (<T>() => Date.now()) as () => number;
+       │                          ^^^^^^^^^^
+    16 │ 
+    17 │ export const wrappedHelper = query({
+  
+  i Convex caches the result of a query and reuses it until the data the query reads changes, so the time in a cached result can be outdated. Reading the time can also make Convex discard cached results more often than needed.
+  
+  i Pass the time to the query as an argument, rounded to a coarse unit such as a minute, or have a mutation or a scheduled function store time-based state in the database.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -4084,6 +4084,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoConvexTimeOrRandomInQueriesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexTimeOrRandomInQueriesOptions" }
+			]
+		},
+		"NoConvexTimeOrRandomInQueriesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoConvexTopOfHourCronsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9686,6 +9696,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexTimeOrRandomInQueries": {
+					"description": "Disallow reading the current time or generating random values in Convex queries.\nSee https://biomejs.dev/linter/rules/no-convex-time-or-random-in-queries",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexTimeOrRandomInQueriesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConvexTopOfHourCrons": {
 					"description": "Disallow scheduling Convex cron jobs at the start of the hour.\nSee https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
 					"anyOf": [
@@ -13630,6 +13647,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoControlCharactersInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexTimeOrRandomInQueriesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexTimeOrRandomInQueriesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
