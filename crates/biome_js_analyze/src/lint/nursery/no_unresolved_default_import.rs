@@ -1,21 +1,20 @@
 use crate::services::database::ResolvedImports;
+use crate::utils::module_exports::{has_checkable_exports, is_es_module};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_languages::JsFileSource;
 use biome_js_syntax::{
     AnyJsImportLike, JsDefaultImportSpecifier, JsImportCombinedClause, JsImportDefaultClause,
     JsModuleSource,
 };
 use biome_module_graph::{
-    JsExportedSymbolLookup, JsModuleInfo, ModuleInfoKind, SymbolFromModuleInfo,
+    JsExportedSymbolLookup, ModuleInfoKind, SymbolFromModuleInfo,
     find_js_exported_symbol,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_unresolved_default_import::NoUnresolvedDefaultImportOptions;
-use camino::Utf8Path;
 
 declare_lint_rule! {
     /// Disallow default imports from modules that have no default export.
@@ -176,28 +175,4 @@ impl AnyJsDefaultImportClause {
         };
         source.ok()?.as_js_module_source().cloned()
     }
-}
-
-/// Returns whether the exports of the file at `path` describe its default
-/// export.
-///
-/// Declaration files often describe CommonJS modules, whose default export
-/// isn't declared. Vue, Svelte and Astro components get their default export
-/// from the framework compiler.
-fn has_checkable_exports(path: &Utf8Path) -> bool {
-    JsFileSource::try_from(path)
-        .is_ok_and(|source| !source.is_embedded() && !source.language().is_definition_file())
-}
-
-/// Returns whether the module uses `import` or `export` syntax.
-///
-/// Modules without it, such as CommonJS modules, have no default export that
-/// can be looked up.
-fn is_es_module(module_info: &JsModuleInfo) -> bool {
-    !module_info.exports.is_empty()
-        || !module_info.blanket_reexports.is_empty()
-        || module_info
-            .import_paths
-            .iter()
-            .any(|import_path| import_path.kind.is_static())
 }

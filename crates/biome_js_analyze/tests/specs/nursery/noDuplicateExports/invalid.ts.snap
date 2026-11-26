@@ -1,0 +1,672 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type A = string;
+type B = number;
+export type { A };
+export type { B as A };
+
+export type C = string;
+export { type B as C };
+
+export interface D {}
+export type { D } from "./d";
+
+export type * as E from "./e";
+export type { E } from "./e";
+
+export function f(value: string): void;
+export function f(value: number): void;
+export function f(value: unknown) {}
+export { g as f } from "./g";
+
+export enum H {}
+export { H } from "./h";
+
+export namespace I {
+	export const x = 1;
+}
+export * as I from "./i";
+
+export namespace J.K {
+	export const x = 1;
+}
+export { j as J } from "./j";
+
+export declare const L: string;
+export { L } from "./l";
+
+export import M = I;
+export { M } from "./m";
+
+export namespace N {
+	const O = 1;
+	export const P = 1;
+	export { O as P };
+}
+
+declare module "q" {
+	const R = 1;
+	export { R };
+	export { R };
+}
+
+const S = 1;
+type T = number;
+export { S as T };
+export type { T };
+
+export { type U } from "./u";
+export { U } from "./u";
+
+export * as V from "./v";
+export type { V } from "./v";
+
+export class W {}
+export type { X as W } from "./x";
+
+export enum Y {}
+export type { Y } from "./y";
+
+export const Z = 1;
+export type { Z } from "./z";
+
+export function AA() {}
+export type { T as AA } from "./t";
+
+export import AB = I;
+export type { T as AB } from "./t";
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name A is exported more than once.
+  
+    3 │ type B = number;
+    4 │ export type { A };
+  > 5 │ export type { B as A };
+      │                    ^
+    6 │ 
+    7 │ export type C = string;
+  
+  i The name is first exported here.
+  
+    2 │ type A = string;
+    3 │ type B = number;
+  > 4 │ export type { A };
+      │               ^
+    5 │ export type { B as A };
+    6 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name C is exported more than once.
+  
+     7 │ export type C = string;
+   > 8 │ export { type B as C };
+       │                    ^
+     9 │ 
+    10 │ export interface D {}
+  
+  i The name is first exported here.
+  
+    5 │ export type { B as A };
+    6 │ 
+  > 7 │ export type C = string;
+      │             ^
+    8 │ export { type B as C };
+    9 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name D is exported more than once.
+  
+    10 │ export interface D {}
+  > 11 │ export type { D } from "./d";
+       │               ^
+    12 │ 
+    13 │ export type * as E from "./e";
+  
+  i The name is first exported here.
+  
+     8 │ export { type B as C };
+     9 │ 
+  > 10 │ export interface D {}
+       │                  ^
+    11 │ export type { D } from "./d";
+    12 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name E is exported more than once.
+  
+    13 │ export type * as E from "./e";
+  > 14 │ export type { E } from "./e";
+       │               ^
+    15 │ 
+    16 │ export function f(value: string): void;
+  
+  i The name is first exported here.
+  
+    11 │ export type { D } from "./d";
+    12 │ 
+  > 13 │ export type * as E from "./e";
+       │                  ^
+    14 │ export type { E } from "./e";
+    15 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    17 │ export function f(value: number): void;
+    18 │ export function f(value: unknown) {}
+  > 19 │ export { g as f } from "./g";
+       │               ^
+    20 │ 
+    21 │ export enum H {}
+  
+  i The name is first exported here.
+  
+    14 │ export type { E } from "./e";
+    15 │ 
+  > 16 │ export function f(value: string): void;
+       │                 ^
+    17 │ export function f(value: number): void;
+    18 │ export function f(value: unknown) {}
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:10 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name H is exported more than once.
+  
+    21 │ export enum H {}
+  > 22 │ export { H } from "./h";
+       │          ^
+    23 │ 
+    24 │ export namespace I {
+  
+  i The name is first exported here.
+  
+    19 │ export { g as f } from "./g";
+    20 │ 
+  > 21 │ export enum H {}
+       │             ^
+    22 │ export { H } from "./h";
+    23 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:13 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name I is exported more than once.
+  
+    25 │ 	export const x = 1;
+    26 │ }
+  > 27 │ export * as I from "./i";
+       │             ^
+    28 │ 
+    29 │ export namespace J.K {
+  
+  i The name is first exported here.
+  
+    22 │ export { H } from "./h";
+    23 │ 
+  > 24 │ export namespace I {
+       │                  ^
+    25 │ 	export const x = 1;
+    26 │ }
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name J is exported more than once.
+  
+    30 │ 	export const x = 1;
+    31 │ }
+  > 32 │ export { j as J } from "./j";
+       │               ^
+    33 │ 
+    34 │ export declare const L: string;
+  
+  i The name is first exported here.
+  
+    27 │ export * as I from "./i";
+    28 │ 
+  > 29 │ export namespace J.K {
+       │                  ^
+    30 │ 	export const x = 1;
+    31 │ }
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:35:10 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name L is exported more than once.
+  
+    34 │ export declare const L: string;
+  > 35 │ export { L } from "./l";
+       │          ^
+    36 │ 
+    37 │ export import M = I;
+  
+  i The name is first exported here.
+  
+    32 │ export { j as J } from "./j";
+    33 │ 
+  > 34 │ export declare const L: string;
+       │                      ^
+    35 │ export { L } from "./l";
+    36 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:10 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name M is exported more than once.
+  
+    37 │ export import M = I;
+  > 38 │ export { M } from "./m";
+       │          ^
+    39 │ 
+    40 │ export namespace N {
+  
+  i The name is first exported here.
+  
+    35 │ export { L } from "./l";
+    36 │ 
+  > 37 │ export import M = I;
+       │               ^
+    38 │ export { M } from "./m";
+    39 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:43:16 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name P is exported more than once.
+  
+    41 │ 	const O = 1;
+    42 │ 	export const P = 1;
+  > 43 │ 	export { O as P };
+       │ 	              ^
+    44 │ }
+    45 │ 
+  
+  i The name is first exported here.
+  
+    40 │ export namespace N {
+    41 │ 	const O = 1;
+  > 42 │ 	export const P = 1;
+       │ 	             ^
+    43 │ 	export { O as P };
+    44 │ }
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:49:11 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name R is exported more than once.
+  
+    47 │ 	const R = 1;
+    48 │ 	export { R };
+  > 49 │ 	export { R };
+       │ 	         ^
+    50 │ }
+    51 │ 
+  
+  i The name is first exported here.
+  
+    46 │ declare module "q" {
+    47 │ 	const R = 1;
+  > 48 │ 	export { R };
+       │ 	         ^
+    49 │ 	export { R };
+    50 │ }
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:55:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name T is exported more than once.
+  
+    53 │ type T = number;
+    54 │ export { S as T };
+  > 55 │ export type { T };
+       │               ^
+    56 │ 
+    57 │ export { type U } from "./u";
+  
+  i The name is first exported here.
+  
+    52 │ const S = 1;
+    53 │ type T = number;
+  > 54 │ export { S as T };
+       │               ^
+    55 │ export type { T };
+    56 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:58:10 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name U is exported more than once.
+  
+    57 │ export { type U } from "./u";
+  > 58 │ export { U } from "./u";
+       │          ^
+    59 │ 
+    60 │ export * as V from "./v";
+  
+  i The name is first exported here.
+  
+    55 │ export type { T };
+    56 │ 
+  > 57 │ export { type U } from "./u";
+       │               ^
+    58 │ export { U } from "./u";
+    59 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:61:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name V is exported more than once.
+  
+    60 │ export * as V from "./v";
+  > 61 │ export type { V } from "./v";
+       │               ^
+    62 │ 
+    63 │ export class W {}
+  
+  i The name is first exported here.
+  
+    58 │ export { U } from "./u";
+    59 │ 
+  > 60 │ export * as V from "./v";
+       │             ^
+    61 │ export type { V } from "./v";
+    62 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:64:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name W is exported more than once.
+  
+    63 │ export class W {}
+  > 64 │ export type { X as W } from "./x";
+       │                    ^
+    65 │ 
+    66 │ export enum Y {}
+  
+  i The name is first exported here.
+  
+    61 │ export type { V } from "./v";
+    62 │ 
+  > 63 │ export class W {}
+       │              ^
+    64 │ export type { X as W } from "./x";
+    65 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:67:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name Y is exported more than once.
+  
+    66 │ export enum Y {}
+  > 67 │ export type { Y } from "./y";
+       │               ^
+    68 │ 
+    69 │ export const Z = 1;
+  
+  i The name is first exported here.
+  
+    64 │ export type { X as W } from "./x";
+    65 │ 
+  > 66 │ export enum Y {}
+       │             ^
+    67 │ export type { Y } from "./y";
+    68 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:70:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name Z is exported more than once.
+  
+    69 │ export const Z = 1;
+  > 70 │ export type { Z } from "./z";
+       │               ^
+    71 │ 
+    72 │ export function AA() {}
+  
+  i The name is first exported here.
+  
+    67 │ export type { Y } from "./y";
+    68 │ 
+  > 69 │ export const Z = 1;
+       │              ^
+    70 │ export type { Z } from "./z";
+    71 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:73:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name AA is exported more than once.
+  
+    72 │ export function AA() {}
+  > 73 │ export type { T as AA } from "./t";
+       │                    ^^
+    74 │ 
+    75 │ export import AB = I;
+  
+  i The name is first exported here.
+  
+    70 │ export type { Z } from "./z";
+    71 │ 
+  > 72 │ export function AA() {}
+       │                 ^^
+    73 │ export type { T as AA } from "./t";
+    74 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:76:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name AB is exported more than once.
+  
+    75 │ export import AB = I;
+  > 76 │ export type { T as AB } from "./t";
+       │                    ^^
+    77 │ 
+  
+  i The name is first exported here.
+  
+    73 │ export type { T as AA } from "./t";
+    74 │ 
+  > 75 │ export import AB = I;
+       │               ^^
+    76 │ export type { T as AB } from "./t";
+    77 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

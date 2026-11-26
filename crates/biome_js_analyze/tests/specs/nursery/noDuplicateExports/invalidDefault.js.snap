@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidDefault.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default function foo() {}
+const bar = 1;
+export { bar as default };
+export { default } from "./baz.js";
+export { qux as "default" } from "./qux.js";
+
+```
+
+# Diagnostics
+```
+invalidDefault.js:4:17 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × There is more than one default export.
+  
+    2 │ export default function foo() {}
+    3 │ const bar = 1;
+  > 4 │ export { bar as default };
+      │                 ^^^^^^^
+    5 │ export { default } from "./baz.js";
+    6 │ export { qux as "default" } from "./qux.js";
+  
+  i The default export is first defined here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default function foo() {}
+      │        ^^^^^^^
+    3 │ const bar = 1;
+    4 │ export { bar as default };
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDefault.js:5:10 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × There is more than one default export.
+  
+    3 │ const bar = 1;
+    4 │ export { bar as default };
+  > 5 │ export { default } from "./baz.js";
+      │          ^^^^^^^
+    6 │ export { qux as "default" } from "./qux.js";
+    7 │ 
+  
+  i The default export is first defined here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default function foo() {}
+      │        ^^^^^^^
+    3 │ const bar = 1;
+    4 │ export { bar as default };
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDefault.js:6:17 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × There is more than one default export.
+  
+    4 │ export { bar as default };
+    5 │ export { default } from "./baz.js";
+  > 6 │ export { qux as "default" } from "./qux.js";
+      │                 ^^^^^^^^^
+    7 │ 
+  
+  i The default export is first defined here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default function foo() {}
+      │        ^^^^^^^
+    3 │ const bar = 1;
+    4 │ export { bar as default };
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

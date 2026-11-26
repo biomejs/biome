@@ -1,0 +1,134 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidExportAllReplaced.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+// A type replaces a value with the same name, and the other way around.
+export type x = string;
+export * from "./exportAll/a.js";
+export * from "./exportAll/types.ts";
+export const f = 1;
+
+```
+
+# Diagnostics
+```
+invalidExportAllReplaced.ts:4:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    2 │ // A type replaces a value with the same name, and the other way around.
+    3 │ export type x = string;
+  > 4 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    5 │ export * from "./exportAll/types.ts";
+    6 │ export const f = 1;
+  
+  i This export replaces the name from the module.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // A type replaces a value with the same name, and the other way around.
+  > 3 │ export type x = string;
+      │             ^
+    4 │ export * from "./exportAll/a.js";
+    5 │ export * from "./exportAll/types.ts";
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAllReplaced.ts:4:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    2 │ // A type replaces a value with the same name, and the other way around.
+    3 │ export type x = string;
+  > 4 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    5 │ export * from "./exportAll/types.ts";
+    6 │ export const f = 1;
+  
+  i This export replaces the name from the module.
+  
+    4 │ export * from "./exportAll/a.js";
+    5 │ export * from "./exportAll/types.ts";
+  > 6 │ export const f = 1;
+      │              ^
+    7 │ 
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAllReplaced.ts:5:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    3 │ export type x = string;
+    4 │ export * from "./exportAll/a.js";
+  > 5 │ export * from "./exportAll/types.ts";
+      │               ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ export const f = 1;
+    7 │ 
+  
+  i This export replaces the name from the module.
+  
+    4 │ export * from "./exportAll/a.js";
+    5 │ export * from "./exportAll/types.ts";
+  > 6 │ export const f = 1;
+      │              ^
+    7 │ 
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAllReplaced.ts:5:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    3 │ export type x = string;
+    4 │ export * from "./exportAll/a.js";
+  > 5 │ export * from "./exportAll/types.ts";
+      │               ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ export const f = 1;
+    7 │ 
+  
+  i This export replaces the name from the module.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // A type replaces a value with the same name, and the other way around.
+  > 3 │ export type x = string;
+      │             ^
+    4 │ export * from "./exportAll/a.js";
+    5 │ export * from "./exportAll/types.ts";
+  
+  i A name that the module exports itself takes precedence over the same name from export * from, so the name from the other module is never exported.
+  
+  i Give the module's own export a different name, or remove it to export the name from the other module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

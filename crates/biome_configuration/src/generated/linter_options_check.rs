@@ -473,6 +473,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noDuplicateEnumValues",
         TypeId::of::<biome_rule_options::no_duplicate_enum_values::NoDuplicateEnumValuesOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noDuplicateExports",
+        TypeId::of::<biome_rule_options::no_duplicate_exports::NoDuplicateExportsOptions>(),
+    ));
     result.push(("correctness", "noDuplicateFieldDefinitionNames", TypeId::of::<biome_rule_options::no_duplicate_field_definition_names::NoDuplicateFieldDefinitionNamesOptions>()));
     result.push((
         "suspicious",
@@ -2082,6 +2087,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noUselessQualifier",
         TypeId::of::<biome_rule_options::no_useless_qualifier::NoUselessQualifierOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noUselessReExportAll",
+        TypeId::of::<biome_rule_options::no_useless_re_export_all::NoUselessReExportAllOptions>(),
     ));
     result.push((
         "nursery",

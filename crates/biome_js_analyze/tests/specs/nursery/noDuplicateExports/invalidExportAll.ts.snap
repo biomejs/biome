@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidExportAll.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+// Types and values from `export *` conflict too.
+export * from "./exportAll/a.js";
+export type * from "./exportAll/types.ts";
+
+```
+
+# Diagnostics
+```
+invalidExportAll.ts:4:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    2 │ // Types and values from `export *` conflict too.
+    3 │ export * from "./exportAll/a.js";
+  > 4 │ export type * from "./exportAll/types.ts";
+      │                    ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i This module also exports the name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Types and values from `export *` conflict too.
+  > 3 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    4 │ export type * from "./exportAll/types.ts";
+    5 │ 
+  
+  i When two export * from statements export the same name from different declarations, the module doesn't export the name at all. Importing it fails, and TypeScript reports an error.
+  
+  i Replace one of the export * from statements with export { ... } from, listing only the names you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAll.ts:4:20 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    2 │ // Types and values from `export *` conflict too.
+    3 │ export * from "./exportAll/a.js";
+  > 4 │ export type * from "./exportAll/types.ts";
+      │                    ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i This module also exports the name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Types and values from `export *` conflict too.
+  > 3 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    4 │ export type * from "./exportAll/types.ts";
+    5 │ 
+  
+  i When two export * from statements export the same name from different declarations, the module doesn't export the name at all. Importing it fails, and TypeScript reports an error.
+  
+  i Replace one of the export * from statements with export { ... } from, listing only the names you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

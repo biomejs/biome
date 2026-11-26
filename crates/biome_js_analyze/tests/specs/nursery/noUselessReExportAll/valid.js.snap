@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export * from "./modules/named.js";
+export * from "./modules/reexportNamed.js";
+export * as onlyDefault from "./modules/onlyDefault.js";
+export * from "./modules/commonJs.cjs";
+export * from "./modules/reexportUnresolved.js";
+export * from "./unresolved.js";
+
+```

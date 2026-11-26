@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: a.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export const x = 1;
+export function f() {}
+export const onlyA = 1;
+export default 1;
+
+```
