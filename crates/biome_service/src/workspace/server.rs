@@ -1226,7 +1226,7 @@ impl WorkspaceServerWithDb<'_> {
                 content: content.clone(),
                 version,
                 file_source_index,
-                inline_config: inline_config.map(Arc::new),
+                inline_config: inline_config.map(Arc::from),
                 syntax: syntax.clone(),
             };
             self.documents.pin().update_or_insert_with(
@@ -3017,7 +3017,7 @@ impl WorkspaceServerWithDb<'_> {
         db: &WorkspaceDb,
         project_key: ProjectKey,
         path: &BiomePath,
-        inline_config: Option<Configuration>,
+        inline_config: Option<Box<Configuration>>,
     ) -> Option<(Utf8PathBuf, Arc<Settings>, SettingsQuery)> {
         if self.is_virtual_document(path) {
             let project = db.get_project(&project_key)?;
@@ -3026,7 +3026,7 @@ impl WorkspaceServerWithDb<'_> {
                 project.root_settings(db).as_ref(),
             ));
             let inline_settings = inline_config.map(|inline_config| {
-                settings_without_overrides(&settings.with_inline_configuration(inline_config))
+                settings_without_overrides(&settings.with_inline_configuration(*inline_config))
             });
             let query = SettingsQuery::new_without_overrides(
                 project,
@@ -3040,7 +3040,7 @@ impl WorkspaceServerWithDb<'_> {
             db.get_settings_context_for_path(project_key, path.as_path())?;
         let settings = settings.clone_arc();
         let inline_settings =
-            inline_config.map(|inline_config| settings.with_inline_configuration(inline_config));
+            inline_config.map(|inline_config| settings.with_inline_configuration(*inline_config));
         let query = SettingsQuery::new(
             project,
             selection,
@@ -3916,7 +3916,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             else {
                 return Err(WorkspaceError::not_found(params.path.to_string()));
             };
-            (view.content.len(), view.inline_config.as_deref().cloned())
+            (
+                view.content.len(),
+                view.inline_config.as_deref().cloned().map(Box::new),
+            )
         };
         let db = self.get_db();
         let limit = self
@@ -4053,7 +4056,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             content: content.clone(),
             version: matches!(view, ViewId::Editor(_)).then_some(version),
             file_source_index,
-            inline_config: inline_config.map(Arc::new),
+            inline_config: inline_config.map(Arc::from),
             syntax: Some(Ok(())),
         };
         let updated = documents.update(path.to_path_buf(), |document| {
