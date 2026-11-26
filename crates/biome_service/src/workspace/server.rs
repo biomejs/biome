@@ -5658,6 +5658,10 @@ fn init_thread_pool(_threads: Option<usize>) {}
 #[path = "server.tests.rs"]
 mod tests;
 
+#[cfg(all(test, feature = "module_graph"))]
+#[path = "server.e2e.rs"]
+mod e2e_tests;
+
 #[cfg(all(test, feature = "md_embeds"))]
 #[path = "md_embeds.tests.rs"]
 mod md_embeds_tests;
