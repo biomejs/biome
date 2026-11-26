@@ -11,7 +11,6 @@ expression: invalid.astro
 <a>invalid</a>
 <a {...spread} href="#">invalid</a>
 <a {...spread} href>invalid</a>
-<a {...spread} onclick={something}>invalid</a>
 <a {...spread} href="javascript:void(0)">invalid</a>
 
 ```
@@ -102,7 +101,7 @@ invalid.astro:6:16 lint/a11y/useValidAnchor ━━━━━━━━━━━━
   > 6 │ <a {...spread} href="#">invalid</a>
       │                ^^^^^^^^
     7 │ <a {...spread} href>invalid</a>
-    8 │ <a {...spread} onclick={something}>invalid</a>
+    8 │ <a {...spread} href="javascript:void(0)">invalid</a>
   
   i The href attribute should be a valid URL
   
@@ -120,8 +119,8 @@ invalid.astro:7:16 lint/a11y/useValidAnchor ━━━━━━━━━━━━
     6 │ <a {...spread} href="#">invalid</a>
   > 7 │ <a {...spread} href>invalid</a>
       │                ^^^^
-    8 │ <a {...spread} onclick={something}>invalid</a>
-    9 │ <a {...spread} href="javascript:void(0)">invalid</a>
+    8 │ <a {...spread} href="javascript:void(0)">invalid</a>
+    9 │ 
   
   i The href attribute should be a valid URL
   
@@ -133,32 +132,13 @@ invalid.astro:7:16 lint/a11y/useValidAnchor ━━━━━━━━━━━━
 ```
 invalid.astro:8:16 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a button element instead of an a element.
-  
-     6 │ <a {...spread} href="#">invalid</a>
-     7 │ <a {...spread} href>invalid</a>
-   > 8 │ <a {...spread} onclick={something}>invalid</a>
-       │                ^^^^^^^^^^^^^^^^^^^
-     9 │ <a {...spread} href="javascript:void(0)">invalid</a>
-    10 │ 
-  
-  i Anchor elements should only be used for default sections or page navigation
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.astro:9:16 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × Provide a valid value for the attribute href.
   
-     7 │ <a {...spread} href>invalid</a>
-     8 │ <a {...spread} onclick={something}>invalid</a>
-   > 9 │ <a {...spread} href="javascript:void(0)">invalid</a>
-       │                ^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
+    6 │ <a {...spread} href="#">invalid</a>
+    7 │ <a {...spread} href>invalid</a>
+  > 8 │ <a {...spread} href="javascript:void(0)">invalid</a>
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
   
   i The href attribute should be a valid URL
   

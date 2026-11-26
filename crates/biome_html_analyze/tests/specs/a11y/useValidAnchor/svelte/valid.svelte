@@ -10,4 +10,5 @@
 <a href="#" {...spread}>test</a>
 <a href {...spread}>test</a>
 <a onclick={something} {...spread}>test</a>
+<a {...spread} onclick={something}>test</a>
 <a href="javascript:void(0)" {...spread}>test</a>

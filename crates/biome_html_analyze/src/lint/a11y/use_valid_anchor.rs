@@ -94,17 +94,16 @@ impl Rule for UseValidAnchor {
                     let attribute_value = anchor_attribute.as_static_value()?;
                     let static_value = attribute_value.text().trim().to_ascii_lowercase_cow();
 
-                    if static_value.is_empty()
+                    if (static_value.is_empty()
                         || static_value == "#"
-                        || static_value.starts_with("javascript:")
+                        || static_value.starts_with("javascript:"))
+                        && !has_trailing_dynamic_spread(node, &anchor_attribute)
                     {
-                        if !has_trailing_dynamic_spread(node, &anchor_attribute) {
-                            return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
-                        }
+                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
                 }
                 (None, Some(on_click_attribute)) => {
-                    if !has_trailing_dynamic_spread(node, &on_click_attribute) {
+                    if !has_dynamic_spread(node) {
                         return Some(UseValidAnchorState::CantBeAnchor(
                             on_click_attribute.range(),
                         ));
