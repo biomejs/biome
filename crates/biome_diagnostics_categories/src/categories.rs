@@ -555,6 +555,7 @@ define_categories! {
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
+    "lint/nursery/useSetMethods": "https://biomejs.dev/linter/rules/use-set-methods",
     "lint/nursery/useSetSize": "https://biomejs.dev/linter/rules/use-set-size",
     "lint/nursery/useSimplifiedBooleanReturn": "https://biomejs.dev/linter/rules/use-simplified-boolean-return",
     "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",

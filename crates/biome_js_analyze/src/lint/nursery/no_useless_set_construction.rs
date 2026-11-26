@@ -6,19 +6,21 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyTsType, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsAwaitExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsComputedMemberExpression, JsConstructorParameters, JsFormalParameter, JsFunctionBody,
-    JsFunctionExpression, JsImportCallExpression, JsLanguage, JsNewExpression,
-    JsParameters, JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsReferenceIdentifier, JsStaticMemberExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
-    JsUnaryExpression, JsUnaryOperator, JsYieldExpression, T, TsGlobalDeclaration,
-    TsNonNullAssertionExpression, TsReferenceType, binding_ext::AnyJsBindingDeclaration,
+    AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsNewExpression,
+    JsParenthesizedExpression, JsStaticMemberExpression, JsSyntaxNode, JsSyntaxToken, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_set_construction::NoUselessSetConstructionOptions;
 
-use crate::{JsRuleAction, ast_utils::starts_unterminated_statement, services::semantic::Semantic};
+use crate::{
+    JsRuleAction,
+    ast_utils::{
+        is_in_new_callee, may_have_side_effects, needs_parentheses_as_object,
+        starts_unterminated_statement,
+    },
+    services::semantic::Semantic,
+    utils::builtin_collection::{CollectionKind, collection_kind, constructed_collection_kind},
+};
 
 declare_lint_rule! {
     /// Disallow creating a `Set` that a `Set` method such as `union()` doesn't need.
@@ -299,12 +301,6 @@ enum SetPosition {
     Result,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
-enum CollectionKind {
-    Set,
-    Map,
-}
-
 /// The `Set` methods that take another collection and don't change the `Set` they are
 /// called on, sorted.
 const SET_METHODS: &[&str] = &[
@@ -316,38 +312,6 @@ const SET_METHODS: &[&str] = &[
     "symmetricDifference",
     "union",
 ];
-
-/// The maximum number of variables that are looked up to find the value of an expression.
-const MAX_VARIABLE_LOOKUPS: u8 = 16;
-
-/// The nodes between a `new` keyword and an expression that the callee of `new` reads a
-/// property from, when the expression is their first child.
-const NEW_CALLEE_OBJECT_PARENT_KINDS: SyntaxKindSet<JsLanguage> =
-    JsStaticMemberExpression::KIND_SET
-        .union(JsTemplateExpression::KIND_SET)
-        .union(TsNonNullAssertionExpression::KIND_SET);
-
-/// The nodes that hold the parameters and the body of a function. This code runs when
-/// the function is called, not when the expression that creates the function is evaluated.
-const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = JsArrowFunctionExpression::KIND_SET
-    .union(JsFunctionExpression::KIND_SET)
-    .union(JsParameters::KIND_SET)
-    .union(JsConstructorParameters::KIND_SET)
-    .union(JsFormalParameter::KIND_SET)
-    .union(JsFunctionBody::KIND_SET);
-
-/// The nodes that [`may_have_side_effects`] looks for, and the [`FUNCTION_KINDS`] that it
-/// skips. A unary expression only has a side effect if its operator is `delete`.
-const SIDE_EFFECT_SEARCH_KINDS: SyntaxKindSet<JsLanguage> = JsCallExpression::KIND_SET
-    .union(JsNewExpression::KIND_SET)
-    .union(JsImportCallExpression::KIND_SET)
-    .union(JsAssignmentExpression::KIND_SET)
-    .union(JsPreUpdateExpression::KIND_SET)
-    .union(JsPostUpdateExpression::KIND_SET)
-    .union(JsAwaitExpression::KIND_SET)
-    .union(JsYieldExpression::KIND_SET)
-    .union(JsUnaryExpression::KIND_SET)
-    .union(FUNCTION_KINDS);
 
 /// A call to one of the [`SET_METHODS`] with a single argument, such as `a.union(b)`.
 struct SetMethodCall {
@@ -444,247 +408,6 @@ fn copied_collection(
     }
 }
 
-/// Returns whether `expression` evaluates to a built-in `Set` or `Map`, or `None` if the
-/// rule can't tell.
-///
-/// A value is recognized if it is created with `new Set()` or `new Map()`, or if it is
-/// declared or asserted with a type that [`type_collection_kind`] recognizes. When a
-/// `const` variable or an asserted expression has no such type, the value that the
-/// variable is initialized with, or the expression itself, is checked instead:
-///
-/// ```ts
-/// const values: Iterable<string> = new Set();
-/// const sameValues = values as Iterable<string>;
-/// ```
-///
-/// Both variables are a `Set`. A conditional expression is recognized if both of its
-/// results are collections of the same kind.
-fn collection_kind(expression: &AnyJsExpression, model: &SemanticModel) -> Option<CollectionKind> {
-    let mut kind = None;
-    let mut remaining_lookups = MAX_VARIABLE_LOOKUPS;
-    let mut next = Some(expression.clone());
-    // The second results of the conditional expressions whose first result is being checked.
-    let mut pending = Vec::new();
-    while let Some(expression) = next.take().or_else(|| pending.pop()) {
-        // `ty` is the type that the expression is declared or asserted with. `value` is
-        // the expression that produces the value when `found` is `None` and `ty` isn't
-        // a collection type.
-        let (found, ty, value) = match expression.omit_parentheses() {
-            AnyJsExpression::JsNewExpression(new) => {
-                (constructed_collection_kind(&new, model), None, None)
-            }
-            AnyJsExpression::TsAsExpression(assertion) => {
-                (None, assertion.ty().ok(), assertion.expression().ok())
-            }
-            AnyJsExpression::TsTypeAssertionExpression(assertion) => {
-                (None, assertion.ty().ok(), assertion.expression().ok())
-            }
-            AnyJsExpression::TsSatisfiesExpression(assertion) => {
-                (None, assertion.ty().ok(), assertion.expression().ok())
-            }
-            AnyJsExpression::TsNonNullAssertionExpression(assertion) => {
-                (None, None, assertion.expression().ok())
-            }
-            AnyJsExpression::JsConditionalExpression(conditional) => {
-                pending.push(conditional.alternate().ok()?);
-                (None, None, conditional.consequent().ok())
-            }
-            AnyJsExpression::JsIdentifierExpression(identifier) => {
-                remaining_lookups = remaining_lookups.checked_sub(1)?;
-                let declaration = model
-                    .binding(&identifier.name().ok()?)?
-                    .tree()
-                    .declaration()?;
-                (
-                    None,
-                    annotated_type(&declaration),
-                    const_initializer(&declaration),
-                )
-            }
-            _ => return None,
-        };
-        let found = match ty.map(|ty| type_collection_kind(ty, model)) {
-            Some(TypeCollectionKind::Collection(found)) => Some(found),
-            Some(TypeCollectionKind::SetOrMap) => return None,
-            Some(TypeCollectionKind::Other) | None => found,
-        };
-        let Some(found) = found else {
-            next = Some(value?);
-            continue;
-        };
-        if kind.is_some_and(|kind| kind != found) {
-            return None;
-        }
-        kind = Some(found);
-    }
-    kind
-}
-
-/// Returns the kind of collection that `new` creates, if its callee is the built-in
-/// `Set` or `Map`.
-fn constructed_collection_kind(
-    new: &JsNewExpression,
-    model: &SemanticModel,
-) -> Option<CollectionKind> {
-    let callee = new.callee().ok()?.omit_parentheses();
-    let name = callee.as_js_identifier_expression()?.name().ok()?;
-    if !is_global_reference(&name, model) {
-        return None;
-    }
-    match name.value_token().ok()?.text_trimmed() {
-        "Set" => Some(CollectionKind::Set),
-        "Map" => Some(CollectionKind::Map),
-        _ => None,
-    }
-}
-
-/// What a type tells about the kind of collection that a value is.
-enum TypeCollectionKind {
-    /// The type is a built-in `Set` type, a built-in `Map` type, or a union of types of
-    /// the same kind, such as `Set<string> | ReadonlySet<number>`.
-    Collection(CollectionKind),
-    /// The type is a union of built-in `Set` and `Map` types.
-    SetOrMap,
-    /// The type, or a member of the union type, isn't a built-in `Set` or `Map` type.
-    Other,
-}
-
-/// Returns what `ty` tells about the kind of collection that a value is.
-///
-/// The built-in types are `Set`, `ReadonlySet`, `Map`, and `ReadonlyMap`.
-fn type_collection_kind(ty: AnyTsType, model: &SemanticModel) -> TypeCollectionKind {
-    let mut kind = None;
-    let mut has_both_kinds = false;
-    let mut next = Some(ty);
-    // The members of the union types that are still to check.
-    let mut pending = Vec::new();
-    while let Some(ty) = next.take().or_else(|| pending.pop()) {
-        let found = match ty.omit_parentheses() {
-            AnyTsType::TsReferenceType(reference) => builtin_collection_type(&reference, model),
-            AnyTsType::TsUnionType(union) => {
-                for member in union.types().iter() {
-                    let Ok(member) = member else {
-                        return TypeCollectionKind::Other;
-                    };
-                    pending.push(member);
-                }
-                continue;
-            }
-            AnyTsType::TsTypeOperatorType(operator)
-                if operator
-                    .operator_token()
-                    .is_ok_and(|token| token.kind() == T![readonly]) =>
-            {
-                let Ok(ty) = operator.ty() else {
-                    return TypeCollectionKind::Other;
-                };
-                next = Some(ty);
-                continue;
-            }
-            _ => None,
-        };
-        let Some(found) = found else {
-            return TypeCollectionKind::Other;
-        };
-        has_both_kinds |= kind.is_some_and(|kind| kind != found);
-        kind = Some(found);
-    }
-    match kind {
-        Some(_) if has_both_kinds => TypeCollectionKind::SetOrMap,
-        Some(kind) => TypeCollectionKind::Collection(kind),
-        None => TypeCollectionKind::Other,
-    }
-}
-
-/// Returns the kind of collection that `reference` names, if it names one of the
-/// built-in `Set` and `Map` types.
-fn builtin_collection_type(
-    reference: &TsReferenceType,
-    model: &SemanticModel,
-) -> Option<CollectionKind> {
-    let name = reference.name().ok()?;
-    let name = name.as_js_reference_identifier()?;
-    let kind = match name.value_token().ok()?.text_trimmed() {
-        "Set" | "ReadonlySet" => CollectionKind::Set,
-        "Map" | "ReadonlyMap" => CollectionKind::Map,
-        _ => return None,
-    };
-    is_global_reference(name, model).then_some(kind)
-}
-
-/// Returns `true` if `reference` names a global value or type, and not one that the file
-/// declares or imports.
-///
-/// A declaration in a `declare global` block describes the global itself.
-fn is_global_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
-    model.binding(reference).is_none_or(|binding| {
-        binding
-            .syntax()
-            .ancestors()
-            .any(|ancestor| TsGlobalDeclaration::can_cast(ancestor.kind()))
-    })
-}
-
-/// Returns the type that a variable or a function parameter is declared with.
-///
-/// The type of an optional parameter, such as `set?: Set<string>`, is returned as it is
-/// written, although the parameter can also be `undefined`.
-fn annotated_type(declaration: &AnyJsBindingDeclaration) -> Option<AnyTsType> {
-    let annotation = match declaration {
-        AnyJsBindingDeclaration::JsFormalParameter(parameter) => parameter.type_annotation(),
-        AnyJsBindingDeclaration::TsPropertyParameter(parameter) => parameter
-            .formal_parameter()
-            .ok()?
-            .as_js_formal_parameter()?
-            .type_annotation(),
-        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => declarator
-            .variable_annotation()?
-            .type_annotation()
-            .ok()?,
-        _ => None,
-    }?;
-    annotation.ty().ok()
-}
-
-/// Returns the value that a `const` variable is initialized with.
-///
-/// The value of a `let` or `var` variable isn't returned, because the variable can be
-/// given another value later.
-fn const_initializer(declaration: &AnyJsBindingDeclaration) -> Option<AnyJsExpression> {
-    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
-        return None;
-    };
-    if !declarator.declaration()?.is_const() {
-        return None;
-    }
-    declarator.initializer()?.expression().ok()
-}
-
-/// Returns `true` if evaluating `expression` may do more than produce a value, such as
-/// calling a function or assigning to a variable.
-///
-/// Reading a property and evaluating a template literal are assumed to have no side
-/// effects. The parameters and the body of a function that `expression` creates aren't
-/// searched, because creating a function doesn't run it.
-fn may_have_side_effects(expression: &AnyJsExpression) -> bool {
-    let mut preorder = expression
-        .syntax()
-        .preorder_of_kinds(SIDE_EFFECT_SEARCH_KINDS);
-    while let Some(event) = preorder.next() {
-        let WalkEvent::Enter(node) = event else {
-            continue;
-        };
-        if FUNCTION_KINDS.matches(node.kind()) {
-            preorder.skip_subtree();
-        } else if JsUnaryExpression::cast(node)
-            .is_none_or(|unary| unary.operator() == Ok(JsUnaryOperator::Delete))
-        {
-            return true;
-        }
-    }
-    false
-}
-
 /// Returns `true` if a comment inside `node` is outside of `replacement`, so the fix
 /// would remove it.
 fn has_comments_outside(node: &JsNewExpression, replacement: &AnyJsExpression) -> bool {
@@ -700,47 +423,6 @@ fn has_comments_outside(node: &JsNewExpression, replacement: &AnyJsExpression) -
                     && !replacement_range.contains_range(piece.text_range())
             })
     })
-}
-
-/// Returns `true` if `object` must be wrapped in parentheses before a property can be
-/// read from it.
-///
-/// `new Set` without arguments would read the property from `Set` itself, and
-/// `a ? b : c` would read the property from `c` only.
-fn needs_parentheses_as_object(object: &AnyJsExpression) -> bool {
-    match object {
-        AnyJsExpression::JsIdentifierExpression(_)
-        | AnyJsExpression::JsParenthesizedExpression(_)
-        | AnyJsExpression::TsNonNullAssertionExpression(_) => false,
-        AnyJsExpression::JsNewExpression(new) => new.arguments().is_none(),
-        _ => true,
-    }
-}
-
-/// Returns `true` if `node` is the object that a `new` callee reads a property from,
-/// such as in `new new Set(a.union(b)).constructor()`, or if it is the callee itself.
-///
-/// A call in that place needs parentheses, because `new a.union(b).constructor()` calls
-/// `a.union` with `new`.
-fn is_in_new_callee(node: &JsNewExpression) -> bool {
-    let mut child = node.syntax().clone();
-    for ancestor in node.syntax().ancestors().skip(1) {
-        // The arguments of `new` are wrapped in another node, so `child` is the callee.
-        if JsNewExpression::can_cast(ancestor.kind()) {
-            return true;
-        }
-        let is_object = match JsComputedMemberExpression::cast_ref(&ancestor) {
-            Some(member) => member
-                .object()
-                .is_ok_and(|object| object.syntax() == &child),
-            None => NEW_CALLEE_OBJECT_PARENT_KINDS.matches(ancestor.kind()),
-        };
-        if !is_object {
-            return false;
-        }
-        child = ancestor;
-    }
-    false
 }
 
 #[cfg(test)]
