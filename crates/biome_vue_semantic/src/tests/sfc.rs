@@ -6,7 +6,7 @@ use crate::{
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{HtmlRoot, HtmlSyntaxKind};
 use biome_languages::HtmlFileSource;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::{AstNode, TextRange};
 
 const LIST: &str = r#"<script setup lang="ts">
 import Card from './Card.vue'
@@ -1035,22 +1035,6 @@ fn string_values_and_comments() {
 }
 
 #[test]
-fn attr_at_finds_the_attribute_with_the_exact_range() {
-    let code = "<template>\n  <div id=\"x\" :title=\"'y'\" />\n</template>\n";
-    let model = sfc(code);
-    let start = code.find(":title").unwrap();
-    let end = start + ":title=\"'y'\"".len();
-    let range = TextRange::new(TextSize::from(start as u32), TextSize::from(end as u32));
-    let attr = model.attr_at(range).unwrap();
-    assert_eq!(attr.static_arg(), Some("title"));
-    assert!(
-        model
-            .attr_at(TextRange::at(range.start(), 1.into()))
-            .is_none()
-    );
-}
-
-#[test]
 fn setup_bindings_record_the_macro_or_composable_they_store() {
     let model = sfc(r#"<script setup>
 import { useAttrs, useSlots } from 'vue'
@@ -1099,12 +1083,14 @@ fn elements_and_attributes_point_to_their_nodes() {
     let node = nodes.get(card.html_node()).expect("a resolved node");
     assert_eq!(node.kind(), HtmlSyntaxKind::HTML_ELEMENT);
     assert_eq!(node.text_trimmed_range(), card.range());
+    assert_eq!(nodes.id(node), Some(card.html_node()));
 
     let attrs: Vec<_> = card
         .attrs()
         .map(|attr| {
             let node = nodes.get(attr.html_node()).expect("a resolved node");
             assert_eq!(node.text_trimmed_range(), attr.range());
+            assert_eq!(nodes.id(node), Some(attr.html_node()));
             node.text_trimmed().to_string()
         })
         .collect();
@@ -1116,4 +1102,7 @@ fn elements_and_attributes_point_to_their_nodes() {
             r#"@click="emit('select', item.id)""#,
         ]
     );
+
+    // No row stands for the root of the document.
+    assert_eq!(nodes.id(host.syntax()), None);
 }

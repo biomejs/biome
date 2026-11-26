@@ -140,7 +140,7 @@ impl Rule for NoVueUselessVBind {
     type Options = NoVueUselessVBindOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let attr = ctx.model().attr_at(ctx.query().range())?;
+        let attr = ctx.model().attr_of(ctx.query())?;
         if attr.directive_kind()? != DirectiveKind::Bind
             || attr.static_arg().is_none()
             || attr.modifiers().next().is_some()

@@ -128,7 +128,7 @@ impl Rule for NoVueUndeclaredDirectives {
 
         // The model holds no reference for a built-in directive, and none at
         // all when it couldn't read the file.
-        let reference = ctx.model().reference_at(token.text_trimmed_range())?;
+        let reference = ctx.model().attr_of(directive)?.directive_reference()?;
         match reference.resolution() {
             Resolution::Unresolved => Some(token),
             Resolution::Symbol(_) | Resolution::Global | Resolution::Unknowable => None,

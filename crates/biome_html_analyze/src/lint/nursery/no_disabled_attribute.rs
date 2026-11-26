@@ -476,7 +476,7 @@ fn vue_binding_snippet(
     model: &AnalyzedVueModel<HtmlLanguage>,
 ) -> Option<Snippet> {
     attribute.as_any_vue_directive()?;
-    model.attr_at(attribute.range())?.value_snippet()
+    model.attr_of(attribute)?.value_snippet()
 }
 
 fn static_attribute_text(
@@ -578,7 +578,7 @@ fn is_inactive_disabled_attribute(
     model: &AnalyzedVueModel<HtmlLanguage>,
 ) -> Option<bool> {
     if attribute.as_any_vue_directive().is_some() {
-        let model_attribute = model.attr_at(attribute.range())?;
+        let model_attribute = model.attr_of(attribute)?;
         let Some(snippet) = model_attribute.value_snippet() else {
             return Some(false);
         };

@@ -165,15 +165,10 @@ impl Rule for UseVueValidVModel {
 
         if has_empty_value(directive) {
             violations.push(ViolationKind::MissingValue);
-        } else if let Some(snippet) =
-            ctx.model()
-                .element_at(directive.range())
-                .and_then(|element| {
-                    element
-                        .attrs()
-                        .find(|attr| attr.range() == directive.range())?
-                        .value_snippet()
-                })
+        } else if let Some(snippet) = ctx
+            .model()
+            .attr_of(directive)
+            .and_then(|attr| attr.value_snippet())
         {
             violations.extend(value_violation(&snippet));
         }
