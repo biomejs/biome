@@ -3055,6 +3055,11 @@ export interface Nursery {
 	 */
 	noConstantComparisons?: NoConstantComparisonsConfiguration;
 	/**
+	 * Disallow reading the current time or generating random values in Convex queries.
+	 * See https://biomejs.dev/linter/rules/no-convex-time-or-random-in-queries
+	 */
+	noConvexTimeOrRandomInQueries?: NoConvexTimeOrRandomInQueriesConfiguration;
+	/**
 	 * Disallow scheduling Convex cron jobs at the start of the hour.
 	 * See https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons
 	 */
@@ -6998,6 +7003,9 @@ export type NoConsoleSpacesConfiguration =
 export type NoConstantComparisonsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantComparisonsOptions;
+export type NoConvexTimeOrRandomInQueriesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexTimeOrRandomInQueriesOptions;
 export type NoConvexTopOfHourCronsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexTopOfHourCronsOptions;
@@ -10222,6 +10230,10 @@ export interface RuleWithNoConsoleSpacesOptions {
 export interface RuleWithNoConstantComparisonsOptions {
 	level: RulePlainConfiguration;
 	options?: NoConstantComparisonsOptions;
+}
+export interface RuleWithNoConvexTimeOrRandomInQueriesOptions {
+	level: RulePlainConfiguration;
+	options?: NoConvexTimeOrRandomInQueriesOptions;
 }
 export interface RuleWithNoConvexTopOfHourCronsOptions {
 	level: RulePlainConfiguration;
@@ -14083,6 +14095,7 @@ export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
+export type NoConvexTimeOrRandomInQueriesOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
@@ -16655,6 +16668,7 @@ export type Category =
 	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
+	| "lint/nursery/noConvexTimeOrRandomInQueries"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
@@ -16819,10 +16833,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
