@@ -39,6 +39,7 @@ biome migrate prettier --fix
       "bracketSpacing": true
     }
   },
+  "markdown": { "parser": { "frontmatter": true } },
   "html": {
     "formatter": {
       "indentScriptAndStyle": false,

@@ -1,0 +1,1 @@
+<Card icon={<Icon   name="x" />}   {...props}   />

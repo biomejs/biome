@@ -1,4 +1,5 @@
 use crate::generate_nodes::token_kind_to_code;
+use crate::generate_syntax_kinds::keyword_kind_name;
 use crate::js_kinds_src::{AstSrc, Field, JS_KINDS_SRC, TokenKind};
 use crate::language_kind::LanguageKind;
 use crate::update;
@@ -33,6 +34,11 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
     let diagnostics = generate_diagnostics_typescript()?;
     update(&diagnostics_path, &diagnostics, mode)?;
 
+    let kind_names_path =
+        project_root().join("crates/biome_js_analyze/src/frameworks/biome_plugin/kind_names.rs");
+    let kind_names = generate_analyzer_kind_names(ast)?;
+    update(&kind_names_path, &kind_names, mode)?;
+
     Ok(())
 }
 
@@ -42,14 +48,7 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
     let mut field_arms = Vec::new();
     let mut field_tables = Vec::new();
 
-    for name in ast
-        .nodes
-        .iter()
-        .map(|node| &node.name)
-        .chain(&ast.bogus)
-        .chain(ast.lists.keys())
-    {
-        let kind_name = Case::Constant.convert(name);
+    for kind_name in node_kind_names(ast) {
         let node_kind = format_ident!("{kind_name}");
         kind_name_arms.push(quote! { #kind_name => JsSyntaxKind::#node_kind });
     }
@@ -136,16 +135,42 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
         let kind = format_ident!("{name}");
         quote! { #name => JsSyntaxKind::#kind }
     });
+    let source_only_token_kind_arms = SOURCE_ONLY_TOKEN_KIND_NAMES.iter().map(|name| {
+        let kind = format_ident!("{name}");
+        quote! { #name => JsSyntaxKind::#kind }
+    });
+    let syntax_kind_name_arms = syntax_kind_names().into_iter().map(|name| {
+        let kind = format_ident!("{name}");
+        quote! { JsSyntaxKind::#kind => js_string!(#name) }
+    });
     let tokens = quote! {
         use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
         use biome_js_syntax::{*, JsSyntaxKind::*};
         use biome_rowan::AstNode;
+        use boa_engine::{JsString, js_string};
 
         impl JsAstNode {
+            /// Returns the variant name of `kind`, which plugins read as the `kind` of
+            /// nodes and tokens. The string is static, so returning it never allocates.
+            pub(crate) fn kind_name(kind: JsSyntaxKind) -> JsString {
+                match kind {
+                    #(#syntax_kind_name_arms,)*
+                }
+            }
+
             /// Resolves a constructible token kind by its exact native enum name.
             pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
                 Some(match name {
                     #(#token_kind_arms,)*
+                    _ => return None,
+                })
+            }
+
+            /// Resolves a token kind that only appears in parsed source, which
+            /// `factory.token()` can't construct, by its exact native enum name.
+            pub(crate) fn source_only_token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
+                Some(match name {
+                    #(#source_only_token_kind_arms,)*
                     _ => return None,
                 })
             }
@@ -173,6 +198,34 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
     };
 
     // Establish line breaks before rustfmt, which can leave oversized expressions unchanged.
+    let file = syn::parse2::<syn::File>(tokens)?;
+    Ok(xtask_glue::reformat(prettyplease::unparse(&file))?.replacen("//!", "//", 1))
+}
+
+/// Generates the sorted kind names that `nodeKinds()` and `tokenKinds()` accept, so that
+/// lint rules in `biome_js_analyze` can tell node kinds from token kinds without depending
+/// on the JS runtime.
+fn generate_analyzer_kind_names(ast: &AstSrc) -> Result<String> {
+    let mut node_kind_names = node_kind_names(ast);
+    node_kind_names.sort_unstable();
+    node_kind_names.dedup();
+    let mut token_kind_names = token_kind_names();
+    token_kind_names.extend(
+        SOURCE_ONLY_TOKEN_KIND_NAMES
+            .iter()
+            .map(|name| (*name).to_owned()),
+    );
+    token_kind_names.sort_unstable();
+    token_kind_names.dedup();
+
+    let tokens = quote! {
+        /// The kind names that `nodeKinds()` accepts in Biome JS plugins, sorted by byte order.
+        pub(crate) const NODE_KIND_NAMES: &[&str] = &[#(#node_kind_names),*];
+
+        /// The kind names that `tokenKinds()` accepts in Biome JS plugins, sorted by byte order.
+        pub(crate) const TOKEN_KIND_NAMES: &[&str] = &[#(#token_kind_names),*];
+    };
+
     let file = syn::parse2::<syn::File>(tokens)?;
     Ok(xtask_glue::reformat(prettyplease::unparse(&file))?.replacen("//!", "//", 1))
 }
@@ -688,6 +741,10 @@ const BASE_MEMBERS: &[&str] = &[
     "children",
     "token",
     "childrenWithTokens",
+    "descendants",
+    "walk",
+    "leadingTrivia",
+    "trailingTrivia",
 ];
 
 fn updater_name_for_field(field: &Field) -> String {
@@ -717,6 +774,55 @@ fn validate_bindings(ast: &AstSrc) -> Result<()> {
     }
     Ok(())
 }
+
+/// Returns the name of every `JsSyntaxKind` variant, in the order `generate_syntax_kinds`
+/// declares them.
+fn syntax_kind_names() -> Vec<String> {
+    ["TOMBSTONE", "EOF", "UNICODE_BOM"]
+        .into_iter()
+        .map(str::to_owned)
+        .chain(
+            JS_KINDS_SRC
+                .punct
+                .iter()
+                .map(|(_, name)| (*name).to_owned()),
+        )
+        .chain(
+            JS_KINDS_SRC
+                .keywords
+                .iter()
+                .map(|keyword| keyword_kind_name(keyword)),
+        )
+        .chain(JS_KINDS_SRC.literals.iter().map(|name| (*name).to_owned()))
+        .chain(JS_KINDS_SRC.tokens.iter().map(|name| (*name).to_owned()))
+        .chain(JS_KINDS_SRC.nodes.iter().map(|name| (*name).to_owned()))
+        .chain(["__LAST".to_owned()])
+        .collect()
+}
+
+/// Returns the names of the node kinds that plugins can match: nodes, bogus nodes, and lists.
+fn node_kind_names(ast: &AstSrc) -> Vec<String> {
+    ast.nodes
+        .iter()
+        .map(|node| &node.name)
+        .chain(&ast.bogus)
+        .chain(ast.lists.keys())
+        .map(|name| Case::Constant.convert(name))
+        .collect()
+}
+
+/// Token kinds that only appear in parsed source. `tokenKinds()` accepts them, but
+/// `factory.token()` can't construct them, so [`token_kind_names`] leaves them out.
+/// Both the runtime and the analyzer's kind names are generated from this list.
+const SOURCE_ONLY_TOKEN_KIND_NAMES: &[&str] = &[
+    "ERROR_TOKEN",
+    "NEWLINE",
+    "WHITESPACE",
+    "COMMENT",
+    "MULTILINE_COMMENT",
+    "EOF",
+    "UNICODE_BOM",
+];
 
 fn token_kind_names() -> Vec<String> {
     JS_KINDS_SRC

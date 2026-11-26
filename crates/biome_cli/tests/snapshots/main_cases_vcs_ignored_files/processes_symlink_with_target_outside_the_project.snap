@@ -1,0 +1,67 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint
+```
+
+## `project/biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "warn"
+      }
+    }
+  }
+}
+```
+
+## `project/.gitignore`
+
+```gitignore
+dist
+
+```
+
+## `shared/file.js`
+
+```js
+debugger;
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+    2 │ 
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger;
+      │ ---------
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 warning.
+```

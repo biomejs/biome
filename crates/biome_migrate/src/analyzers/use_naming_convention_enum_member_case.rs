@@ -112,15 +112,13 @@ impl Rule for UseNamingConventionEnumMemberCase {
             mutation.remove_node(node.clone());
             if let Some(trailing_comma) = node
                 .syntax()
-                .last_token()
-                .and_then(|ignore_last_token| ignore_last_token.next_token())
+                .next_token()
                 .filter(|next_token| next_token.kind() == T![,])
             {
                 mutation.remove_token(trailing_comma);
             } else if let Some(leading_comma) = node
                 .syntax()
-                .first_token()
-                .and_then(|ignore_last_token| ignore_last_token.prev_token())
+                .prev_token()
                 .filter(|prev_token| prev_token.kind() == T![,])
             {
                 mutation.remove_token(leading_comma);

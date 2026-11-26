@@ -18,14 +18,12 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_UNKNOWN_TAG@1..5 "math" [] [],
+                    value_token: MATH_KW@1..5 "math" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@5..6 ">" [] [],
@@ -35,7 +33,7 @@ HtmlRoot {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@6..7 "<" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_UNKNOWN_TAG@7..17 "annotation" [] [],
+                            value_token: ANNOTATION_KW@7..17 "annotation" [] [],
                         },
                         attributes: HtmlAttributeList [],
                         r_angle_token: R_ANGLE@17..18 ">" [] [],
@@ -61,7 +59,7 @@ HtmlRoot {
                         l_angle_token: L_ANGLE@26..27 "<" [] [],
                         slash_token: SLASH@27..28 "/" [] [],
                         name: HtmlTagName {
-                            value_token: HTML_UNKNOWN_TAG@28..38 "annotation" [] [],
+                            value_token: ANNOTATION_KW@28..38 "annotation" [] [],
                         },
                         r_angle_token: R_ANGLE@38..39 ">" [] [],
                     },
@@ -71,7 +69,7 @@ HtmlRoot {
                 l_angle_token: L_ANGLE@39..40 "<" [] [],
                 slash_token: SLASH@40..41 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_UNKNOWN_TAG@41..45 "math" [] [],
+                    value_token: MATH_KW@41..45 "math" [] [],
                 },
                 r_angle_token: R_ANGLE@45..46 ">" [] [],
             },
@@ -114,14 +112,12 @@ HtmlRoot {
 0: HTML_ROOT@0..69
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..68
+  2: HTML_ROOT_ITEM_LIST@0..68
     0: HTML_ELEMENT@0..46
       0: HTML_OPENING_ELEMENT@0..6
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_UNKNOWN_TAG@1..5 "math" [] []
+          0: MATH_KW@1..5 "math" [] []
         2: HTML_ATTRIBUTE_LIST@5..5
         3: R_ANGLE@5..6 ">" [] []
       1: HTML_ELEMENT_LIST@6..39
@@ -129,7 +125,7 @@ HtmlRoot {
           0: HTML_OPENING_ELEMENT@6..18
             0: L_ANGLE@6..7 "<" [] []
             1: HTML_TAG_NAME@7..17
-              0: HTML_UNKNOWN_TAG@7..17 "annotation" [] []
+              0: ANNOTATION_KW@7..17 "annotation" [] []
             2: HTML_ATTRIBUTE_LIST@17..17
             3: R_ANGLE@17..18 ">" [] []
           1: HTML_ELEMENT_LIST@18..26
@@ -147,13 +143,13 @@ HtmlRoot {
             0: L_ANGLE@26..27 "<" [] []
             1: SLASH@27..28 "/" [] []
             2: HTML_TAG_NAME@28..38
-              0: HTML_UNKNOWN_TAG@28..38 "annotation" [] []
+              0: ANNOTATION_KW@28..38 "annotation" [] []
             3: R_ANGLE@38..39 ">" [] []
       2: HTML_CLOSING_ELEMENT@39..46
         0: L_ANGLE@39..40 "<" [] []
         1: SLASH@40..41 "/" [] []
         2: HTML_TAG_NAME@41..45
-          0: HTML_UNKNOWN_TAG@41..45 "math" [] []
+          0: MATH_KW@41..45 "math" [] []
         3: R_ANGLE@45..46 ">" [] []
     1: HTML_ELEMENT@46..68
       0: HTML_OPENING_ELEMENT@46..52
@@ -174,6 +170,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@64..67
           0: DIV_KW@64..67 "div" [] []
         3: R_ANGLE@67..68 ">" [] []
-  5: EOF@68..69 "" [Newline("\n")] []
+  3: EOF@68..69 "" [Newline("\n")] []
 
 ```

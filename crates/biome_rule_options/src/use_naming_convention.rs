@@ -384,11 +384,7 @@ impl Kind {
                     )
                     | (
                         Self::TypeMember,
-                        Self::TypeGetter
-                            | Self::TypeMethod
-                            | Self::TypeParameter
-                            | Self::TypeProperty
-                            | Self::TypeSetter
+                        Self::TypeGetter | Self::TypeMethod | Self::TypeProperty | Self::TypeSetter
                     )
                     | (
                         Self::NamespaceLike,

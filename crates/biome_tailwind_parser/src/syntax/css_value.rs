@@ -1,5 +1,5 @@
 use crate::parser::TailwindParser;
-use crate::token_source::TailwindLexContext;
+use crate::syntax::atoms::{css_token, url_raw_value};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -7,6 +7,19 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
+use biome_unicode_table::Dispatch::{PNC, QOT, WHS};
+
+/// Returns the kind and length in atoms of the CSS token at the current atom.
+#[inline]
+fn css(p: &TailwindParser) -> (TailwindSyntaxKind, usize) {
+    p.css_token()
+}
+
+/// Whether the CSS token at the current atom is of one of `kinds`.
+#[inline]
+fn css_at_ts(p: &TailwindParser, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
+    kinds.contains(css(p).0)
+}
 
 pub(crate) fn parse_css_generic_component_value_list(p: &mut TailwindParser) -> bool {
     let start = p.source().position();
@@ -53,9 +66,10 @@ impl ParseNodeList for CssGenericComponentValueList {
 }
 
 fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at_ts(token_set![T![,], T![/], T![:], T![=], T![.]]) {
+    let (kind, _) = css(p);
+    if token_set![T![,], T![/], T![:], T![=], T![.]].contains(kind) {
         let m = p.start();
-        p.bump_with_context(p.cur(), TailwindLexContext::CssValue);
+        p.bump_css(kind);
         Present(m.complete(p, CSS_GENERIC_DELIMITER))
     } else {
         parse_css_value(p)
@@ -63,10 +77,10 @@ fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at_ts(token_set![T![+], T![-]]) {
-        parse_css_unary_expression(p)
+    if css_at_ts(p, token_set![T![+], T![-]]) {
+        parse_unary_expression(p)
     } else if p.at(T!['(']) {
-        parse_css_parenthesized_expression(p)
+        parse_parenthesized_expression(p)
     } else {
         parse_any_value(p)
     }
@@ -76,202 +90,169 @@ fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
 /// parentheses are left to the caller.
 fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
     if is_at_any_function(p) {
-        parse_any_function(p)
-    } else if is_at_identifier(p) {
-        if is_at_dashed_identifier(p) {
-            parse_css_dashed_identifier(p)
-        } else {
-            parse_css_identifier(p)
+        return parse_any_function(p);
+    }
+    let (kind, atoms) = css(p);
+    if is_identifier(kind) {
+        return parse_css_identifier(p);
+    }
+    match kind {
+        CSS_STRING_LITERAL => parse_css_string(p),
+        CSS_DIMENSION_VALUE => {
+            let m = p.start();
+            p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
+            // The lexer splits a number from its unit, the ASCII letters after it, and gives the
+            // unit the kind of its keyword.
+            let node = if is_unit(p.cur()) {
+                CSS_REGULAR_DIMENSION
+            } else {
+                CSS_UNKNOWN_DIMENSION
+            };
+            p.bump_css_atoms(T![ident], 1);
+            Present(m.complete(p, node))
         }
-    } else if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p)
-    } else if p.at(CSS_DIMENSION_VALUE) {
-        parse_css_dimension(p)
-    } else if p.at(CSS_PERCENTAGE_VALUE) {
-        parse_css_percentage(p)
-    } else if p.at(CSS_NUMBER_LITERAL) {
-        parse_css_number_or_ratio(p)
-    } else if p.at(CSS_COLOR_LITERAL) {
-        parse_css_color(p)
-    } else {
-        Absent
+        CSS_PERCENTAGE_VALUE => {
+            let m = p.start();
+            p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
+            p.expect_css(T![%]);
+            Present(m.complete(p, CSS_PERCENTAGE))
+        }
+        CSS_NUMBER_LITERAL => parse_css_number_or_ratio(p),
+        CSS_COLOR_LITERAL => {
+            let m = p.start();
+            p.bump_css_atoms(CSS_COLOR_LITERAL, atoms);
+            Present(m.complete(p, CSS_COLOR))
+        }
+        _ => Absent,
     }
 }
 
+/// Parses an identifier, which is dashed if it starts with `--`.
 fn parse_css_identifier(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    let (kind, atoms) = css(p);
+    if !is_identifier(kind) {
         return Absent;
     }
-
+    let node = if is_at_dashed_identifier(p) {
+        CSS_DASHED_IDENTIFIER
+    } else {
+        CSS_IDENTIFIER
+    };
     let m = p.start();
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
-    Present(m.complete(p, CSS_IDENTIFIER))
-}
-
-fn parse_css_dashed_identifier(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_dashed_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
-    Present(m.complete(p, CSS_DASHED_IDENTIFIER))
+    p.bump_css_atoms(T![ident], atoms);
+    Present(m.complete(p, node))
 }
 
 fn parse_css_string(p: &mut TailwindParser) -> ParsedSyntax {
+    let (_, atoms) = css(p);
     let m = p.start();
-    p.bump_with_context(CSS_STRING_LITERAL, TailwindLexContext::CssValue);
+    p.bump_css_atoms(CSS_STRING_LITERAL, atoms);
     Present(m.complete(p, CSS_STRING))
 }
 
 fn parse_css_number(p: &mut TailwindParser) -> ParsedSyntax {
+    let (kind, atoms) = css(p);
+    if kind != CSS_NUMBER_LITERAL {
+        return Absent;
+    }
     let m = p.start();
-    p.bump_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
+    p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
     Present(m.complete(p, CSS_NUMBER))
 }
 
 fn parse_css_number_or_ratio(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(CSS_NUMBER_LITERAL) {
-        return Absent;
-    }
-
     let number = parse_css_number(p);
-
-    if !current_slash_is_followed_by_css_number(p) {
+    if number.is_absent() || !current_slash_is_followed_by_css_number(p) {
         return number;
     }
 
-    p.bump_with_context(T![/], TailwindLexContext::CssValue);
+    p.bump_css(T![/]);
     let ratio = number.precede(p);
     parse_css_number(p).ok();
 
     Present(ratio.complete(p, CSS_RATIO))
 }
 
-fn current_slash_is_followed_by_css_number(p: &mut TailwindParser) -> bool {
+/// Whether the current atom is a `/` and the CSS token after it, past any `_`s, is a number.
+fn current_slash_is_followed_by_css_number(p: &TailwindParser) -> bool {
     if !p.at(T![/]) {
         return false;
     }
-
-    // because p.nth_at() does not preserve the current lex context
-    let checkpoint = p.checkpoint();
-    p.bump_with_context(T![/], TailwindLexContext::CssValue);
-    let is_followed_by_number = p.at(CSS_NUMBER_LITERAL);
-    p.rewind(checkpoint);
-
-    is_followed_by_number
-}
-
-fn parse_css_dimension(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
-    let kind = if is_nth_at_unit(p, 0) {
-        CSS_REGULAR_DIMENSION
-    } else {
-        CSS_UNKNOWN_DIMENSION
-    };
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
-    Present(m.complete(p, kind))
-}
-
-fn parse_css_percentage(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
-    p.expect_with_context(T![%], TailwindLexContext::CssValue);
-    Present(m.complete(p, CSS_PERCENTAGE))
-}
-
-fn parse_css_color(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_with_context(CSS_COLOR_LITERAL, TailwindLexContext::CssValue);
-    Present(m.complete(p, CSS_COLOR))
+    let mut n = 1;
+    while p.source().nth_kind(n) == CSS_WHITESPACE {
+        n += 1;
+    }
+    css_token(p.source(), n).0 == CSS_NUMBER_LITERAL
 }
 
 #[inline]
-fn is_at_any_function(p: &mut TailwindParser) -> bool {
+fn is_at_any_function(p: &TailwindParser) -> bool {
     is_at_url_function(p) || is_at_function(p)
 }
 
 #[inline]
 fn parse_any_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_any_function(p) {
-        return Absent;
-    }
-
     if is_at_url_function(p) {
         parse_url_function(p)
-    } else {
+    } else if is_at_function(p) {
         parse_function(p)
+    } else {
+        Absent
     }
 }
 
+/// Whether the current atom starts an identifier with a `(` right after it.
 #[inline]
-fn is_at_url_function(p: &mut TailwindParser) -> bool {
-    p.at(T![url]) && p.nth_at(1, T!['('])
+fn is_at_identifier_and_paren(p: &TailwindParser) -> bool {
+    let (kind, atoms) = css(p);
+    is_identifier(kind) && p.source().nth_kind(atoms) == T!['(']
+}
+
+#[inline]
+fn is_at_url_function(p: &TailwindParser) -> bool {
+    css(p).0 == T![url] && is_at_identifier_and_paren(p)
+}
+
+#[inline]
+fn is_at_function(p: &TailwindParser) -> bool {
+    is_at_identifier_and_paren(p) && css(p).0 != T![url]
 }
 
 fn parse_url_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_url_function(p) {
-        return Absent;
-    }
-
     let m = p.start();
-    p.bump_with_context(T![url], TailwindLexContext::CssValue);
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    let (_, atoms) = css(p);
+    p.bump_css_atoms(T![url], atoms);
+    p.expect_css(T!['(']);
     if is_at_any_function(p) {
         ParameterList.parse_list(p);
     } else {
-        p.source_mut()
-            .re_lex_current_in_context(TailwindLexContext::CssUrlRawValue);
         parse_url_value(p).ok();
     }
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
-#[inline]
-fn parse_url_value_raw(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(CSS_URL_VALUE_RAW_LITERAL) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump_with_context(
-        CSS_URL_VALUE_RAW_LITERAL,
-        TailwindLexContext::CssUrlRawValue,
-    );
-    Present(m.complete(p, CSS_URL_VALUE_RAW))
-}
-
-#[inline]
+/// Parses the argument of `url(...)` when it isn't a function: a string, or a raw URL, which
+/// runs to the next `)` or whitespace.
 fn parse_url_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p)
-    } else {
-        parse_url_value_raw(p)
+    match p.source().nth_dispatch(0) {
+        Some(QOT) => parse_css_string(p),
+        None | Some(PNC | WHS) => Absent,
+        Some(_) => {
+            let m = p.start();
+            let atoms = url_raw_value(p.source());
+            p.bump_atoms(CSS_URL_VALUE_RAW_LITERAL, atoms);
+            Present(m.complete(p, CSS_URL_VALUE_RAW))
+        }
     }
-}
-
-#[inline]
-fn is_at_function(p: &mut TailwindParser) -> bool {
-    is_nth_at_function(p, 0) && !is_at_url_function(p)
-}
-
-#[inline]
-fn is_nth_at_function(p: &mut TailwindParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
 }
 
 fn parse_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_function(p) {
-        return Absent;
-    }
-
     let m = p.start();
     parse_css_identifier(p).ok();
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.expect_css(T!['(']);
     ParameterList.parse_list(p);
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_FUNCTION))
 }
 
@@ -310,7 +291,7 @@ impl ParseSeparatedList for ParameterList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
-        p.expect_with_context(T![,], TailwindLexContext::CssValue)
+        p.expect_css(T![,])
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
@@ -318,12 +299,8 @@ impl ParseSeparatedList for ParameterList {
     }
 }
 
-fn parse_css_parenthesized_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    parse_parenthesized_expression(p)
-}
-
 #[inline]
-fn is_at_any_expression(p: &mut TailwindParser) -> bool {
+fn is_at_any_expression(p: &TailwindParser) -> bool {
     is_at_unary_operator(p) || p.at(T!['(']) || is_at_any_value(p)
 }
 
@@ -335,9 +312,10 @@ fn parse_any_expression(p: &mut TailwindParser) -> ParsedSyntax {
 
     let param = parse_unary_expression_operand(p);
 
-    if is_at_binary_operator(p) {
+    let (kind, _) = css(p);
+    if BINARY_OPERATION_TOKEN.contains(kind) {
         let binary_expression = param.precede(p);
-        p.eat_ts_with_context(BINARY_OPERATION_TOKEN, TailwindLexContext::CssValue);
+        p.bump_css(kind);
         parse_any_expression(p).or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
         Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION))
     } else {
@@ -351,23 +329,19 @@ const COMPONENT_VALUE_EXPRESSION_RECOVERY_SET: TokenSet<TailwindSyntaxKind> =
     token_set![T![')'], T![,], T![']'], WHITESPACE].union(BINARY_OPERATION_TOKEN);
 
 #[inline]
-fn is_at_binary_operator(p: &mut TailwindParser) -> bool {
-    p.at_ts(BINARY_OPERATION_TOKEN)
-}
-
-#[inline]
-fn is_at_unary_operator(p: &mut TailwindParser) -> bool {
-    p.at_ts(UNARY_OPERATION_TOKEN)
+fn is_at_unary_operator(p: &TailwindParser) -> bool {
+    css_at_ts(p, UNARY_OPERATION_TOKEN)
 }
 
 #[inline]
 fn parse_unary_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_unary_operator(p) {
+    let (kind, _) = css(p);
+    if !UNARY_OPERATION_TOKEN.contains(kind) {
         return Absent;
     }
 
     let m = p.start();
-    p.eat_ts_with_context(UNARY_OPERATION_TOKEN, TailwindLexContext::CssValue);
+    p.bump_css(kind);
     parse_unary_expression_operand(p)
         .or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
     Present(m.complete(p, CSS_UNARY_EXPRESSION))
@@ -390,9 +364,9 @@ fn parse_parenthesized_expression(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.expect_css(T!['(']);
     parse_any_expression(p).ok();
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
 }
 
@@ -419,8 +393,10 @@ impl ParseNodeList for ComponentValueExpressionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(BINARY_OPERATION_TOKEN.union(token_set![T![,], T![')'], T![']']]))
-            || is_at_class_separator(p)
+        css_at_ts(
+            p,
+            BINARY_OPERATION_TOKEN.union(token_set![T![,], T![')'], T![']']]),
+        ) || is_at_class_separator(p)
     }
 
     fn recover(
@@ -440,45 +416,41 @@ impl ParseNodeList for ComponentValueExpressionList {
 }
 
 #[inline]
-fn parse_css_unary_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    parse_unary_expression(p)
-}
-
-#[inline]
-fn is_at_any_value(p: &mut TailwindParser) -> bool {
+fn is_at_any_value(p: &TailwindParser) -> bool {
+    let (kind, _) = css(p);
     is_at_any_function(p)
-        || is_at_identifier(p)
-        || p.at_ts(token_set![
+        || is_identifier(kind)
+        || token_set![
             CSS_STRING_LITERAL,
             CSS_DIMENSION_VALUE,
             CSS_PERCENTAGE_VALUE,
             CSS_NUMBER_LITERAL,
             CSS_COLOR_LITERAL
-        ])
+        ]
+        .contains(kind)
 }
 
-fn is_at_class_separator(p: &mut TailwindParser) -> bool {
+fn is_at_class_separator(p: &TailwindParser) -> bool {
     p.at(WHITESPACE)
 }
 
+/// Whether a CSS token of `kind` is an identifier: `IDENT`, or a keyword such as `var` or a
+/// unit.
 #[inline]
-pub(crate) fn is_at_identifier(p: &mut TailwindParser) -> bool {
-    is_nth_at_identifier(p, 0)
+pub(crate) fn is_identifier(kind: TailwindSyntaxKind) -> bool {
+    kind == IDENT || CSS_VALUE_KEYWORD_SET.contains(kind)
 }
 
+/// Whether the CSS token at the current atom is a dashed identifier: one that starts with `--`.
 #[inline]
-fn is_nth_at_identifier(p: &mut TailwindParser, n: usize) -> bool {
-    p.nth_at(n, IDENT) || p.nth_at_ts(n, CSS_VALUE_KEYWORD_SET)
+pub(crate) fn is_at_dashed_identifier(p: &TailwindParser) -> bool {
+    css(p).0 == IDENT && p.source().text()[p.cur_range().start().into()..].starts_with("--")
 }
 
+/// Whether a token of `kind` is a unit keyword.
 #[inline]
-pub(crate) fn is_at_dashed_identifier(p: &mut TailwindParser) -> bool {
-    p.at(IDENT) && p.cur_text().starts_with("--")
-}
-
-#[inline]
-fn is_nth_at_unit(p: &mut TailwindParser, n: usize) -> bool {
-    p.nth_at_ts(n, ALL_UNIT_SET)
+fn is_unit(kind: TailwindSyntaxKind) -> bool {
+    ALL_UNIT_SET.contains(kind)
 }
 
 const CSS_VALUE_KEYWORD_SET: TokenSet<TailwindSyntaxKind> =

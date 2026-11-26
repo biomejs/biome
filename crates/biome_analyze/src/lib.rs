@@ -51,9 +51,9 @@ pub use crate::registry::{
     RuleRegistry, RuleRegistryBuilder, RuleSuppressions,
 };
 pub use crate::rule::{
-    FixKind, GroupCategory, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleFramework, RuleGroup,
-    RuleMeta, RuleMetadata, RulePreset, RuleSource, RuleSourceKind, RuleSourceWithKind,
-    SuppressAction,
+    FixKind, GroupCategory, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleExecutionContext,
+    RuleExecutionScope, RuleFramework, RuleGroup, RuleMeta, RuleMetadata, RulePreset, RuleSource,
+    RuleSourceKind, RuleSourceWithKind, SuppressAction,
 };
 pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
@@ -67,7 +67,7 @@ use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::unsupported_rules::{UNSUPPORTED_RULES, UnsupportedRule, UnsupportedRuleReason};
 pub use crate::visitor::{
-    NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
+    AnalyzedTree, NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
@@ -210,10 +210,7 @@ where
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
             for visitor in &mut visitors {
-                visitor.start(VisitorStartContext {
-                    root: &ctx.root,
-                    services: &mut ctx.services,
-                });
+                visitor.start(VisitorStartContext::new(&ctx.root, &mut ctx.services));
             }
             let runner = PhaseRunner {
                 phase,
@@ -374,22 +371,60 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        // Iterate to evaluate suppressions
-        for token in self.root.syntax().borrowed_tokens() {
-            self.handle_token(token)?;
-        }
-        // Emit any validation diagnostics from finalizing
-        if let Err(error_diagnostics) = self.suppressions.finalize() {
-            for diagnostic in error_diagnostics {
-                let signal = DiagnosticSignal::new(|| diagnostic.clone());
-                (self.emit_signal)(&signal)?;
+        if self.has_suppression_comments() {
+            // Iterate to evaluate suppressions
+            for token in self.root.syntax().borrowed_tokens() {
+                self.handle_token(token)?;
             }
+            // Emit any validation diagnostics from finalizing
+            if let Err(error_diagnostics) = self.suppressions.finalize() {
+                for diagnostic in error_diagnostics {
+                    let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                    (self.emit_signal)(&signal)?;
+                }
+            }
+        } else {
+            debug_assert!(
+                self.root.syntax().borrowed_tokens().all(|token| self
+                    .suppression
+                    .parse_snippet(token.text_trimmed_range())
+                    .is_empty()),
+                "`Suppression::parse_snippet` returned comments, but `Suppression::has_snippet_comments` returned false"
+            );
         }
         // Iterate for syntax rules after we've established suppressions
         self.walk_nodes(|_| ControlFlow::Continue(()))?;
 
         // Flush all remaining pending events
         self.flush_matches(None)
+    }
+
+    /// Returns whether a comment of the file or of its snippets yields a
+    /// suppression or a suppression diagnostic.
+    ///
+    /// Without one, the token pass of [Self::run_first_phase] registers
+    /// nothing: the line index it maintains is only read when a suppression
+    /// is registered. This check only reads the tokens that carry comments,
+    /// which is much cheaper than the token pass over every token and trivia
+    /// piece.
+    fn has_suppression_comments(&self) -> bool {
+        self.suppression.has_snippet_comments()
+            || self
+                .root
+                .syntax()
+                .borrowed_tokens_with_comments()
+                .any(|token| {
+                    token
+                        .leading_trivia_pieces()
+                        .chain(token.trailing_trivia_pieces())
+                        .any(|piece| {
+                            piece.kind().is_comment()
+                                && !self
+                                    .suppression
+                                    .parse_comment(piece.text(), piece.text_range())
+                                    .is_empty()
+                        })
+                })
     }
 
     /// Runs phases 1..N over nodes, since suppression comments were already
@@ -508,7 +543,8 @@ where
             remaining,
         );
         if !self.deny_top_level_suppressions && !token_range.is_empty() {
-            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
+            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions()
+                && !self.suppression.is_comment_snippet(token_range);
         }
 
         for piece in token.trailing_trivia_pieces() {

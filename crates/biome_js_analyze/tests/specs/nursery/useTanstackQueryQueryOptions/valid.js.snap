@@ -1,0 +1,142 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import * as rq from "@tanstack/react-query";
+import {
+	infiniteQueryOptions,
+	QueryClient,
+	queryOptions,
+	useIsFetching,
+	useMutation,
+	useQueries,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
+import { useQuery as useOtherQuery, useQueryClient as useOtherClient } from "other-library";
+import { queryClient as importedClient } from "./client";
+
+// The functions that create the options.
+const todosOptions = queryOptions({
+	queryKey: ["todos"],
+	queryFn: () => fetchTodos(),
+});
+const pagedTodosOptions = infiniteQueryOptions({
+	queryKey: ["todos", "paged"],
+	queryFn: ({ pageParam }) => fetchTodos(pageParam),
+	initialPageParam: 0,
+	getNextPageParam: (lastPage) => lastPage.nextCursor,
+});
+
+function Hooks({ id, ids, isEnabled }) {
+	useQuery(todosOptions);
+	useQuery(todoOptions(id));
+	useQuery({ ...todosOptions, select: (data) => data.items });
+	useQuery({ ...todoOptions(id), select: (data) => data.items });
+	useQuery();
+	useQuery(...args);
+	// A name that is computed while the code runs isn't checked.
+	useQuery({ [key]: ["todos"] });
+	// Only an object written directly as the argument is checked.
+	useQuery(isEnabled ? { queryKey: ["todos"], queryFn: fetchTodos } : todosOptions);
+	// The options are the first argument.
+	useQuery(todosOptions, { queryKey: ["todos"] });
+
+	useQueries({ queries: [todosOptions, usersOptions] });
+	useQueries({ queries: [todosOptions, { ...usersOptions, enabled: isEnabled }] });
+	useQueries({ queries: ids.map((id) => todoOptions(id)) });
+	useQueries({ queries: ids.map((id) => ({ ...todoOptions(id), enabled: isEnabled })) });
+	useQueries({ queries: ids.map(toOptions) });
+	useQueries({ queries });
+	useQueries({ queries: ids.flatMap((id) => [{ queryKey: ["todo", id], queryFn: fetchTodo }]) });
+	useQueries({
+		queries: ids.map((id) => {
+			// The values returned by other functions aren't options of a query.
+			const describe = () => {
+				return { queryKey: ["todo", id] };
+			};
+			function fetchWithKey() {
+				return { queryFn: fetchTodo };
+			}
+			return todoOptions(id, describe, fetchWithKey);
+		}),
+	});
+
+	useIsFetching({ queryKey: todosOptions.queryKey });
+	useIsFetching({ queryKey });
+	useIsFetching();
+
+	// Mutations have no query options.
+	useMutation({ mutationKey: ["addTodo"], mutationFn: addTodo });
+}
+
+function Clients({ queryKey }) {
+	const queryClient = useQueryClient();
+	queryClient.fetchQuery(todosOptions);
+	queryClient.fetchQuery({ ...todosOptions, staleTime: 1000 });
+	queryClient.getQueryData(todosOptions.queryKey);
+	queryClient.getQueryData(queryKey);
+	queryClient.setQueryData(todosOptions.queryKey, []);
+	// The key is the first argument.
+	queryClient.setQueryData(todosOptions.queryKey, ["todos"]);
+	queryClient.invalidateQueries({ queryKey: todosOptions.queryKey });
+	queryClient.invalidateQueries({ queryKey: todosOptions.queryKey, exact: true });
+	queryClient.invalidateQueries({ queryKey });
+	queryClient.invalidateQueries({ predicate: (query) => query.isStale() });
+	queryClient.invalidateQueries();
+	// Methods that take neither options nor a key.
+	queryClient.clear(["todos"]);
+	queryClient.setDefaultOptions({ queryKey: ["todos"] });
+	// An array isn't options, and an object isn't a key.
+	queryClient.fetchQuery(["todos"]);
+	queryClient.getQueryData({ queryKey: ["todos"] });
+}
+
+// A query client that is a function parameter isn't checked.
+function shadowed() {
+	const queryClient = useQueryClient();
+
+	function run(queryClient) {
+		queryClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	}
+}
+
+function loader({ context: { queryClient } }) {
+	return queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+}
+
+// An object that only has a method with the same name isn't a query client.
+const analytics = {
+	fetchQuery(options) {
+		return options;
+	},
+};
+analytics.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+importedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+unknownClient.getQueryData(["todos"]);
+this.queryClient.getQueryData(["todos"]);
+
+// Functions from other packages aren't checked.
+useOtherQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+const otherClient = useOtherClient();
+otherClient.getQueryData(["todos"]);
+notImported({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// A namespace import isn't checked.
+rq.useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// Other values of TanStack Query aren't query clients.
+const cache = new QueryClient().getQueryCache();
+cache.getQueryData(["todos"]);
+const options = queryOptions({ queryKey: ["users"], queryFn: fetchUsers });
+options.getQueryData(["todos"]);
+
+// Variables that are initialized with each other.
+var first = second;
+var second = first;
+first.getQueryData(["todos"]);
+
+```

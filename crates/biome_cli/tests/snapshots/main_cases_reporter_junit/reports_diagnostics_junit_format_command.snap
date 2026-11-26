@@ -51,7 +51,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="0" failures="0" errors="2" time="<TIME>">
+<testsuites name="Biome" tests="0" skipped="0" failures="0" errors="2" time="<TIME>">
 </testsuites>
 
 ```

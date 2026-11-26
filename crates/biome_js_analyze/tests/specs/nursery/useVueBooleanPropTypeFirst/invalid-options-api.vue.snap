@@ -1,0 +1,272 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: {
+    a: [String, Boolean],
+    b: { type: [String, Boolean] },
+    c: [String, Number, Boolean],
+    d: { type: [String, Boolean, Number] },
+    e: [Number, Boolean],
+    f: [
+      String,
+      Number,
+      Boolean,
+    ],
+    g: [ String, Boolean ],
+    h: ([String, Boolean]),
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:17 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     a: [String, Boolean],
+      │                 ^^^^^^^
+    6 │     b: { type: [String, Boolean] },
+    7 │     c: [String, Number, Boolean],
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     2  2 │   export default {
+     3  3 │     props: {
+     4    │ - ····a:·[String,·Boolean],
+        4 │ + ····a:·[Boolean,·String],
+     5  5 │       b: { type: [String, Boolean] },
+     6  6 │       c: [String, Number, Boolean],
+  
+
+```
+
+```
+invalid-options-api.vue:6:25 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    4 │   props: {
+    5 │     a: [String, Boolean],
+  > 6 │     b: { type: [String, Boolean] },
+      │                         ^^^^^^^
+    7 │     c: [String, Number, Boolean],
+    8 │     d: { type: [String, Boolean, Number] },
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     3  3 │     props: {
+     4  4 │       a: [String, Boolean],
+     5    │ - ····b:·{·type:·[String,·Boolean]·},
+        5 │ + ····b:·{·type:·[Boolean,·String]·},
+     6  6 │       c: [String, Number, Boolean],
+     7  7 │       d: { type: [String, Boolean, Number] },
+  
+
+```
+
+```
+invalid-options-api.vue:7:25 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    5 │     a: [String, Boolean],
+    6 │     b: { type: [String, Boolean] },
+  > 7 │     c: [String, Number, Boolean],
+      │                         ^^^^^^^
+    8 │     d: { type: [String, Boolean, Number] },
+    9 │     e: [Number, Boolean],
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     4  4 │       a: [String, Boolean],
+     5  5 │       b: { type: [String, Boolean] },
+     6    │ - ····c:·[String,·Number,·Boolean],
+        6 │ + ····c:·[Boolean,·String,·Number],
+     7  7 │       d: { type: [String, Boolean, Number] },
+     8  8 │       e: [Number, Boolean],
+  
+
+```
+
+```
+invalid-options-api.vue:8:25 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+     6 │     b: { type: [String, Boolean] },
+     7 │     c: [String, Number, Boolean],
+   > 8 │     d: { type: [String, Boolean, Number] },
+       │                         ^^^^^^^
+     9 │     e: [Number, Boolean],
+    10 │     f: [
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     5  5 │       b: { type: [String, Boolean] },
+     6  6 │       c: [String, Number, Boolean],
+     7    │ - ····d:·{·type:·[String,·Boolean,·Number]·},
+        7 │ + ····d:·{·type:·[Boolean,·String,·Number]·},
+     8  8 │       e: [Number, Boolean],
+     9  9 │       f: [
+  
+
+```
+
+```
+invalid-options-api.vue:9:17 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+     7 │     c: [String, Number, Boolean],
+     8 │     d: { type: [String, Boolean, Number] },
+   > 9 │     e: [Number, Boolean],
+       │                 ^^^^^^^
+    10 │     f: [
+    11 │       String,
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     6  6 │       c: [String, Number, Boolean],
+     7  7 │       d: { type: [String, Boolean, Number] },
+     8    │ - ····e:·[Number,·Boolean],
+        8 │ + ····e:·[Boolean,·Number],
+     9  9 │       f: [
+    10 10 │         String,
+  
+
+```
+
+```
+invalid-options-api.vue:13:7 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    11 │       String,
+    12 │       Number,
+  > 13 │       Boolean,
+       │       ^^^^^^^
+    14 │     ],
+    15 │     g: [ String, Boolean ],
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+     8  8 │       e: [Number, Boolean],
+     9  9 │       f: [
+    10    │ - ······String,
+    11    │ - ······Number,
+    12    │ - ······Boolean,
+       10 │ + ······Boolean,
+       11 │ + ······String,
+       12 │ + ······Number,
+    13 13 │       ],
+    14 14 │       g: [ String, Boolean ],
+  
+
+```
+
+```
+invalid-options-api.vue:15:18 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    13 │       Boolean,
+    14 │     ],
+  > 15 │     g: [ String, Boolean ],
+       │                  ^^^^^^^
+    16 │     h: ([String, Boolean]),
+    17 │   },
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+    12 12 │         Boolean,
+    13 13 │       ],
+    14    │ - ····g:·[·String,·Boolean·],
+       14 │ + ····g:·[·Boolean,·String·],
+    15 15 │       h: ([String, Boolean]),
+    16 16 │     },
+  
+
+```
+
+```
+invalid-options-api.vue:16:18 lint/nursery/useVueBooleanPropTypeFirst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Boolean isn't the first type of this prop.
+  
+    14 │     ],
+    15 │     g: [ String, Boolean ],
+  > 16 │     h: ([String, Boolean]),
+       │                  ^^^^^^^
+    17 │   },
+    18 │ };
+  
+  i When String comes before Boolean, a prop written in a template without a value, such as <MyComponent disabled />, is set to an empty string instead of true.
+  
+  i Move Boolean to the start of the list of types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move Boolean to the start of the list.
+  
+    13 13 │       ],
+    14 14 │       g: [ String, Boolean ],
+    15    │ - ····h:·([String,·Boolean]),
+       15 │ + ····h:·([Boolean,·String]),
+    16 16 │     },
+    17 17 │   };
+  
+
+```

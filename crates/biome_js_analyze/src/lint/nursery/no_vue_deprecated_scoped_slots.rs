@@ -3,7 +3,7 @@ use crate::frameworks::vue::vue_instance::{
     component_instance_property_member, template_instance_property_reference,
 };
 use crate::services::embedded::EmbeddedService;
-use crate::services::semantic::Semantic;
+use crate::services::vue::VueSemantic;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -64,7 +64,7 @@ declare_node_union! {
 }
 
 impl Rule for NoVueDeprecatedScopedSlots {
-    type Query = Semantic<AnyScopedSlotsReference>;
+    type Query = VueSemantic<AnyScopedSlotsReference>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = NoVueDeprecatedScopedSlotsOptions;
@@ -94,8 +94,7 @@ impl Rule for NoVueDeprecatedScopedSlots {
             member.as_js_name()?,
             "$scopedSlots",
             model,
-            source,
-            ctx.file_path(),
+            ctx.vue_model(),
         )
     }
 

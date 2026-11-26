@@ -32,13 +32,14 @@ use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
-use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_parser::AnyParse;
+use biome_parser::db::{AnalyzedSource, SnippetRef, SourceExt};
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_service::db::WorkspaceDb;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
 use camino::Utf8PathBuf;
@@ -232,29 +233,101 @@ impl AnalyzerServicesBuilder {
         parse: HtmlParse,
         file_source: HtmlFileSource,
     ) -> HtmlAnalyzerServices {
-        let source_index = self
-            .module_db
-            .insert_source(DocumentFileSource::Html(file_source));
-        let parsed_source = Source::new(
-            &self.module_db,
-            path.clone(),
-            parse.syntax().text_with_trivia().to_string().into(),
-            source_index,
+        let document = self.insert_html_file(path, parse, file_source, None);
+
+        HtmlAnalyzerServices::default()
+            .with_module_db(self.module_db.rc_module_db())
+            .with_project_layout(self.project_layout.clone())
+            .with_language_db(self.module_db.rc_language_db())
+            .with_document(document)
+    }
+
+    /// Stores an HTML document, such as a `.vue` file, and returns the
+    /// JavaScript snippets the workspace parses from it, in the order they
+    /// appear in the document. The snippets are parsed with `configuration`
+    /// on top of the default settings.
+    ///
+    /// A rule analyzing a returned snippet with the services of
+    /// [`Self::build_for_js_snippet`] sees the rest of the document as it does
+    /// in the workspace, such as the template in the Vue semantic model. Unlike
+    /// the workspace linter, this also returns Astro template expressions that
+    /// only hold a comment.
+    pub fn store_html_parse(
+        &mut self,
+        path: Utf8PathBuf,
+        parse: HtmlParse,
+        file_source: HtmlFileSource,
+        configuration: Option<Configuration>,
+    ) -> Vec<JsSnippet> {
+        let document = self.insert_html_file(path, parse, file_source, configuration);
+        let db = &self.module_db;
+        let mut snippets: Vec<_> = document
+            .snippets(db)
+            .iter()
+            .filter_map(|snippet| {
+                let DocumentFileSource::Js(file_source) =
+                    db.source_from_index(snippet.document_source_index(db))?
+                else {
+                    return None;
+                };
+                let snippet = snippet.to_ref(db);
+                Some(JsSnippet {
+                    parse: snippet.parsed().clone(),
+                    file_source,
+                    range: snippet.content_range(),
+                    snippet,
+                })
+            })
+            .collect();
+        snippets.sort_by_key(|snippet| snippet.range.start());
+        snippets
+    }
+
+    pub fn build_for_js_snippet(&self, snippet: &JsSnippet) -> JsAnalyzerServices {
+        let db = &self.module_db;
+        let source = AnalyzedSource::from(snippet.snippet.clone());
+        JsAnalyzerServices::from((
+            db.rc_module_db(),
+            self.project_layout.clone(),
+            snippet.file_source,
+        ))
+        .with_language_db(db.rc_language_db())
+        .with_snippet_offset(source.diagnostic_offset())
+        .with_parsed_source(source)
+    }
+
+    fn insert_html_file(
+        &mut self,
+        path: Utf8PathBuf,
+        parse: HtmlParse,
+        file_source: HtmlFileSource,
+        configuration: Option<Configuration>,
+    ) -> Source {
+        let document = self.module_db.upsert_file_with_configuration(
+            &path,
+            parse.syntax().text_with_trivia().to_string(),
+            DocumentFileSource::Html(file_source),
+            configuration,
         );
-        self.module_db.insert_file(&path, parsed_source);
 
         let resolved = resolve_html_module(&self.module_db, &BiomePath::new(&path));
         debug_assert!(resolved.is_some());
         let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
         self.module_db
             .update_or_insert_module(path, ModuleInfoKind::Html(module_info));
-
-        HtmlAnalyzerServices::default()
-            .with_module_db(self.module_db.rc_module_db())
-            .with_project_layout(self.project_layout.clone())
-            .with_language_db(self.module_db.rc_language_db())
-            .with_document(parsed_source)
+        document
     }
+}
+
+/// A JavaScript snippet of a document stored by
+/// [`AnalyzerServicesBuilder::store_html_parse`], such as a script or a Vue
+/// directive value.
+pub struct JsSnippet {
+    snippet: SnippetRef,
+    pub parse: AnyParse,
+    pub file_source: JsFileSource,
+    /// The range of the snippet's code in the document.
+    pub range: TextRange,
 }
 
 /// Parse the options fragment for a lint rule and return the parsed options.
@@ -476,4 +549,32 @@ fn make_member<V: Into<AnyJsonValue>>(name: &str, value: V) -> JsonMember {
         make::token(biome_json_syntax::JsonSyntaxKind::COLON),
         value.into(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_html_parser::{HtmlParserOptions, parse_html};
+
+    #[test]
+    fn stores_the_vue_directive_values_of_an_html_code_block() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let path = Utf8PathBuf::from("/code-block.vue");
+        let code = "<template><div :id=\"'foo'\"></div></template>";
+        let file_source = HtmlFileSource::vue();
+        let parse = parse_html(code, HtmlParserOptions::from(&file_source));
+
+        services_builder.build_for_html_parse(path.clone(), parse, file_source);
+
+        let db = &services_builder.module_db;
+        let file = db
+            .get_parsed_source(&path)
+            .expect("the code block is stored");
+        let snippets: Vec<_> = file
+            .snippets(db)
+            .iter()
+            .map(|snippet| &code[snippet.content_range(db)])
+            .collect();
+        assert_eq!(snippets, ["'foo'"]);
+    }
 }

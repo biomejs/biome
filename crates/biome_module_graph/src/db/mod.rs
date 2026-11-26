@@ -15,6 +15,8 @@ use std::sync::Arc;
 pub mod queries;
 mod type_inference;
 
+pub use type_inference::MAX_ON_DEMAND_IMPORT_DEPTH;
+
 /// Tracks changes with which module is associated with each file path in a
 /// [`ModuleDb`].
 ///

@@ -799,6 +799,13 @@ impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Le
         // because of the diagnostic.
         let checkpoint = lexer.checkpoint();
         debug_assert_eq!(kind, checkpoint.current_kind);
+        // Use the kind `next_token` returned instead of reading it back from the lexer. The
+        // compiler widens that read to cover the neighboring flags, and a load spanning several
+        // separate stores cannot be forwarded from them, which stalls on every lookahead token.
+        let checkpoint = LexerCheckpoint {
+            current_kind: kind,
+            ..checkpoint
+        };
         let lookahead = LookaheadToken::from(&checkpoint);
 
         self.buffered.lookahead.push_back(checkpoint);

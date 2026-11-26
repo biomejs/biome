@@ -3,9 +3,11 @@
 use super::{DefaultProject, ProjectsGeneration, WorkspaceDb};
 use crate::file_handlers::{Features, ParseEmbeddedParams, ParseResult};
 use crate::projects::ProjectDb;
-use crate::settings::{SettingsEditorState, SettingsHandle, SettingsQuery, SettingsSelectionKey};
+use crate::settings::{
+    SettingsEditorState, SettingsHandle, SettingsQuery, SettingsSelectionKey,
+    settings_without_overrides,
+};
 use biome_db::Source;
-use biome_fs::BiomePath;
 use biome_json_parser::JsonParserOptions;
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
@@ -18,24 +20,39 @@ impl ParseDb for WorkspaceDb {
     /// source.
     ///
     /// The settings are the ones of the project whose root contains the path
-    /// of the text, with the inline configuration of the client that published
-    /// the text on top. A path outside every project gets the default
-    /// settings.
+    /// of the text, or the project assigned to a virtual document, with the
+    /// inline configuration of the client that published the text on top. A
+    /// filesystem path outside every project gets the default settings.
     ///
     /// The workspace publishes only texts whose file source can be parsed. If
     /// it can't, the result is an empty document of an unknown file source.
     fn parse_source(&self, source: Source) -> SourceOutput {
         let data = self.data();
-        let path = BiomePath::new(source.path(self));
+        let path = self.biome_path(source.path(self));
 
         // Salsa doesn't track the map of projects. Reading this counter makes
         // the parse run again when the project of the path could change.
         let _ = ProjectsGeneration::try_get(self).map(|generation| generation.value(self));
-        let (project, selection, project_settings) = match self
-            .find_project_for_path(&path)
-            .and_then(|project_key| self.get_settings_context_for_path(project_key, &path))
-        {
-            Some((project, selection, _, settings)) => (project, selection, settings),
+        let is_virtual = path.is_virtual();
+        let settings_context = if is_virtual {
+            self.project_key_for_source(source)
+                .and_then(|project_key| self.get_project(&project_key))
+                .map(|project| {
+                    (
+                        project,
+                        SettingsSelectionKey::Root,
+                        project.root_settings(self),
+                    )
+                })
+        } else {
+            self.find_project_for_path(path.as_path())
+                .and_then(|project_key| {
+                    self.get_settings_context_for_path(project_key, path.as_path())
+                })
+                .map(|(project, selection, _, settings)| (project, selection, settings))
+        };
+        let (project, selection, project_settings) = match settings_context {
+            Some(settings_context) => settings_context,
             None => {
                 let Some(default_project) = DefaultProject::try_get(self) else {
                     error!(%path, "The database has no default project");
@@ -49,27 +66,40 @@ impl ParseDb for WorkspaceDb {
                 )
             }
         };
+        let virtual_project_settings;
+        let project_settings = if is_virtual {
+            virtual_project_settings = settings_without_overrides(project_settings.as_ref());
+            &virtual_project_settings
+        } else {
+            project_settings.as_ref()
+        };
         let inline_settings = source
             .configuration_index(self)
             .and_then(|index| self.inline_configuration(index))
             .map(|configuration| {
-                project_settings
-                    .as_ref()
-                    .with_inline_configuration(configuration.clone())
+                let settings = project_settings.with_inline_configuration(configuration.clone());
+                if is_virtual {
+                    settings_without_overrides(&settings)
+                } else {
+                    settings
+                }
             });
-        let query = SettingsQuery::new(
-            project,
-            selection,
-            project_settings.as_ref(),
-            inline_settings,
-            &path,
-        );
-        let settings =
-            SettingsHandle::new(project_settings.as_ref(), SettingsEditorState::new(query));
+        let query = if is_virtual {
+            SettingsQuery::new_without_overrides(project, selection, inline_settings)
+        } else {
+            SettingsQuery::new(
+                project,
+                selection,
+                project_settings,
+                inline_settings,
+                path.as_path(),
+            )
+        };
+        let settings = SettingsHandle::new(project_settings, SettingsEditorState::new(query));
         let effective_settings = settings
             .query()
             .inline_settings()
-            .map_or(project_settings.as_ref(), AsRef::as_ref);
+            .map_or(project_settings, AsRef::as_ref);
 
         let features = Features::new();
         let file_source = effective_settings.file_source_with_parser_variants(
@@ -106,12 +136,7 @@ impl ParseDb for WorkspaceDb {
             .get_deprecated_capabilities(file_source)
             .parser
             .parse_embedded_nodes
-            .filter(|_| {
-                DocumentFileSource::can_contain_embeds(
-                    path.as_path(),
-                    effective_settings.experimental_full_html_support_enabled(),
-                )
-            });
+            .filter(|_| file_source.may_contain_embeds());
         let snippets = parse_embedded_nodes.map_or_else(Vec::new, |parse_embedded_nodes| {
             parse_embedded_nodes(ParseEmbeddedParams {
                 any_parse: &any_parse,

@@ -1,0 +1,80 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/throwing_javascript_plugin_fails_lint'
+```
+
+## `biome.json`
+
+```json
+{ "plugins": ["./rule.js"] }
+```
+
+## `main.js`
+
+```js
+console.log("hello");
+
+```
+
+## `rule.js`
+
+```js
+import { ast, defineRule } from "@biomejs/runtime/plugin";
+
+export default defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run() {
+        throw new Error("boom");
+    },
+});
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+main.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Rule default errored: Error: boom (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+        at run (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+  
+
+```
+
+```block
+rule.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Rule default errored: Error: boom (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+        at run (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+  
+
+```
+
+```block
+rule.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Rule default errored: Error: boom (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+        at run (<TEMP_DIR>/throwing_javascript_plugin_fails_lint/rule.js:6:15)
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

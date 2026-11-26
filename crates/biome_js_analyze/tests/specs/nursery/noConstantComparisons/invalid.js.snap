@@ -1,0 +1,1561 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Comparisons that can never both be true
+status_code <= 400 && status_code > 500;
+status_code > 500 && status_code < 400;
+status_code < 500 && status_code > 500;
+status_code <= 500 && status_code > 500;
+500 >= status_code && 600 < status_code;
+500 >= status_code && status_code > 600;
+(status_code > 500) && (status_code < 400);
+x > -1 && x < -5;
+this.count > 10 && this.count < 5;
+a.b.c > 10 && a["b"].c < 5;
+
+// Comparisons with no effect
+status_code < 200 && status_code <= 299;
+status_code > 200 && status_code >= 299;
+status_code >= 500 && status_code > 500;
+status_code > 500 && status_code >= 500;
+status_code <= 500 && status_code < 500;
+status_code < 500 && status_code <= 500;
+x < 5 && 5 > x;
+
+// Chains of `&&`
+status_code <= 400 && foo() && status_code > 500;
+status_code > 500 && foo() && bar && status_code < 400;
+foo() && bar && status_code < 500 && status_code > 500;
+500 >= status_code && baz && 600 < status_code;
+que && 500 >= status_code && baz && status_code > 600;
+foo() && status_code >= 500 && status_code > 500;
+status_code <= 500 && foo() && status_code < 500;
+other < 1 && status_code > 500 && status_code < 400;
+
+// Both sides make the same check
+a == b && a == b;
+a == b || a == b;
+a == b && b == a;
+a == (b) && (b) == a;
+a != b || b != a;
+!foo && !foo;
+!foo || !foo;
+foo && foo;
+a.b && a.b;
+(a && b) || (a && b);
+a * b && b * a;
+x < 5 && x < 5;
+
+// One side is the opposite of the other
+!foo && foo;
+foo && !foo;
+!foo || foo;
+foo || !foo;
+a == b && a != b;
+a != b && b == a;
+a !== a && a === a;
+a === b || a !== b;
+a !== a || a === a;
+!(a === b) && a === b;
+
+// Longer chains
+x > 5 && x > 6 && x > 7;
+x < 3 && x > 5 && x > 10;
+(x = 1) && x > 5 && x < 3;
+x > 5 && x < 10 && x > 3;
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Comparisons that can never both be true
+  > 3 │ status_code <= 400 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  
+  i No value can make this comparison...
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Comparisons that can never both be true
+  > 3 │ status_code <= 400 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  
+  i ...and this comparison true at the same time.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Comparisons that can never both be true
+  > 3 │ status_code <= 400 && status_code > 500;
+      │                       ^^^^^^^^^^^^^^^^^
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    2 │ // Comparisons that can never both be true
+    3 │ status_code <= 400 && status_code > 500;
+  > 4 │ status_code > 500 && status_code < 400;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  
+  i No value can make this comparison...
+  
+    2 │ // Comparisons that can never both be true
+    3 │ status_code <= 400 && status_code > 500;
+  > 4 │ status_code > 500 && status_code < 400;
+      │ ^^^^^^^^^^^^^^^^^
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  
+  i ...and this comparison true at the same time.
+  
+    2 │ // Comparisons that can never both be true
+    3 │ status_code <= 400 && status_code > 500;
+  > 4 │ status_code > 500 && status_code < 400;
+      │                      ^^^^^^^^^^^^^^^^^
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    3 │ status_code <= 400 && status_code > 500;
+    4 │ status_code > 500 && status_code < 400;
+  > 5 │ status_code < 500 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ status_code <= 500 && status_code > 500;
+    7 │ 500 >= status_code && 600 < status_code;
+  
+  i No value can make this comparison...
+  
+    3 │ status_code <= 400 && status_code > 500;
+    4 │ status_code > 500 && status_code < 400;
+  > 5 │ status_code < 500 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^
+    6 │ status_code <= 500 && status_code > 500;
+    7 │ 500 >= status_code && 600 < status_code;
+  
+  i ...and this comparison true at the same time.
+  
+    3 │ status_code <= 400 && status_code > 500;
+    4 │ status_code > 500 && status_code < 400;
+  > 5 │ status_code < 500 && status_code > 500;
+      │                      ^^^^^^^^^^^^^^^^^
+    6 │ status_code <= 500 && status_code > 500;
+    7 │ 500 >= status_code && 600 < status_code;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  > 6 │ status_code <= 500 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 500 >= status_code && 600 < status_code;
+    8 │ 500 >= status_code && status_code > 600;
+  
+  i No value can make this comparison...
+  
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  > 6 │ status_code <= 500 && status_code > 500;
+      │ ^^^^^^^^^^^^^^^^^^
+    7 │ 500 >= status_code && 600 < status_code;
+    8 │ 500 >= status_code && status_code > 600;
+  
+  i ...and this comparison true at the same time.
+  
+    4 │ status_code > 500 && status_code < 400;
+    5 │ status_code < 500 && status_code > 500;
+  > 6 │ status_code <= 500 && status_code > 500;
+      │                       ^^^^^^^^^^^^^^^^^
+    7 │ 500 >= status_code && 600 < status_code;
+    8 │ 500 >= status_code && status_code > 600;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  > 7 │ 500 >= status_code && 600 < status_code;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 500 >= status_code && status_code > 600;
+    9 │ (status_code > 500) && (status_code < 400);
+  
+  i No value can make this comparison...
+  
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  > 7 │ 500 >= status_code && 600 < status_code;
+      │ ^^^^^^^^^^^^^^^^^^
+    8 │ 500 >= status_code && status_code > 600;
+    9 │ (status_code > 500) && (status_code < 400);
+  
+  i ...and this comparison true at the same time.
+  
+    5 │ status_code < 500 && status_code > 500;
+    6 │ status_code <= 500 && status_code > 500;
+  > 7 │ 500 >= status_code && 600 < status_code;
+      │                       ^^^^^^^^^^^^^^^^^
+    8 │ 500 >= status_code && status_code > 600;
+    9 │ (status_code > 500) && (status_code < 400);
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+     6 │ status_code <= 500 && status_code > 500;
+     7 │ 500 >= status_code && 600 < status_code;
+   > 8 │ 500 >= status_code && status_code > 600;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  
+  i No value can make this comparison...
+  
+     6 │ status_code <= 500 && status_code > 500;
+     7 │ 500 >= status_code && 600 < status_code;
+   > 8 │ 500 >= status_code && status_code > 600;
+       │ ^^^^^^^^^^^^^^^^^^
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  
+  i ...and this comparison true at the same time.
+  
+     6 │ status_code <= 500 && status_code > 500;
+     7 │ 500 >= status_code && 600 < status_code;
+   > 8 │ 500 >= status_code && status_code > 600;
+       │                       ^^^^^^^^^^^^^^^^^
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+     7 │ 500 >= status_code && 600 < status_code;
+     8 │ 500 >= status_code && status_code > 600;
+   > 9 │ (status_code > 500) && (status_code < 400);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  
+  i No value can make this comparison...
+  
+     7 │ 500 >= status_code && 600 < status_code;
+     8 │ 500 >= status_code && status_code > 600;
+   > 9 │ (status_code > 500) && (status_code < 400);
+       │  ^^^^^^^^^^^^^^^^^
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  
+  i ...and this comparison true at the same time.
+  
+     7 │ 500 >= status_code && 600 < status_code;
+     8 │ 500 >= status_code && status_code > 600;
+   > 9 │ (status_code > 500) && (status_code < 400);
+       │                         ^^^^^^^^^^^^^^^^^
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+     8 │ 500 >= status_code && status_code > 600;
+     9 │ (status_code > 500) && (status_code < 400);
+  > 10 │ x > -1 && x < -5;
+       │ ^^^^^^^^^^^^^^^^
+    11 │ this.count > 10 && this.count < 5;
+    12 │ a.b.c > 10 && a["b"].c < 5;
+  
+  i No value can make this comparison...
+  
+     8 │ 500 >= status_code && status_code > 600;
+     9 │ (status_code > 500) && (status_code < 400);
+  > 10 │ x > -1 && x < -5;
+       │ ^^^^^^
+    11 │ this.count > 10 && this.count < 5;
+    12 │ a.b.c > 10 && a["b"].c < 5;
+  
+  i ...and this comparison true at the same time.
+  
+     8 │ 500 >= status_code && status_code > 600;
+     9 │ (status_code > 500) && (status_code < 400);
+  > 10 │ x > -1 && x < -5;
+       │           ^^^^^^
+    11 │ this.count > 10 && this.count < 5;
+    12 │ a.b.c > 10 && a["b"].c < 5;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  > 11 │ this.count > 10 && this.count < 5;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ a.b.c > 10 && a["b"].c < 5;
+    13 │ 
+  
+  i No value can make this comparison...
+  
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  > 11 │ this.count > 10 && this.count < 5;
+       │ ^^^^^^^^^^^^^^^
+    12 │ a.b.c > 10 && a["b"].c < 5;
+    13 │ 
+  
+  i ...and this comparison true at the same time.
+  
+     9 │ (status_code > 500) && (status_code < 400);
+    10 │ x > -1 && x < -5;
+  > 11 │ this.count > 10 && this.count < 5;
+       │                    ^^^^^^^^^^^^^^
+    12 │ a.b.c > 10 && a["b"].c < 5;
+    13 │ 
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  > 12 │ a.b.c > 10 && a["b"].c < 5;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Comparisons with no effect
+  
+  i No value can make this comparison...
+  
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  > 12 │ a.b.c > 10 && a["b"].c < 5;
+       │ ^^^^^^^^^^
+    13 │ 
+    14 │ // Comparisons with no effect
+  
+  i ...and this comparison true at the same time.
+  
+    10 │ x > -1 && x < -5;
+    11 │ this.count > 10 && this.count < 5;
+  > 12 │ a.b.c > 10 && a["b"].c < 5;
+       │               ^^^^^^^^^^^^
+    13 │ 
+    14 │ // Comparisons with no effect
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:22 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    14 │ // Comparisons with no effect
+  > 15 │ status_code < 200 && status_code <= 299;
+       │                      ^^^^^^^^^^^^^^^^^^
+    16 │ status_code > 200 && status_code >= 299;
+    17 │ status_code >= 500 && status_code > 500;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    14 │ // Comparisons with no effect
+  > 15 │ status_code < 200 && status_code <= 299;
+       │ ^^^^^^^^^^^^^^^^^
+    16 │ status_code > 200 && status_code >= 299;
+    17 │ status_code >= 500 && status_code > 500;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    14 │ // Comparisons with no effect
+    15 │ status_code < 200 && status_code <= 299;
+  > 16 │ status_code > 200 && status_code >= 299;
+       │ ^^^^^^^^^^^^^^^^^
+    17 │ status_code >= 500 && status_code > 500;
+    18 │ status_code > 500 && status_code >= 500;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    14 │ // Comparisons with no effect
+    15 │ status_code < 200 && status_code <= 299;
+  > 16 │ status_code > 200 && status_code >= 299;
+       │                      ^^^^^^^^^^^^^^^^^^
+    17 │ status_code >= 500 && status_code > 500;
+    18 │ status_code > 500 && status_code >= 500;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    15 │ status_code < 200 && status_code <= 299;
+    16 │ status_code > 200 && status_code >= 299;
+  > 17 │ status_code >= 500 && status_code > 500;
+       │ ^^^^^^^^^^^^^^^^^^
+    18 │ status_code > 500 && status_code >= 500;
+    19 │ status_code <= 500 && status_code < 500;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    15 │ status_code < 200 && status_code <= 299;
+    16 │ status_code > 200 && status_code >= 299;
+  > 17 │ status_code >= 500 && status_code > 500;
+       │                       ^^^^^^^^^^^^^^^^^
+    18 │ status_code > 500 && status_code >= 500;
+    19 │ status_code <= 500 && status_code < 500;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:22 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    16 │ status_code > 200 && status_code >= 299;
+    17 │ status_code >= 500 && status_code > 500;
+  > 18 │ status_code > 500 && status_code >= 500;
+       │                      ^^^^^^^^^^^^^^^^^^
+    19 │ status_code <= 500 && status_code < 500;
+    20 │ status_code < 500 && status_code <= 500;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    16 │ status_code > 200 && status_code >= 299;
+    17 │ status_code >= 500 && status_code > 500;
+  > 18 │ status_code > 500 && status_code >= 500;
+       │ ^^^^^^^^^^^^^^^^^
+    19 │ status_code <= 500 && status_code < 500;
+    20 │ status_code < 500 && status_code <= 500;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    17 │ status_code >= 500 && status_code > 500;
+    18 │ status_code > 500 && status_code >= 500;
+  > 19 │ status_code <= 500 && status_code < 500;
+       │ ^^^^^^^^^^^^^^^^^^
+    20 │ status_code < 500 && status_code <= 500;
+    21 │ x < 5 && 5 > x;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    17 │ status_code >= 500 && status_code > 500;
+    18 │ status_code > 500 && status_code >= 500;
+  > 19 │ status_code <= 500 && status_code < 500;
+       │                       ^^^^^^^^^^^^^^^^^
+    20 │ status_code < 500 && status_code <= 500;
+    21 │ x < 5 && 5 > x;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:22 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    18 │ status_code > 500 && status_code >= 500;
+    19 │ status_code <= 500 && status_code < 500;
+  > 20 │ status_code < 500 && status_code <= 500;
+       │                      ^^^^^^^^^^^^^^^^^^
+    21 │ x < 5 && 5 > x;
+    22 │ 
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    18 │ status_code > 500 && status_code >= 500;
+    19 │ status_code <= 500 && status_code < 500;
+  > 20 │ status_code < 500 && status_code <= 500;
+       │ ^^^^^^^^^^^^^^^^^
+    21 │ x < 5 && 5 > x;
+    22 │ 
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:10 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    19 │ status_code <= 500 && status_code < 500;
+    20 │ status_code < 500 && status_code <= 500;
+  > 21 │ x < 5 && 5 > x;
+       │          ^^^^^
+    22 │ 
+    23 │ // Chains of `&&`
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    19 │ status_code <= 500 && status_code < 500;
+    20 │ status_code < 500 && status_code <= 500;
+  > 21 │ x < 5 && 5 > x;
+       │ ^^^^^
+    22 │ 
+    23 │ // Chains of `&&`
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    23 │ // Chains of `&&`
+  > 24 │ status_code <= 400 && foo() && status_code > 500;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  
+  i No value can make this comparison...
+  
+    23 │ // Chains of `&&`
+  > 24 │ status_code <= 400 && foo() && status_code > 500;
+       │ ^^^^^^^^^^^^^^^^^^
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  
+  i ...and this comparison true at the same time.
+  
+    23 │ // Chains of `&&`
+  > 24 │ status_code <= 400 && foo() && status_code > 500;
+       │                                ^^^^^^^^^^^^^^^^^
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    23 │ // Chains of `&&`
+    24 │ status_code <= 400 && foo() && status_code > 500;
+  > 25 │ status_code > 500 && foo() && bar && status_code < 400;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  
+  i No value can make this comparison...
+  
+    23 │ // Chains of `&&`
+    24 │ status_code <= 400 && foo() && status_code > 500;
+  > 25 │ status_code > 500 && foo() && bar && status_code < 400;
+       │ ^^^^^^^^^^^^^^^^^
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  
+  i ...and this comparison true at the same time.
+  
+    23 │ // Chains of `&&`
+    24 │ status_code <= 400 && foo() && status_code > 500;
+  > 25 │ status_code > 500 && foo() && bar && status_code < 400;
+       │                                      ^^^^^^^^^^^^^^^^^
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    24 │ status_code <= 400 && foo() && status_code > 500;
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+  > 26 │ foo() && bar && status_code < 500 && status_code > 500;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 500 >= status_code && baz && 600 < status_code;
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+  
+  i No value can make this comparison...
+  
+    24 │ status_code <= 400 && foo() && status_code > 500;
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+  > 26 │ foo() && bar && status_code < 500 && status_code > 500;
+       │                 ^^^^^^^^^^^^^^^^^
+    27 │ 500 >= status_code && baz && 600 < status_code;
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+  
+  i ...and this comparison true at the same time.
+  
+    24 │ status_code <= 400 && foo() && status_code > 500;
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+  > 26 │ foo() && bar && status_code < 500 && status_code > 500;
+       │                                      ^^^^^^^^^^^^^^^^^
+    27 │ 500 >= status_code && baz && 600 < status_code;
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  > 27 │ 500 >= status_code && baz && 600 < status_code;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+    29 │ foo() && status_code >= 500 && status_code > 500;
+  
+  i No value can make this comparison...
+  
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  > 27 │ 500 >= status_code && baz && 600 < status_code;
+       │ ^^^^^^^^^^^^^^^^^^
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+    29 │ foo() && status_code >= 500 && status_code > 500;
+  
+  i ...and this comparison true at the same time.
+  
+    25 │ status_code > 500 && foo() && bar && status_code < 400;
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+  > 27 │ 500 >= status_code && baz && 600 < status_code;
+       │                              ^^^^^^^^^^^^^^^^^
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+    29 │ foo() && status_code >= 500 && status_code > 500;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  > 28 │ que && 500 >= status_code && baz && status_code > 600;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  
+  i No value can make this comparison...
+  
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  > 28 │ que && 500 >= status_code && baz && status_code > 600;
+       │        ^^^^^^^^^^^^^^^^^^
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  
+  i ...and this comparison true at the same time.
+  
+    26 │ foo() && bar && status_code < 500 && status_code > 500;
+    27 │ 500 >= status_code && baz && 600 < status_code;
+  > 28 │ que && 500 >= status_code && baz && status_code > 600;
+       │                                     ^^^^^^^^^^^^^^^^^
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:10 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    27 │ 500 >= status_code && baz && 600 < status_code;
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+  > 29 │ foo() && status_code >= 500 && status_code > 500;
+       │          ^^^^^^^^^^^^^^^^^^
+    30 │ status_code <= 500 && foo() && status_code < 500;
+    31 │ other < 1 && status_code > 500 && status_code < 400;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    27 │ 500 >= status_code && baz && 600 < status_code;
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+  > 29 │ foo() && status_code >= 500 && status_code > 500;
+       │                                ^^^^^^^^^^^^^^^^^
+    30 │ status_code <= 500 && foo() && status_code < 500;
+    31 │ other < 1 && status_code > 500 && status_code < 400;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+    29 │ foo() && status_code >= 500 && status_code > 500;
+  > 30 │ status_code <= 500 && foo() && status_code < 500;
+       │ ^^^^^^^^^^^^^^^^^^
+    31 │ other < 1 && status_code > 500 && status_code < 400;
+    32 │ 
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    28 │ que && 500 >= status_code && baz && status_code > 600;
+    29 │ foo() && status_code >= 500 && status_code > 500;
+  > 30 │ status_code <= 500 && foo() && status_code < 500;
+       │                                ^^^^^^^^^^^^^^^^^
+    31 │ other < 1 && status_code > 500 && status_code < 400;
+    32 │ 
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  > 31 │ other < 1 && status_code > 500 && status_code < 400;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // Both sides make the same check
+  
+  i No value can make this comparison...
+  
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  > 31 │ other < 1 && status_code > 500 && status_code < 400;
+       │              ^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // Both sides make the same check
+  
+  i ...and this comparison true at the same time.
+  
+    29 │ foo() && status_code >= 500 && status_code > 500;
+    30 │ status_code <= 500 && foo() && status_code < 500;
+  > 31 │ other < 1 && status_code > 500 && status_code < 400;
+       │                                   ^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // Both sides make the same check
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    33 │ // Both sides make the same check
+  > 34 │ a == b && a == b;
+       │ ^^^^^^^^^^^^^^^^
+    35 │ a == b || a == b;
+    36 │ a == b && b == a;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    33 │ // Both sides make the same check
+    34 │ a == b && a == b;
+  > 35 │ a == b || a == b;
+       │ ^^^^^^^^^^^^^^^^
+    36 │ a == b && b == a;
+    37 │ a == (b) && (b) == a;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    34 │ a == b && a == b;
+    35 │ a == b || a == b;
+  > 36 │ a == b && b == a;
+       │ ^^^^^^^^^^^^^^^^
+    37 │ a == (b) && (b) == a;
+    38 │ a != b || b != a;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    35 │ a == b || a == b;
+    36 │ a == b && b == a;
+  > 37 │ a == (b) && (b) == a;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    38 │ a != b || b != a;
+    39 │ !foo && !foo;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    36 │ a == b && b == a;
+    37 │ a == (b) && (b) == a;
+  > 38 │ a != b || b != a;
+       │ ^^^^^^^^^^^^^^^^
+    39 │ !foo && !foo;
+    40 │ !foo || !foo;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    37 │ a == (b) && (b) == a;
+    38 │ a != b || b != a;
+  > 39 │ !foo && !foo;
+       │ ^^^^^^^^^^^^
+    40 │ !foo || !foo;
+    41 │ foo && foo;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    38 │ a != b || b != a;
+    39 │ !foo && !foo;
+  > 40 │ !foo || !foo;
+       │ ^^^^^^^^^^^^
+    41 │ foo && foo;
+    42 │ a.b && a.b;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    39 │ !foo && !foo;
+    40 │ !foo || !foo;
+  > 41 │ foo && foo;
+       │ ^^^^^^^^^^
+    42 │ a.b && a.b;
+    43 │ (a && b) || (a && b);
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    40 │ !foo || !foo;
+    41 │ foo && foo;
+  > 42 │ a.b && a.b;
+       │ ^^^^^^^^^^
+    43 │ (a && b) || (a && b);
+    44 │ a * b && b * a;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    41 │ foo && foo;
+    42 │ a.b && a.b;
+  > 43 │ (a && b) || (a && b);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    44 │ a * b && b * a;
+    45 │ x < 5 && x < 5;
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    42 │ a.b && a.b;
+    43 │ (a && b) || (a && b);
+  > 44 │ a * b && b * a;
+       │ ^^^^^^^^^^^^^^
+    45 │ x < 5 && x < 5;
+    46 │ 
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Both sides of this logical expression make the same check.
+  
+    43 │ (a && b) || (a && b);
+    44 │ a * b && b * a;
+  > 45 │ x < 5 && x < 5;
+       │ ^^^^^^^^^^^^^^
+    46 │ 
+    47 │ // One side is the opposite of the other
+  
+  i Repeating a check doesn't change the result, so one side has no effect.
+  
+  i Remove one side, or check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    47 │ // One side is the opposite of the other
+  > 48 │ !foo && foo;
+       │ ^^^^^^^^^^^
+    49 │ foo && !foo;
+    50 │ !foo || foo;
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    47 │ // One side is the opposite of the other
+    48 │ !foo && foo;
+  > 49 │ foo && !foo;
+       │ ^^^^^^^^^^^
+    50 │ !foo || foo;
+    51 │ foo || !foo;
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is always true.
+  
+    48 │ !foo && foo;
+    49 │ foo && !foo;
+  > 50 │ !foo || foo;
+       │ ^^^^^^^^^^^
+    51 │ foo || !foo;
+    52 │ a == b && a != b;
+  
+  i One side is the opposite of the other, so one of them is always true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is always true.
+  
+    49 │ foo && !foo;
+    50 │ !foo || foo;
+  > 51 │ foo || !foo;
+       │ ^^^^^^^^^^^
+    52 │ a == b && a != b;
+    53 │ a != b && b == a;
+  
+  i One side is the opposite of the other, so one of them is always true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    50 │ !foo || foo;
+    51 │ foo || !foo;
+  > 52 │ a == b && a != b;
+       │ ^^^^^^^^^^^^^^^^
+    53 │ a != b && b == a;
+    54 │ a !== a && a === a;
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    51 │ foo || !foo;
+    52 │ a == b && a != b;
+  > 53 │ a != b && b == a;
+       │ ^^^^^^^^^^^^^^^^
+    54 │ a !== a && a === a;
+    55 │ a === b || a !== b;
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    52 │ a == b && a != b;
+    53 │ a != b && b == a;
+  > 54 │ a !== a && a === a;
+       │ ^^^^^^^^^^^^^^^^^^
+    55 │ a === b || a !== b;
+    56 │ a !== a || a === a;
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is always true.
+  
+    53 │ a != b && b == a;
+    54 │ a !== a && a === a;
+  > 55 │ a === b || a !== b;
+       │ ^^^^^^^^^^^^^^^^^^
+    56 │ a !== a || a === a;
+    57 │ !(a === b) && a === b;
+  
+  i One side is the opposite of the other, so one of them is always true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is always true.
+  
+    54 │ a !== a && a === a;
+    55 │ a === b || a !== b;
+  > 56 │ a !== a || a === a;
+       │ ^^^^^^^^^^^^^^^^^^
+    57 │ !(a === b) && a === b;
+    58 │ 
+  
+  i One side is the opposite of the other, so one of them is always true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    55 │ a === b || a !== b;
+    56 │ a !== a || a === a;
+  > 57 │ !(a === b) && a === b;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    58 │ 
+    59 │ // Longer chains
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    59 │ // Longer chains
+  > 60 │ x > 5 && x > 6 && x > 7;
+       │ ^^^^^
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    59 │ // Longer chains
+  > 60 │ x > 5 && x > 6 && x > 7;
+       │          ^^^^^
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:10 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    59 │ // Longer chains
+  > 60 │ x > 5 && x > 6 && x > 7;
+       │          ^^^^^
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    59 │ // Longer chains
+  > 60 │ x > 5 && x > 6 && x > 7;
+       │                   ^^^^^
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i No value can make this comparison...
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │ ^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i ...and this comparison true at the same time.
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │                   ^^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │ ^^^^^^^^^^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i No value can make this comparison...
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │ ^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i ...and this comparison true at the same time.
+  
+    59 │ // Longer chains
+    60 │ x > 5 && x > 6 && x > 7;
+  > 61 │ x < 3 && x > 5 && x > 10;
+       │          ^^^^^
+    62 │ (x = 1) && x > 5 && x < 3;
+    63 │ x > 5 && x < 10 && x > 3;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    60 │ x > 5 && x > 6 && x > 7;
+    61 │ x < 3 && x > 5 && x > 10;
+  > 62 │ (x = 1) && x > 5 && x < 3;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ x > 5 && x < 10 && x > 3;
+    64 │ 
+  
+  i No value can make this comparison...
+  
+    60 │ x > 5 && x > 6 && x > 7;
+    61 │ x < 3 && x > 5 && x > 10;
+  > 62 │ (x = 1) && x > 5 && x < 3;
+       │            ^^^^^
+    63 │ x > 5 && x < 10 && x > 3;
+    64 │ 
+  
+  i ...and this comparison true at the same time.
+  
+    60 │ x > 5 && x > 6 && x > 7;
+    61 │ x < 3 && x > 5 && x > 10;
+  > 62 │ (x = 1) && x > 5 && x < 3;
+       │                     ^^^^^
+    63 │ x > 5 && x < 10 && x > 3;
+    64 │ 
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:20 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison has no effect.
+  
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  > 63 │ x > 5 && x < 10 && x > 3;
+       │                    ^^^^^
+    64 │ 
+  
+  i Whenever this comparison is true, the other comparison is also true.
+  
+    61 │ x < 3 && x > 5 && x > 10;
+    62 │ (x = 1) && x > 5 && x < 3;
+  > 63 │ x > 5 && x < 10 && x > 3;
+       │ ^^^^^
+    64 │ 
+  
+  i Remove the comparison that has no effect, or check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

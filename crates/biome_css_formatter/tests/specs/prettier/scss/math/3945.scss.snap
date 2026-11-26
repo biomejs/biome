@@ -212,8 +212,8 @@ light: #eaf0c6
    white-space: pre-wrap;
  }
  
- width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
 -width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
+ width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
 +width
 +:
 +(

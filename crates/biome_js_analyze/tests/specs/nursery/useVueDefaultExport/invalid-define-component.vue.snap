@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-define-component.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div>{{ foo }}</div>
+</template>
+
+<script>
+import { defineComponent } from "vue";
+
+export const component = defineComponent({
+  data() {
+    return { foo: "foo" };
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-component.vue:9:26 lint/nursery/useVueDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This component is not the default export of the <script> block.
+  
+     7 │ import { defineComponent } from "vue";
+     8 │ 
+   > 9 │ export const component = defineComponent({
+       │                          ^^^^^^^^^^^^^^^^^
+  > 10 │   data() {
+  > 11 │     return { foo: "foo" };
+  > 12 │   },
+  > 13 │ });
+       │ ^^
+    14 │ </script>
+    15 │ 
+  
+  i Vue builds the component from the default export of the <script> block. Without one, the component can't use anything this block declares.
+  
+  i Export the component with export default, or move the code to a <script setup> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

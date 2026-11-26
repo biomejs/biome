@@ -3,9 +3,8 @@ use std::sync::OnceLock;
 use biome_rowan::Text;
 
 use crate::{
-    Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeInstance, TypeReference, TypeReferenceQualifier, Union,
-    interned_types::TypeData as InferredTypeData,
+    Function, GenericTypeParameter, Literal, RawTypeId, ReturnType, TypeData, TypeReference,
+    TypeReferenceQualifier, Union, interned_types::TypeData as InferredTypeData,
 };
 
 use crate::generated::global_types::{
@@ -40,7 +39,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
         UNKNOWN_ID_GLOBAL_TYPE_ID => TypeData::Unknown,
         UNDEFINED_ID_GLOBAL_TYPE_ID => TypeData::Undefined,
         VOID_ID_GLOBAL_TYPE_ID => TypeData::VoidKeyword,
-        CONDITIONAL_ID_GLOBAL_TYPE_ID => TypeData::Conditional,
         NUMBER_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::Number,
         STRING_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::String,
         BOOLEAN_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::Boolean,
@@ -51,13 +49,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
         NEVER_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::NeverKeyword,
         OBJECT_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::ObjectKeyword,
         UNKNOWN_KEYWORD_ID_GLOBAL_TYPE_ID => TypeData::UnknownKeyword,
-        INSTANCEOF_ARRAY_T_ID_GLOBAL_TYPE_ID => {
-            TypeData::instance_of(TypeReference::from(GLOBAL_ARRAY_ID))
-        }
-        INSTANCEOF_ARRAY_U_ID_GLOBAL_TYPE_ID => TypeData::instance_of(TypeInstance {
-            ty: TypeReference::from(GLOBAL_ARRAY_ID),
-            type_parameters: [GLOBAL_U_ID.into()].into(),
-        }),
         GLOBAL_ID_GLOBAL_TYPE_ID => TypeData::Global,
         INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID => {
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID))
@@ -87,32 +78,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
             name: Text::new_static("T"),
             constraint: TypeReference::unknown(),
             default: TypeReference::unknown(),
-        }),
-        U_ID_GLOBAL_TYPE_ID => TypeData::from(GenericTypeParameter {
-            is_const: false,
-            name: Text::new_static("U"),
-            constraint: TypeReference::unknown(),
-            default: TypeReference::unknown(),
-        }),
-        CONDITIONAL_CALLBACK_ID_GLOBAL_TYPE_ID => TypeData::from(Function {
-            is_async: false,
-            type_parameters: Default::default(),
-            name: Some(Text::new_static(CONDITIONAL_CALLBACK_ID_NAME)),
-            parameters: Default::default(),
-            return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
-        }),
-        MAP_CALLBACK_ID_GLOBAL_TYPE_ID => TypeData::from(Function {
-            is_async: false,
-            type_parameters: Default::default(),
-            name: Some(Text::new_static(MAP_CALLBACK_ID_NAME)),
-            parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
-                ty: GLOBAL_U_ID.into(),
-                bindings: Default::default(),
-                is_optional: false,
-                is_rest: false,
-            })]
-            .into(),
-            return_type: ReturnType::Type(GLOBAL_U_ID.into()),
         }),
         VOID_CALLBACK_ID_GLOBAL_TYPE_ID => TypeData::from(Function {
             is_async: false,

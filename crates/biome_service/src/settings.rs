@@ -5,8 +5,8 @@ pub use query::SettingsIdentity;
 pub(crate) use query::SettingsQuerySelection;
 pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
-use crate::workspace::{FeatureKind, ScanKind};
-use crate::{WorkspaceError, is_dir};
+use crate::WorkspaceError;
+use crate::workspace::{FeatureKind, IgnoreKind, ScanKind};
 use biome_analyze::{
     AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider, options::TailwindOptions,
 };
@@ -49,7 +49,7 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, PathRelation};
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_syntax::GraphqlLanguage;
 #[cfg(feature = "lang_grit")]
@@ -455,6 +455,13 @@ impl Settings {
             }
         }
 
+        #[cfg(feature = "lang_grit")]
+        {
+            if let Some(grit) = configuration.grit {
+                self.languages.grit = grit.into();
+            }
+        }
+
         // plugin settings
         #[cfg(feature = "plugins")]
         {
@@ -567,8 +574,7 @@ impl Settings {
             .linter
             .rules
             .as_ref()
-            .map(Rules::as_explicitly_enabled_rules)
-            .unwrap_or_default();
+            .map_or_default(Rules::as_explicitly_enabled_rules);
         for &index in indices {
             let Some(pattern_rules) = self
                 .override_settings
@@ -714,9 +720,14 @@ impl Settings {
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
     ///
-    /// `path` is expected to point to a file and not a directory.
+    /// `is_dir` selects whether `path` is matched as a directory or as a file.
     #[inline]
-    pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
+    pub fn is_path_ignored_for_feature(
+        &self,
+        path: &Utf8Path,
+        is_dir: bool,
+        feature: FeatureKind,
+    ) -> bool {
         let feature_includes_files = match feature {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
@@ -726,7 +737,7 @@ impl Settings {
             FeatureKind::Debug => return false,
         };
 
-        if is_dir(path) {
+        if is_dir {
             !feature_includes_files.is_dir_included(path)
         } else {
             !feature_includes_files.is_file_included(path)
@@ -880,9 +891,7 @@ impl<'a> SettingsHandle<'a, SettingsEditorState> {
     }
 
     fn effective_settings(&self) -> &Settings {
-        self.query()
-            .inline_settings()
-            .map_or_else(|| self.as_ref(), AsRef::as_ref)
+        self.query().effective_settings(self.as_ref())
     }
 
     /// Resolve the formatting options for the given language
@@ -1447,13 +1456,14 @@ impl VcsSettings {
     }
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
+    ///
+    /// `ignore_kind` selects whether the parent directories of `path` are checked too.
     #[inline]
-    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, root_path: Option<&Utf8Path>) -> bool {
+    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
         self.should_use_ignore_file()
-            && self
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir, root_path))
+            && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
+                ignored_matches.is_ignored(path, is_dir, ignore_kind)
+            })
     }
 
     #[inline]
@@ -1481,7 +1491,7 @@ impl VcsSettings {
     /// Stores the patterns of the root ignore file
     pub fn store_root_ignore_patterns(
         &mut self,
-        path: &Utf8Path,
+        path: &BiomePath,
         patterns: &[&str],
     ) -> Result<(), WorkspaceError> {
         match self.client_kind {
@@ -1502,102 +1512,163 @@ impl VcsSettings {
 #[derive(Clone, Debug)]
 pub enum VcsIgnoredPatterns {
     Git {
-        /// Represents the `.gitignore` file at the root of the project
-        root: Gitignore,
-        /// The list of nested `.gitignore` files found inside the project
-        nested: Vec<Gitignore>,
+        /// Matches the ignore file at the configured VCS root.
+        root: GitIgnoreMatcher,
+        /// Matches ignore files discovered below the configured VCS root.
+        nested: Vec<GitIgnoreMatcher>,
     },
 }
 
-impl VcsIgnoredPatterns {
-    /// Checks whether the path ignored by any ignore file found inside the project
+/// Associates compiled Git ignore patterns with the logical root they apply to.
+#[derive(Clone, Debug)]
+pub struct GitIgnoreMatcher {
+    /// The normalized logical directory containing the ignore file.
+    root: BiomePath,
+    /// The compiled patterns evaluated with paths relative to `root`.
+    matcher: Gitignore,
+}
+
+impl GitIgnoreMatcher {
+    /// Returns the directory of the ignore file of this matcher.
+    pub(crate) fn root(&self) -> &BiomePath {
+        &self.root
+    }
+
+    /// Returns whether the ignore file of this matcher is located in `scope`.
+    pub(crate) fn is_in(&self, scope: &BiomePath) -> bool {
+        !matches!(scope.relation_to(&self.root), PathRelation::Outside)
+    }
+
+    /// Returns whether the last pattern matching `path` itself ignores or whitelists it.
     ///
-    /// The `root_path` represents the root of the project, as we want to match all ignore files untile the root.
-    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, root_path: Option<&Utf8Path>) -> bool {
+    /// Parent directories aren't considered, and paths outside the matcher root never match.
+    fn matched(&self, path: &BiomePath, is_dir: bool) -> Option<bool> {
+        let PathRelation::Descendant(relative) = self.root.relation_to(path) else {
+            return None;
+        };
+        let matched = self.matcher.matched(relative, is_dir);
+        if matched.is_ignore() {
+            Some(true)
+        } else if matched.is_whitelist() {
+            Some(false)
+        } else {
+            None
+        }
+    }
+}
+
+impl VcsIgnoredPatterns {
+    pub(crate) fn root_path(&self) -> &BiomePath {
         match self {
-            Self::Git { root, nested, .. } => {
-                match root_path {
-                    None => Self::is_git_ignore(root, nested.as_slice(), path, is_dir),
-                    Some(root_path) => {
-                        // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
-                        // When crawling the file system with the CLI, we correctly exclude ignored folders
-                        // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`
-                        //
-                        // However, the LSP sends absolute file paths, e.g. `/Users/foo/project/dist/a.min.js`,
-                        // and they **don't** match globs such as `dist/`.
-                        // To work around this limitation, we crawl upwards the parents of the path, until
-                        // we arrive at the `root_path`.
-                        let mut current_path = path;
-                        loop {
-                            if current_path == root_path {
-                                break false;
-                            }
-                            if Self::is_git_ignore(
-                                root,
-                                nested.as_slice(),
-                                current_path,
-                                current_path.is_dir(),
-                            ) {
-                                break true;
-                            }
-                            if let Some(parent) = current_path.parent() {
-                                current_path = parent;
-                            } else {
-                                break false;
-                            }
-                        }
-                    }
+            Self::Git { root, .. } => &root.root,
+        }
+    }
+
+    /// Returns the decision for `path` itself from the deepest ignore file with a matching pattern.
+    ///
+    /// Patterns from a nested ignore file take precedence over patterns from its parents.
+    fn match_git_path(
+        root: &GitIgnoreMatcher,
+        nested: &[GitIgnoreMatcher],
+        path: &BiomePath,
+        is_dir: bool,
+    ) -> Option<bool> {
+        nested
+            .iter()
+            .rev()
+            .find_map(|matcher| matcher.matched(path, is_dir))
+            .or_else(|| root.matched(path, is_dir))
+    }
+
+    /// Returns whether a configured ignore file excludes `path`.
+    ///
+    /// A path is excluded when its own decision ignores it or when any of its parent directories is
+    /// ignored. Git doesn't descend into ignored directories, so no pattern can re-include their
+    /// contents. Whitelisting a directory only allows descending into it: each child is still
+    /// matched on its own.
+    ///
+    /// With [`IgnoreKind::Path`], only the decision for `path` itself is evaluated, so the caller
+    /// must have checked the parent directories already.
+    pub fn is_ignored(&self, path: &BiomePath, is_dir: bool, ignore_kind: IgnoreKind) -> bool {
+        match self {
+            Self::Git { root, nested } => {
+                if Self::match_git_path(root, nested, path, is_dir) == Some(true) {
+                    return true;
                 }
+                if ignore_kind == IgnoreKind::Path {
+                    return false;
+                }
+
+                let PathRelation::Descendant(relative) = root.root.relation_to(path) else {
+                    return false;
+                };
+                let Some(parent) = relative.parent() else {
+                    return false;
+                };
+                let mut ancestor = root.root.to_path_buf();
+                parent.components().any(|component| {
+                    ancestor.push(component.as_str());
+                    Self::match_git_path(root, nested, &BiomePath::new(&ancestor), true)
+                        == Some(true)
+                })
             }
         }
     }
 
-    fn is_git_ignore(
-        root: &Gitignore,
-        nested: &[Gitignore],
-        path: &Utf8Path,
-        is_dir: bool,
-    ) -> bool {
-        let root_ignored = {
-            let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched_path_or_any_parents(path, is_dir).is_ignore()
-        };
-
-        let nested_ignored = nested.iter().any(|gitignore| {
-            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
-                // Ignore patterns apply to descendants, not the containing directory itself.
-                !stripped_path.as_str().is_empty()
-                    && gitignore.matched(stripped_path, is_dir).is_ignore()
-            } else {
-                false
-            }
-        });
-
-        root_ignored || nested_ignored
+    pub(crate) fn replace_root_git_match(&mut self, git_ignore: GitIgnoreMatcher) {
+        match self {
+            Self::Git { root, .. } => *root = git_ignore,
+        }
     }
 
-    pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
+    /// Adds a matcher for an ignore file below the configured VCS root.
+    pub fn insert_git_match(&mut self, git_ignore: GitIgnoreMatcher) {
         match self {
             Self::Git { nested, .. } => {
                 nested.push(git_ignore);
+                nested.sort_by_key(|matcher| matcher.root.as_path().components().count());
             }
         }
     }
 
-    /// Creates an instance of [Gitignore] for the given patterns.
+    pub(crate) fn has_git_matches_in(&self, scope: &BiomePath) -> bool {
+        match self {
+            Self::Git { nested, .. } => nested.iter().any(|matcher| matcher.is_in(scope)),
+        }
+    }
+
+    pub(crate) fn replace_git_matches(
+        &mut self,
+        scope: &BiomePath,
+        replacements: &[GitIgnoreMatcher],
+    ) {
+        match self {
+            Self::Git { nested, .. } => {
+                nested.retain(|matcher| !matcher.is_in(scope));
+                nested.extend_from_slice(replacements);
+                nested.sort_by_key(|matcher| matcher.root.as_path().components().count());
+            }
+        }
+    }
+
+    /// Builds a matcher rooted at `path` from the supplied ignore patterns.
     ///
-    /// ## Error
-    ///
-    /// If the patterns are invalid
+    /// Returns an error when a pattern is invalid.
     pub(crate) fn git_ignore(
-        path: &Utf8Path,
+        path: &BiomePath,
         patterns: &[&str],
-    ) -> Result<Gitignore, WorkspaceError> {
-        let mut gitignore_builder = GitignoreBuilder::new(path.as_std_path());
+    ) -> Result<GitIgnoreMatcher, WorkspaceError> {
+        let root = path.clone();
+        // Candidates are already relative to `root`. Rooting the builder at `.` stops the `ignore`
+        // crate from stripping a relative root from them a second time.
+        let mut gitignore_builder = GitignoreBuilder::new(".");
 
         for the_match in patterns {
             gitignore_builder
-                .add_line(Some(path.to_path_buf().into_std_path_buf()), the_match)
+                .add_line(
+                    Some(root.as_path().to_path_buf().into_std_path_buf()),
+                    the_match,
+                )
                 .map_err(|err| {
                     BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
                         message: err.to_string(),
@@ -1611,7 +1682,10 @@ impl VcsIgnoredPatterns {
                 file_path: Some(path.to_string()),
             })
         })?;
-        Ok(gitignore)
+        Ok(GitIgnoreMatcher {
+            root,
+            matcher: gitignore,
+        })
     }
 }
 
@@ -1772,6 +1846,12 @@ fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceErr
         use_ignore_file: config.use_ignore_file,
         ignore_matches: None,
     })
+}
+
+pub(crate) fn settings_without_overrides(settings: &Settings) -> Settings {
+    let mut settings = settings.clone();
+    settings.override_settings = OverrideSettings::default();
+    settings
 }
 
 impl Settings {
@@ -2521,7 +2601,7 @@ pub fn to_override_settings(
     for mut pattern in overrides.0 {
         let formatter = pattern
             .formatter
-            .map(|formatter| OverrideFormatSettings {
+            .map_or_default(|formatter| OverrideFormatSettings {
                 enabled: formatter.enabled.or(current_settings.formatter.enabled),
                 format_with_errors: formatter
                     .format_with_errors
@@ -2538,30 +2618,24 @@ pub fn to_override_settings(
                 #[cfg(feature = "lang_js")]
                 trailing_commas: formatter.trailing_commas,
                 trailing_newline: formatter.trailing_newline,
-            })
-            .unwrap_or_default();
+            });
         let linter = pattern
             .linter
-            .map(|linter| OverrideLinterSettings {
+            .map_or_default(|linter| OverrideLinterSettings {
                 enabled: linter.enabled.or(current_settings.linter.enabled),
                 rules: linter.rules,
                 domains: linter.domains,
-            })
-            .unwrap_or_default();
+            });
         let assist = pattern
             .assist
-            .map(|assist| OverrideAssistSettings {
+            .map_or_default(|assist| OverrideAssistSettings {
                 enabled: assist.enabled.or(current_settings.assist.enabled),
                 actions: assist.actions,
-            })
-            .unwrap_or_default();
+            });
 
-        let files = pattern
-            .files
-            .map(|files| OverrideFilesSettings {
-                max_size: files.max_size,
-            })
-            .unwrap_or_default();
+        let files = pattern.files.map_or_default(|files| OverrideFilesSettings {
+            max_size: files.max_size,
+        });
 
         let mut languages = LanguageListSettings::default();
         #[cfg(feature = "lang_js")]

@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+var a = function () { this.foo(); }.bind(bar);
+var b = (function () { this.foo(); }).bind(bar);
+var c = function () { (() => this.foo())(); }.bind(bar);
+var d = function () { return () => () => this; }.bind(bar);
+var e = function (a) { return a + 1; }.bind(bar, 1);
+var f = function () { foo(); }.bind();
+var g = function () { foo(); }.bind(...args);
+var h = (() => {}).bind(bar, 1);
+var i = function () { foo(); }.call(bar);
+var j = function () { foo(); }.apply(bar);
+var k = function (x = this.y) { return x; }.bind(bar);
+var l = function () { return { [this.key]() {} }; }.bind(bar);
+var m = function () { class A { [this.key]() {} } }.bind(bar);
+var n = function () { class A { [this.key] = 1; } }.bind(bar);
+var o = function () { return class extends this.Base {}; }.bind(bar);
+var p = function () { return { a: this }; }.bind(bar);
+var q = function () { return `${this.x}`; }.bind(bar);
+var r = foo.bind(bar);
+var s = foo().bind(bar);
+var t = function () { foo(); }[bind](bar);
+var u = function () { foo(); }.bind;
+var v = new (function () { foo(); }).bind(bar);

@@ -79,11 +79,11 @@ See console log:
 +-->
 +</ul>
  <span
-   ><!--
+-  ><!--
 ---><span>a</span
 -  ><!--
 ---><span>b</span
--  ><!--
+   ><!--
 ---></span>
 +--><span>a</span><!--
 +--><span>b</span><!--

@@ -1,0 +1,225 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: logicalOrAssignmentInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Union with null
+declare let a: string | null;
+a ||= 'default';
+
+// Union with undefined
+declare let b: number | undefined;
+b ||= 0;
+
+// Union with null and undefined
+declare let c: string | null | undefined;
+c ||= 'fallback';
+
+// Nullish literal
+let d: null = null;
+d ||= 'value';
+
+let e: undefined = undefined;
+e ||= 'value';
+
+// Object union with `null`: no fix
+declare let obj: { a: string } | null;
+obj ||= { a: 'default' };
+
+// Number union with `null`: no fix
+declare let mixed: number | null;
+mixed ||= 100;
+
+// Boolean union with `null`: no fix
+declare let flag: boolean | null;
+flag ||= true;
+
+```
+
+# Diagnostics
+```
+logicalOrAssignmentInvalid.ts:5:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    3 │ // Union with null
+    4 │ declare let a: string | null;
+  > 5 │ a ||= 'default';
+      │   ^^^
+    6 │ 
+    7 │ // Union with undefined
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:9:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+     7 │ // Union with undefined
+     8 │ declare let b: number | undefined;
+   > 9 │ b ||= 0;
+       │   ^^^
+    10 │ 
+    11 │ // Union with null and undefined
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:13:3 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    11 │ // Union with null and undefined
+    12 │ declare let c: string | null | undefined;
+  > 13 │ c ||= 'fallback';
+       │   ^^^
+    14 │ 
+    15 │ // Nullish literal
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:17:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    15 │ // Nullish literal
+    16 │ let d: null = null;
+  > 17 │ d ||= 'value';
+       │   ^^^
+    18 │ 
+    19 │ let e: undefined = undefined;
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    15 15 │   // Nullish literal
+    16 16 │   let d: null = null;
+    17    │ - d·||=·'value';
+       17 │ + d·??=·'value';
+    18 18 │   
+    19 19 │   let e: undefined = undefined;
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:20:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    19 │ let e: undefined = undefined;
+  > 20 │ e ||= 'value';
+       │   ^^^
+    21 │ 
+    22 │ // Object union with `null`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace ||= with ??=.
+  
+    18 18 │   
+    19 19 │   let e: undefined = undefined;
+    20    │ - e·||=·'value';
+       20 │ + e·??=·'value';
+    21 21 │   
+    22 22 │   // Object union with `null`: no fix
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:24:5 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    22 │ // Object union with `null`: no fix
+    23 │ declare let obj: { a: string } | null;
+  > 24 │ obj ||= { a: 'default' };
+       │     ^^^
+    25 │ 
+    26 │ // Number union with `null`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:28:7 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    26 │ // Number union with `null`: no fix
+    27 │ declare let mixed: number | null;
+  > 28 │ mixed ||= 100;
+       │       ^^^
+    29 │ 
+    30 │ // Boolean union with `null`: no fix
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+logicalOrAssignmentInvalid.ts:32:6 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    30 │ // Boolean union with `null`: no fix
+    31 │ declare let flag: boolean | null;
+  > 32 │ flag ||= true;
+       │      ^^^
+    33 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

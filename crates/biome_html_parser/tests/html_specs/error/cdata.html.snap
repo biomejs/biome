@@ -1,0 +1,63 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<![CDATA[<![CDATA[
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        HtmlCdataSection {
+            cdata_start_token: CDATA_START@0..9 "<![CDATA[" [] [],
+            content_token: HTML_LITERAL@9..19 "<![CDATA[\n" [] [],
+            cdata_end_token: missing (required),
+        },
+    ],
+    eof_token: EOF@19..19 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..19
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..19
+    0: HTML_CDATA_SECTION@0..19
+      0: CDATA_START@0..9 "<![CDATA[" [] []
+      1: HTML_LITERAL@9..19 "<![CDATA[\n" [] []
+      2: (empty)
+  3: EOF@19..19 "" [] []
+
+```
+
+## Diagnostics
+
+```
+cdata.html:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]]>` but instead the file ends
+  
+    1 │ <![CDATA[<![CDATA[
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <![CDATA[<![CDATA[
+  > 2 │ 
+      │ 
+  
+```

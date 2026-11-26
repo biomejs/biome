@@ -80,11 +80,71 @@ impl AnyMdBlock {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_)))
     }
 
+    /// Returns whether the block is an MDX ESM block, block tag, or block
+    /// expression. Like a fenced code block, none of them holds the line
+    /// ending of its last line.
+    pub const fn is_mdx_block(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(
+                AnyMdLeafBlock::MdxEsmBlock(_)
+                    | AnyMdLeafBlock::MdxBlockExpression(_)
+                    | AnyMdLeafBlock::MdxJsxBlockTag(_)
+            )
+        )
+    }
+
+    /// Returns whether the block is an MDX block tag or block expression that
+    /// continues the line of the construct before it, as `{a}` does in
+    /// `<Tip /> {a}`. The constructs of one line are consecutive siblings.
+    pub fn continues_mdx_flow_line(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(
+                AnyMdLeafBlock::MdxBlockExpression(_) | AnyMdLeafBlock::MdxJsxBlockTag(_)
+            )
+        ) && self.syntax().prev_sibling().is_some_and(|sibling| {
+            matches!(
+                sibling.kind(),
+                MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION | MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG
+            )
+        })
+    }
+
     pub fn is_html_comment(&self) -> bool {
         match self {
             Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(block)) => block.is_html_comment(),
             Self::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
                 paragraph.is_html_comment()
+            }
+            _ => false,
+        }
+    }
+
+    /// Returns whether the block is an MDX expression that holds only
+    /// comments, such as `{/* comment */}`, the comment syntax of MDX.
+    pub fn is_mdx_comment(&self) -> bool {
+        match self {
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdxBlockExpression(expression)) => expression
+                .content()
+                .is_some_and(|content| matches!(content.comment_ranges(), Ok(Some(_)))),
+            // `{/* a */} {/* b */}` is a paragraph of inline expressions.
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
+                let mut has_comment = false;
+                for item in paragraph.list() {
+                    match item {
+                        AnyMdInline::MdxInlineExpression(expression)
+                            if expression.content().is_some_and(|content| {
+                                matches!(content.comment_ranges(), Ok(Some(_)))
+                            }) =>
+                        {
+                            has_comment = true;
+                        }
+                        AnyMdInline::MdTextual(text) if text.is_empty().unwrap_or_default() => {}
+                        _ => return false,
+                    }
+                }
+                has_comment
             }
             _ => false,
         }
@@ -270,10 +330,7 @@ impl MdParagraph {
     }
 
     pub fn ends_with_newline(&self) -> bool {
-        self.list().last().is_some_and(|item| {
-            item.as_md_textual()
-                .is_some_and(|textual| textual.is_newline().unwrap_or_default())
-        })
+        self.list().ends_with_newline()
     }
 
     pub fn ends_with_double_newline(&self) -> bool {

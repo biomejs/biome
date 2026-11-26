@@ -1,0 +1,222 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  mounted() {
+    this.$on("start", function (args) {
+      console.log("start", args);
+    });
+    this.$off("start");
+    this.$once("start", () => {});
+    this["$on"]("start", handler);
+    this?.$on("start");
+    (this?.$off)("start");
+    (this.$once)("start");
+
+    const vm = this;
+    vm.$on("start", handler);
+  },
+  methods: {
+    stop() {
+      this.$off();
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $on instance method was removed in Vue 3.
+  
+    3 │ export default {
+    4 │   mounted() {
+  > 5 │     this.$on("start", function (args) {
+      │          ^^^
+    6 │       console.log("start", args);
+    7 │     });
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $off instance method was removed in Vue 3.
+  
+     6 │       console.log("start", args);
+     7 │     });
+   > 8 │     this.$off("start");
+       │          ^^^^
+     9 │     this.$once("start", () => {});
+    10 │     this["$on"]("start", handler);
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $once instance method was removed in Vue 3.
+  
+     7 │     });
+     8 │     this.$off("start");
+   > 9 │     this.$once("start", () => {});
+       │          ^^^^^
+    10 │     this["$on"]("start", handler);
+    11 │     this?.$on("start");
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $on instance method was removed in Vue 3.
+  
+     8 │     this.$off("start");
+     9 │     this.$once("start", () => {});
+  > 10 │     this["$on"]("start", handler);
+       │          ^^^^^
+    11 │     this?.$on("start");
+    12 │     (this?.$off)("start");
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:11 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $on instance method was removed in Vue 3.
+  
+     9 │     this.$once("start", () => {});
+    10 │     this["$on"]("start", handler);
+  > 11 │     this?.$on("start");
+       │           ^^^
+    12 │     (this?.$off)("start");
+    13 │     (this.$once)("start");
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:12 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $off instance method was removed in Vue 3.
+  
+    10 │     this["$on"]("start", handler);
+    11 │     this?.$on("start");
+  > 12 │     (this?.$off)("start");
+       │            ^^^^
+    13 │     (this.$once)("start");
+    14 │ 
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:11 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $once instance method was removed in Vue 3.
+  
+    11 │     this?.$on("start");
+    12 │     (this?.$off)("start");
+  > 13 │     (this.$once)("start");
+       │           ^^^^^
+    14 │ 
+    15 │     const vm = this;
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:8 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $on instance method was removed in Vue 3.
+  
+    15 │     const vm = this;
+  > 16 │     vm.$on("start", handler);
+       │        ^^^
+    17 │   },
+    18 │   methods: {
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:12 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $off instance method was removed in Vue 3.
+  
+    18 │   methods: {
+    19 │     stop() {
+  > 20 │       this.$off();
+       │            ^^^^
+    21 │     },
+    22 │   },
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

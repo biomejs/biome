@@ -197,7 +197,7 @@ impl ServiceLanguage for CssLanguage {
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
         };
 
-        overrides.apply_override_css_parser_options(path, &mut options);
+        overrides.apply_override_css_parser_options(path.as_path(), &mut options);
 
         options
     }
@@ -261,19 +261,19 @@ impl ServiceLanguage for CssLanguage {
         override_indices: &[usize],
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
-        let preferred_quote = global
-            .languages
-            .css
-            .formatter
-            .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
-            })
-            .unwrap_or_default();
+        let preferred_quote =
+            global
+                .languages
+                .css
+                .formatter
+                .quote_style
+                .map_or_default(|quote_style: QuoteStyle| {
+                    if quote_style == QuoteStyle::Single {
+                        PreferredQuote::Single
+                    } else {
+                        PreferredQuote::Double
+                    }
+                });
 
         let configuration = AnalyzerConfiguration::default()
             .with_rules(to_analyzer_rules_by_indices(global, override_indices))

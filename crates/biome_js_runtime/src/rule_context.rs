@@ -1,7 +1,7 @@
 use biome_languages::JsFileSource;
 use biome_languages::javascript::{
-    JsEmbeddingKind, Language, LanguageVariant, LanguageVersion, ModuleKind, SvelteEmbeddingKind,
-    SvelteFileKind,
+    JsEmbeddingKind, Language, LanguageVariant, LanguageVersion, MdxEmbeddingKind, ModuleKind,
+    SvelteEmbeddingKind, SvelteFileKind,
 };
 use boa_engine::object::ObjectInitializer;
 use boa_engine::property::Attribute;
@@ -136,8 +136,10 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
                 SvelteEmbeddingKind::Expression => js_string!("expression"),
                 SvelteEmbeddingKind::TextInterpolation => js_string!("textInterpolation"),
                 SvelteEmbeddingKind::SnippetSignature => js_string!("snippetSignature"),
+                SvelteEmbeddingKind::EachBinding => js_string!("eachBinding"),
                 SvelteEmbeddingKind::LegacyConst => js_string!("legacyConst"),
                 SvelteEmbeddingKind::Declaration => js_string!("declaration"),
+                SvelteEmbeddingKind::Generics => js_string!("generics"),
             };
             object
                 .property(
@@ -146,6 +148,20 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
                     Attribute::ENUMERABLE,
                 )
                 .property(js_string!("fileKind"), file_kind, Attribute::ENUMERABLE)
+                .property(
+                    js_string!("embeddingKind"),
+                    embedding_kind,
+                    Attribute::ENUMERABLE,
+                );
+        }
+        JsEmbeddingKind::Mdx { kind } => {
+            let embedding_kind = match kind {
+                MdxEmbeddingKind::Esm => js_string!("esm"),
+                MdxEmbeddingKind::Expression => js_string!("expression"),
+                MdxEmbeddingKind::Tag => js_string!("tag"),
+            };
+            object
+                .property(js_string!("kind"), js_string!("mdx"), Attribute::ENUMERABLE)
                 .property(
                     js_string!("embeddingKind"),
                     embedding_kind,

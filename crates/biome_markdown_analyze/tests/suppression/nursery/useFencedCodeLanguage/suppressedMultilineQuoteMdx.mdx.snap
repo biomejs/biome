@@ -1,0 +1,14 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressedMultilineQuoteMdx.mdx
+---
+# Input
+```md
+> {/*
+> biome-ignore lint/nursery/useFencedCodeLanguage: language is intentionally omitted
+> */}
+> ```
+> code
+> ```
+
+```

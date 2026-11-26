@@ -18,4 +18,5 @@
   <transition><dialog v-dialog="show" /></transition>
   <transition><div key="static" /></transition>
   <transition name="fade" mode="out-in"><p class="message">Saved</p></transition>
+  <transition><math><mi>x</mi></math></transition>
 </template>

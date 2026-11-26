@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-model.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const a = defineModel({ type: Boolean, default: "hello" });
+const b = defineModel("count", { type: Number, default: false });
+const c = defineModel("list", { type: Array, default: [] });
+const d = defineModel("options", { type: Object, default: {} });
+const e = defineModel("label", { type: String, default: () => 123 });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-model.vue:3:49 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop modelValue doesn't match the type of the prop.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const a = defineModel({ type: Boolean, default: "hello" });
+      │                                                 ^^^^^^^
+    4 │ const b = defineModel("count", { type: Number, default: false });
+    5 │ const c = defineModel("list", { type: Array, default: [] });
+  
+  i The prop accepts Boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:4:57 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop count doesn't match the type of the prop.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const a = defineModel({ type: Boolean, default: "hello" });
+  > 4 │ const b = defineModel("count", { type: Number, default: false });
+      │                                                         ^^^^^
+    5 │ const c = defineModel("list", { type: Array, default: [] });
+    6 │ const d = defineModel("options", { type: Object, default: {} });
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:5:55 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop list isn't returned from a function.
+  
+    3 │ const a = defineModel({ type: Boolean, default: "hello" });
+    4 │ const b = defineModel("count", { type: Number, default: false });
+  > 5 │ const c = defineModel("list", { type: Array, default: [] });
+      │                                                       ^^
+    6 │ const d = defineModel("options", { type: Object, default: {} });
+    7 │ const e = defineModel("label", { type: String, default: () => 123 });
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:6:59 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop options isn't returned from a function.
+  
+    4 │ const b = defineModel("count", { type: Number, default: false });
+    5 │ const c = defineModel("list", { type: Array, default: [] });
+  > 6 │ const d = defineModel("options", { type: Object, default: {} });
+      │                                                           ^^
+    7 │ const e = defineModel("label", { type: String, default: () => 123 });
+    8 │ </script>
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-model.vue:7:63 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop label that doesn't match the type of the prop.
+  
+    5 │ const c = defineModel("list", { type: Array, default: [] });
+    6 │ const d = defineModel("options", { type: Object, default: {} });
+  > 7 │ const e = defineModel("label", { type: String, default: () => 123 });
+      │                                                               ^^^
+    8 │ </script>
+    9 │ 
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

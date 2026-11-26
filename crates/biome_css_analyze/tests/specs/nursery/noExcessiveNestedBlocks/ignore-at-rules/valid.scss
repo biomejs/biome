@@ -1,0 +1,28 @@
+/* should not generate diagnostics */
+.a {
+    @if $theme == dark {
+        color: white;
+    } @else {
+        .b {
+            color: black;
+        }
+    }
+}
+
+.a {
+    @if $theme == dark {
+        color: white;
+    } @else if $theme == light {
+        .b {
+            color: black;
+        }
+    }
+}
+
+.a {
+    @include breakpoint(md) {
+        .b {
+            color: red;
+        }
+    }
+}

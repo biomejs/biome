@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const a = 1;
+type MyType = { foo: string };
+interface MyInterface {
+	foo: string;
+}
+declare const chromeApi: { run(): void };
+
+makeSynchronous(() => {
+	const b: typeof a = 1;
+	const f = <T extends MyType>(t: T) => t;
+	let myType: MyType = { foo: "bar" };
+	myType = { foo: "bar" } as MyType;
+	myType = { foo: "bar" } as const;
+	myType = { foo: "baz" } satisfies MyType;
+	const other: MyInterface = myType;
+	type X = typeof myType extends MyType ? true : false;
+	return [b, f, other];
+});
+
+makeSynchronous(() => chromeApi.run());
+
+```

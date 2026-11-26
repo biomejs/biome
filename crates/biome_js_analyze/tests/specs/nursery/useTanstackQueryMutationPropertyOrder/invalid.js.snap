@@ -1,0 +1,675 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useMutation, useMutation as useSave } from "@tanstack/react-query";
+import { useMutation as useVueMutation } from "@tanstack/vue-query";
+
+useMutation({
+	mutationFn: (todo) => saveTodo(todo),
+	onError: (error, todo, saved) => restoreTodo(saved.previous),
+	onMutate: (todo) => ({ previous: readTodo(todo.id) }),
+	retry: 3,
+});
+
+useSave({
+	onSettled: (data, error, todo, saved) => refreshTodo(saved.previous),
+	gcTime: 5 * 60 * 1000,
+	onMutate: (todo) => ({ previous: readTodo(todo.id) }),
+});
+
+useVueMutation({
+	onError,
+	onSettled,
+	onMutate,
+});
+
+useMutation({
+	onSettled,
+	onMutate,
+	onError,
+});
+
+useMutation({
+	onError() {},
+	"onMutate": () => {},
+});
+
+useMutation({
+	"onSettled": () => {},
+	async onMutate() {},
+});
+
+useMutation({
+	onError,
+	["onMutate"]: () => {},
+});
+
+useMutation(({
+	// Roll back the change.
+	onError, // rollback
+	// Remember the previous value.
+	onMutate, // snapshot
+}), queryClient);
+
+useMutation({ onError, onMutate });
+
+useMutation({ onError, gcTime, onMutate, });
+
+useMutation({
+	onError,
+	onMutate
+});
+
+useMutation({
+	onError,
+	...sharedOptions,
+	onMutate,
+});
+
+useMutation({
+	onMutate: first,
+	onError,
+	onMutate: second,
+});
+
+function Component() {
+	return useMutation({
+		onSettled,
+		onMutate,
+	});
+}
+
+useMutation({ mutationFn,
+	onError,
+	onMutate });
+
+useMutation({
+	mutationFn, // send the request
+	onError, onMutate,
+});
+
+useMutation({ onError,
+	onMutate, // snapshot
+});
+
+useMutation({ onError, onMutate // snapshot
+});
+
+useMutation({
+	onError, gcTime, // cache
+	onMutate, retry });
+
+```
+
+# Diagnostics
+```
+invalid.js:8:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+     6 │ 	mutationFn: (todo) => saveTodo(todo),
+     7 │ 	onError: (error, todo, saved) => restoreTodo(saved.previous),
+   > 8 │ 	onMutate: (todo) => ({ previous: readTodo(todo.id) }),
+       │ 	^^^^^^^^
+     9 │ 	retry: 3,
+    10 │ });
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+     5  5 │   useMutation({
+     6  6 │     mutationFn: (todo) => saveTodo(todo),
+     7    │ - → onError:·(error,·todo,·saved)·=>·restoreTodo(saved.previous),
+     8    │ - → onMutate:·(todo)·=>·({·previous:·readTodo(todo.id)·}),
+        7 │ + → onMutate:·(todo)·=>·({·previous:·readTodo(todo.id)·}),
+        8 │ + → onError:·(error,·todo,·saved)·=>·restoreTodo(saved.previous),
+     9  9 │     retry: 3,
+    10 10 │   });
+  
+
+```
+
+```
+invalid.js:15:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onSettled.
+  
+    13 │ 	onSettled: (data, error, todo, saved) => refreshTodo(saved.previous),
+    14 │ 	gcTime: 5 * 60 * 1000,
+  > 15 │ 	onMutate: (todo) => ({ previous: readTodo(todo.id) }),
+       │ 	^^^^^^^^
+    16 │ });
+    17 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onSettled.
+  
+    11 11 │   
+    12 12 │   useSave({
+    13    │ - → onSettled:·(data,·error,·todo,·saved)·=>·refreshTodo(saved.previous),
+    14    │ - → gcTime:·5·*·60·*·1000,
+    15    │ - → onMutate:·(todo)·=>·({·previous:·readTodo(todo.id)·}),
+       13 │ + → onMutate:·(todo)·=>·({·previous:·readTodo(todo.id)·}),
+       14 │ + → onSettled:·(data,·error,·todo,·saved)·=>·refreshTodo(saved.previous),
+       15 │ + → gcTime:·5·*·60·*·1000,
+    16 16 │   });
+    17 17 │   
+  
+
+```
+
+```
+invalid.js:21:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    19 │ 	onError,
+    20 │ 	onSettled,
+  > 21 │ 	onMutate,
+       │ 	^^^^^^^^
+    22 │ });
+    23 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    17 17 │   
+    18 18 │   useVueMutation({
+    19    │ - → onError,
+    20    │ - → onSettled,
+    21    │ - → onMutate,
+       19 │ + → onMutate,
+       20 │ + → onError,
+       21 │ + → onSettled,
+    22 22 │   });
+    23 23 │   
+  
+
+```
+
+```
+invalid.js:26:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onSettled.
+  
+    24 │ useMutation({
+    25 │ 	onSettled,
+  > 26 │ 	onMutate,
+       │ 	^^^^^^^^
+    27 │ 	onError,
+    28 │ });
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onSettled.
+  
+    23 23 │   
+    24 24 │   useMutation({
+    25    │ - → onSettled,
+    26    │ - → onMutate,
+       25 │ + → onMutate,
+       26 │ + → onSettled,
+    27 27 │     onError,
+    28 28 │   });
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    30 │ useMutation({
+    31 │ 	onError() {},
+  > 32 │ 	"onMutate": () => {},
+       │ 	^^^^^^^^^^
+    33 │ });
+    34 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    29 29 │   
+    30 30 │   useMutation({
+    31    │ - → onError()·{},
+    32    │ - → "onMutate":·()·=>·{},
+       31 │ + → "onMutate":·()·=>·{},
+       32 │ + → onError()·{},
+    33 33 │   });
+    34 34 │   
+  
+
+```
+
+```
+invalid.js:37:8 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onSettled.
+  
+    35 │ useMutation({
+    36 │ 	"onSettled": () => {},
+  > 37 │ 	async onMutate() {},
+       │ 	      ^^^^^^^^
+    38 │ });
+    39 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onSettled.
+  
+    34 34 │   
+    35 35 │   useMutation({
+    36    │ - → "onSettled":·()·=>·{},
+    37    │ - → async·onMutate()·{},
+       36 │ + → async·onMutate()·{},
+       37 │ + → "onSettled":·()·=>·{},
+    38 38 │   });
+    39 39 │   
+  
+
+```
+
+```
+invalid.js:42:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    40 │ useMutation({
+    41 │ 	onError,
+  > 42 │ 	["onMutate"]: () => {},
+       │ 	^^^^^^^^^^^^
+    43 │ });
+    44 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    39 39 │   
+    40 40 │   useMutation({
+    41    │ - → onError,
+    42    │ - → ["onMutate"]:·()·=>·{},
+       41 │ + → ["onMutate"]:·()·=>·{},
+       42 │ + → onError,
+    43 43 │   });
+    44 44 │   
+  
+
+```
+
+```
+invalid.js:49:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    47 │ 	onError, // rollback
+    48 │ 	// Remember the previous value.
+  > 49 │ 	onMutate, // snapshot
+       │ 	^^^^^^^^
+    50 │ }), queryClient);
+    51 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    44 44 │   
+    45 45 │   useMutation(({
+    46    │ - → //·Roll·back·the·change.
+    47    │ - → onError,·//·rollback
+    48    │ - → //·Remember·the·previous·value.
+    49    │ - → onMutate,·//·snapshot
+       46 │ + → //·Remember·the·previous·value.
+       47 │ + → onMutate,·//·snapshot
+       48 │ + → //·Roll·back·the·change.
+       49 │ + → onError,·//·rollback
+    50 50 │   }), queryClient);
+    51 51 │   
+  
+
+```
+
+```
+invalid.js:52:24 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    50 │ }), queryClient);
+    51 │ 
+  > 52 │ useMutation({ onError, onMutate });
+       │                        ^^^^^^^^
+    53 │ 
+    54 │ useMutation({ onError, gcTime, onMutate, });
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    50 50 │   }), queryClient);
+    51 51 │   
+    52    │ - useMutation({·onError,·onMutate·});
+       52 │ + useMutation({·onMutate,·onError·});
+    53 53 │   
+    54 54 │   useMutation({ onError, gcTime, onMutate, });
+  
+
+```
+
+```
+invalid.js:54:32 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    52 │ useMutation({ onError, onMutate });
+    53 │ 
+  > 54 │ useMutation({ onError, gcTime, onMutate, });
+       │                                ^^^^^^^^
+    55 │ 
+    56 │ useMutation({
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    52 52 │   useMutation({ onError, onMutate });
+    53 53 │   
+    54    │ - useMutation({·onError,·gcTime,·onMutate,·});
+       54 │ + useMutation({·onMutate,·onError,·gcTime,·});
+    55 55 │   
+    56 56 │   useMutation({
+  
+
+```
+
+```
+invalid.js:58:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    56 │ useMutation({
+    57 │ 	onError,
+  > 58 │ 	onMutate
+       │ 	^^^^^^^^
+    59 │ });
+    60 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    55 55 │   
+    56 56 │   useMutation({
+    57    │ - → onError,
+    58    │ - → onMutate
+       57 │ + → onMutate,
+       58 │ + → onError
+    59 59 │   });
+    60 60 │   
+  
+
+```
+
+```
+invalid.js:64:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    62 │ 	onError,
+    63 │ 	...sharedOptions,
+  > 64 │ 	onMutate,
+       │ 	^^^^^^^^
+    65 │ });
+    66 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    60 60 │   
+    61 61 │   useMutation({
+    62    │ - → onError,
+    63    │ - → ...sharedOptions,
+    64    │ - → onMutate,
+       62 │ + → onMutate,
+       63 │ + → onError,
+       64 │ + → ...sharedOptions,
+    65 65 │   });
+    66 66 │   
+  
+
+```
+
+```
+invalid.js:70:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    68 │ 	onMutate: first,
+    69 │ 	onError,
+  > 70 │ 	onMutate: second,
+       │ 	^^^^^^^^
+    71 │ });
+    72 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    67 67 │   useMutation({
+    68 68 │     onMutate: first,
+    69    │ - → onError,
+    70    │ - → onMutate:·second,
+       69 │ + → onMutate:·second,
+       70 │ + → onError,
+    71 71 │   });
+    72 72 │   
+  
+
+```
+
+```
+invalid.js:76:3 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onSettled.
+  
+    74 │ 	return useMutation({
+    75 │ 		onSettled,
+  > 76 │ 		onMutate,
+       │ 		^^^^^^^^
+    77 │ 	});
+    78 │ }
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onSettled.
+  
+    73 73 │   function Component() {
+    74 74 │     return useMutation({
+    75    │ - → → onSettled,
+    76    │ - → → onMutate,
+       75 │ + → → onMutate,
+       76 │ + → → onSettled,
+    77 77 │     });
+    78 78 │   }
+  
+
+```
+
+```
+invalid.js:82:2 lint/nursery/useTanstackQueryMutationPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    80 │ useMutation({ mutationFn,
+    81 │ 	onError,
+  > 82 │ 	onMutate });
+       │ 	^^^^^^^^
+    83 │ 
+    84 │ useMutation({
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move onMutate before onError.
+  
+    79 79 │   
+    80 80 │   useMutation({ mutationFn,
+    81    │ - → onError,
+    82    │ - → onMutate·});
+       81 │ + → onMutate,
+       82 │ + → onError});
+    83 83 │   
+    84 84 │   useMutation({
+  
+
+```
+
+```
+invalid.js:86:11 lint/nursery/useTanstackQueryMutationPropertyOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    84 │ useMutation({
+    85 │ 	mutationFn, // send the request
+  > 86 │ 	onError, onMutate,
+       │ 	         ^^^^^^^^
+    87 │ });
+    88 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:90:2 lint/nursery/useTanstackQueryMutationPropertyOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    89 │ useMutation({ onError,
+  > 90 │ 	onMutate, // snapshot
+       │ 	^^^^^^^^
+    91 │ });
+    92 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:93:24 lint/nursery/useTanstackQueryMutationPropertyOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    91 │ });
+    92 │ 
+  > 93 │ useMutation({ onError, onMutate // snapshot
+       │                        ^^^^^^^^
+    94 │ });
+    95 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:2 lint/nursery/useTanstackQueryMutationPropertyOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This onMutate property comes after onError.
+  
+    96 │ useMutation({
+    97 │ 	onError, gcTime, // cache
+  > 98 │ 	onMutate, retry });
+       │ 	^^^^^^^^
+    99 │ 
+  
+  i TanStack Query passes the value that onMutate returns to onError and onSettled. The type of that value is worked out from the properties in the order in which they are written, so it can be wrong in a property that comes before onMutate.
+  
+  i Move onMutate before onError and onSettled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

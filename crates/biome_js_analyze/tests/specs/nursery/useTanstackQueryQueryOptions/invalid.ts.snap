@@ -1,0 +1,221 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import {
+	type QueryClient as QueryClientType,
+	QueryClient,
+	useQuery,
+	useQueryClient,
+	type UseQueryOptions,
+} from "@tanstack/react-query";
+
+function Component() {
+	const queryClient = useQueryClient();
+	queryClient.getQueryData(["todos"] as const);
+	queryClient.getQueryData((["todos"]) satisfies readonly string[]);
+	queryClient.getQueryData(<const>["todos"]);
+	queryClient.invalidateQueries({ queryKey: ["todos"] as const });
+	queryClient.invalidateQueries({
+		queryKey: (["todos"]) satisfies readonly string[],
+	});
+
+	useQuery({ queryKey: ["todos"], queryFn: fetchTodos } satisfies UseQueryOptions);
+	useQuery<Todo[]>({ queryKey: ["todos"], queryFn: fetchTodos });
+}
+
+const typedClient: QueryClientType = new QueryClient();
+typedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+(typedClient as QueryClientType)!.getQueryData(["todos"]);
+
+```
+
+# Diagnostics
+```
+invalid.ts:12:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    10 │ function Component() {
+    11 │ 	const queryClient = useQueryClient();
+  > 12 │ 	queryClient.getQueryData(["todos"] as const);
+       │ 	                         ^^^^^^^^^
+    13 │ 	queryClient.getQueryData((["todos"]) satisfies readonly string[]);
+    14 │ 	queryClient.getQueryData(<const>["todos"]);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:28 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    11 │ 	const queryClient = useQueryClient();
+    12 │ 	queryClient.getQueryData(["todos"] as const);
+  > 13 │ 	queryClient.getQueryData((["todos"]) satisfies readonly string[]);
+       │ 	                          ^^^^^^^^^
+    14 │ 	queryClient.getQueryData(<const>["todos"]);
+    15 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] as const });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:34 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    12 │ 	queryClient.getQueryData(["todos"] as const);
+    13 │ 	queryClient.getQueryData((["todos"]) satisfies readonly string[]);
+  > 14 │ 	queryClient.getQueryData(<const>["todos"]);
+       │ 	                                ^^^^^^^^^
+    15 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] as const });
+    16 │ 	queryClient.invalidateQueries({
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:44 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    13 │ 	queryClient.getQueryData((["todos"]) satisfies readonly string[]);
+    14 │ 	queryClient.getQueryData(<const>["todos"]);
+  > 15 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] as const });
+       │ 	                                          ^^^^^^^^^
+    16 │ 	queryClient.invalidateQueries({
+    17 │ 		queryKey: (["todos"]) satisfies readonly string[],
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:14 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    15 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] as const });
+    16 │ 	queryClient.invalidateQueries({
+  > 17 │ 		queryKey: (["todos"]) satisfies readonly string[],
+       │ 		           ^^^^^^^^^
+    18 │ 	});
+    19 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    18 │ 	});
+    19 │ 
+  > 20 │ 	useQuery({ queryKey: ["todos"], queryFn: fetchTodos } satisfies UseQueryOptions);
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	useQuery<Todo[]>({ queryKey: ["todos"], queryFn: fetchTodos });
+    22 │ }
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:19 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    20 │ 	useQuery({ queryKey: ["todos"], queryFn: fetchTodos } satisfies UseQueryOptions);
+  > 21 │ 	useQuery<Todo[]>({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:24 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    24 │ const typedClient: QueryClientType = new QueryClient();
+  > 25 │ typedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ (typedClient as QueryClientType)!.getQueryData(["todos"]);
+    27 │ 
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:48 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    24 │ const typedClient: QueryClientType = new QueryClient();
+    25 │ typedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 26 │ (typedClient as QueryClientType)!.getQueryData(["todos"]);
+       │                                                ^^^^^^^^^
+    27 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,6 +1,6 @@
 use crate::TestArgs as Args;
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use camino::Utf8Path;
@@ -95,6 +95,49 @@ fn prettier_migrate_default_options() {
         fs,
         console,
         result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_preserves_markdown_frontmatter() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert("biome.json".into(), b"{}");
+    fs.insert(".prettierrc".into(), b"{}");
+    fs.insert(
+        "SKILL.md".into(),
+        include_bytes!("../specs/migrate_prettier/SKILL.md"),
+    );
+
+    let (fs, migration_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+    assert!(
+        migration_result.is_ok(),
+        "run_cli returned {migration_result:?}"
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", "SKILL.md"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new("SKILL.md"),
+        include_str!("../specs/migrate_prettier/SKILL.md.prettier-snap"),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_preserves_markdown_frontmatter",
+        fs,
+        console,
+        migration_result.followed_by(result),
     ));
 }
 

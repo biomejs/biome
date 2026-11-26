@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/nested_gitignore_cannot_reinclude_file_below_ignored_parent/ignored/file.js' '<TEMP_DIR>/nested_gitignore_cannot_reinclude_file_below_ignored_parent/kept.js'
+```
+
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": "."
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+ignored/
+
+```
+
+## `ignored/.gitignore`
+
+```gitignore
+!file.js
+
+```
+
+## `ignored/file.js`
+
+```js
+  statement(  )  
+```
+
+## `kept.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

@@ -196,7 +196,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
     let mut biome_config_content = String::new();
     biome_config_file.read_to_string(&mut biome_config_content)?;
 
-    let biome_path = BiomePath::new(configuration_file_path.as_path());
+    let biome_path = fs.biome_path(configuration_file_path.as_path());
     let parse_options = match configuration_file_path.extension() {
         Some("jsonc") => JsonParserOptions::default()
             .with_allow_comments()
@@ -469,10 +469,13 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             let mut tree = parsed.tree();
             let mut actions = Vec::new();
             let is_root = workspace.fs().working_directory().is_some_and(|wd| {
-                configuration_file_path.strip_prefix(wd).is_ok_and(|path| {
-                    path.starts_with(ConfigName::biome_json())
-                        || path.starts_with(ConfigName::biome_jsonc())
-                })
+                configuration_file_path
+                    .as_path()
+                    .strip_prefix(wd)
+                    .is_ok_and(|path| {
+                        path.starts_with(ConfigName::biome_json())
+                            || path.starts_with(ConfigName::biome_jsonc())
+                    })
             });
             loop {
                 let (action, _) = migrate_configuration(

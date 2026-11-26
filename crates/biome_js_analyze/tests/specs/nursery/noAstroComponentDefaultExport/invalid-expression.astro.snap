@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-expression.astro
+---
+# Input
+```astro
+---
+/* should generate diagnostics */
+const value = {};
+export default value;
+---
+
+```
+
+# Diagnostics
+```
+invalid-expression.astro:4:8 lint/nursery/noAstroComponentDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const value = {};
+  > 4 │ export default value;
+      │        ^^^^^^^
+    5 │ ---
+    6 │ 
+  
+  i Astro generates the component's runtime default export.
+  
+  i Remove this export or use a named export instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

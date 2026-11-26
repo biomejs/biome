@@ -35,4 +35,21 @@ pub trait Suppression {
     fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
         Vec::new()
     }
+
+    /// Returns `false` only if [`Self::parse_snippet`] returns no comments for
+    /// every range. The default returns `false`, matching the default
+    /// [`Self::parse_snippet`]; implementations that override one override
+    /// both.
+    fn has_snippet_comments(&self) -> bool {
+        false
+    }
+
+    /// Returns whether the token whose trimmed range is `range` holds nothing
+    /// but comments, such as the MDX expression `{/* comment */}`. Top-level
+    /// suppressions may follow such a token even when its kind isn't
+    /// [allowed before suppressions](biome_rowan::SyntaxKind::is_allowed_before_suppressions).
+    /// The default returns `false`.
+    fn is_comment_snippet(&self, _range: TextRange) -> bool {
+        false
+    }
 }

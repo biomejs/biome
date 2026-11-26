@@ -63,6 +63,14 @@ declare_lint_rule! {
     /// delete process.env.FOO;
     ///```
     ///
+    /// ## See Also
+    ///
+    /// - To report `delete` only on array elements, see
+    ///   [`noArrayDelete`](https://biomejs.dev/linter/rules/no-array-delete/). That rule uses
+    ///   type information to know whether a value is an array, so it also reports keys that are
+    ///   variables, such as `delete array[index]`. Its fix removes the element with `splice()`
+    ///   instead of assigning `undefined`.
+    ///
     pub NoDelete {
         version: "1.0.0",
         name: "noDelete",

@@ -1,6 +1,6 @@
 use biome_parser::diagnostic::expected_node;
 use biome_parser::prelude::*;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 
 use crate::parser::TailwindParser;
 
@@ -18,6 +18,15 @@ pub(crate) fn expected_value(p: &TailwindParser, range: TextRange) -> ParseDiagn
 
 pub(crate) fn expected_modifier(p: &TailwindParser, range: TextRange) -> ParseDiagnostic {
     expected_node("modifier", range, p).into_diagnostic(p)
+}
+
+/// The diagnostic for the whitespace byte at `start` that CSS doesn't allow: `\x0B` or `\x0C`.
+pub(crate) fn invalid_whitespace(start: TextSize) -> ParseDiagnostic {
+    ParseDiagnostic::new(
+        "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
+        start..start + TextSize::from(1),
+    )
+    .with_hint("Use a regular whitespace character instead.")
 }
 
 /// A candidate spelled important twice: with the legacy leading `!` and

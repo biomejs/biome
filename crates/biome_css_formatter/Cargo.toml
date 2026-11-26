@@ -23,13 +23,14 @@ harness = false
 name    = "css_formatter"
 
 [dependencies]
-biome_css_syntax  = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_formatter   = { workspace = true }
-biome_languages   = { workspace = true, features = ["lang_css"] }
-biome_rowan       = { workspace = true }
-biome_string_case = { workspace = true }
-biome_suppression = { workspace = true }
+biome_css_syntax    = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_formatter     = { workspace = true }
+biome_languages     = { workspace = true, features = ["lang_css"] }
+biome_rowan         = { workspace = true }
+biome_string_case   = { workspace = true }
+biome_suppression   = { workspace = true }
+biome_unicode_table = { workspace = true }
 
 [dev-dependencies]
 biome_configuration  = { path = "../biome_configuration", features = ["lang_css"] }
@@ -44,7 +45,7 @@ biome_service        = { path = "../biome_service", features = ["lang_css"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_css"] }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion            = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }

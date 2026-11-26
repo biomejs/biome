@@ -1,0 +1,26 @@
+<p>{#if a}<span>one</span>{/if}{#if b}<span>two</span>{/if}</p>
+
+<div><strong>{name}</strong>{#if best}<span class="tag">best</span>{/if}<p>{title}</p></div>
+
+<div><Chart {labels} />{#if empty}<p>Nothing to show.</p>{/if}</div>
+
+<p>Total:{#each items as item}<b>{item}</b>{/each}.</p>
+
+<p><i>a</i>{#key k}<b>b</b>{/key}<i>c</i>{#await p}<b>wait</b>{:then v}<b>{v}</b>{/await}<i>d</i></p>
+
+<p><i>a</i>{#snippet s()}<b>b</b>{/snippet}<i>c</i></p>
+
+<p><i>a</i>{@debug a}<i>b</i></p>
+
+{#if x}<i>a</i>{@const q = 1}<i>b</i>{/if}
+
+<p>
+	{#if a}
+		<span>one</span>
+	{/if}
+	{#if b}
+		<span>two</span>
+	{/if}
+</p>
+
+<div><div>block</div>{#if x}<div>block</div>{/if}</div>

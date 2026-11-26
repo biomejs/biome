@@ -1,0 +1,83 @@
+/* should not generate diagnostics */
+
+// Already using `??`
+declare const maybeStr: string | null;
+const a = maybeStr ?? 'default';
+
+// `&&`
+declare const x: string | null;
+declare const y: string;
+const b = x && y;
+
+// Non-nullish types
+declare const definiteString: string;
+const c = definiteString || 'fallback';
+
+declare const definiteNumber: number;
+const d = definiteNumber || 0;
+
+declare const definiteBoolean: boolean;
+const e = definiteBoolean || false;
+
+// Non-nullish union types
+declare const strOrNum: string | number;
+const f = strOrNum || 'default';
+
+declare const obj: { prop: string };
+const g = obj.prop || 'default';
+
+function getString(): string {
+  return 'value';
+}
+const h = getString() || 'default';
+
+// Unresolved type
+type Recursive = Recursive;
+declare const value: Recursive;
+value || "fallback";
+
+// `||` on destructured parameters with a default
+type FormValues = {
+	value: string;
+};
+
+type GenericProps<T extends FormValues> = {
+	values: T;
+	inert?: boolean;
+};
+
+type PlainProps = {
+	inert?: boolean;
+};
+
+export function genericWithDefault<T extends FormValues>({
+	inert = false,
+}: GenericProps<T>) {
+	return inert || undefined;
+}
+
+export function plainWithDefault({ inert = false }: PlainProps) {
+	return inert || undefined;
+}
+
+export function renamedWithDefault({ inert: renamed = false }: PlainProps) {
+	return renamed || undefined;
+}
+
+// `||` on a destructured declarator with a default
+declare const props: PlainProps;
+const { inert: fromDeclarator = false } = props;
+export const declaratorResult = fromDeclarator || undefined;
+
+// `||` on an array element with a default
+declare const list: (number | undefined)[];
+const [first = 1] = list;
+export const arrayResult = first || undefined;
+
+// `||` on a parameter whose default removes `undefined`
+export function annotatedWithDefault(flag: boolean | undefined = false, other: boolean) {
+	return flag || other;
+}
+
+export const arrowWithDefault = (flag: boolean | undefined = false, other: boolean) =>
+	flag || other;

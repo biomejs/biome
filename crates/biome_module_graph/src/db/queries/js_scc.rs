@@ -82,6 +82,10 @@ pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> J
 
 /// Computes strongly connected components with Kosaraju's algorithm
 ///
+/// Returns the component ID of each node and the size of each component.
+/// IDs follow a topological order of the components: when an edge leads from
+/// a node in component `a` to a node in another component `b`, `a < b`.
+///
 /// See: <https://en.wikipedia.org/wiki/Kosaraju%27s_algorithm>
 pub(super) fn compute_sccs(edges: &[Vec<u32>]) -> (Vec<u32>, Vec<u32>) {
     let node_count = edges.len();
@@ -199,6 +203,18 @@ mod tests {
         assert_ne!(components[3], components[0]);
         assert_eq!(components[4], components[5]);
         assert_eq!(sizes[components[4] as usize], 2);
+    }
+
+    #[test]
+    fn numbers_components_in_topological_order() {
+        let edges = [vec![4], vec![2], vec![3], vec![1, 4], vec![], vec![0, 1]];
+        let (components, _) = compute_sccs(&edges);
+
+        for (from, targets) in edges.iter().enumerate() {
+            for &to in targets {
+                assert!(components[from] <= components[to as usize]);
+            }
+        }
     }
 
     #[test]

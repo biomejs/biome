@@ -341,13 +341,11 @@ fn sort_interface_members_in_place(
         let expected_leading: Vec<_> = expected_member
             .syntax()
             .first_token()
-            .map(|token| token.leading_trivia().pieces().collect())
-            .unwrap_or_default();
+            .map_or_default(|token| token.leading_trivia().pieces().collect());
         let expected_trailing: Vec<_> = expected_member
             .syntax()
             .last_token()
-            .map(|token| token.trailing_trivia().pieces().collect())
-            .unwrap_or_default();
+            .map_or_default(|token| token.trailing_trivia().pieces().collect());
 
         // Build the new leading trivia for the expected member at this position.
         let new_leading = if partition_by_new_line {
@@ -362,8 +360,7 @@ fn sort_interface_members_in_place(
                 let current_leading: Vec<_> = current_member
                     .syntax()
                     .first_token()
-                    .map(|token| token.leading_trivia().pieces().collect())
-                    .unwrap_or_default();
+                    .map_or_default(|token| token.leading_trivia().pieces().collect());
                 let detached_end = find_last_blank_line_idx(&current_leading).unwrap_or(0);
                 current_leading
                     .iter()

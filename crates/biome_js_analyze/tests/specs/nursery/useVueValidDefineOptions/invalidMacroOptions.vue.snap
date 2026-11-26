@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidMacroOptions.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineOptions({
+  name: "Foo",
+  props: { msg: String },
+  emits: ["click"],
+  expose: ["focus"],
+  slots: Object,
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalidMacroOptions.vue:5:3 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() can't declare props.
+  
+    3 │ defineOptions({
+    4 │   name: "Foo",
+  > 5 │   props: { msg: String },
+      │   ^^^^^^^^^^^^^^^^^^^^^^
+    6 │   emits: ["click"],
+    7 │   expose: ["focus"],
+  
+  i Vue reports an error when it compiles this option, because <script setup> has a dedicated macro for it.
+  
+  i Declare props with defineProps() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMacroOptions.vue:6:3 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() can't declare emits.
+  
+    4 │   name: "Foo",
+    5 │   props: { msg: String },
+  > 6 │   emits: ["click"],
+      │   ^^^^^^^^^^^^^^^^
+    7 │   expose: ["focus"],
+    8 │   slots: Object,
+  
+  i Vue reports an error when it compiles this option, because <script setup> has a dedicated macro for it.
+  
+  i Declare emits with defineEmits() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMacroOptions.vue:7:3 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() can't declare expose.
+  
+    5 │   props: { msg: String },
+    6 │   emits: ["click"],
+  > 7 │   expose: ["focus"],
+      │   ^^^^^^^^^^^^^^^^^
+    8 │   slots: Object,
+    9 │ });
+  
+  i Vue reports an error when it compiles this option, because <script setup> has a dedicated macro for it.
+  
+  i Declare expose with defineExpose() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMacroOptions.vue:8:3 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() can't declare slots.
+  
+     6 │   emits: ["click"],
+     7 │   expose: ["focus"],
+   > 8 │   slots: Object,
+       │   ^^^^^^^^^^^^^
+     9 │ });
+    10 │ </script>
+  
+  i Vue reports an error when it compiles this option, because <script setup> has a dedicated macro for it.
+  
+  i Declare slots with defineSlots() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

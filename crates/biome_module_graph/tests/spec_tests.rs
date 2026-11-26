@@ -20,8 +20,8 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
-    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, ResolverDb,
-    find_value_member_type, infer_call_argument_type,
+    MAX_ON_DEMAND_IMPORT_DEPTH, ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind,
+    NormalizeTypeInput, ResolverDb, find_value_member_type, infer_call_argument_type,
     infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
@@ -34,9 +34,14 @@ use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
+#[path = "spec_tests/aliased_conditions.test.rs"]
+mod aliased_conditions;
 #[path = "spec_tests/ambient_modules.test.rs"]
 mod ambient_modules;
+#[path = "spec_tests/assertions.test.rs"]
+mod assertions;
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
@@ -55,6 +60,8 @@ mod expected_argument_inference;
 mod expressions;
 #[path = "spec_tests/framework_scope.test.rs"]
 mod framework_scope;
+#[path = "spec_tests/function_guards.test.rs"]
+mod function_guards;
 #[path = "spec_tests/globals.test.rs"]
 mod globals;
 #[path = "spec_tests/html_classes.test.rs"]
@@ -69,16 +76,22 @@ mod intersections;
 mod js_doc;
 #[path = "spec_tests/module_resolution.test.rs"]
 mod module_resolution;
+#[path = "spec_tests/narrowing.test.rs"]
+mod narrowing;
 #[path = "spec_tests/normalization.test.rs"]
 mod normalization;
 #[path = "spec_tests/overloads.test.rs"]
 mod overloads;
 #[path = "spec_tests/promises.test.rs"]
 mod promises;
+#[path = "spec_tests/property_narrowing.test.rs"]
+mod property_narrowing;
 #[path = "spec_tests/queries.test.rs"]
 mod queries;
 #[path = "spec_tests/requests.test.rs"]
 mod requests;
+#[path = "spec_tests/scss_modules.test.rs"]
+mod scss_modules;
 #[path = "spec_tests/substitutions.test.rs"]
 mod substitutions;
 #[path = "spec_tests/tailwind_stylesheet.test.rs"]
@@ -102,6 +115,8 @@ struct TestModuleDb {
     /// [ResolverDb::framework_module_path].
     framework_modules: BTreeMap<String, Utf8PathBuf>,
     events: Events,
+    module_enumeration_count: AtomicUsize,
+    module_lookup_count: AtomicUsize,
     storage: Storage<Self>,
 }
 
@@ -119,6 +134,8 @@ impl TestModuleDb {
             modules: BTreeMap::new(),
             resolver_paths: ResolverPaths::default(),
             framework_modules: BTreeMap::new(),
+            module_enumeration_count: AtomicUsize::new(0),
+            module_lookup_count: AtomicUsize::new(0),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -137,6 +154,14 @@ impl TestModuleDb {
 
     fn clear_salsa_events(&self) {
         self.take_salsa_events();
+    }
+
+    fn take_module_enumeration_count(&self) -> usize {
+        self.module_enumeration_count.swap(0, Ordering::Relaxed)
+    }
+
+    fn take_module_lookup_count(&self) -> usize {
+        self.module_lookup_count.swap(0, Ordering::Relaxed)
     }
 
     /// Indexes a JSON document, such as a manifest, as a parsed source.
@@ -211,10 +236,13 @@ impl biome_module_graph::TypeDb for TestModuleDb {
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.module_lookup_count.fetch_add(1, Ordering::Relaxed);
         self.modules.get(path).copied()
     }
 
     fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
+        self.module_enumeration_count
+            .fetch_add(1, Ordering::Relaxed);
         for module in self.modules.values() {
             f(*module);
         }

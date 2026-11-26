@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_control_flow"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "JavaScript control-flow graph construction and semantic service"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 [dependencies]
 biome_control_flow = { workspace = true }

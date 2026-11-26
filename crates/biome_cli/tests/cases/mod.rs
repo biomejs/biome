@@ -2,6 +2,7 @@
 //! case that affects many commands
 
 mod assist;
+mod astro_stability;
 mod biome_json_support;
 mod config_extends;
 mod config_path;
@@ -13,6 +14,7 @@ mod editorconfig;
 mod format_with_errors;
 mod frameworks;
 mod graphql;
+mod grit;
 mod handle_astro_files;
 mod handle_css_files;
 mod handle_gs_files;
@@ -29,6 +31,7 @@ mod json_parsing;
 mod linter_domains;
 mod linter_groups_plain;
 mod markdown;
+mod mdx;
 mod migrate_v2;
 mod monorepo;
 mod multiple_reporters;

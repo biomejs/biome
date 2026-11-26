@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+var foo = fs.foo.foo();
+fs.fooSync;
+fooSync;
+() => fooSync;
+var foo = fs.fooSync;
+obj.sync();
+obj.Sync_();
+fooSync.bind(null);
+new FooSync();
+fs[fooSync]();
+
+```

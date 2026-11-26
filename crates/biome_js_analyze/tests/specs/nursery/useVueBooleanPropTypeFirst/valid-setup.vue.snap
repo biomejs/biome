@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+defineProps({
+  a: [Boolean, String],
+  b: { type: [Boolean, String] },
+});
+</script>
+
+```

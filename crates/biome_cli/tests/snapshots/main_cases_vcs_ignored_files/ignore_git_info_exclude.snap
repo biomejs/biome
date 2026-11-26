@@ -24,12 +24,14 @@ biome format --write '<TEMP_DIR>/ignore_git_info_exclude'
 
 ```git/info/exclude
 file2.js
+file3.js
 
 ```
 
 ## `.gitignore`
 
 ```gitignore
+!file2.js
 
 ```
 
@@ -43,11 +45,18 @@ statement();
 ## `file2.js`
 
 ```js
+statement();
+
+```
+
+## `file3.js`
+
+```js
   statement(  )  
 ```
 
 # Emitted Messages
 
 ```block
-Formatted 2 files in <TIME>. Fixed 2 files.
+Formatted 3 files in <TIME>. Fixed 3 files.
 ```

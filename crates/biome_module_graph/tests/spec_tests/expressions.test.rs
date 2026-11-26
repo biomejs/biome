@@ -263,6 +263,64 @@ fn test_infer_module_types_widens_array_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_iterates_values_and_indexes_with_unknown_numbers() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare const numbers: number[];
+            declare const map: Map<string, number>;
+            declare const set: Set<number>;
+
+            for (const [entryIndex, entryValue] of numbers.entries()) {
+                const indexed = numbers[entryIndex];
+            }
+            for (const entry of numbers.entries()) {}
+            for (const [mapKey, mapValue] of map) {}
+            for (const setValue of set) {}
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let binding = |name: &str| {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        inferred.resolve_type(&db, ty)
+    };
+
+    for name in ["entryIndex", "entryValue", "mapValue", "setValue"] {
+        assert!(
+            is_inferred_number(&db, binding(name)),
+            "{name} must be a number, got {}",
+            format_inferred_type(&db, binding(name))
+        );
+    }
+    assert!(
+        is_inferred_string(&db, binding("mapKey")),
+        "mapKey must be a string, got {}",
+        format_inferred_type(&db, binding("mapKey"))
+    );
+    let indexed = binding("indexed");
+    assert!(
+        contains_inferred_number(&db, indexed) && contains_inferred_undefined(&db, indexed),
+        "indexed must be number | undefined, got {}",
+        format_inferred_type(&db, indexed)
+    );
+    let entry = normalize_type(&db, index_module, binding("entry"));
+    let InferredTypeData::Tuple(entry) = entry else {
+        panic!(
+            "entry must be a tuple without the iterator's return value, got {}",
+            format_inferred_type(&db, entry)
+        );
+    };
+    assert_eq!(entry.elements(&db).len(), 2);
+}
+
+#[test]
 fn test_infer_module_types_evaluates_static_member_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -948,6 +1006,167 @@ fn test_infer_module_types_evaluates_destructuring_edge_expressions_on_build() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_infer_module_types_removes_undefined_from_destructuring_defaults_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const object: {
+                b?: number;
+                c?: number;
+                d?: string | null;
+                inner?: { x: number };
+            } = {};
+            export const { b = 1, c: renamed = 1, d = "value", inner: { x } = { x: 1 } } = object;
+            export const { b: withoutDefault } = object;
+
+            export const numbers: (number | undefined)[] = [];
+            export const [head = 0] = numbers;
+            export const [withoutDefaultHead] = numbers;
+
+            export function pick({ b: picked = 1 }: { b?: number }) {
+                return picked;
+            }
+            export const fromCall = pick({});
+
+            export function pickGeneric<T extends { b?: number }>({ b: picked = 1 }: T) {
+                return picked;
+            }
+            export const fromGenericCall = pickGeneric({});
+
+            export function identity<T>(value: T): T {
+                return value;
+            }
+            export const { b: viaCall = 1 } = identity(object);
+            export const [headViaCall = 0] = identity(numbers);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in [
+        "b",
+        "renamed",
+        "x",
+        "head",
+        "fromCall",
+        "fromGenericCall",
+        "viaCall",
+        "headViaCall",
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_number(&db, ty),
+            "{name} must stay a number"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "{name} must not include undefined"
+        );
+    }
+
+    let d_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "d")
+        .expect("d binding type must be inferred");
+    let d_ty = inferred.resolve_type(&db, d_ty);
+    assert!(contains_inferred_string(&db, d_ty));
+    assert!(contains_inferred_null(&db, d_ty));
+    assert!(!contains_inferred_undefined(&db, d_ty));
+
+    for name in ["withoutDefault", "withoutDefaultHead"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined"
+        );
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_removes_undefined_from_destructuring_defaults_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_removes_undefined_from_parameter_defaults_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export function withDefault(value: number | undefined = 1) {
+                return value;
+            }
+            export const fromDefault = withDefault();
+
+            export const withArrowDefault = (value: number | undefined = 1) => value;
+            export const fromArrowDefault = withArrowDefault();
+
+            export function withNullableDefault(value: string | null | undefined = "value") {
+                return value;
+            }
+            export const fromNullableDefault = withNullableDefault();
+
+            declare const maybeNumber: number | undefined;
+            export function withUndefinedDefault(value: number | undefined = maybeNumber) {
+                return value;
+            }
+            export const fromUndefinedDefault = withUndefinedDefault();
+
+            export function withoutDefault(value?: number) {
+                return value;
+            }
+            export const fromWithoutDefault = withoutDefault();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["fromDefault", "fromArrowDefault"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_number(&db, ty),
+            "{name} must stay a number"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "{name} must not include undefined"
+        );
+    }
+
+    let nullable_ty =
+        inferred_binding_ty_by_name(&db, index_module, inferred, "fromNullableDefault")
+            .expect("fromNullableDefault binding type must be inferred");
+    let nullable_ty = inferred.resolve_type(&db, nullable_ty);
+    assert!(contains_inferred_string(&db, nullable_ty));
+    assert!(contains_inferred_null(&db, nullable_ty));
+    assert!(!contains_inferred_undefined(&db, nullable_ty));
+
+    for name in ["fromUndefinedDefault", "fromWithoutDefault"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined"
+        );
+    }
 }
 
 #[test]

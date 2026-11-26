@@ -6,7 +6,7 @@ use crate::runner::execution::{AnalyzerSelectors, Execution};
 use crate::runner::impls::commands::traversal::TraversalCommand;
 use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
 use crate::runner::process_file::{
-    FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile,
+    FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile, document_file_source,
 };
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration};
@@ -143,7 +143,7 @@ impl ProcessFile for SearchProcessFile {
         Ctx: CrawlerContext,
     {
         let execution = ctx.execution();
-        let file_source = DocumentFileSource::from_path(workspace_file.path.as_path(), false);
+        let file_source = document_file_source(ctx.fs(), &workspace_file.path);
         let pattern_language = execution.search_language().unwrap_or(SearchLanguage::Js);
         // SAFETY: search_pattern is implemented in this file
         let pattern = execution.search_pattern().unwrap();

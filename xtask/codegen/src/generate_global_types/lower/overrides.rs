@@ -1,12 +1,12 @@
 //! Hand-written projections for globals whose shape type inference depends on.
 //!
-//! Type inference and lint rules rely on the reduced shapes of `Array`, `Promise`,
-//! `Error`, `Disposable`, and `AsyncDisposable`, including synthetic helper globals such
-//! as `Array.prototype.filter`. Each override validates the declarations it projects so
+//! Type inference and lint rules rely on the reduced shapes of `Promise`, `Error`,
+//! `Disposable`, and `AsyncDisposable`, including synthetic helper globals such as
+//! `Promise.prototype.then`. Each override validates the declarations it projects so
 //! that a TypeScript change which breaks the projection fails codegen. Every other global
 //! is lowered from its declarations by the generic lowerer.
 
-use biome_js_syntax::{JsFormalParameter, TsFunctionType};
+use biome_js_syntax::JsFormalParameter;
 use biome_rowan::SyntaxResult;
 
 use super::generic::GenericLowerer;
@@ -21,7 +21,6 @@ pub(super) fn lower_overrides<'a>(
     lowerer: &mut GenericLowerer<'a>,
 ) -> Result<Vec<LoweredGlobal>> {
     let mut globals = Vec::new();
-    lower_array_globals(manifest, ids, lowerer, &mut globals)?;
     lower_promise_globals(manifest, &mut lowerer.sources, &mut globals)?;
     lower_error_globals(manifest, &mut lowerer.sources, &mut globals)?;
     lower_disposable_global(
@@ -222,35 +221,6 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     return_kind: DisposableReturnKind::PromiseLikeVoid,
 };
 
-/// Array members retained in the resolver's reduced projection.
-#[derive(Clone, Copy)]
-enum SelectedArrayMember {
-    Filter,
-    ForEach,
-    Length,
-    Map,
-}
-
-impl SelectedArrayMember {
-    /// Returns the TypeScript spelling used in diagnostics.
-    fn name(self) -> &'static str {
-        match self {
-            Self::Filter => "filter",
-            Self::ForEach => "forEach",
-            Self::Length => "length",
-            Self::Map => "map",
-        }
-    }
-}
-
-/// Return shape required from a selected Array callback declaration.
-#[derive(Clone, Copy)]
-enum ArrayCallbackReturn<'a> {
-    Reference(&'a str),
-    Unknown,
-    Void,
-}
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum PromiseMemberLocation {
     Instance,
@@ -341,198 +311,6 @@ const PROMISE_METHOD_SPECIFICATIONS: [PromiseMethodSpecification; PROMISE_METHOD
         location: PromiseMemberLocation::Static,
     },
 ];
-
-/// Validates selected members across merged declarations and builds the resolver projection.
-///
-/// Static members and constructor signatures are lowered from `ArrayConstructor`.
-fn lower_array_globals<'a>(
-    manifest: &GlobalManifest,
-    ids: &'a GlobalIds,
-    lowerer: &mut GenericLowerer<'a>,
-    globals: &mut Vec<LoweredGlobal>,
-) -> Result<()> {
-    let Some(array_group) = manifest.global_group("Array") else {
-        return Ok(());
-    };
-    let source_cache = &mut lowerer.sources;
-    if !array_group.has_role(GlobalDeclarationRole::Type) {
-        bail!("Array global must have a type-side declaration");
-    }
-
-    let mut saw_interface = false;
-    let mut saw_filter = false;
-    let mut saw_for_each = false;
-    let mut saw_length = false;
-    let mut saw_map = false;
-
-    for record in array_group.declarations() {
-        match &record.kind {
-            DeclarationKind::Interface => {
-                saw_interface = true;
-            }
-            DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the Array global")
-            }
-            DeclarationKind::VariableDeclarator { .. } => continue,
-            DeclarationKind::DeclareFunction | DeclarationKind::ImportEquals => {
-                bail!("unsupported value-side Array declaration")
-            }
-        }
-
-        let declaration = source_cache
-            .find_interface_declaration(record)?
-            .with_context(|| {
-                format!(
-                    "failed to find interface declaration {} at {:?}",
-                    record.declared_name.text(),
-                    record.text_range
-                )
-            })?;
-        let array_type_parameter = validate_array_interface_type_parameter(&declaration)?;
-
-        for member in declaration.members() {
-            match member {
-                AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
-                    let Some(selected) = selected_array_member(method.name()?)? else {
-                        continue;
-                    };
-                    match selected {
-                        SelectedArrayMember::Filter => {
-                            if method.type_parameters().is_some() {
-                                continue;
-                            }
-                            if saw_filter {
-                                bail!("Array has multiple non-generic filter overloads");
-                            }
-                            validate_array_filter(&method, array_type_parameter.text())?;
-                            saw_filter = true;
-                        }
-                        SelectedArrayMember::ForEach => {
-                            if saw_for_each {
-                                bail!("Array has multiple forEach methods");
-                            }
-                            validate_array_for_each(&method, array_type_parameter.text())?;
-                            saw_for_each = true;
-                        }
-                        SelectedArrayMember::Length => {
-                            bail!("Array.length must be a property")
-                        }
-                        SelectedArrayMember::Map => {
-                            if saw_map {
-                                bail!("Array has multiple map methods");
-                            }
-                            validate_array_map(&method, array_type_parameter.text())?;
-                            saw_map = true;
-                        }
-                    }
-                }
-                AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
-                    let Some(selected) = selected_array_member(property.name()?)? else {
-                        continue;
-                    };
-                    if !matches!(selected, SelectedArrayMember::Length) {
-                        bail!("Array.{} must be a method", selected.name());
-                    }
-                    if saw_length {
-                        bail!("Array has multiple length properties");
-                    }
-                    validate_array_length(&property)?;
-                    saw_length = true;
-                }
-                AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => {
-                    reject_selected_array_accessor(getter.name()?)?;
-                }
-                AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => {
-                    reject_selected_array_accessor(setter.name()?)?;
-                }
-                AnyTsTypeMember::JsBogusMember(_)
-                | AnyTsTypeMember::JsMetavariable(_)
-                | AnyTsTypeMember::TsCallSignatureTypeMember(_)
-                | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
-                | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
-            }
-        }
-    }
-
-    if !saw_interface {
-        bail!("Array global must include an interface declaration");
-    }
-    if !saw_filter {
-        bail!("Array is missing a non-generic filter overload");
-    }
-    if !saw_for_each {
-        bail!("Array is missing forEach");
-    }
-    if !saw_length {
-        bail!("Array is missing length");
-    }
-    if !saw_map {
-        bail!("Array is missing map");
-    }
-
-    let (mut class, local_types) = match ids.type_slot("Array").map(|index| ids.slot(index)) {
-        Some(slot) if matches!(slot.kind(), GlobalSlotKind::Class { .. }) => {
-            lowerer.lower_class_statics(slot)?
-        }
-        _ => (
-            LoweredClass {
-                name: Text::from("Array"),
-                type_parameters: Box::default(),
-                extends: None,
-                implements: Box::default(),
-                members: Box::default(),
-            },
-            Box::default(),
-        ),
-    };
-    // The projection's member types refer to the predefined `T` rather than a local
-    // type parameter, so the class must declare that same `T`.
-    class.type_parameters = Box::new([LoweredTypeReference::Predefined("GLOBAL_T_ID")]);
-    class.members = [
-        ("filter", "GLOBAL_ARRAY_FILTER_ID"),
-        ("forEach", "GLOBAL_ARRAY_FOREACH_ID"),
-        ("map", "GLOBAL_ARRAY_MAP_ID"),
-        ("length", "GLOBAL_NUMBER_KEYWORD_ID"),
-    ]
-    .into_iter()
-    .map(|(name, type_id)| LoweredTypeMember {
-        name: Text::from(name),
-        kind: LoweredMemberKind::Named { optional: false },
-        type_reference: LoweredTypeReference::Predefined(type_id),
-    })
-    .chain(class.members.iter().cloned())
-    .collect();
-    globals.push(LoweredGlobal {
-        roles: GlobalRoles::default(),
-        local_types,
-        name: Text::from("Array"),
-        id_constant: "ARRAY_ID_GLOBAL_TYPE_ID".into(),
-        data: LoweredTypeData::Class(class),
-    });
-    globals.push(array_method_global(
-        "Array.prototype.filter",
-        "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
-        Box::default(),
-        "GLOBAL_CONDITIONAL_CALLBACK_ID",
-        "GLOBAL_INSTANCEOF_ARRAY_T_ID",
-    ));
-    globals.push(array_method_global(
-        "Array.prototype.forEach",
-        "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
-        Box::default(),
-        "GLOBAL_VOID_CALLBACK_ID",
-        "GLOBAL_VOID_ID",
-    ));
-    globals.push(array_method_global(
-        "Array.prototype.map",
-        "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
-        Box::new([LoweredTypeReference::Predefined("GLOBAL_U_ID")]),
-        "GLOBAL_MAP_CALLBACK_ID",
-        "GLOBAL_INSTANCEOF_ARRAY_U_ID",
-    ));
-
-    Ok(())
-}
 
 /// Validates the selected declarations before emitting the resolver's reduced Promise projection.
 fn lower_promise_globals(
@@ -683,6 +461,7 @@ fn lower_promise_globals(
                 is_rest: false,
             }]),
             return_type: LoweredTypeReference::Predefined("GLOBAL_VOID_ID"),
+            return_kind: LoweredReturnKind::Type,
         }),
     });
     for specification in PROMISE_METHOD_SPECIFICATIONS {
@@ -911,183 +690,9 @@ fn promise_method_global(specification: PromiseMethodSpecification) -> LoweredGl
             name: Some(Text::from(specification.global_name)),
             parameters: Box::default(),
             return_type: LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_PROMISE_ID"),
+            return_kind: LoweredReturnKind::Type,
         }),
     }
-}
-
-/// Builds the resolver's single-callback shape, omitting the validated `thisArg`.
-fn array_method_global(
-    name: &'static str,
-    id_constant: &'static str,
-    type_parameters: Box<[LoweredTypeReference]>,
-    parameter_type_id: &'static str,
-    return_type_id: &'static str,
-) -> LoweredGlobal {
-    LoweredGlobal {
-        roles: GlobalRoles::default(),
-        local_types: Box::default(),
-        name: Text::from(name),
-        id_constant: id_constant.into(),
-        data: LoweredTypeData::Function(LoweredFunction {
-            is_async: false,
-            type_parameters,
-            name: Some(Text::from(name)),
-            parameters: Box::new([LoweredFunctionParameter {
-                binding: LoweredFunctionParameterBinding::Pattern,
-                type_reference: LoweredTypeReference::Predefined(parameter_type_id),
-                is_optional: false,
-                is_rest: false,
-            }]),
-            return_type: LoweredTypeReference::Predefined(return_type_id),
-        }),
-    }
-}
-
-/// Requires unextended `Array<T>` with no modifiers, constraint, or default on `T`.
-fn validate_array_interface_type_parameter(declaration: &TsInterfaceDeclaration) -> Result<Text> {
-    if declaration.extends_clause().is_some() {
-        bail!("Array interface extends clauses are not supported");
-    }
-    single_type_parameter_name(declaration.type_parameters(), "Array interface")
-}
-
-/// Recognizes only the Array members represented by the resolver projection.
-fn selected_array_member(name: AnyJsObjectMemberName) -> Result<Option<SelectedArrayMember>> {
-    let AnyJsObjectMemberName::JsLiteralMemberName(name) = name else {
-        return Ok(None);
-    };
-    Ok(match name.name()?.text() {
-        "filter" => Some(SelectedArrayMember::Filter),
-        "forEach" => Some(SelectedArrayMember::ForEach),
-        "length" => Some(SelectedArrayMember::Length),
-        "map" => Some(SelectedArrayMember::Map),
-        _ => None,
-    })
-}
-
-/// Rejects selected members expressed as unsupported getter or setter declarations.
-fn reject_selected_array_accessor(name: AnyJsObjectMemberName) -> Result<()> {
-    if let Some(member) = selected_array_member(name)? {
-        bail!(
-            "Array.{} has an unsupported accessor declaration",
-            member.name()
-        );
-    }
-    Ok(())
-}
-
-/// Requires `length` to be a mutable, required `number` property.
-fn validate_array_length(property: &TsPropertySignatureTypeMember) -> Result<()> {
-    if property.readonly_token().is_some() {
-        bail!("Array.length must not be readonly");
-    }
-    if property.optional_token().is_some() {
-        bail!("Array.length must not be optional");
-    }
-    let type_node = property
-        .type_annotation()
-        .context("Array.length is missing a type annotation")?
-        .ty()
-        .context("Array.length has a malformed type annotation")?;
-    if !matches!(type_node, AnyTsType::TsNumberType(_)) {
-        bail!("Array.length must be number");
-    }
-    Ok(())
-}
-
-/// Validates the selected non-generic `filter` overload that preserves the element type.
-fn validate_array_filter(
-    method: &TsMethodSignatureTypeMember,
-    array_type_parameter: &str,
-) -> Result<()> {
-    validate_array_method_parameters(
-        method,
-        "Array.filter",
-        array_type_parameter,
-        ArrayCallbackReturn::Unknown,
-    )?;
-    validate_array_method_array_return(method, "Array.filter", array_type_parameter)
-}
-
-/// Requires a non-generic `forEach` method and callback that both return `void`.
-fn validate_array_for_each(
-    method: &TsMethodSignatureTypeMember,
-    array_type_parameter: &str,
-) -> Result<()> {
-    if method.type_parameters().is_some() {
-        bail!("Array.forEach must not be generic");
-    }
-    validate_array_method_parameters(
-        method,
-        "Array.forEach",
-        array_type_parameter,
-        ArrayCallbackReturn::Void,
-    )?;
-    validate_array_method_void_return(method, "Array.forEach")
-}
-
-/// Requires `map` to use one type parameter for both callback and array results.
-fn validate_array_map(
-    method: &TsMethodSignatureTypeMember,
-    array_type_parameter: &str,
-) -> Result<()> {
-    let map_type_parameter = single_type_parameter_name(method.type_parameters(), "Array.map")?;
-    validate_array_method_parameters(
-        method,
-        "Array.map",
-        array_type_parameter,
-        ArrayCallbackReturn::Reference(map_type_parameter.text()),
-    )?;
-    validate_array_method_array_return(method, "Array.map", map_type_parameter.text())
-}
-
-/// Requires a callback followed by an optional `any`-typed `thisArg`.
-fn validate_array_method_parameters(
-    method: &TsMethodSignatureTypeMember,
-    owner: &str,
-    array_type_parameter: &str,
-    callback_return: ArrayCallbackReturn,
-) -> Result<()> {
-    if method.optional_token().is_some() {
-        bail!("{owner} must not be optional");
-    }
-
-    let mut parameters = method.parameters()?.items().into_iter();
-    let expected_parameters = "a callback and an optional thisArg parameter";
-    let callback_parameter =
-        required_formal_parameter(parameters.next(), owner, expected_parameters)?;
-    let this_argument_parameter =
-        required_formal_parameter(parameters.next(), owner, expected_parameters)?;
-    if parameters.next().is_some() {
-        bail!("{owner} must have a callback and an optional thisArg parameter");
-    }
-
-    if callback_parameter.question_mark_token().is_some() {
-        bail!("{owner} callback must not be optional");
-    }
-    let callback_type = callback_parameter
-        .type_annotation()
-        .with_context(|| format!("{owner} callback is missing a type annotation"))?
-        .ty()
-        .with_context(|| format!("{owner} callback has a malformed type annotation"))?;
-    let AnyTsType::TsFunctionType(callback) = callback_type else {
-        bail!("{owner} callback must be a function type");
-    };
-    validate_array_callback(&callback, owner, array_type_parameter, callback_return)?;
-
-    if this_argument_parameter.question_mark_token().is_none() {
-        bail!("{owner} thisArg must be optional");
-    }
-    let this_argument_type = this_argument_parameter
-        .type_annotation()
-        .with_context(|| format!("{owner} thisArg is missing a type annotation"))?
-        .ty()
-        .with_context(|| format!("{owner} thisArg has a malformed type annotation"))?;
-    if !matches!(this_argument_type, AnyTsType::TsAnyType(_)) {
-        bail!("{owner} thisArg must be any");
-    }
-
-    Ok(())
 }
 
 /// Extracts a plain formal parameter without decorators or an initializer.
@@ -1108,113 +713,6 @@ fn required_formal_parameter(
         bail!("{owner} has an unsupported parameter");
     }
     Ok(parameter)
-}
-
-/// Requires a non-generic callback with the selected parameters and return shape.
-fn validate_array_callback(
-    callback: &TsFunctionType,
-    owner: &str,
-    array_type_parameter: &str,
-    callback_return: ArrayCallbackReturn,
-) -> Result<()> {
-    if callback.type_parameters().is_some() {
-        bail!("{owner} callback must not be generic");
-    }
-
-    let mut parameters = callback.parameters()?.items().into_iter();
-    let expected_parameters = "a callback with three required parameters";
-    let value_parameter = required_formal_parameter(parameters.next(), owner, expected_parameters)?;
-    let index_parameter = required_formal_parameter(parameters.next(), owner, expected_parameters)?;
-    let array_parameter = required_formal_parameter(parameters.next(), owner, expected_parameters)?;
-    if parameters.next().is_some() {
-        bail!("{owner} must have a callback with three required parameters");
-    }
-    let value_type = required_array_callback_parameter_type(&value_parameter, owner)?;
-    validate_reference_type(&value_type, array_type_parameter, owner)?;
-    let index_type = required_array_callback_parameter_type(&index_parameter, owner)?;
-    if !matches!(index_type, AnyTsType::TsNumberType(_)) {
-        bail!("{owner} callback index parameter must be number");
-    }
-    let array_type = required_array_callback_parameter_type(&array_parameter, owner)?;
-    validate_array_type(&array_type, array_type_parameter, owner)?;
-
-    let return_type = regular_return_type(callback.return_type()?, owner)?;
-    match callback_return {
-        ArrayCallbackReturn::Reference(type_parameter) => {
-            validate_reference_type(&return_type, type_parameter, owner)?;
-        }
-        ArrayCallbackReturn::Unknown => {
-            if !matches!(return_type, AnyTsType::TsUnknownType(_)) {
-                bail!("{owner} callback must return unknown");
-            }
-        }
-        ArrayCallbackReturn::Void => {
-            if !matches!(return_type, AnyTsType::TsVoidType(_)) {
-                bail!("{owner} callback must return void");
-            }
-        }
-    }
-
-    Ok(())
-}
-
-/// Returns the type annotation after rejecting an optional callback parameter.
-fn required_array_callback_parameter_type(
-    parameter: &JsFormalParameter,
-    owner: &str,
-) -> Result<AnyTsType> {
-    if parameter.question_mark_token().is_some() {
-        bail!("{owner} callback must have three required parameters");
-    }
-    parameter
-        .type_annotation()
-        .with_context(|| format!("{owner} callback parameter is missing a type annotation"))?
-        .ty()
-        .with_context(|| format!("{owner} callback parameter has a malformed type annotation"))
-}
-
-/// Requires a regular array return whose element matches the selected type parameter.
-fn validate_array_method_array_return(
-    method: &TsMethodSignatureTypeMember,
-    owner: &str,
-    element_type_parameter: &str,
-) -> Result<()> {
-    let return_type = method
-        .return_type_annotation()
-        .with_context(|| format!("{owner} is missing a return type"))?
-        .ty()
-        .with_context(|| format!("{owner} has a malformed return type"))?;
-    let return_type = regular_return_type(return_type, owner)?;
-    validate_array_type(&return_type, element_type_parameter, owner)
-}
-
-/// Requires an ordinary `void` return rather than a predicate or assertion.
-fn validate_array_method_void_return(
-    method: &TsMethodSignatureTypeMember,
-    owner: &str,
-) -> Result<()> {
-    let return_type = method
-        .return_type_annotation()
-        .with_context(|| format!("{owner} is missing a return type"))?
-        .ty()
-        .with_context(|| format!("{owner} has a malformed return type"))?;
-    let return_type = regular_return_type(return_type, owner)?;
-    if !matches!(return_type, AnyTsType::TsVoidType(_)) {
-        bail!("{owner} must return void");
-    }
-    Ok(())
-}
-
-/// Requires array syntax whose element references the expected type parameter.
-fn validate_array_type(
-    type_node: &AnyTsType,
-    element_type_parameter: &str,
-    owner: &str,
-) -> Result<()> {
-    let AnyTsType::TsArrayType(array_type) = type_node else {
-        bail!("{owner} must use an array type");
-    };
-    validate_reference_type(&array_type.element_type()?, element_type_parameter, owner)
 }
 
 /// Requires an unqualified type reference without type arguments.
@@ -1385,6 +883,7 @@ fn lower_disposable_global(
             name: None,
             parameters: Box::default(),
             return_type: LoweredTypeReference::Predefined(spec.return_kind.return_type_id()),
+            return_kind: LoweredReturnKind::Type,
         }),
     });
 
@@ -1868,6 +1367,7 @@ fn lower_call_signature(member: &TsCallSignatureTypeMember) -> Result<LoweredFun
         name: Some(Text::from("Error")),
         parameters: lower_parameters(member.parameters()?)?,
         return_type: instance_return_reference(return_type),
+        return_kind: LoweredReturnKind::Type,
     })
 }
 

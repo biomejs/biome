@@ -1,13 +1,16 @@
-use crate::Workspace;
+use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
-use crate::workspace::{FileContent, OpenFileParams, UpdateSettingsParams};
+use crate::workspace::{FileContent, OpenFileParams, PullDiagnosticsParams, UpdateSettingsParams};
+use crate::{LocalWorkspace, Workspace};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, HtmlConfiguration};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_parser::prelude::ParseDiagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 
-fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
+fn prepare_workspace(file: &str, content: &str) -> (LocalWorkspace, ProjectKey) {
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(file), content);
 
@@ -41,6 +44,11 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
         })
         .unwrap();
 
+    (workspace, project_key)
+}
+
+fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
+    let (workspace, _) = prepare_workspace(file, content);
     workspace.db_get_parse_diagnostics(Utf8Path::new(file))
 }
 
@@ -81,6 +89,25 @@ fn snippet_svelte_ts_parsing() {
 }
 
 #[test]
+fn snippet_svelte_ts_type_parameters_parsing() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+	let items = $state(["a", "b"]);
+</script>
+
+{#snippet row<T extends string>(item: T)}
+	<li>{item}</li>
+{/snippet}
+
+{#each items as item (item)}
+	{@render row(item)}
+{/each}
+"#;
+
+    assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
 fn snippet_svelte_incorrect() {
     const FILE_PATH: &str = "/project/file.svelte";
     const FILE_CONTENT: &str = r#"<script lang="ts">
@@ -97,6 +124,36 @@ fn snippet_svelte_incorrect() {
 "#;
 
     assert_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+fn assert_diagnostic_text(file: &str, content: &str, expected: &str) {
+    let (workspace, project_key) = prepare_workspace(file, content);
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(file),
+            categories: RuleCategoriesBuilder::default().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap()
+        .diagnostics;
+
+    assert!(
+        diagnostics.iter().any(|diagnostic| {
+            diagnostic
+                .location()
+                .span
+                .is_some_and(|span| &content[span] == expected)
+        }),
+        "Expected a diagnostic on {expected:?}, got: {diagnostics:#?}"
+    );
 }
 
 #[test]
@@ -125,6 +182,30 @@ fn svelte_each_with_incorrect_method_call_key() {
 "#;
 
     assert_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_advanced_binding_parsing() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+    const items = [];
+    const property = "value";
+    const fallback = 0;
+</script>
+{#each items as { [property]: [value = fallback, ...rest] }: Record<string, number[]>, index (value)}
+  <p>{index}: {value}: {rest}</p>
+{/each}
+"#;
+
+    assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn svelte_each_binding_diagnostic_uses_host_range() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = "{#each items as item = fallback}{item}{/each}";
+
+    assert_diagnostic_text(FILE_PATH, FILE_CONTENT, "=");
 }
 
 #[test]
@@ -232,6 +313,43 @@ fn vue_v_for_default_values_are_parsed_as_javascript() {
 }
 
 #[test]
+fn svelte_generics_are_parsed_as_type_parameters() {
+    const FILE_PATH: &str = "/project/file.svelte";
+
+    assert_no_diagnostics(
+        FILE_PATH,
+        r#"<script lang="ts" generics="T extends { selected?: boolean; name?: string }">
+let items: T[] = [];
+</script>"#,
+    );
+    assert_diagnostics(
+        FILE_PATH,
+        r#"<script lang="ts" generics="T extends">
+let items: T[] = [];
+</script>"#,
+    );
+}
+
+#[test]
+fn unsupported_script_and_style_languages_are_opaque() {
+    assert_no_diagnostics(
+        "/project/file.astro",
+        r#"<style lang="less">
+.mixin(@color) { color: @color; }
+</style>
+<script lang="coffee">
+square = (value) -> value * value
+</script>"#,
+    );
+    assert_no_diagnostics(
+        "/project/file.html",
+        r#"<style type="text/less">
+.mixin(@color) { color: @color; }
+</style>"#,
+    );
+}
+
+#[test]
 fn html_style_attribute_is_parsed_as_css() {
     assert_diagnostics("/project/file.html", r#"<div style="color: rgb("></div>"#);
 }
@@ -252,6 +370,40 @@ fn html_style_attribute_reports_invalid_declaration() {
     ] {
         assert_diagnostics("/project/file.html", content);
     }
+}
+
+#[test]
+fn html_style_attribute_decodes_character_references() {
+    for quote in ["&quot;", "&QUOT;", "&#34;", "&#x22;"] {
+        let content = format!(
+            r#"<p style="font-family:RotisSansCyrillic, {quote}Rotis Sans Cyrillic{quote}, sans-serif; font-size:10px;">test</p>"#
+        );
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+    for quote in ["&apos;", "&#39;", "&#x27;"] {
+        let content = format!(r#"<p style="font-family:{quote}Rotis Sans{quote};">test</p>"#);
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+
+    for content in [
+        r#"<p style="content:&quot;a\&quot;b&quot;; color:red">test</p>"#,
+        r#"<p style="content:&quot;a&apos;b&quot;; color:red">test</p>"#,
+        r#"<p style='content:&quot;a"; color:red'>test</p>"#,
+        r#"<p style='content:"a&quot;; color:red'>test</p>"#,
+    ] {
+        assert_no_diagnostics("/project/file.html", content);
+    }
+
+    let svg = r#"<text style="font-family:&quot;Rotis Sans Cyrillic&quot;;">test</text>"#;
+    assert_no_diagnostics("/project/file.svg", svg);
+}
+
+#[test]
+fn html_style_attribute_reports_unclosed_character_reference_quote() {
+    assert_diagnostics(
+        "/project/file.html",
+        r#"<p style="font-family:&quot;Rotis Sans;">test</p>"#,
+    );
 }
 
 #[test]

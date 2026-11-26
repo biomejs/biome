@@ -111,7 +111,14 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@37..38 "[" [] [],
-                        TW_SELECTOR@38..60 "url(/img/mountains.jpg" [] [],
+                        URL_KW@38..41 "url" [] [],
+                        L_PAREN@41..42 "(" [] [],
+                        SLASH@42..43 "/" [] [],
+                        IDENT@43..46 "img" [] [],
+                        SLASH@46..47 "/" [] [],
+                        IDENT@47..56 "mountains" [] [],
+                        DOT@56..57 "." [] [],
+                        IDENT@57..60 "jpg" [] [],
                         R_BRACKET@60..61 "]" [] [],
                     ],
                 },
@@ -237,8 +244,15 @@ TwRoot {
         1: DASH@36..37 "-" [] []
         2: TW_BOGUS_VALUE@37..61
           0: L_BRACKET@37..38 "[" [] []
-          1: TW_SELECTOR@38..60 "url(/img/mountains.jpg" [] []
-          2: R_BRACKET@60..61 "]" [] []
+          1: URL_KW@38..41 "url" [] []
+          2: L_PAREN@41..42 "(" [] []
+          3: SLASH@42..43 "/" [] []
+          4: IDENT@43..46 "img" [] []
+          5: SLASH@46..47 "/" [] []
+          6: IDENT@47..56 "mountains" [] []
+          7: DOT@56..57 "." [] []
+          8: IDENT@57..60 "jpg" [] []
+          9: R_BRACKET@60..61 "]" [] []
         3: (empty)
       4: (empty)
     5: WHITESPACE@61..62 " " [] []

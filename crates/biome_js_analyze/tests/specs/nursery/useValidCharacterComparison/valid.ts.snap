@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const value: number;
+value[0] === "ab";
+function f(text: string[]) {
+	text[0] === "ab";
+}
+
+```

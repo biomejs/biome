@@ -1,0 +1,18 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_ignore_accessible.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <template id="a">...</template>
+  <template :id="a">...</template>
+  <template v-bind:id="a">...</template>
+  <template ref="b">...</template>
+  <template :ref="b">...</template>
+  <template class="b" ref="c"/>
+  <template ID="a">...</template>
+</template>
+
+```

@@ -1,0 +1,342 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.disallowed.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.foo > .bar {}
+.foo + .bar > a {}
+.foo .bar {}
+button:hover {}
+a:not(.foo):hover {}
+a:HOVER {}
+li::marker {}
+a::before {}
+a:before {}
+[class*="foo"] {}
+img[alt^="foo"] {}
+:has(> img) {}
+.parent {
+	> .child {}
+}
+.multi
+	.line {}
+
+```
+
+# Diagnostics
+```
+invalid.disallowed.css:2:6 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator > isn't allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .foo > .bar {}
+      │      ^
+    3 │ .foo + .bar > a {}
+    4 │ .foo .bar {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:3:13 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator > isn't allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .foo > .bar {}
+  > 3 │ .foo + .bar > a {}
+      │             ^
+    4 │ .foo .bar {}
+    5 │ button:hover {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:4:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The descendant combinator (a space between selectors) isn't allowed.
+  
+    2 │ .foo > .bar {}
+    3 │ .foo + .bar > a {}
+  > 4 │ .foo .bar {}
+      │ ^^^^^^^^^
+    5 │ button:hover {}
+    6 │ a:not(.foo):hover {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:5:7 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-class :hover isn't allowed.
+  
+    3 │ .foo + .bar > a {}
+    4 │ .foo .bar {}
+  > 5 │ button:hover {}
+      │       ^^^^^^
+    6 │ a:not(.foo):hover {}
+    7 │ a:HOVER {}
+  
+  i The rule's configuration disallows this pseudo-class in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:6:12 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-class :hover isn't allowed.
+  
+    4 │ .foo .bar {}
+    5 │ button:hover {}
+  > 6 │ a:not(.foo):hover {}
+      │            ^^^^^^
+    7 │ a:HOVER {}
+    8 │ li::marker {}
+  
+  i The rule's configuration disallows this pseudo-class in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:7:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-class :HOVER isn't allowed.
+  
+    5 │ button:hover {}
+    6 │ a:not(.foo):hover {}
+  > 7 │ a:HOVER {}
+      │  ^^^^^^
+    8 │ li::marker {}
+    9 │ a::before {}
+  
+  i The rule's configuration disallows this pseudo-class in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:8:3 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-element ::marker isn't allowed.
+  
+     6 │ a:not(.foo):hover {}
+     7 │ a:HOVER {}
+   > 8 │ li::marker {}
+       │   ^^^^^^^^
+     9 │ a::before {}
+    10 │ a:before {}
+  
+  i The rule's configuration disallows this pseudo-element in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:9:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-element ::before isn't allowed.
+  
+     7 │ a:HOVER {}
+     8 │ li::marker {}
+   > 9 │ a::before {}
+       │  ^^^^^^^^
+    10 │ a:before {}
+    11 │ [class*="foo"] {}
+  
+  i The rule's configuration disallows this pseudo-element in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:10:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The pseudo-element :before isn't allowed.
+  
+     8 │ li::marker {}
+     9 │ a::before {}
+  > 10 │ a:before {}
+       │  ^^^^^^^
+    11 │ [class*="foo"] {}
+    12 │ img[alt^="foo"] {}
+  
+  i The rule's configuration disallows this pseudo-element in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:11:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The attribute class isn't allowed.
+  
+     9 │ a::before {}
+    10 │ a:before {}
+  > 11 │ [class*="foo"] {}
+       │  ^^^^^
+    12 │ img[alt^="foo"] {}
+    13 │ :has(> img) {}
+  
+  i The rule's configuration disallows this attribute in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:11:7 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The attribute operator *= isn't allowed.
+  
+     9 │ a::before {}
+    10 │ a:before {}
+  > 11 │ [class*="foo"] {}
+       │       ^^
+    12 │ img[alt^="foo"] {}
+    13 │ :has(> img) {}
+  
+  i The rule's configuration disallows this attribute operator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:12:8 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The attribute operator ^= isn't allowed.
+  
+    10 │ a:before {}
+    11 │ [class*="foo"] {}
+  > 12 │ img[alt^="foo"] {}
+       │        ^^
+    13 │ :has(> img) {}
+    14 │ .parent {
+  
+  i The rule's configuration disallows this attribute operator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:13:6 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator > isn't allowed.
+  
+    11 │ [class*="foo"] {}
+    12 │ img[alt^="foo"] {}
+  > 13 │ :has(> img) {}
+       │      ^
+    14 │ .parent {
+    15 │ 	> .child {}
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:15:2 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The combinator > isn't allowed.
+  
+    13 │ :has(> img) {}
+    14 │ .parent {
+  > 15 │ 	> .child {}
+       │ 	^
+    16 │ }
+    17 │ .multi
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.disallowed.css:17:1 lint/nursery/noExcessiveSelectorComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The descendant combinator (a space between selectors) isn't allowed.
+  
+    15 │ 	> .child {}
+    16 │ }
+  > 17 │ .multi
+       │ ^^^^^^
+  > 18 │ 	.line {}
+       │ 	^^^^^
+    19 │ 
+  
+  i The rule's configuration disallows this combinator in selectors.
+  
+  i Rewrite the selector without it, for example by giving the element a class and selecting it directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

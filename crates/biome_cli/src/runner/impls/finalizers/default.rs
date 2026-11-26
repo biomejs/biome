@@ -10,13 +10,14 @@ use crate::reporter::sarif::{SarifReporter, SarifReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::reporter::{ConsoleReporterWriter, FileReporterWriter, Reporter, ReporterWriter};
+use crate::runner::crawler::EvaluatedPath;
 use crate::runner::execution::Execution;
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::{CliDiagnostic, DiagnosticsPayload, TraversalSummary};
 use biome_console::{Console, markup};
 use biome_diagnostics::{PrintDiagnostic, Resource};
-use biome_fs::{BiomePath, FileSystem, OpenOptions};
+use biome_fs::{FileSystem, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_rowan::AstNode;
 use std::cmp::Ordering;
@@ -41,6 +42,7 @@ impl Finalizer for DefaultFinalizer {
             mut summary,
             evaluated_paths,
             mut diagnostics,
+            traversal_errors,
         } = result;
 
         diagnostics.sort_unstable_by(|a, b| match a.severity().cmp(&b.severity()) {
@@ -134,7 +136,10 @@ impl Finalizer for DefaultFinalizer {
         reporter.write(&mut ConsoleReporterWriter(console), &mut visitor)?;
 
         // Processing emitted error diagnostics, exit with a non-zero code
-        if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
+        if processed.saturating_sub(skipped) == 0
+            && traversal_errors == 0
+            && !cli_options.no_errors_on_unmatched
+        {
             Err(CliDiagnostic::no_files_processed(
                 execution.as_diagnostic_category(),
                 paths,
@@ -171,7 +176,7 @@ struct PrintToReporter<'a> {
     cli_options: &'a CliOptions,
     diagnostics_payload: &'a DiagnosticsPayload,
     summary: TraversalSummary,
-    evaluated_paths: Vec<BiomePath>,
+    evaluated_paths: Vec<EvaluatedPath>,
     file_reporter_writer: &'a mut FileReporterWriter,
     console: &'a mut dyn Console,
     fs: &'a dyn FileSystem,

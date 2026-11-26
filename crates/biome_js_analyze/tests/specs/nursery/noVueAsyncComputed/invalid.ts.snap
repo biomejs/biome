@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { computed } from "vue";
+
+const nonNullCallee = computed(() => bar.then!(() => {}));
+const withTypeArguments = computed<number>(async () => 1);
+const typeAssertion = computed(() => (Promise as PromiseConstructor).resolve(1));
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:38 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    2 │ import { computed } from "vue";
+    3 │ 
+  > 4 │ const nonNullCallee = computed(() => bar.then!(() => {}));
+      │                                      ^^^^^^^^^^^^^^^^^^^
+    5 │ const withTypeArguments = computed<number>(async () => 1);
+    6 │ const typeAssertion = computed(() => (Promise as PromiseConstructor).resolve(1));
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:44 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+    4 │ const nonNullCallee = computed(() => bar.then!(() => {}));
+  > 5 │ const withTypeArguments = computed<number>(async () => 1);
+      │                                            ^^^^^
+    6 │ const typeAssertion = computed(() => (Promise as PromiseConstructor).resolve(1));
+    7 │ 
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:38 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    4 │ const nonNullCallee = computed(() => bar.then!(() => {}));
+    5 │ const withTypeArguments = computed<number>(async () => 1);
+  > 6 │ const typeAssertion = computed(() => (Promise as PromiseConstructor).resolve(1));
+      │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validNestedCall.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+function setOptions() {
+  defineOptions();
+}
+
+if (import.meta.env.DEV) {
+  defineOptions({ props: {} });
+}
+</script>
+
+```

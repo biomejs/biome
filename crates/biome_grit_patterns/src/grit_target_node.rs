@@ -1,8 +1,10 @@
 use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
+use biome_diagnostics::LineIndex;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxNode, JsonSyntaxToken};
+use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange, error::GritResult};
 use std::{borrow::Cow, fmt::Debug, ops::Deref};
@@ -59,6 +61,14 @@ macro_rules! generate_target_node {
         })+
 
         impl GritTargetLanguageNode {
+            /// Returns the stable identity of this node or token.
+            pub fn key(&self) -> SyntaxElementKey {
+                match self {
+                    $(Self::$lang(Node(node)) => node.key()),+,
+                    $(Self::$lang(Token(token)) => token.key()),+
+                }
+            }
+
             pub fn first_child(&self) -> Option<Self> {
                 match self {
                     $(Self::$lang(Node(node)) => node.first_child().map(Into::into)),+,
@@ -212,6 +222,11 @@ impl<'a> GritTargetNode<'a> {
         DescendantsIterator::new(self)
     }
 
+    /// Returns the underlying language node, which may be a node or a token.
+    pub fn language_node(&self) -> &GritTargetLanguageNode {
+        &self.node
+    }
+
     pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone + use<'a> {
         NamedChildrenIterator::new(self)
     }
@@ -246,6 +261,11 @@ impl<'a> GritTargetNode<'a> {
     #[inline]
     pub fn source(&self) -> &'a str {
         self.tree.text()
+    }
+
+    #[inline]
+    pub fn line_index(&self) -> &'a LineIndex {
+        self.tree.line_index()
     }
 
     #[inline]

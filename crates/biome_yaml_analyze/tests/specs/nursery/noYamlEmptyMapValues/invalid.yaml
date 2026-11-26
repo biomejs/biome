@@ -1,0 +1,16 @@
+# should generate diagnostics
+empty:
+trailing_space: 
+nested:
+  child:
+tagged: !!str
+anchored: &anchor
+tagged_and_anchored: !!null &other
+flow: { a: , b }
+flow_tagged: { a: !!str }
+pair_in_sequence: [a: ]
+? explicit_without_value
+? explicit_with_colon
+:
+flow_explicit: { ? a }
+"quoted":

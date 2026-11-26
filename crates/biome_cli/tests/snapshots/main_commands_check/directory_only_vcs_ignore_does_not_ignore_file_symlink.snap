@@ -1,0 +1,15 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write --unsafe '<TEMP_DIR>/directory_only_vcs_ignore_does_not_ignore_file_symlink/alias.js' '<TEMP_DIR>/directory_only_vcs_ignore_does_not_ignore_file_symlink/ignored.js'
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

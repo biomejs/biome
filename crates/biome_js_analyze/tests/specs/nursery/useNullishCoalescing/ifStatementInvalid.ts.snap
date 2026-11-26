@@ -1,0 +1,538 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ifStatementInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare let obj: { x: number } | null;
+declare function makeObj(): { x: number };
+
+// `!obj` on an object union: no fix
+if (!obj) {
+	obj = makeObj();
+}
+
+// Body without braces: no fix
+if (!obj) obj = makeObj();
+
+// Loose `== null`
+declare let loose: string | null;
+if (loose == null) {
+	loose = 'default';
+}
+
+// Strict compound check
+declare let compound: string | null;
+if (compound === null || compound === undefined) {
+	compound = 'default';
+}
+
+// `!str` on a string union: no fix
+declare let str: string | null;
+if (!str) {
+	str = 'default';
+}
+
+// `=== null` on a union without `undefined`
+declare let onlyNull: string | null;
+if (onlyNull === null) {
+	onlyNull = 'default';
+}
+
+// `=== undefined` on a union without `null`
+declare let onlyUndef: string | undefined;
+if (onlyUndef === undefined) {
+	onlyUndef = 'default';
+}
+
+// Reversed operands
+declare let reversed: string | null;
+if (null == reversed) {
+	reversed = 'default';
+}
+
+// Static member subject
+declare let rec: { a: number | null };
+if (rec.a == null) {
+	rec.a = 1;
+}
+
+// Computed member subject
+declare let rec2: { a: number | null };
+if (rec2['a'] == null) {
+	rec2['a'] = 1;
+}
+
+// Computed member subject with whitespace in the test
+declare let rec3: { a: number | null };
+if (rec3[ 'a' ] == null) {
+	rec3['a'] = 1;
+}
+
+// Calls in the subject: no fix
+declare function getRec(): { a: number | null };
+if (getRec().a == null) {
+	getRec().a = 1;
+}
+
+if (getRec()['a'] == null) {
+	getRec()['a'] = 1;
+}
+
+// `||=` body: only the `||=` is reported
+declare let assign: { x: number } | null;
+if (!assign) {
+	assign ||= makeObj();
+}
+
+// Inner comment in the body: no fix
+declare let commented: string | null;
+if (commented == null) {
+	// keep me
+	commented = 'default';
+}
+
+```
+
+# Diagnostics
+```
+ifStatementInvalid.ts:7:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+     6 │ // `!obj` on an object union: no fix
+   > 7 │ if (!obj) {
+       │ ^^^^^^^^^^^
+   > 8 │ 	obj = makeObj();
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ // Body without braces: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:12:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    11 │ // Body without braces: no fix
+  > 12 │ if (!obj) obj = makeObj();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Loose `== null`
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:16:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    14 │ // Loose `== null`
+    15 │ declare let loose: string | null;
+  > 16 │ if (loose == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^
+  > 17 │ 	loose = 'default';
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ // Strict compound check
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    14 14 │   // Loose `== null`
+    15 15 │   declare let loose: string | null;
+    16    │ - if·(loose·==·null)·{
+    17    │ - → loose·=·'default';
+    18    │ - }
+       16 │ + loose·??=·'default';
+    19 17 │   
+    20 18 │   // Strict compound check
+  
+
+```
+
+```
+ifStatementInvalid.ts:22:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    20 │ // Strict compound check
+    21 │ declare let compound: string | null;
+  > 22 │ if (compound === null || compound === undefined) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 23 │ 	compound = 'default';
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ // `!str` on a string union: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    20 20 │   // Strict compound check
+    21 21 │   declare let compound: string | null;
+    22    │ - if·(compound·===·null·||·compound·===·undefined)·{
+    23    │ - → compound·=·'default';
+    24    │ - }
+       22 │ + compound·??=·'default';
+    25 23 │   
+    26 24 │   // `!str` on a string union: no fix
+  
+
+```
+
+```
+ifStatementInvalid.ts:28:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    26 │ // `!str` on a string union: no fix
+    27 │ declare let str: string | null;
+  > 28 │ if (!str) {
+       │ ^^^^^^^^^^^
+  > 29 │ 	str = 'default';
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ // `=== null` on a union without `undefined`
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:34:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    32 │ // `=== null` on a union without `undefined`
+    33 │ declare let onlyNull: string | null;
+  > 34 │ if (onlyNull === null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │ 	onlyNull = 'default';
+  > 36 │ }
+       │ ^
+    37 │ 
+    38 │ // `=== undefined` on a union without `null`
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    32 32 │   // `=== null` on a union without `undefined`
+    33 33 │   declare let onlyNull: string | null;
+    34    │ - if·(onlyNull·===·null)·{
+    35    │ - → onlyNull·=·'default';
+    36    │ - }
+       34 │ + onlyNull·??=·'default';
+    37 35 │   
+    38 36 │   // `=== undefined` on a union without `null`
+  
+
+```
+
+```
+ifStatementInvalid.ts:40:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    38 │ // `=== undefined` on a union without `null`
+    39 │ declare let onlyUndef: string | undefined;
+  > 40 │ if (onlyUndef === undefined) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 41 │ 	onlyUndef = 'default';
+  > 42 │ }
+       │ ^
+    43 │ 
+    44 │ // Reversed operands
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    38 38 │   // `=== undefined` on a union without `null`
+    39 39 │   declare let onlyUndef: string | undefined;
+    40    │ - if·(onlyUndef·===·undefined)·{
+    41    │ - → onlyUndef·=·'default';
+    42    │ - }
+       40 │ + onlyUndef·??=·'default';
+    43 41 │   
+    44 42 │   // Reversed operands
+  
+
+```
+
+```
+ifStatementInvalid.ts:46:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    44 │ // Reversed operands
+    45 │ declare let reversed: string | null;
+  > 46 │ if (null == reversed) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+  > 47 │ 	reversed = 'default';
+  > 48 │ }
+       │ ^
+    49 │ 
+    50 │ // Static member subject
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    44 44 │   // Reversed operands
+    45 45 │   declare let reversed: string | null;
+    46    │ - if·(null·==·reversed)·{
+    47    │ - → reversed·=·'default';
+    48    │ - }
+       46 │ + reversed·??=·'default';
+    49 47 │   
+    50 48 │   // Static member subject
+  
+
+```
+
+```
+ifStatementInvalid.ts:52:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    50 │ // Static member subject
+    51 │ declare let rec: { a: number | null };
+  > 52 │ if (rec.a == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^
+  > 53 │ 	rec.a = 1;
+  > 54 │ }
+       │ ^
+    55 │ 
+    56 │ // Computed member subject
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    50 50 │   // Static member subject
+    51 51 │   declare let rec: { a: number | null };
+    52    │ - if·(rec.a·==·null)·{
+    53    │ - → rec.a·=·1;
+    54    │ - }
+       52 │ + rec.a·??=·1;
+    55 53 │   
+    56 54 │   // Computed member subject
+  
+
+```
+
+```
+ifStatementInvalid.ts:58:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    56 │ // Computed member subject
+    57 │ declare let rec2: { a: number | null };
+  > 58 │ if (rec2['a'] == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 59 │ 	rec2['a'] = 1;
+  > 60 │ }
+       │ ^
+    61 │ 
+    62 │ // Computed member subject with whitespace in the test
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    56 56 │   // Computed member subject
+    57 57 │   declare let rec2: { a: number | null };
+    58    │ - if·(rec2['a']·==·null)·{
+    59    │ - → rec2['a']·=·1;
+    60    │ - }
+       58 │ + rec2['a']·??=·1;
+    61 59 │   
+    62 60 │   // Computed member subject with whitespace in the test
+  
+
+```
+
+```
+ifStatementInvalid.ts:64:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    62 │ // Computed member subject with whitespace in the test
+    63 │ declare let rec3: { a: number | null };
+  > 64 │ if (rec3[ 'a' ] == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 65 │ 	rec3['a'] = 1;
+  > 66 │ }
+       │ ^
+    67 │ 
+    68 │ // Calls in the subject: no fix
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the if statement with ??=.
+  
+    62 62 │   // Computed member subject with whitespace in the test
+    63 63 │   declare let rec3: { a: number | null };
+    64    │ - if·(rec3[·'a'·]·==·null)·{
+    65    │ - → rec3['a']·=·1;
+    66    │ - }
+       64 │ + rec3['a']·??=·1;
+    67 65 │   
+    68 66 │   // Calls in the subject: no fix
+  
+
+```
+
+```
+ifStatementInvalid.ts:70:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    68 │ // Calls in the subject: no fix
+    69 │ declare function getRec(): { a: number | null };
+  > 70 │ if (getRec().a == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 71 │ 	getRec().a = 1;
+  > 72 │ }
+       │ ^
+    73 │ 
+    74 │ if (getRec()['a'] == null) {
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:74:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    72 │ }
+    73 │ 
+  > 74 │ if (getRec()['a'] == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 75 │ 	getRec()['a'] = 1;
+  > 76 │ }
+       │ ^
+    77 │ 
+    78 │ // `||=` body: only the `||=` is reported
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:81:9 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    79 │ declare let assign: { x: number } | null;
+    80 │ if (!assign) {
+  > 81 │ 	assign ||= makeObj();
+       │ 	       ^^^
+    82 │ }
+    83 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ifStatementInvalid.ts:86:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    84 │ // Inner comment in the body: no fix
+    85 │ declare let commented: string | null;
+  > 86 │ if (commented == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 87 │ 	// keep me
+  > 88 │ 	commented = 'default';
+  > 89 │ }
+       │ ^
+    90 │ 
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

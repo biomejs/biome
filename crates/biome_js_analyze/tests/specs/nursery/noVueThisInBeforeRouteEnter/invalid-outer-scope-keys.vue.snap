@@ -1,0 +1,153 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-outer-scope-keys.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  beforeRouteEnter() {
+    const object = {
+      [this.methodKey]() {},
+      get [this.getterKey]() {
+        return 1;
+      },
+      [this.propertyKey]: function () {},
+    };
+    class Local extends this.Base {
+      [this.classKey]() {}
+      [this.fieldKey] = 1;
+    }
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-outer-scope-keys.vue:6:8 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    4 │   beforeRouteEnter() {
+    5 │     const object = {
+  > 6 │       [this.methodKey]() {},
+      │        ^^^^
+    7 │       get [this.getterKey]() {
+    8 │         return 1;
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-outer-scope-keys.vue:7:12 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    5 │     const object = {
+    6 │       [this.methodKey]() {},
+  > 7 │       get [this.getterKey]() {
+      │            ^^^^
+    8 │         return 1;
+    9 │       },
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-outer-scope-keys.vue:10:8 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+     8 │         return 1;
+     9 │       },
+  > 10 │       [this.propertyKey]: function () {},
+       │        ^^^^
+    11 │     };
+    12 │     class Local extends this.Base {
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-outer-scope-keys.vue:12:25 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    10 │       [this.propertyKey]: function () {},
+    11 │     };
+  > 12 │     class Local extends this.Base {
+       │                         ^^^^
+    13 │       [this.classKey]() {}
+    14 │       [this.fieldKey] = 1;
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-outer-scope-keys.vue:13:8 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    11 │     };
+    12 │     class Local extends this.Base {
+  > 13 │       [this.classKey]() {}
+       │        ^^^^
+    14 │       [this.fieldKey] = 1;
+    15 │     }
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-outer-scope-keys.vue:14:8 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    12 │     class Local extends this.Base {
+    13 │       [this.classKey]() {}
+  > 14 │       [this.fieldKey] = 1;
+       │        ^^^^
+    15 │     }
+    16 │   },
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

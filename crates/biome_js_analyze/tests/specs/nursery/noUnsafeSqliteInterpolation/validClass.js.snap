@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validClass.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+class DatabaseSync {
+	exec() {}
+}
+const database = new DatabaseSync();
+database.exec(`SELECT ${value}`);
+
+```

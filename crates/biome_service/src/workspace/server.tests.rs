@@ -10,10 +10,14 @@ use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{
-    FormatterConfiguration, HtmlConfiguration, JsConfiguration,
+    FilesConfiguration, FormatterConfiguration, HtmlConfiguration, JsConfiguration,
+    OverrideFilesConfiguration, OverrideFormatterConfiguration, OverrideGlobs, OverridePattern,
+    Overrides,
     analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
     json::{JsonConfiguration, JsonFormatterConfiguration},
+    max_size::MaxSize,
+    vcs::{VcsClientKind, VcsConfiguration},
 };
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
@@ -29,6 +33,7 @@ use biome_module_graph::{
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::plumbing::{AsId, ZalsaDatabase};
+use std::num::NonZeroU64;
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
@@ -505,7 +510,7 @@ fn clients_that_did_not_open_a_file_read_the_disk() {
 
     assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
     let db = workspace.get_db();
-    let parse = cli.get_parse(Utf8Path::new(INDEXED)).unwrap();
+    let parse = cli.get_parse(&BiomePath::new(INDEXED)).unwrap();
     let parsed_text = parse
         .parsed(&db)
         .syntax::<JsLanguage>()
@@ -1448,7 +1453,8 @@ fn shared_manifest_refresh_preserves_project_settings_and_dependency_ownership()
         })
         .unwrap();
     workspace
-        .open_file(OpenFileParams {
+        .open_file(
+            OpenFileParams {
             project_key: second_project,
             path: BiomePath::new("/second/index.ts"),
             content: FileContent::FromClient {
@@ -1682,7 +1688,7 @@ fn assert_settings_query_routes(db_state: fn(Arc<dyn FsWithResolverProxy>) -> Db
         .format_file(FormatFileParams {
             project_key,
             path: BiomePath::new(PATH),
-            inline_config: Some(inline_configuration),
+            inline_config: Some(Box::new(inline_configuration)),
         })
         .unwrap();
     assert!(inline.as_code().contains("\"bar\""));
@@ -1852,7 +1858,7 @@ fn settings_query_preserves_sequential_analyzer_rule_options() {
         .unwrap();
 
     let no_console = AnalyzerSelector::from_str("lint/suspicious/noConsole").unwrap();
-    for inline_config in [None, Some(Configuration::default())] {
+    for inline_config in [None, Some(Box::default())] {
         let diagnostics = workspace
             .pull_diagnostics(PullDiagnosticsParams {
                 project_key,
@@ -1946,7 +1952,7 @@ fn settings_query_uses_inline_analyzer_override_indices() {
             skip: Vec::new(),
             enabled_rules: Vec::new(),
             include_code_fix: false,
-            inline_config: Some(inline_configuration),
+            inline_config: Some(Box::new(inline_configuration)),
             max_diagnostics: None,
             diagnostic_level: Severity::Hint,
             enforce_assist: false,
@@ -2217,7 +2223,7 @@ fn cjk_friendly_emphasis_change_parses_open_documents_again() {
     let has_emphasis = |editor: &WorkspaceServerWithDb| {
         let db = workspace.get_db();
         editor
-            .get_parse(Utf8Path::new(PATH))
+            .get_parse(&BiomePath::new(PATH))
             .unwrap()
             .parsed(&db)
             .syntax::<MarkdownLanguage>()
@@ -2259,7 +2265,7 @@ fn inline_configuration_applies_to_the_parse_of_its_client() {
             },
             document_file_source: None,
             persist_node_cache: false,
-            inline_config: Some(json_allow_comments(true)),
+            inline_config: Some(Box::new(json_allow_comments(true))),
             editor_features: None,
         })
         .unwrap();
@@ -3064,6 +3070,30 @@ fn owned_rescan_updates_existing_project_input() {
     assert_eq!(nested_settings(), Some(1));
 }
 
+#[test]
+fn owned_scan_loads_hidden_nested_configuration() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/a/.biome.json"),
+        br#"{ "root": false }"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/a/index.js"),
+        b"export const value = 1;",
+    );
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    scan_without_watching(&workspace, project_key);
+
+    let db = workspace.get_db();
+    assert_eq!(
+        db.get_project(&project_key)
+            .map(|project| project.nested_settings(&db).len()),
+        Some(1)
+    );
+}
+
 /// A scan resolves pnpm catalog versions for a package when its nested
 /// configuration file enables catalogs, even though the scan reads that file
 /// after the package manifest.
@@ -3311,6 +3341,104 @@ fn owned_scan_reuses_inputs_of_closed_files() {
     assert_eq!(&**scanned_changed.text(&db), UPDATED);
     drop(db);
     assert_eq!(allocated_file_inputs(&workspace), (2, 2));
+}
+
+/// Clears a pause flag when dropped.
+///
+/// A panicking assertion inside [std::thread::scope] would otherwise leave the paused thread
+/// spinning, and the scope would wait for it forever instead of reporting the failure.
+struct ClearOnDrop<'a>(&'a AtomicBool);
+
+impl Drop for ClearOnDrop<'_> {
+    fn drop(&mut self) {
+        self.0.store(false, Ordering::Release);
+    }
+}
+
+#[test]
+fn vcs_ignore_refresh_keeps_concurrent_settings_updates() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/.gitignore"), "ignored.js\n");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let update_settings = |formatter_enabled: bool| {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    vcs: Some(VcsConfiguration {
+                        enabled: Some(true.into()),
+                        client_kind: Some(VcsClientKind::Git),
+                        use_ignore_file: Some(true.into()),
+                        ..Default::default()
+                    }),
+                    formatter: Some(FormatterConfiguration {
+                        enabled: Some(formatter_enabled.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+    };
+    update_settings(true);
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_vcs_ignore_publish
+        .store(true, Ordering::Release);
+    let (refresh_paused, refresh_result) = std::thread::scope(|scope| {
+        let resume_refresh = ClearOnDrop(&test_state.pause_vcs_ignore_publish);
+        let refresh_workspace = &workspace;
+        let refresh = scope.spawn(move || {
+            refresh_workspace
+                .as_workspace()
+                .refresh_project_vcs_ignore_settings(project_key)
+        });
+        let refresh_paused = wait_until(TIMEOUT, || {
+            test_state
+                .vcs_ignore_publish_attempts
+                .load(Ordering::Acquire)
+                >= 1
+        });
+        if refresh_paused {
+            update_settings(false);
+        }
+        drop(resume_refresh);
+        (refresh_paused, refresh.join().unwrap())
+    });
+
+    assert!(refresh_paused, "the refresh did not read the ignore files");
+    refresh_result.unwrap();
+    let settings = workspace
+        .as_workspace()
+        .project_get_root_settings(project_key)
+        .unwrap();
+    assert_eq!(settings.formatter.enabled, Some(false.into()));
+    assert!(settings.vcs_settings.is_ignored(
+        &BiomePath::new("/project/ignored.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
 }
 
 #[test]
@@ -4543,6 +4671,117 @@ const Bar = styled(Component)`
 }
 
 #[test]
+fn format_js_with_embedded_css_attrs() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div.attrs({ role: "button" })`
+  display:
+    flex;
+`;
+
+const Bar = styled(Component).attrs(() => ({ role: "button" }))`
+  display:
+    flex;
+`;
+
+const Baz = foo.bar.attrs({})`
+  display:
+    flex;
+`;
+
+const Qux = styled.div.withConfig({}).attrs({})`
+  display:
+    flex;
+`;
+
+const Quux = styled(Component).attrs({}).attrs({})`
+  display:
+    flex;
+`;
+
+const Corge = graphql.a.b()`
+  query { a }
+`;
+
+const Grault = graphql(A).b()`
+  query { a }
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    const Foo = styled.div.attrs({ role: "button" })`
+    	display: flex;
+    `;
+
+    const Bar = styled(Component).attrs(() => ({ role: "button" }))`
+    	display: flex;
+    `;
+
+    const Baz = foo.bar.attrs({})`
+      display:
+        flex;
+    `;
+
+    const Qux = styled.div.withConfig({}).attrs({})`
+      display:
+        flex;
+    `;
+
+    const Quux = styled(Component).attrs({}).attrs({})`
+      display:
+        flex;
+    `;
+
+    const Corge = graphql.a.b()`
+      query { a }
+    `;
+
+    const Grault = graphql(A).b()`
+      query { a }
+    `;
+    "#);
+}
+
+#[test]
 fn format_js_with_embedded_css_with_interpolations() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Button = styled.button`
@@ -5628,6 +5867,35 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
     assert!(!js.is_typescript());
 }
 
+#[cfg(feature = "lang_mdx")]
+#[test]
+fn lsp_markdown_language_hint_keeps_mdx_path_semantics() {
+    const MDX_FILE_PATH: &str = "/project/page.mdx";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(MDX_FILE_PATH), b"# Hello, {props.name}\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(MDX_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("markdown", None)),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let file_source = workspace.get_file_source(MDX_FILE_PATH.into(), false);
+    let markdown = file_source
+        .to_markdown_file_source()
+        .expect("Markdown file source");
+    assert!(markdown.is_mdx());
+}
+
 // noUndeclaredClasses
 
 /// A class used in `class="..."` that has no matching `.foo {}` in any `<style>`
@@ -6132,6 +6400,829 @@ fn no_unused_classes_passes_with_transitive_css_import() {
 }
 
 #[test]
+fn virtual_documents_preserve_complete_uri_identity() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let first_path = BiomePath::new_virtual("untitled:first/../document.js");
+    let second_path = BiomePath::new_virtual("untitled:second/../document.js");
+
+    for (path, content) in [
+        (first_path.clone(), "const first = 1;"),
+        (second_path.clone(), "const second = 2;"),
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path,
+                content: FileContent::FromClient {
+                    content: content.into(),
+                    version: 0,
+                },
+                document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    for (path, expected) in [
+        (first_path, "const first = 1;"),
+        (second_path, "const second = 2;"),
+    ] {
+        assert!(
+            workspace
+                .file_exists(FileExistsParams {
+                    file_path: path.clone(),
+                })
+                .unwrap()
+        );
+        assert_eq!(
+            workspace
+                .get_file_content(GetFileContentParams { project_key, path })
+                .unwrap(),
+            expected
+        );
+    }
+}
+
+#[test]
+fn virtual_documents_bypass_filesystem_overrides() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    format_with_errors: Some(false.into()),
+                    ..FormatterConfiguration::default()
+                }),
+                files: Some(FilesConfiguration {
+                    max_size: Some(MaxSize(NonZeroU64::new(2).unwrap())),
+                    ..FilesConfiguration::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    parser: Some(JsParserConfiguration {
+                        jsx_everywhere: Some(false.into()),
+                        ..JsParserConfiguration::default()
+                    }),
+                    ..JsConfiguration::default()
+                }),
+                overrides: Some(Overrides(vec![OverridePattern {
+                    includes: Some(OverrideGlobs::Globs(Box::new([
+                        biome_glob::NormalizedGlob::from_str("**/*").unwrap(),
+                    ]))),
+                    formatter: Some(OverrideFormatterConfiguration {
+                        enabled: Some(false.into()),
+                        format_with_errors: Some(false.into()),
+                        ..OverrideFormatterConfiguration::default()
+                    }),
+                    javascript: Some(JsConfiguration {
+                        parser: Some(JsParserConfiguration {
+                            jsx_everywhere: Some(true.into()),
+                            ..JsParserConfiguration::default()
+                        }),
+                        ..JsConfiguration::default()
+                    }),
+                    files: Some(OverrideFilesConfiguration {
+                        max_size: Some(MaxSize(NonZeroU64::new(1).unwrap())),
+                    }),
+                    ..OverridePattern::default()
+                }])),
+                ..Configuration::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let inline_config = Configuration {
+        formatter: Some(FormatterConfiguration {
+            format_with_errors: Some(true.into()),
+            ..FormatterConfiguration::default()
+        }),
+        files: Some(FilesConfiguration {
+            max_size: Some(MaxSize(NonZeroU64::new(1024).unwrap())),
+            ..FilesConfiguration::default()
+        }),
+        ..Configuration::default()
+    };
+    let virtual_path = BiomePath::new_virtual("untitled:Override-1");
+    let document_path = virtual_path;
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: document_path.clone(),
+            content: FileContent::FromClient {
+                content: "const element = <div />;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: Some(Box::new(inline_config.clone())),
+            editor_features: None,
+        })
+        .unwrap();
+
+    let features = workspace
+        .file_features(SupportsFeatureParams {
+            project_key,
+            path: document_path.clone(),
+            features: FeaturesBuilder::new().with_formatter().build(),
+            inline_config: Some(Box::new(inline_config.clone())),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().build(),
+            ignore_kind: IgnoreKind::Ancestors,
+        })
+        .unwrap();
+    assert!(features.features_supported.supports_format());
+
+    let size = workspace
+        .check_file_size(CheckFileSizeParams {
+            project_key,
+            path: document_path.clone(),
+        })
+        .unwrap();
+    assert!(!size.is_too_large());
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: document_path.clone(),
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: Some(Box::new(inline_config.clone())),
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(!diagnostics.diagnostics.is_empty());
+
+    workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: document_path,
+            inline_config: Some(Box::new(inline_config)),
+        })
+        .unwrap();
+}
+
+#[test]
+fn virtual_full_html_documents_parse_embedded_scripts() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..HtmlConfiguration::default()
+                }),
+                ..Configuration::default()
+            },
+            workspace_directory: None,
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let document_path = BiomePath::new_virtual("untitled:Html-1");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: document_path.clone(),
+            content: FileContent::FromClient {
+                content: "<script>let value = ;</script>".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::vue())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: document_path.clone(),
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(!diagnostics.diagnostics.is_empty());
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: document_path.clone(),
+            content: "<script>let value=1</script>".into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let formatted = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: document_path,
+            inline_config: None,
+        })
+        .unwrap()
+        .into_code();
+    assert!(formatted.contains("<script>"), "{formatted}");
+}
+
+#[test]
+fn virtual_documents_produce_diagnostics() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let virtual_path = BiomePath::new_virtual("untitled:folder/../diagnostic.js");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path.clone(),
+            content: FileContent::FromClient {
+                content: "const value = ;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: virtual_path,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(!result.diagnostics.is_empty());
+}
+
+#[test]
+fn virtual_documents_produce_diagnostics_and_actions() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let virtual_path = BiomePath::new_virtual("untitled:folder/../actions.js");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path.clone(),
+            content: FileContent::FromClient {
+                content: "debugger;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            project_key,
+            path: virtual_path,
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(!result.diagnostics.is_empty());
+}
+
+#[test]
+fn failed_virtual_open_preserves_other_clients_document() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let first = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(1));
+    let second = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(2));
+    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
+    let document_path = virtual_path.clone();
+
+    first
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path.clone(),
+            content: FileContent::FromClient {
+                content: "const first = 1;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let _error = second
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path,
+            content: FileContent::FromClient {
+                content: "unsupported".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Unknown),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap_err();
+
+    assert!(
+        first
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+    assert_eq!(
+        first
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: document_path.clone(),
+            })
+            .unwrap(),
+        "const first = 1;"
+    );
+    assert!(
+        !second
+            .file_exists(FileExistsParams {
+                file_path: document_path,
+            })
+            .unwrap()
+    );
+}
+
+#[test]
+fn concurrent_virtual_open_survives_the_last_view_closing() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let first = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(1));
+    let second = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(2));
+    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
+    let document_path = virtual_path.clone();
+
+    first
+        .open_file(OpenFileParams {
+            project_key,
+            path: document_path.clone(),
+            content: FileContent::FromClient {
+                content: "const first = 1;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .server
+        .pause_close_after_document_update
+        .store(true, Ordering::Release);
+    let (closed, opened) = std::thread::scope(|scope| {
+        let resume_close = ClearOnDrop(&workspace.server.pause_close_after_document_update);
+        let close_path = document_path.clone();
+        let close = scope.spawn(move || {
+            first.close_file(CloseFileParams {
+                project_key,
+                path: close_path,
+            })
+        });
+        assert!(wait_until(TIMEOUT, || {
+            workspace
+                .server
+                .close_document_updates
+                .load(Ordering::Acquire)
+                == 1
+        }));
+
+        let opened = second.open_file(OpenFileParams {
+            project_key,
+            path: virtual_path,
+            content: FileContent::FromClient {
+                content: "const second = 2;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        });
+        drop(resume_close);
+        (close.join(), opened)
+    });
+
+    assert!(opened.is_ok(), "concurrent open failed: {opened:?}");
+    assert!(
+        closed.expect("close must not unwind").is_ok(),
+        "close must succeed"
+    );
+    assert!(
+        second
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+    assert_eq!(
+        second
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: document_path,
+            })
+            .unwrap(),
+        "const second = 2;"
+    );
+}
+
+#[test]
+fn virtual_documents_follow_close_and_client_disconnect_lifecycles() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let first = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(1));
+    let second = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(2));
+    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
+
+    for (client, content) in [(&first, "const first = 1;"), (&second, "const second = 2;")] {
+        client
+            .open_file(OpenFileParams {
+                project_key,
+                path: virtual_path.clone(),
+                content: FileContent::FromClient {
+                    content: content.into(),
+                    version: 0,
+                },
+                document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+                persist_node_cache: true,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    let document_path = virtual_path.clone();
+    assert_eq!(
+        first
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: document_path.clone(),
+            })
+            .unwrap(),
+        "const first = 1;"
+    );
+    assert_eq!(
+        second
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: document_path.clone(),
+            })
+            .unwrap(),
+        "const second = 2;"
+    );
+
+    first
+        .close_file(CloseFileParams {
+            project_key,
+            path: document_path.clone(),
+        })
+        .unwrap();
+    assert!(
+        !first
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+    assert!(
+        second
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+
+    first
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path.clone(),
+            content: FileContent::FromClient {
+                content: "const reopened = 3;".into(),
+                version: 1,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: true,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    first.close_client_files().unwrap();
+    assert!(
+        !first
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+    assert!(
+        second
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+
+    second.close_client_files().unwrap();
+    assert!(
+        !second
+            .file_exists(FileExistsParams {
+                file_path: document_path,
+            })
+            .unwrap()
+    );
+}
+
+#[test]
+fn virtual_documents_keep_client_project_contexts() {
+    let (workspace, first_project) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/first");
+    let second_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/second"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+
+    for (project_key, jsx_everywhere) in [(first_project, false), (second_project, true)] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    javascript: Some(JsConfiguration {
+                        parser: Some(JsParserConfiguration {
+                            jsx_everywhere: Some(jsx_everywhere.into()),
+                            ..JsParserConfiguration::default()
+                        }),
+                        ..JsConfiguration::default()
+                    }),
+                    ..Configuration::default()
+                },
+                workspace_directory: None,
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+    }
+
+    let first = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(1));
+    let second = workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(2));
+    let virtual_path = BiomePath::new_virtual("untitled:Shared-1");
+    let document_path = virtual_path;
+
+    for (client, project_key) in [(&first, first_project), (&second, second_project)] {
+        client
+            .open_file(OpenFileParams {
+                project_key,
+                path: document_path.clone(),
+                content: FileContent::FromClient {
+                    content: "const element = <div />;".into(),
+                    version: 0,
+                },
+                document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    for (client, project_key, expect_diagnostics) in [
+        (&first, first_project, true),
+        (&second, second_project, false),
+    ] {
+        let diagnostics = client
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: document_path.clone(),
+                categories: RuleCategoriesBuilder::default().with_syntax().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap()
+            .diagnostics;
+        assert_eq!(!diagnostics.is_empty(), expect_diagnostics);
+    }
+}
+
+#[test]
+fn virtual_document_rebinds_after_its_project_closes() {
+    let (workspace, first_project) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/first");
+    assert_virtual_document_rebinds_after_its_project_closes(workspace, first_project);
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn virtual_document_rebinds_after_its_project_closes_in_owned_workspace() {
+    let (workspace, first_project, _) = lsp_workspace(&[]);
+    assert_virtual_document_rebinds_after_its_project_closes(workspace, first_project);
+}
+
+fn assert_virtual_document_rebinds_after_its_project_closes(
+    workspace: LocalWorkspace,
+    first_project: ProjectKey,
+) {
+    let second_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/second"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+
+    for (project_key, jsx_everywhere) in [(first_project, false), (second_project, true)] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    javascript: Some(JsConfiguration {
+                        parser: Some(JsParserConfiguration {
+                            jsx_everywhere: Some(jsx_everywhere.into()),
+                            ..JsParserConfiguration::default()
+                        }),
+                        ..JsConfiguration::default()
+                    }),
+                    ..Configuration::default()
+                },
+                workspace_directory: None,
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+    }
+
+    let virtual_path = BiomePath::new_virtual("untitled:Rebind-1");
+    let document_path = virtual_path.clone();
+    workspace
+        .open_file(OpenFileParams {
+            project_key: first_project,
+            path: document_path.clone(),
+            content: FileContent::FromClient {
+                content: "const element = <div />;".into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let diagnostics = |project_key| {
+        workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: document_path.clone(),
+                categories: RuleCategoriesBuilder::default().with_syntax().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap()
+            .diagnostics
+    };
+
+    assert!(!diagnostics(first_project).is_empty());
+    workspace
+        .close_project(CloseProjectParams {
+            project_key: first_project,
+        })
+        .unwrap();
+    assert!(
+        workspace
+            .file_exists(FileExistsParams {
+                file_path: document_path.clone(),
+            })
+            .unwrap()
+    );
+    let diagnostics = diagnostics(second_project);
+    let db = workspace.get_db();
+    let source = db
+        .get_client_parsed_source(virtual_path.as_path(), ClientId::default())
+        .unwrap();
+    assert_eq!(db.project_key_for_source(source), Some(second_project));
+    assert!(diagnostics.is_empty(), "{diagnostics:#?}");
+}
+
+#[test]
+fn go_to_definition_restores_virtual_document_path() {
+    const CONTENT: &str = "const value = 1;\nvalue;\n";
+
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let virtual_path = BiomePath::new_virtual("untitled:Untitled-1");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: virtual_path.clone(),
+            content: FileContent::FromClient {
+                content: CONTENT.into(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::Js(JsFileSource::js_module())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let cursor = TextSize::from(CONTENT.rfind("value").unwrap() as u32);
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            path: virtual_path.clone(),
+            cursor_range: TextRange::new(cursor, cursor),
+            enabled: true,
+        })
+        .unwrap()
+        .expect("should find the local definition");
+
+    assert_eq!(
+        result.matches,
+        vec![(
+            virtual_path,
+            TextRange::new(TextSize::from(6), TextSize::from(11)),
+        )]
+    );
+}
+
+/// Asserts that a document result points to the expected filesystem path.
+fn assert_document_path(path: &BiomePath, expected: &Utf8Path) {
+    assert_eq!(path.as_path(), expected);
+}
+
+#[test]
 fn go_to_definition_named_import() {
     const UTILS_CONTENT: &str = "export function greet() { return 'hello'; }\n";
     const MAIN_CONTENT: &str = "import { greet } from './utils.js';\ngreet();\n";
@@ -6173,7 +7264,7 @@ fn go_to_definition_named_import() {
     let definition = result.expect("should find a definition");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path.as_path(), Utf8Path::new("/project/utils.js"));
+    assert_document_path(path, Utf8Path::new("/project/utils.js"));
     // The `greet` binding in utils.js starts at byte 16 (after "export function ")
     assert_eq!(range.start(), TextSize::from(16));
     assert_eq!(range.end(), TextSize::from(21));
@@ -6221,7 +7312,7 @@ fn go_to_definition_default_import() {
     let definition = result.expect("should find a definition for default import");
     assert_eq!(definition.matches.len(), 1);
     let (path, _range) = &definition.matches[0];
-    assert_eq!(path.as_path(), Utf8Path::new("/project/utils.js"));
+    assert_document_path(path, Utf8Path::new("/project/utils.js"));
 }
 
 #[test]
@@ -6258,7 +7349,7 @@ fn go_to_definition_same_file_local_binding() {
     let definition = result.expect("should find a local definition");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path.as_path(), Utf8Path::new("/project/main.js"));
+    assert_document_path(path, Utf8Path::new("/project/main.js"));
     // `myVar` is declared at byte 6 (after "const ")
     assert_eq!(range.start(), TextSize::from(6));
 }
@@ -6396,7 +7487,7 @@ fn go_to_definition_jsx_classname_to_css() {
     let definition = result.expect("should resolve className to CSS class");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    assert_document_path(path, Utf8Path::new("/project/styles.css"));
     // "btn" in `.btn` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
 }
@@ -6444,7 +7535,7 @@ fn go_to_definition_jsx_classname_multiple_classes() {
     let definition = result.expect("should resolve to .bar in CSS");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    assert_document_path(path, Utf8Path::new("/project/styles.css"));
     // ".bar" is at offset 9, so "bar" name starts at 10
     assert_eq!(
         range,
@@ -6501,7 +7592,7 @@ fn go_to_definition_html_class_to_css() {
     let definition = result.expect("should resolve HTML class to CSS class");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    assert_document_path(path, Utf8Path::new("/project/styles.css"));
     // "header" in `.header` starts at offset 1
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(7)));
 }
@@ -6561,7 +7652,7 @@ fn go_to_definition_html_class_inline_style() {
     let definition = result.expect("should resolve HTML class to inline style");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/project/index.html"));
+    assert_document_path(path, Utf8Path::new("/project/index.html"));
     // "card" in `.card` inside <style> block — must be in parent document coordinates
     let style_offset = HTML_CONTENT.find("<style>").unwrap() + "<style>".len();
     // ".card" starts at offset 0 in snippet, "card" at offset 1
@@ -6705,7 +7796,7 @@ fn go_to_definition_vue_class_to_inline_style() {
     let definition = result.expect("should resolve Vue class to inline style");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/App.vue"));
+    assert_document_path(path, Utf8Path::new("/App.vue"));
     // "card" in `.card` inside <style> block — range must be in parent document coordinates
     let style_offset = VUE_CONTENT.find("<style>").unwrap() + "<style>\n".len();
     // ".card" starts at offset 0 in snippet, "card" at offset 1
@@ -6802,7 +7893,7 @@ foo();
     let definition = result.expect("should resolve Vue class to inline style with script present");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/App.vue"));
+    assert_document_path(path, Utf8Path::new("/App.vue"));
     // "btn" in `.btn` inside <style> — must be in parent document coordinates
     let style_offset = VUE_CONTENT.find("<style>").unwrap() + "<style>\n".len();
     let expected_start = style_offset + 1; // skip the dot in `.btn`
@@ -6880,7 +7971,7 @@ fn go_to_definition_vue_class_to_external_css() {
     let definition = result.expect("should resolve Vue class to external CSS");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/styles.css"));
+    assert_document_path(path, Utf8Path::new("/styles.css"));
     // "wrapper" in `.wrapper` starts at offset 1
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(8)));
 }
@@ -6935,7 +8026,7 @@ import './styles.css';
     let definition = result.expect("should resolve class to CSS imported from script block");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/styles.css"));
+    assert_document_path(path, Utf8Path::new("/styles.css"));
     // "foo" in `.foo` starts at offset 1
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
 }
@@ -7053,7 +8144,7 @@ fn go_to_definition_css_class_via_transitive_import() {
     let definition = result.expect("should resolve className to CSS class in transitive import");
     assert_eq!(definition.matches.len(), 1);
     let (path, range) = &definition.matches[0];
-    assert_eq!(path, &BiomePath::new("/project/components.css"));
+    assert_document_path(path, Utf8Path::new("/project/components.css"));
     // "card" in `.card` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
 }
@@ -7110,13 +8201,13 @@ fn fix_file_respects_inline_format_with_errors() {
                 enabled_rules: vec![use_const],
                 rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
                 suppression_reason: None,
-                inline_config: Some(Configuration {
+                inline_config: Some(Box::new(Configuration {
                     formatter: Some(FormatterConfiguration {
                         format_with_errors: Some(inline_format_with_errors.into()),
                         ..Default::default()
                     }),
                     ..Default::default()
-                }),
+                })),
             })
             .unwrap();
 
@@ -7304,6 +8395,7 @@ export const useLet = defineRule({
         "const prefix = 'λ';\n/* café */\nvar /* keep */ café = '漢'; // suffix\n";
     const FIXED_CONTENT: &str =
         "const prefix = 'λ';\n/* café */\nlet /* keep */ renamed = '漢'; // suffix\n";
+    const SUPPRESSED_CONTENT: &str = "const prefix = 'λ';\n/* café */\n// biome-ignore lint/plugin/useLet: <explanation>\nvar /* keep */ café = '漢'; // suffix\n";
 
     for (kind, applicability) in [
         ("safe", Applicability::Always),
@@ -7360,8 +8452,21 @@ export const useLet = defineRule({
             &FILE_CONTENT[diagnostic.location().span.unwrap()],
             "var /* keep */ café = '漢'"
         );
-        assert_eq!(actions.len(), 1);
-        let suggestion = actions[0].suggestion.as_ref().unwrap();
+        let [fix, inline_suppression, top_level_suppression] = actions.as_slice() else {
+            panic!("{kind}: {actions:?}");
+        };
+        assert!(fix.category.matches("quickfix.biome.plugin"));
+        assert!(
+            inline_suppression
+                .category
+                .matches("quickfix.suppressRule.inline.biome")
+        );
+        assert!(
+            top_level_suppression
+                .category
+                .matches("quickfix.suppressRule.topLevel.biome")
+        );
+        let suggestion = fix.suggestion.as_ref().unwrap();
         assert_eq!(suggestion.applicability, applicability);
         assert_eq!(suggestion.msg, biome_console::markup!("Use let").to_owned());
         assert_eq!(
@@ -7390,14 +8495,18 @@ export const useLet = defineRule({
                 .unwrap();
             let applies = mode == FixFileMode::SafeAndUnsafeFixes
                 || (mode == FixFileMode::SafeFixes && kind == "safe");
-            assert_eq!(
-                result.code,
-                if applies { FIXED_CONTENT } else { FILE_CONTENT },
-                "{kind}: {mode:?}"
-            );
+            let suppresses = mode == FixFileMode::ApplySuppressions;
+            let expected_code = if applies {
+                FIXED_CONTENT
+            } else if suppresses {
+                SUPPRESSED_CONTENT
+            } else {
+                FILE_CONTENT
+            };
+            assert_eq!(result.code, expected_code, "{kind}: {mode:?}");
             assert_eq!(
                 result.actions.len(),
-                usize::from(applies),
+                usize::from(applies || suppresses),
                 "{kind}: {mode:?}"
             );
             assert_eq!(

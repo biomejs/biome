@@ -11,18 +11,19 @@
 //! `emit('change')` is a use of the event `change`.
 
 use super::builder::{ModelBuilder, NewSymbol, synthetic_name};
-use super::component::ScriptInput;
+use super::component::{ScriptInput, static_string_text};
 use super::layout::Layout;
 use super::model::*;
+use super::nodes::JsNodeId;
 use super::snippets::SfcSnippet;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsRoot,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberAssignment,
-    JsComputedMemberExpression, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsUnaryExpression, JsUnaryOperator, inner_string_text,
-    static_value::StaticValue,
+    AnyJsCallArgument, AnyJsExpression, AnyJsIdentifierReference, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsRoot, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierAssignment,
+    JsIdentifierBinding, JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -75,6 +76,13 @@ const TEMPLATE_GLOBALS: &[&str] = &[
     "parseInt",
     "undefined",
 ];
+
+/// Returns `true` when `name` is a JavaScript global that a template
+/// expression may use, such as `Math`. Vue reads such a name from the global
+/// scope instead of from the component instance.
+pub fn is_template_global(name: &str) -> bool {
+    TEMPLATE_GLOBALS.binary_search(&name).is_ok()
+}
 
 /// Tags Vue resolves itself.
 const BUILTIN_COMPONENTS: &[&str] = &[
@@ -131,6 +139,8 @@ pub(crate) fn add_builtins_scope(builder: &mut ModelBuilder) -> ScopeId {
             namespace: Namespace::Binding,
             kind: SymbolKind::Builtin,
             component: None,
+            node: None,
+            name_node: None,
         });
     }
     scope
@@ -157,6 +167,8 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::VForAlias,
                 component: None,
+                node: None,
+                name_node: None,
             });
         }
     }
@@ -179,6 +191,7 @@ pub(crate) fn collect_template_symbols(
                 continue;
             };
             let range = token.text_trimmed_range() + snippet.content_offset;
+            let node = builder.add_js_node(Some(*id), binding.syntax());
             builder.add_symbol(NewSymbol {
                 name: token.token_text_trimmed(),
                 range,
@@ -188,6 +201,8 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::SlotParam,
                 component: None,
+                node: Some(node),
+                name_node: Some(node),
             });
         }
     }
@@ -202,6 +217,8 @@ pub(crate) fn collect_template_symbols(
             namespace: Namespace::TemplateRef,
             kind: SymbolKind::TemplateRef,
             component: scopes.component,
+            node: None,
+            name_node: None,
         });
     }
 }
@@ -460,6 +477,11 @@ impl Walker<'_> {
         range + self.offset
     }
 
+    /// Returns the id of `node`, a node of the tree the pass walks.
+    fn node_id(&mut self, node: &JsSyntaxNode) -> JsNodeId {
+        self.builder.add_js_node(self.snippet, node)
+    }
+
     /// Resolves `name` among the declarations of `component` in `namespace`.
     fn resolve_in_component(
         &self,
@@ -506,12 +528,11 @@ impl Walker<'_> {
         };
         let resolution =
             self.resolve_in_component(component, Namespace::Binding, name.text(), kinds);
-        let range = member_range(&usage.top, usage.path.len() - skip - 1).map_or_else(
-            || self.host(usage.top.text_trimmed_range()),
-            |range| self.host(range),
-        );
+        let node = member_node(&usage.top, usage.path.len() - skip - 1)
+            .unwrap_or_else(|| usage.top.clone());
+        let node_id = self.node_id(&node);
         self.builder.add_reference(ReferenceData {
-            range,
+            range: self.host(node.text_trimmed_range()),
             name: name.clone(),
             snippet: self.snippet,
             site: RefSite::Identifier,
@@ -523,6 +544,7 @@ impl Walker<'_> {
             access: usage.access,
             call_args: usage.call_args,
             resolution,
+            node: Some(node_id),
         });
     }
 
@@ -540,9 +562,7 @@ impl Walker<'_> {
             .into_iter()
             .flat_map(|arguments| arguments.args().iter().flatten())
             .collect();
-        let Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-        )) = arguments
+        let Some(literal) = arguments
             .first()
             .and_then(AnyJsCallArgument::as_any_js_expression)
             .map(|argument| argument.clone().omit_parentheses())
@@ -550,23 +570,34 @@ impl Walker<'_> {
             self.mark_uses_open(component, Namespace::Emit);
             return;
         };
-        let Ok(name) = literal.inner_string_text() else {
+        let Some(name) = static_string_text(&literal) else {
+            self.mark_uses_open(component, Namespace::Emit);
             return;
         };
         let mut resolution =
             self.resolve_in_component(component, Namespace::Emit, name.text(), &[]);
-        // `defineModel('value')` declares the event `update:value`.
+        // `defineModel('value')` declares the event `update:value`. Like any
+        // event, it is declared for both script blocks of a file.
         if !matches!(resolution, Resolution::Symbol(_))
             && let Some(model) = name.text().strip_prefix("update:")
-            && let Resolution::Symbol(symbol) = self.resolve_in_component(
-                component,
-                Namespace::Binding,
-                model,
-                &[SymbolKind::Model],
-            )
+            && let Some(symbol) = component
+                .into_iter()
+                .chain(component.and_then(|component| self.builder.paired(component)))
+                .find_map(|id| {
+                    match self.resolve_in_component(
+                        Some(id),
+                        Namespace::Binding,
+                        model,
+                        &[SymbolKind::Model],
+                    ) {
+                        Resolution::Symbol(symbol) => Some(symbol),
+                        _ => None,
+                    }
+                })
         {
             resolution = Resolution::Symbol(symbol);
         }
+        let node = self.node_id(literal.syntax());
         self.builder.add_reference(ReferenceData {
             range: self.host(literal.syntax().text_trimmed_range()),
             name,
@@ -580,21 +611,24 @@ impl Walker<'_> {
             access: Access::Call,
             call_args: Some(arguments.len().saturating_sub(1) as u8),
             resolution,
+            node: Some(node),
         });
     }
 
-    /// Records the template ref a `$refs` member names, as in `$refs.input`.
+    /// Records the template ref that `node` names: the member of `$refs` in
+    /// `$refs.input`, or the argument of `useTemplateRef('input')`.
     fn add_template_ref_reference(
         &mut self,
         component: Option<ComponentId>,
         name: TokenText,
-        range: TextRange,
+        node: &JsSyntaxNode,
         scope: Option<ScopeId>,
     ) {
         let resolution =
             self.resolve_in_component(component, Namespace::TemplateRef, name.text(), &[]);
+        let node_id = self.node_id(node);
         self.builder.add_reference(ReferenceData {
-            range,
+            range: self.host(node.text_trimmed_range()),
             name,
             snippet: self.snippet,
             site: RefSite::TemplateRefKey,
@@ -606,6 +640,7 @@ impl Walker<'_> {
             access: Access::Read,
             call_args: None,
             resolution,
+            node: Some(node_id),
         });
     }
 
@@ -709,11 +744,9 @@ impl Walker<'_> {
             ),
             "$refs" => match usage.path.get(skip) {
                 Some(key) => {
-                    let range = member_range(&usage.top, usage.path.len() - skip - 1).map_or_else(
-                        || self.host(usage.top.text_trimmed_range()),
-                        |range| self.host(range),
-                    );
-                    self.add_template_ref_reference(component, key.clone(), range, scope);
+                    let node = member_node(&usage.top, usage.path.len() - skip - 1)
+                        .unwrap_or_else(|| usage.top.clone());
+                    self.add_template_ref_reference(component, key.clone(), &node, scope);
                 }
                 None => {
                     if usage.path_open || usage.access != Access::Read {
@@ -726,9 +759,9 @@ impl Walker<'_> {
     }
 }
 
-/// Returns the range of the member name `depth` levels below the top of a
+/// Returns the node of the member name `depth` levels below the top of a
 /// member chain: depth 0 is the last name of `a.b.c`.
-fn member_range(top: &JsSyntaxNode, depth: usize) -> Option<TextRange> {
+fn member_node(top: &JsSyntaxNode, depth: usize) -> Option<JsSyntaxNode> {
     let mut node = top.clone();
     for _ in 0..depth {
         node = match node.kind() {
@@ -759,22 +792,19 @@ fn member_range(top: &JsSyntaxNode, depth: usize) -> Option<TextRange> {
             JsStaticMemberExpression::cast(node)?
                 .member()
                 .ok()?
-                .syntax()
-                .text_trimmed_range(),
+                .into_syntax(),
         ),
         JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => Some(
             JsStaticMemberAssignment::cast(node)?
                 .member()
                 .ok()?
-                .syntax()
-                .text_trimmed_range(),
+                .into_syntax(),
         ),
         JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => Some(
             JsComputedMemberExpression::cast(node)?
                 .member()
                 .ok()?
-                .syntax()
-                .text_trimmed_range(),
+                .into_syntax(),
         ),
         _ => None,
     }
@@ -858,6 +888,10 @@ pub(crate) fn collect_template_references(
             | SnippetHost::Interpolation(None)
             | SnippetHost::Unknown => scopes.head,
         };
+        builder.data.snippets[id.index()].name_scope = Some(NameScope {
+            scope,
+            hidden_slot_params: slot_owner,
+        });
 
         let root_expression = match snippet.root {
             AnyJsRoot::JsExpressionTemplateRoot(root) => root
@@ -885,12 +919,21 @@ pub(crate) fn collect_template_references(
             let found = lookup(&walker.builder.data, scope, name.text(), slot_owner);
             let resolution = match found {
                 Some(symbol) => Resolution::Symbol(symbol),
-                None if TEMPLATE_GLOBALS.contains(&name.text()) => Resolution::Global,
+                None if is_template_global(name.text()) => Resolution::Global,
+                // A type, as in `$event.target as HTMLInputElement`, can be
+                // declared by the TypeScript libraries, which the model does
+                // not read.
+                None if AnyJsIdentifierReference::cast_ref(&node)
+                    .is_some_and(|reference| reference.is_only_type()) =>
+                {
+                    Resolution::Unknowable
+                }
                 None if walker.builder.is_open(scopes.component, Namespace::Binding) => {
                     Resolution::Unknowable
                 }
                 None => Resolution::Unresolved,
             };
+            let node_id = walker.node_id(&node);
             walker.builder.add_reference(ReferenceData {
                 range: walker.host(token.text_trimmed_range()),
                 name: name.clone(),
@@ -904,6 +947,7 @@ pub(crate) fn collect_template_references(
                 access: usage.access,
                 call_args: usage.call_args,
                 resolution,
+                node: Some(node_id),
             });
 
             let Some(symbol) = found else {
@@ -945,7 +989,7 @@ pub(crate) fn collect_template_references(
 ///
 /// The slot parameters declared in `slot_owner` are skipped: they are not
 /// visible to the directives of the element that declares them.
-fn lookup(
+pub(crate) fn lookup(
     data: &SemanticModelData,
     scope: ScopeId,
     name: &str,
@@ -1029,6 +1073,7 @@ pub(crate) fn collect_script_references(
                     let Some(token) = node.first_token() else {
                         continue;
                     };
+                    let node_id = walker.node_id(&node);
                     walker.builder.add_reference(ReferenceData {
                         range: walker.host(token.text_trimmed_range()),
                         name: token.token_text_trimmed(),
@@ -1042,6 +1087,7 @@ pub(crate) fn collect_script_references(
                         access: usage.access,
                         call_args: usage.call_args,
                         resolution: Resolution::Symbol(target),
+                        node: Some(node_id),
                     });
                 }
                 _ => {
@@ -1082,6 +1128,35 @@ pub(crate) fn collect_script_references(
         } else if let Some(call) = JsCallExpression::cast_ref(&node) {
             collect_use_template_ref(&mut walker, input, &call, components);
         }
+    }
+
+    // Names written as strings in the options, such as the keys of `watch`.
+    let (names, others): (Vec<_>, Vec<_>) = std::mem::take(&mut walker.builder.option_names)
+        .into_iter()
+        .partition(|name| components.contains(&name.component));
+    walker.builder.option_names = others;
+    for option_name in names {
+        let resolution = walker.resolve_in_component(
+            Some(option_name.component),
+            Namespace::Binding,
+            option_name.name.text(),
+            &[],
+        );
+        walker.builder.add_reference(ReferenceData {
+            range: option_name.range,
+            name: option_name.name,
+            snippet: input.snippet,
+            site: RefSite::OptionName,
+            namespace: Namespace::Binding,
+            scope: None,
+            base: RefBase::This,
+            path: option_name.path,
+            path_open: false,
+            access: option_name.access,
+            call_args: None,
+            resolution,
+            node: Some(option_name.node),
+        });
     }
 }
 
@@ -1139,8 +1214,7 @@ fn collect_use_template_ref(
         }
     };
     let name = inner_string_text(&token);
-    let range = walker.host(argument.syntax().text_trimmed_range());
-    walker.add_template_ref_reference(component, name, range, None);
+    walker.add_template_ref_reference(component, name, argument.syntax(), None);
 }
 
 /// Returns `true` when a `this` expression refers to the component instance.
@@ -1228,6 +1302,7 @@ pub(crate) fn collect_markup_references(builder: &mut ModelBuilder, scopes: &Tem
                 access: Access::Read,
                 call_args: None,
                 resolution,
+                node: None,
             });
             builder.data.elements[index].tag_ref = Some(id);
         }
@@ -1260,6 +1335,7 @@ pub(crate) fn collect_markup_references(builder: &mut ModelBuilder, scopes: &Tem
                         access: Access::Read,
                         call_args: None,
                         resolution,
+                        node: None,
                     });
                 }
             }
@@ -1295,6 +1371,7 @@ pub(crate) fn collect_markup_references(builder: &mut ModelBuilder, scopes: &Tem
                         access: Access::Read,
                         call_args: None,
                         resolution,
+                        node: None,
                     });
                     if let AttrName::Directive { name_ref, .. } =
                         &mut builder.data.attrs[attr.index()].name
@@ -1326,6 +1403,7 @@ pub(crate) fn collect_markup_references(builder: &mut ModelBuilder, scopes: &Tem
                             access: Access::Read,
                             call_args: None,
                             resolution,
+                            node: None,
                         });
                     }
                 }
@@ -1498,5 +1576,22 @@ fn resolve_directive(
         Resolution::Unknowable
     } else {
         Resolution::Unresolved
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TEMPLATE_GLOBALS;
+
+    #[test]
+    fn template_globals_are_sorted() {
+        for pair in TEMPLATE_GLOBALS.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "`{}` must come after `{}` in TEMPLATE_GLOBALS",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }

@@ -13,8 +13,8 @@ component Setup 0..532 name=MyList inheritAttrs=No
   Local model 267..272 origin=DefineModel uses-open
   Local count 424..429 origin=Ref uses-open
   Local double 446..452 origin=Computed getter uses-open
-  Prop title 73..78 form=TypeMember types=String required=Yes uses-open
-  Prop items 88..93 form=TypeMember types=Array required=No default=WithDefaults@165..173 uses-open
+  Prop title 73..78 form=TypeMember types=String required=Yes external-defaults=WithDefaults uses-open
+  Prop items 88..93 form=TypeMember types=Array required=No default=WithDefaults@165..173 external-defaults=WithDefaults uses-open
   Emit change 205..211 form=TypeMember payload=1 uses-open
   Emit close 231..238 form=CallSignature payload=0 uses-open
   Emit open 241..247 form=CallSignature payload=0 uses-open

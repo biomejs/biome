@@ -1,0 +1,723 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var a = function () { foo(); }.bind(bar);
+var b = (function () { foo(); }).bind(bar);
+var c = (() => { foo(); }).bind(bar);
+var d = (() => { this.foo(); }).bind(bar);
+var e = function () { (function () { this.foo(); }()); }.bind(bar);
+var f = function () { function inner() { this.foo(); } }.bind(bar);
+var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+var h = function () { class A { x = this.y; } }.bind(bar);
+var i = function () { class A { static { this.y; } } }.bind(bar);
+var j = function () { foo(); }["bind"](bar);
+var k = function () { foo(); }[`bind`](bar);
+var l = function () { foo(); }?.bind(bar);
+var m = function () { foo(); }.bind?.(bar);
+var n = async function () { await foo(); }.bind(bar);
+var o = function* () { yield foo(); }.bind(bar);
+var p = function () { foo(); }.bind(this);
+var q = function () { foo(); }.bind("x");
+var r = function () { foo(); }.bind(function () {});
+var s = function () { foo(); }.bind(baz());
+var t = function () { foo(); }.bind(obj.prop);
+var u = function () { foo(); }.bind(bar) // trailing comment
+var v = function () { foo(); }.bind(/* comment */ bar);
+var w = function () { foo(); } /* comment */ .bind(bar);
+var x = function () { foo(); }
+    .bind(bar);
+foo(function () { bar(); }.bind(this));
+var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+var z = function () { return { get x() { return this.y; } }; }.bind(bar);
+(function () { foo(); }.bind)(bar);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var a = function () { foo(); }.bind(bar);
+      │                                ^^^^
+    3 │ var b = (function () { foo(); }).bind(bar);
+    4 │ var c = (() => { foo(); }).bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    2 │ var·a·=·function·()·{·foo();·}.bind(bar);
+      │                               ---------- 
+
+```
+
+```
+invalid.js:3:34 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var a = function () { foo(); }.bind(bar);
+  > 3 │ var b = (function () { foo(); }).bind(bar);
+      │                                  ^^^^
+    4 │ var c = (() => { foo(); }).bind(bar);
+    5 │ var d = (() => { this.foo(); }).bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    3 │ var·b·=·(function·()·{·foo();·}).bind(bar);
+      │                                 ---------- 
+
+```
+
+```
+invalid.js:4:28 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    2 │ var a = function () { foo(); }.bind(bar);
+    3 │ var b = (function () { foo(); }).bind(bar);
+  > 4 │ var c = (() => { foo(); }).bind(bar);
+      │                            ^^^^
+    5 │ var d = (() => { this.foo(); }).bind(bar);
+    6 │ var e = function () { (function () { this.foo(); }()); }.bind(bar);
+  
+  i Arrow functions always use the this of the code around them, so bind() can't change it.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    4 │ var·c·=·(()·=>·{·foo();·}).bind(bar);
+      │                           ---------- 
+
+```
+
+```
+invalid.js:5:33 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    3 │ var b = (function () { foo(); }).bind(bar);
+    4 │ var c = (() => { foo(); }).bind(bar);
+  > 5 │ var d = (() => { this.foo(); }).bind(bar);
+      │                                 ^^^^
+    6 │ var e = function () { (function () { this.foo(); }()); }.bind(bar);
+    7 │ var f = function () { function inner() { this.foo(); } }.bind(bar);
+  
+  i Arrow functions always use the this of the code around them, so bind() can't change it.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    5 │ var·d·=·(()·=>·{·this.foo();·}).bind(bar);
+      │                                ---------- 
+
+```
+
+```
+invalid.js:6:58 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    4 │ var c = (() => { foo(); }).bind(bar);
+    5 │ var d = (() => { this.foo(); }).bind(bar);
+  > 6 │ var e = function () { (function () { this.foo(); }()); }.bind(bar);
+      │                                                          ^^^^
+    7 │ var f = function () { function inner() { this.foo(); } }.bind(bar);
+    8 │ var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    6 │ var·e·=·function·()·{·(function·()·{·this.foo();·}());·}.bind(bar);
+      │                                                         ---------- 
+
+```
+
+```
+invalid.js:7:58 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    5 │ var d = (() => { this.foo(); }).bind(bar);
+    6 │ var e = function () { (function () { this.foo(); }()); }.bind(bar);
+  > 7 │ var f = function () { function inner() { this.foo(); } }.bind(bar);
+      │                                                          ^^^^
+    8 │ var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+    9 │ var h = function () { class A { x = this.y; } }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    7 │ var·f·=·function·()·{·function·inner()·{·this.foo();·}·}.bind(bar);
+      │                                                         ---------- 
+
+```
+
+```
+invalid.js:8:67 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+     6 │ var e = function () { (function () { this.foo(); }()); }.bind(bar);
+     7 │ var f = function () { function inner() { this.foo(); } }.bind(bar);
+   > 8 │ var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+       │                                                                   ^^^^
+     9 │ var h = function () { class A { x = this.y; } }.bind(bar);
+    10 │ var i = function () { class A { static { this.y; } } }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    8 │ var·g·=·function·()·{·return·{·method()·{·return·this.foo;·}·};·}.bind(bar);
+      │                                                                  ---------- 
+
+```
+
+```
+invalid.js:9:49 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+     7 │ var f = function () { function inner() { this.foo(); } }.bind(bar);
+     8 │ var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+   > 9 │ var h = function () { class A { x = this.y; } }.bind(bar);
+       │                                                 ^^^^
+    10 │ var i = function () { class A { static { this.y; } } }.bind(bar);
+    11 │ var j = function () { foo(); }["bind"](bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    9 │ var·h·=·function·()·{·class·A·{·x·=·this.y;·}·}.bind(bar);
+      │                                                ---------- 
+
+```
+
+```
+invalid.js:10:56 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+     8 │ var g = function () { return { method() { return this.foo; } }; }.bind(bar);
+     9 │ var h = function () { class A { x = this.y; } }.bind(bar);
+  > 10 │ var i = function () { class A { static { this.y; } } }.bind(bar);
+       │                                                        ^^^^
+    11 │ var j = function () { foo(); }["bind"](bar);
+    12 │ var k = function () { foo(); }[`bind`](bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    10 │ var·i·=·function·()·{·class·A·{·static·{·this.y;·}·}·}.bind(bar);
+       │                                                       ---------- 
+
+```
+
+```
+invalid.js:11:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+     9 │ var h = function () { class A { x = this.y; } }.bind(bar);
+    10 │ var i = function () { class A { static { this.y; } } }.bind(bar);
+  > 11 │ var j = function () { foo(); }["bind"](bar);
+       │                                ^^^^^^
+    12 │ var k = function () { foo(); }[`bind`](bar);
+    13 │ var l = function () { foo(); }?.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    11 │ var·j·=·function·()·{·foo();·}["bind"](bar);
+       │                               ------------- 
+
+```
+
+```
+invalid.js:12:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    10 │ var i = function () { class A { static { this.y; } } }.bind(bar);
+    11 │ var j = function () { foo(); }["bind"](bar);
+  > 12 │ var k = function () { foo(); }[`bind`](bar);
+       │                                ^^^^^^
+    13 │ var l = function () { foo(); }?.bind(bar);
+    14 │ var m = function () { foo(); }.bind?.(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    12 │ var·k·=·function·()·{·foo();·}[`bind`](bar);
+       │                               ------------- 
+
+```
+
+```
+invalid.js:13:33 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    11 │ var j = function () { foo(); }["bind"](bar);
+    12 │ var k = function () { foo(); }[`bind`](bar);
+  > 13 │ var l = function () { foo(); }?.bind(bar);
+       │                                 ^^^^
+    14 │ var m = function () { foo(); }.bind?.(bar);
+    15 │ var n = async function () { await foo(); }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    13 │ var·l·=·function·()·{·foo();·}?.bind(bar);
+       │                               ----------- 
+
+```
+
+```
+invalid.js:14:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    12 │ var k = function () { foo(); }[`bind`](bar);
+    13 │ var l = function () { foo(); }?.bind(bar);
+  > 14 │ var m = function () { foo(); }.bind?.(bar);
+       │                                ^^^^
+    15 │ var n = async function () { await foo(); }.bind(bar);
+    16 │ var o = function* () { yield foo(); }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    14 │ var·m·=·function·()·{·foo();·}.bind?.(bar);
+       │                               ------------ 
+
+```
+
+```
+invalid.js:15:44 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    13 │ var l = function () { foo(); }?.bind(bar);
+    14 │ var m = function () { foo(); }.bind?.(bar);
+  > 15 │ var n = async function () { await foo(); }.bind(bar);
+       │                                            ^^^^
+    16 │ var o = function* () { yield foo(); }.bind(bar);
+    17 │ var p = function () { foo(); }.bind(this);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    15 │ var·n·=·async·function·()·{·await·foo();·}.bind(bar);
+       │                                           ---------- 
+
+```
+
+```
+invalid.js:16:39 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    14 │ var m = function () { foo(); }.bind?.(bar);
+    15 │ var n = async function () { await foo(); }.bind(bar);
+  > 16 │ var o = function* () { yield foo(); }.bind(bar);
+       │                                       ^^^^
+    17 │ var p = function () { foo(); }.bind(this);
+    18 │ var q = function () { foo(); }.bind("x");
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    16 │ var·o·=·function*·()·{·yield·foo();·}.bind(bar);
+       │                                      ---------- 
+
+```
+
+```
+invalid.js:17:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    15 │ var n = async function () { await foo(); }.bind(bar);
+    16 │ var o = function* () { yield foo(); }.bind(bar);
+  > 17 │ var p = function () { foo(); }.bind(this);
+       │                                ^^^^
+    18 │ var q = function () { foo(); }.bind("x");
+    19 │ var r = function () { foo(); }.bind(function () {});
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    17 │ var·p·=·function·()·{·foo();·}.bind(this);
+       │                               ----------- 
+
+```
+
+```
+invalid.js:18:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    16 │ var o = function* () { yield foo(); }.bind(bar);
+    17 │ var p = function () { foo(); }.bind(this);
+  > 18 │ var q = function () { foo(); }.bind("x");
+       │                                ^^^^
+    19 │ var r = function () { foo(); }.bind(function () {});
+    20 │ var s = function () { foo(); }.bind(baz());
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    18 │ var·q·=·function·()·{·foo();·}.bind("x");
+       │                               ---------- 
+
+```
+
+```
+invalid.js:19:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    17 │ var p = function () { foo(); }.bind(this);
+    18 │ var q = function () { foo(); }.bind("x");
+  > 19 │ var r = function () { foo(); }.bind(function () {});
+       │                                ^^^^
+    20 │ var s = function () { foo(); }.bind(baz());
+    21 │ var t = function () { foo(); }.bind(obj.prop);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    19 │ var·r·=·function·()·{·foo();·}.bind(function·()·{});
+       │                               --------------------- 
+
+```
+
+```
+invalid.js:20:32 lint/nursery/noUselessBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    18 │ var q = function () { foo(); }.bind("x");
+    19 │ var r = function () { foo(); }.bind(function () {});
+  > 20 │ var s = function () { foo(); }.bind(baz());
+       │                                ^^^^
+    21 │ var t = function () { foo(); }.bind(obj.prop);
+    22 │ var u = function () { foo(); }.bind(bar) // trailing comment
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:32 lint/nursery/noUselessBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    19 │ var r = function () { foo(); }.bind(function () {});
+    20 │ var s = function () { foo(); }.bind(baz());
+  > 21 │ var t = function () { foo(); }.bind(obj.prop);
+       │                                ^^^^
+    22 │ var u = function () { foo(); }.bind(bar) // trailing comment
+    23 │ var v = function () { foo(); }.bind(/* comment */ bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:32 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    20 │ var s = function () { foo(); }.bind(baz());
+    21 │ var t = function () { foo(); }.bind(obj.prop);
+  > 22 │ var u = function () { foo(); }.bind(bar) // trailing comment
+       │                                ^^^^
+    23 │ var v = function () { foo(); }.bind(/* comment */ bar);
+    24 │ var w = function () { foo(); } /* comment */ .bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    22 │ var·u·=·function·()·{·foo();·}.bind(bar)·//·trailing·comment
+       │                               ----------                    
+
+```
+
+```
+invalid.js:23:32 lint/nursery/noUselessBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    21 │ var t = function () { foo(); }.bind(obj.prop);
+    22 │ var u = function () { foo(); }.bind(bar) // trailing comment
+  > 23 │ var v = function () { foo(); }.bind(/* comment */ bar);
+       │                                ^^^^
+    24 │ var w = function () { foo(); } /* comment */ .bind(bar);
+    25 │ var x = function () { foo(); }
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:47 lint/nursery/noUselessBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    22 │ var u = function () { foo(); }.bind(bar) // trailing comment
+    23 │ var v = function () { foo(); }.bind(/* comment */ bar);
+  > 24 │ var w = function () { foo(); } /* comment */ .bind(bar);
+       │                                               ^^^^
+    25 │ var x = function () { foo(); }
+    26 │     .bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:6 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    24 │ var w = function () { foo(); } /* comment */ .bind(bar);
+    25 │ var x = function () { foo(); }
+  > 26 │     .bind(bar);
+       │      ^^^^
+    27 │ foo(function () { bar(); }.bind(this));
+    28 │ var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    23 23 │   var v = function () { foo(); }.bind(/* comment */ bar);
+    24 24 │   var w = function () { foo(); } /* comment */ .bind(bar);
+    25    │ - var·x·=·function·()·{·foo();·}
+    26    │ - ····.bind(bar);
+       25 │ + var·x·=·function·()·{·foo();·};
+    27 26 │   foo(function () { bar(); }.bind(this));
+    28 27 │   var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+  
+
+```
+
+```
+invalid.js:27:28 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    25 │ var x = function () { foo(); }
+    26 │     .bind(bar);
+  > 27 │ foo(function () { bar(); }.bind(this));
+       │                            ^^^^
+    28 │ var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+    29 │ var z = function () { return { get x() { return this.y; } }; }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    27 │ foo(function·()·{·bar();·}.bind(this));
+       │                           -----------  
+
+```
+
+```
+invalid.js:28:89 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    26 │     .bind(bar);
+    27 │ foo(function () { bar(); }.bind(this));
+  > 28 │ var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+       │                                                                                         ^^^^
+    29 │ var z = function () { return { get x() { return this.y; } }; }.bind(bar);
+    30 │ (function () { foo(); }.bind)(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    28 │ var·y·=·function·()·{·class·A·{·get·x()·{·return·this.y;·}·set·x(v)·{·this.y·=·v;·}·}·}.bind(bar);
+       │                                                                                        ---------- 
+
+```
+
+```
+invalid.js:29:64 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    27 │ foo(function () { bar(); }.bind(this));
+    28 │ var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+  > 29 │ var z = function () { return { get x() { return this.y; } }; }.bind(bar);
+       │                                                                ^^^^
+    30 │ (function () { foo(); }.bind)(bar);
+    31 │ 
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    29 │ var·z·=·function·()·{·return·{·get·x()·{·return·this.y;·}·};·}.bind(bar);
+       │                                                               ---------- 
+
+```
+
+```
+invalid.js:30:25 lint/nursery/noUselessBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    28 │ var y = function () { class A { get x() { return this.y; } set x(v) { this.y = v; } } }.bind(bar);
+    29 │ var z = function () { return { get x() { return this.y; } }; }.bind(bar);
+  > 30 │ (function () { foo(); }.bind)(bar);
+       │                         ^^^^
+    31 │ 
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

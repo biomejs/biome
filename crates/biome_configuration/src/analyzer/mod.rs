@@ -579,6 +579,47 @@ where
     }
 }
 
+/// Names the options of a rule in the JSON schema.
+///
+/// The rules without options share one options type, but the JSON schema
+/// keeps a definition per rule, named after the rule.
+#[cfg(feature = "schema")]
+pub trait RuleOptionsName {
+    /// The name of the definition of the options in the JSON schema.
+    const NAME: &'static str;
+
+    /// The options of the rule.
+    type Options: schemars::JsonSchema;
+}
+
+/// Stands for the options of a rule in the JSON schema, to give them the
+/// name that `N` tells instead of the name of their type.
+#[cfg(feature = "schema")]
+pub struct NamedRuleOptions<N>(std::marker::PhantomData<N>);
+
+#[cfg(feature = "schema")]
+impl<N> Default for NamedRuleOptions<N> {
+    fn default() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl<N> Merge for NamedRuleOptions<N> {
+    fn merge_with(&mut self, _other: Self) {}
+}
+
+#[cfg(feature = "schema")]
+impl<N: RuleOptionsName> schemars::JsonSchema for NamedRuleOptions<N> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed(N::NAME)
+    }
+
+    fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
+        <N::Options as schemars::JsonSchema>::json_schema(generator)
+    }
+}
+
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub enum AnalyzerSelector {
     Rule(RuleSelector),

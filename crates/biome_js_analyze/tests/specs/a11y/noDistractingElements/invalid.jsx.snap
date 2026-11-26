@@ -9,7 +9,15 @@ expression: invalid.jsx
     <div />
     <marquee />
     <blink />
-</div>
+    <marquee>News</marquee>
+    <blink>
+        <span>Sale</span>
+    </blink>
+</div>;
+
+export const Ticker = () => <marquee>News</marquee>;
+
+export const Blinker = () => <blink />;
 
 ```
 
@@ -24,7 +32,7 @@ invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
   > 4 │     <marquee />
       │     ^^^^^^^^^^^
     5 │     <blink />
-    6 │ </div>
+    6 │     <marquee>News</marquee>
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
@@ -44,8 +52,8 @@ invalid.jsx:5:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
     4 │     <marquee />
   > 5 │     <blink />
       │     ^^^^^^^^^
-    6 │ </div>
-    7 │ 
+    6 │     <marquee>News</marquee>
+    7 │     <blink>
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
@@ -53,5 +61,87 @@ invalid.jsx:5:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
   
     5 │ ····<blink·/>
       │     ---------
+
+```
+
+```
+invalid.jsx:6:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+    4 │     <marquee />
+    5 │     <blink />
+  > 6 │     <marquee>News</marquee>
+      │     ^^^^^^^^^
+    7 │     <blink>
+    8 │         <span>Sale</span>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'marquee' element.
+  
+    6 │ ····<marquee>News</marquee>
+      │     -----------------------
+
+```
+
+```
+invalid.jsx:7:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    5 │     <blink />
+    6 │     <marquee>News</marquee>
+  > 7 │     <blink>
+      │     ^^^^^^^
+    8 │         <span>Sale</span>
+    9 │     </blink>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Unsafe fix: Remove the 'blink' element.
+  
+     5  5 │       <blink />
+     6  6 │       <marquee>News</marquee>
+     7    │ - ····<blink>
+     8    │ - ········<span>Sale</span>
+     9    │ - ····</blink>
+        7 │ + ····
+    10  8 │   </div>;
+    11  9 │   
+  
+
+```
+
+```
+invalid.jsx:12:29 lint/a11y/noDistractingElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'marquee' element.
+  
+    10 │ </div>;
+    11 │ 
+  > 12 │ export const Ticker = () => <marquee>News</marquee>;
+       │                             ^^^^^^^^^
+    13 │ 
+    14 │ export const Blinker = () => <blink />;
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+
+```
+
+```
+invalid.jsx:14:30 lint/a11y/noDistractingElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use the 'blink' element.
+  
+    12 │ export const Ticker = () => <marquee>News</marquee>;
+    13 │ 
+  > 14 │ export const Blinker = () => <blink />;
+       │                              ^^^^^^^^^
+    15 │ 
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
 
 ```

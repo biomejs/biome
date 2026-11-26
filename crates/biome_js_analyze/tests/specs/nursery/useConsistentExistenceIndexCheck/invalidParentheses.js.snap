@@ -1,0 +1,540 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidParentheses.js
+---
+# Input
+```js
+/* should generate diagnostics */
+{
+	const index = list.indexOf(item);
+	expected === index < 0;
+	expected !== index >= 0;
+	expected == index > -1;
+	expected != index < 0;
+}
+{
+	const index = list.indexOf(item);
+	index < 0 < expected;
+	index >= 0 === expected;
+	expected === (index < 0);
+	expected === ((index < 0));
+	expected === index /* before */ < /* after */ 0;
+	index < 0 && expected;
+	index < 0 | mask;
+	index < 0 in object;
+	index < 0 instanceof Foo;
+}
+{
+	const index = list.indexOf(item);
+	foo()
+	index < 0 < 1
+}
+{
+	const index = list.indexOf(item);
+	foo() // keep
+	index < 0 < 1
+}
+{
+	const index = list.indexOf(item);
+	const previous = value
+	index < 0 === expected
+}
+{
+	const index = list.indexOf(item);
+	foo();
+	index < 0 < 1;
+}
+{
+	const index = list.indexOf(item);
+	if (ready)
+	index < 0 < 1
+}
+
+```
+
+# Diagnostics
+```
+invalidParentheses.js:4:21 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    2 │ {
+    3 │ 	const index = list.indexOf(item);
+  > 4 │ 	expected === index < 0;
+      │ 	                   ^^^
+    5 │ 	expected !== index >= 0;
+    6 │ 	expected == index > -1;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     2  2 │   {
+     3  3 │     const index = list.indexOf(item);
+     4    │ - → expected·===·index·<·0;
+        4 │ + → expected·===·(index·===·-1);
+     5  5 │     expected !== index >= 0;
+     6  6 │     expected == index > -1;
+  
+
+```
+
+```
+invalidParentheses.js:5:21 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses >= 0 to check whether indexOf() found an element.
+  
+    3 │ 	const index = list.indexOf(item);
+    4 │ 	expected === index < 0;
+  > 5 │ 	expected !== index >= 0;
+      │ 	                   ^^^^
+    6 │ 	expected == index > -1;
+    7 │ 	expected != index < 0;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+     3  3 │     const index = list.indexOf(item);
+     4  4 │     expected === index < 0;
+     5    │ - → expected·!==·index·>=·0;
+        5 │ + → expected·!==·(index·!==·-1);
+     6  6 │     expected == index > -1;
+     7  7 │     expected != index < 0;
+  
+
+```
+
+```
+invalidParentheses.js:6:20 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses > -1 to check whether indexOf() found an element.
+  
+    4 │ 	expected === index < 0;
+    5 │ 	expected !== index >= 0;
+  > 6 │ 	expected == index > -1;
+      │ 	                  ^^^^
+    7 │ 	expected != index < 0;
+    8 │ }
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+     4  4 │     expected === index < 0;
+     5  5 │     expected !== index >= 0;
+     6    │ - → expected·==·index·>·-1;
+        6 │ + → expected·==·(index·!==·-1);
+     7  7 │     expected != index < 0;
+     8  8 │   }
+  
+
+```
+
+```
+invalidParentheses.js:7:20 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    5 │ 	expected !== index >= 0;
+    6 │ 	expected == index > -1;
+  > 7 │ 	expected != index < 0;
+      │ 	                  ^^^
+    8 │ }
+    9 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     5  5 │     expected !== index >= 0;
+     6  6 │     expected == index > -1;
+     7    │ - → expected·!=·index·<·0;
+        7 │ + → expected·!=·(index·===·-1);
+     8  8 │   }
+     9  9 │   {
+  
+
+```
+
+```
+invalidParentheses.js:11:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+     9 │ {
+    10 │ 	const index = list.indexOf(item);
+  > 11 │ 	index < 0 < expected;
+       │ 	      ^^^
+    12 │ 	index >= 0 === expected;
+    13 │ 	expected === (index < 0);
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     9  9 │   {
+    10 10 │     const index = list.indexOf(item);
+    11    │ - → index·<·0·<·expected;
+       11 │ + → (index·===·-1)·<·expected;
+    12 12 │     index >= 0 === expected;
+    13 13 │     expected === (index < 0);
+  
+
+```
+
+```
+invalidParentheses.js:12:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses >= 0 to check whether indexOf() found an element.
+  
+    10 │ 	const index = list.indexOf(item);
+    11 │ 	index < 0 < expected;
+  > 12 │ 	index >= 0 === expected;
+       │ 	      ^^^^
+    13 │ 	expected === (index < 0);
+    14 │ 	expected === ((index < 0));
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    10 10 │     const index = list.indexOf(item);
+    11 11 │     index < 0 < expected;
+    12    │ - → index·>=·0·===·expected;
+       12 │ + → index·!==·-1·===·expected;
+    13 13 │     expected === (index < 0);
+    14 14 │     expected === ((index < 0));
+  
+
+```
+
+```
+invalidParentheses.js:13:22 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    11 │ 	index < 0 < expected;
+    12 │ 	index >= 0 === expected;
+  > 13 │ 	expected === (index < 0);
+       │ 	                    ^^^
+    14 │ 	expected === ((index < 0));
+    15 │ 	expected === index /* before */ < /* after */ 0;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    11 11 │     index < 0 < expected;
+    12 12 │     index >= 0 === expected;
+    13    │ - → expected·===·(index·<·0);
+       13 │ + → expected·===·(index·===·-1);
+    14 14 │     expected === ((index < 0));
+    15 15 │     expected === index /* before */ < /* after */ 0;
+  
+
+```
+
+```
+invalidParentheses.js:14:23 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    12 │ 	index >= 0 === expected;
+    13 │ 	expected === (index < 0);
+  > 14 │ 	expected === ((index < 0));
+       │ 	                     ^^^
+    15 │ 	expected === index /* before */ < /* after */ 0;
+    16 │ 	index < 0 && expected;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    12 12 │     index >= 0 === expected;
+    13 13 │     expected === (index < 0);
+    14    │ - → expected·===·((index·<·0));
+       14 │ + → expected·===·((index·===·-1));
+    15 15 │     expected === index /* before */ < /* after */ 0;
+    16 16 │     index < 0 && expected;
+  
+
+```
+
+```
+invalidParentheses.js:15:34 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    13 │ 	expected === (index < 0);
+    14 │ 	expected === ((index < 0));
+  > 15 │ 	expected === index /* before */ < /* after */ 0;
+       │ 	                                ^^^^^^^^^^^^^^^
+    16 │ 	index < 0 && expected;
+    17 │ 	index < 0 | mask;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    13 13 │     expected === (index < 0);
+    14 14 │     expected === ((index < 0));
+    15    │ - → expected·===·index·/*·before·*/·<·/*·after·*/·0;
+       15 │ + → expected·===·(index·/*·before·*/·===·/*·after·*/·-1);
+    16 16 │     index < 0 && expected;
+    17 17 │     index < 0 | mask;
+  
+
+```
+
+```
+invalidParentheses.js:16:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    14 │ 	expected === ((index < 0));
+    15 │ 	expected === index /* before */ < /* after */ 0;
+  > 16 │ 	index < 0 && expected;
+       │ 	      ^^^
+    17 │ 	index < 0 | mask;
+    18 │ 	index < 0 in object;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    14 14 │     expected === ((index < 0));
+    15 15 │     expected === index /* before */ < /* after */ 0;
+    16    │ - → index·<·0·&&·expected;
+       16 │ + → index·===·-1·&&·expected;
+    17 17 │     index < 0 | mask;
+    18 18 │     index < 0 in object;
+  
+
+```
+
+```
+invalidParentheses.js:17:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    15 │ 	expected === index /* before */ < /* after */ 0;
+    16 │ 	index < 0 && expected;
+  > 17 │ 	index < 0 | mask;
+       │ 	      ^^^
+    18 │ 	index < 0 in object;
+    19 │ 	index < 0 instanceof Foo;
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    15 15 │     expected === index /* before */ < /* after */ 0;
+    16 16 │     index < 0 && expected;
+    17    │ - → index·<·0·|·mask;
+       17 │ + → index·===·-1·|·mask;
+    18 18 │     index < 0 in object;
+    19 19 │     index < 0 instanceof Foo;
+  
+
+```
+
+```
+invalidParentheses.js:18:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    16 │ 	index < 0 && expected;
+    17 │ 	index < 0 | mask;
+  > 18 │ 	index < 0 in object;
+       │ 	      ^^^
+    19 │ 	index < 0 instanceof Foo;
+    20 │ }
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    16 16 │     index < 0 && expected;
+    17 17 │     index < 0 | mask;
+    18    │ - → index·<·0·in·object;
+       18 │ + → (index·===·-1)·in·object;
+    19 19 │     index < 0 instanceof Foo;
+    20 20 │   }
+  
+
+```
+
+```
+invalidParentheses.js:19:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    17 │ 	index < 0 | mask;
+    18 │ 	index < 0 in object;
+  > 19 │ 	index < 0 instanceof Foo;
+       │ 	      ^^^
+    20 │ }
+    21 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    17 17 │     index < 0 | mask;
+    18 18 │     index < 0 in object;
+    19    │ - → index·<·0·instanceof·Foo;
+       19 │ + → (index·===·-1)·instanceof·Foo;
+    20 20 │   }
+    21 21 │   {
+  
+
+```
+
+```
+invalidParentheses.js:24:8 lint/nursery/useConsistentExistenceIndexCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    22 │ 	const index = list.indexOf(item);
+    23 │ 	foo()
+  > 24 │ 	index < 0 < 1
+       │ 	      ^^^
+    25 │ }
+    26 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidParentheses.js:29:8 lint/nursery/useConsistentExistenceIndexCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    27 │ 	const index = list.indexOf(item);
+    28 │ 	foo() // keep
+  > 29 │ 	index < 0 < 1
+       │ 	      ^^^
+    30 │ }
+    31 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidParentheses.js:34:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    32 │ 	const index = list.indexOf(item);
+    33 │ 	const previous = value
+  > 34 │ 	index < 0 === expected
+       │ 	      ^^^
+    35 │ }
+    36 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    32 32 │     const index = list.indexOf(item);
+    33 33 │     const previous = value
+    34    │ - → index·<·0·===·expected
+       34 │ + → index·===·-1·===·expected
+    35 35 │   }
+    36 36 │   {
+  
+
+```
+
+```
+invalidParentheses.js:39:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    37 │ 	const index = list.indexOf(item);
+    38 │ 	foo();
+  > 39 │ 	index < 0 < 1;
+       │ 	      ^^^
+    40 │ }
+    41 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    37 37 │     const index = list.indexOf(item);
+    38 38 │     foo();
+    39    │ - → index·<·0·<·1;
+       39 │ + → (index·===·-1)·<·1;
+    40 40 │   }
+    41 41 │   {
+  
+
+```
+
+```
+invalidParentheses.js:44:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    42 │ 	const index = list.indexOf(item);
+    43 │ 	if (ready)
+  > 44 │ 	index < 0 < 1
+       │ 	      ^^^
+    45 │ }
+    46 │ 
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    42 42 │     const index = list.indexOf(item);
+    43 43 │     if (ready)
+    44    │ - → index·<·0·<·1
+       44 │ + → (index·===·-1)·<·1
+    45 45 │   }
+    46 46 │   
+  
+
+```

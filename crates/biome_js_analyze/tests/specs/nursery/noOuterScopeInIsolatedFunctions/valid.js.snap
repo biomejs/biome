@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const foo = "hi";
+
+makeSynchronous(() => {
+	const foo = "hi";
+	return foo.slice();
+});
+
+makeSynchronous((foo) => foo.slice());
+
+makeSynchronous(async function (foo) {
+	return foo.slice();
+});
+
+// Global variables are allowed.
+makeSynchronous(() => (process.env.MAP ? new Map() : new URL("https://example.com")));
+makeSynchronous(async () => {
+	const response = await fetch("https://example.com");
+	console.log(response.status);
+	return response.text();
+});
+
+// A named function expression can call itself.
+makeSynchronous(function retry(count) {
+	return count > 0 ? retry(count - 1) : 0;
+});
+
+/** @isolated */
+function recursive(count) {
+	return count > 0 ? recursive(count - 1) : 0;
+}
+
+/** @isolated */
+function inner() {
+	const foo = "hi";
+	const slice = () => foo.slice();
+	return slice();
+}
+
+// Nested regular functions and class members have their own `this`.
+/** @isolated */
+function nestedFunction() {
+	function getValue() {
+		return this.value;
+	}
+	return getValue;
+}
+
+/** @isolated */
+function nestedClass() {
+	return class {
+		value = this.other;
+		method() {
+			return this.value;
+		}
+		static {
+			this.count = 0;
+		}
+	};
+}
+
+makeSynchronous(() => ({
+	method() {
+		return this.value;
+	},
+	get getter() {
+		return this.value;
+	},
+}));
+
+// Functions are not isolated without a known API or an `@isolated` comment.
+memoize(() => foo.slice());
+serialize(() => foo.slice());
+frame.evaluate(() => foo.slice());
+utils.makeSynchronous(() => foo.slice());
+
+// Only the first function passed to these methods is isolated.
+browser.execute(() => "browser", () => foo.slice());
+page.evaluate(() => "page", () => foo.slice());
+
+// Computed method names are not recognized.
+browser["execute"](() => foo.slice());
+page["evaluate"](() => foo.slice());
+chrome.scripting["executeScript"]({
+	func: () => foo.slice(),
+});
+
+// Only a `func` function in the first argument of `executeScript()` is isolated.
+const func = () => foo.slice();
+chrome.scripting.executeScript({ func });
+chrome.scripting.executeScript({
+	[func]: () => foo.slice(),
+});
+chrome.scripting.executeScript({
+	get func() {
+		return () => foo.slice();
+	},
+});
+chrome.scripting.executeScript(target, {
+	func: () => foo.slice(),
+});
+chrome.scripting.executeScript({
+	other: () => foo.slice(),
+});
+other.scripting.executeScript({
+	func: () => foo.slice(),
+});
+
+// Comments that only mention the tag don't mark the function.
+// @isolated functions are great
+const notTagged = () => foo.slice();
+
+// @isolatedFunction
+const otherTag = () => foo.slice();
+
+/** @isolated */
+// a later comment replaces the tag
+const laterComment = () => foo.slice();
+
+// The comment applies to the declaration it precedes.
+// @isolated
+const notAFunction = 1;
+const afterTaggedDeclaration = () => foo.slice();
+
+// The computed name and decorators of an isolated method run outside of it.
+const key = "method";
+const object = {
+	/** @isolated */
+	[key]() {
+		return 1;
+	},
+};
+class WithComputedName {
+	/** @isolated */
+	[this.key]() {
+		return 1;
+	}
+}
+
+```

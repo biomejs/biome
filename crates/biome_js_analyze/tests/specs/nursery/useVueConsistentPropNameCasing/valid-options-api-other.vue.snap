@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api-other.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  props: some_props,
+  data() {
+    return { greeting_text: '' };
+  },
+  methods: {
+    greeting_text() {},
+  },
+}
+</script>
+
+```

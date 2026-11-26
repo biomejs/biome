@@ -250,12 +250,11 @@ fn with_tailwind_options(
         let mut combined: Vec<String> = existing_object
             .as_ref()
             .and_then(|object| object.find_member(name)?.value().ok())
-            .map(|value| {
+            .map_or_default(|value| {
                 string_values(&value)
                     .map(|value| value.to_string())
                     .collect()
-            })
-            .unwrap_or_default();
+            });
         for value in values {
             if !combined.contains(value) {
                 combined.push(value.clone());

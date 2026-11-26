@@ -50,12 +50,14 @@ use crate::workspace::{
     GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
     RenameResult, SearchQuery,
 };
+#[cfg(feature = "lang_js")]
+use biome_analyze::RuleExecutionScope;
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
     AnalyzerSignal, ControlFlow, EmbeddedSignalInspector, FixKind, GroupCategory, Never,
     PLUGIN_GROUP, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError,
-    RuleFilter, RuleGroup, SnippetAnalyzer,
+    RuleExecutionContext, RuleFilter, RuleGroup, SnippetAnalyzer,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::assist::Actions;
@@ -86,7 +88,8 @@ use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
-    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
+    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, MdxEmbeddingKind,
+    SvelteEmbeddingKind, SvelteFileKind,
 };
 use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
@@ -174,6 +177,56 @@ pub(crate) enum ParsedSnippetOrigin {
         content: EmbedContent,
         file_source: DocumentFileSource,
     },
+}
+
+#[cfg(feature = "lang_js")]
+fn is_js_program(source: JsFileSource) -> bool {
+    match source.as_embedding_kind() {
+        JsEmbeddingKind::Astro { frontmatter, .. } => *frontmatter,
+        JsEmbeddingKind::Vue { is_source, .. } => *is_source,
+        JsEmbeddingKind::Svelte { embedding_kind, .. } => {
+            matches!(embedding_kind, SvelteEmbeddingKind::Source)
+        }
+        JsEmbeddingKind::Mdx { kind } => matches!(kind, MdxEmbeddingKind::Esm),
+        JsEmbeddingKind::None => true,
+    }
+}
+
+#[cfg(feature = "lang_js")]
+pub(crate) fn js_host_document_snippet_index(
+    snippets: &[ParsedSnippetOrigin],
+    db: &WorkspaceDb,
+) -> Option<usize> {
+    let mut first_js = None;
+    for (index, snippet) in snippets.iter().enumerate() {
+        let Some(source) = snippet
+            .file_source(db)
+            .and_then(|source| source.to_js_file_source())
+        else {
+            continue;
+        };
+        first_js.get_or_insert(index);
+        if is_js_program(source) {
+            return Some(index);
+        }
+    }
+    first_js
+}
+
+/// Returns the context for the registry of an embedded JavaScript snippet: it
+/// registers `Snippet` rules, plus `HostDocument` rules when `host_document`
+/// is `true`. Pass `true` only for the snippet that
+/// [`js_host_document_snippet_index`] selects, so that the file's
+/// document-level rules report once.
+#[cfg(feature = "lang_js")]
+pub(crate) fn js_rule_execution_context(host_document: bool) -> RuleExecutionContext {
+    if host_document {
+        RuleExecutionContext::from_scopes(
+            RuleExecutionScope::Snippet | RuleExecutionScope::HostDocument,
+        )
+    } else {
+        RuleExecutionContext::from_scopes(RuleExecutionScope::Snippet)
+    }
 }
 
 impl ParsedSnippetOrigin {
@@ -384,9 +437,15 @@ impl<'a> SnippetsIterator<'a> {
         Self::Workspace(snippets.into_iter())
     }
 
-    /// Excludes host-owned template comments from guest analysis, and every
+    /// Excludes host-owned template comments, such as Astro template comments
+    /// and comment-only MDX expressions, and MDX JavaScript that spans lines
+    /// inside a block quote from guest analysis, and every
     /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
     /// host suppression extraction.
+    ///
+    /// The JavaScript of MDX constructs is analyzed regardless of
+    /// `markdown.analyzeEmbeds`: MDX compiles it into the document's module, so
+    /// its mistakes break the document, unlike the examples in code blocks.
     pub(crate) fn for_analysis(
         self,
         host: &'a ParsedOrigin,
@@ -402,11 +461,17 @@ impl<'a> SnippetsIterator<'a> {
         self.filter(move |snippet| {
             let _ = (host, source, snippet, db);
             #[cfg(feature = "md_embeds")]
-            if skips_markdown_snippets {
+            if skips_markdown_snippets && !is_mdx_snippet(snippet, db) {
                 return false;
             }
             #[cfg(feature = "html_embeds")]
             if html::is_astro_template_comment(host, source, snippet, db) {
+                return false;
+            }
+            #[cfg(feature = "lang_mdx")]
+            if md::is_mdx_comment_snippet(snippet, db)
+                || md::is_quoted_multiline_mdx_snippet(host, snippet, db)
+            {
                 return false;
             }
             true
@@ -415,18 +480,34 @@ impl<'a> SnippetsIterator<'a> {
 
     /// Excludes the snippets whose syntax errors don't stop formatting the
     /// containing file: the formatter of a Markdown file keeps such snippets as
-    /// written.
+    /// written. The JavaScript of an MDX construct is part of the document's
+    /// syntax, so its syntax errors stop formatting like the document's own.
     pub(crate) fn blocking_formatting(
         self,
         source: DocumentFileSource,
+        db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
-        let _ = source;
+        let _ = (source, db);
         #[cfg(feature = "lang_md")]
         let blocks = source.to_markdown_file_source().is_none();
         #[cfg(not(feature = "lang_md"))]
         let blocks = true;
-        self.filter(move |_| blocks)
+        self.filter(move |snippet| blocks || is_mdx_snippet(snippet, db))
     }
+}
+
+/// Returns whether `snippet` holds the JavaScript of an MDX construct.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) -> bool {
+    snippet
+        .file_source(db)
+        .and_then(|source| source.to_js_file_source())
+        .is_some_and(|source| source.as_embedding_kind().is_mdx())
+}
+
+#[cfg(not(feature = "lang_mdx"))]
+pub(crate) fn is_mdx_snippet(_snippet: &ParsedSnippetOrigin, _db: &WorkspaceDb) -> bool {
+    false
 }
 
 impl Iterator for SnippetsIterator<'_> {
@@ -529,6 +610,11 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
+    /// The execution scopes of the rules that run on `parsed_source`. A
+    /// standalone file runs every scope. When a host document lints its
+    /// embedded sources, each source gets the scopes that apply to it, so
+    /// document-level rules run once per document.
+    pub(crate) rule_execution: RuleExecutionContext,
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
     pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
@@ -561,6 +647,7 @@ impl<'a> LintParams<'a> {
             only: self.only,
             skip: self.skip,
             categories: self.categories,
+            rule_execution: self.rule_execution,
             workspace_db: self.workspace_db.clone(),
             #[cfg(feature = "html_embeds")]
             embedded_data: self.embedded_data.clone(),
@@ -576,6 +663,49 @@ impl<'a> LintParams<'a> {
             diagnostic_level: self.diagnostic_level,
             enforce_assist: self.enforce_assist,
         }
+    }
+
+    #[cfg(feature = "lang_js")]
+    pub(crate) fn for_js_host_document(&self, source: JsFileSource) -> Self {
+        let parse = parse("", source, JsParserOptions::default());
+        let parsed_source = ParsedOrigin::interned(
+            AnyParse::from(
+                parse
+                    .syntax()
+                    .as_send()
+                    .expect("the empty JavaScript module is sendable"),
+            ),
+            None,
+        );
+        Self {
+            parsed_source,
+            settings: self.settings,
+            language: DocumentFileSource::Js(source),
+            path: self.path,
+            only: self.only,
+            skip: self.skip,
+            categories: self.categories,
+            rule_execution: RuleExecutionContext::new_host_document(),
+            workspace_db: self.workspace_db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data: self.embedded_data.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db: self.module_db.clone(),
+            project_layout: self.project_layout.clone(),
+            suppression_reason: self.suppression_reason.clone(),
+            enabled_selectors: self.enabled_selectors,
+            plugins: self.plugins.clone(),
+            pull_code_actions: self.pull_code_actions,
+            working_directory: self.working_directory,
+            max_diagnostics: self.max_diagnostics,
+            diagnostic_level: self.diagnostic_level,
+            enforce_assist: self.enforce_assist,
+        }
+    }
+
+    pub(crate) fn with_rule_execution(mut self, rule_execution: RuleExecutionContext) -> Self {
+        self.rule_execution = rule_execution;
+        self
     }
 }
 
@@ -1413,7 +1543,7 @@ impl Features {
                     file_kind: SvelteFileKind::Component,
                     ..
                 } => self.js.capabilities(),
-                JsEmbeddingKind::None => self.js.capabilities(),
+                JsEmbeddingKind::Mdx { .. } | JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             #[cfg(feature = "lang_css")]
@@ -2271,7 +2401,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         Vec<RuleFilter<'a>>,
         FxHashSet<RuleFilter<'a>>,
     ) {
-        let actions = self.actions.map(Cow::Borrowed).unwrap_or_default();
+        let actions = self.actions.map_or_default(Cow::Borrowed);
         self.enabled_rules.extend(actions.as_enabled_rules());
         self.disabled_rules.extend(actions.as_disabled_rules());
         (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
@@ -2555,7 +2685,14 @@ pub(crate) struct AnalyzerVisitorBuilder<'a, 'settings> {
     skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
     enabled_selectors: Option<&'a [AnalyzerSelector]>,
-    project_layout: Arc<ProjectLayout>,
+    /// The layout used to find the `package.json` and `tsconfig.json` of
+    /// `path`. `None` finds neither, like an empty layout.
+    ///
+    /// The default isn't an empty [ProjectLayout] because this builder runs
+    /// for every analyzed file, and creating a layout is not cheap: its
+    /// concurrent map asks for the number of available CPUs, which on Linux
+    /// reads several cgroup files.
+    project_layout: Option<Arc<ProjectLayout>>,
     analyzer_options: AnalyzerOptions,
 }
 
@@ -2572,7 +2709,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
             skip: None,
             path: None,
             enabled_selectors: None,
-            project_layout: Default::default(),
+            project_layout: None,
             analyzer_options,
         }
     }
@@ -2603,7 +2740,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
 
     #[must_use]
     pub(crate) fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
-        self.project_layout = project_layout;
+        self.project_layout = Some(project_layout);
         self
     }
 
@@ -2667,7 +2804,8 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
         if use_configured_rules
             && let Some((_, manifest)) = self
                 .path
-                .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
+                .zip(self.project_layout.as_deref())
+                .and_then(|(path, project_layout)| project_layout.find_node_manifest_for_path(path))
         {
             let manifest = ManifestDependencies(manifest);
             let manifest_result = if let Some(query_db) = &query_db {
@@ -2699,11 +2837,11 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
         analyzer_options.push_globals(globals);
 
         if let Some(path) = self.path
+            && let Some(project_layout) = self.project_layout.as_deref()
             && analyzer_options.jsx_runtime() == Some(JsxRuntime::ReactClassic)
         {
             if analyzer_options.jsx_factory().is_none() {
-                let factory = self
-                    .project_layout
+                let factory = project_layout
                     .query_tsconfig_for_path(path, |tsconfig| {
                         tsconfig.jsx_factory_identifier().map(|s| s.to_string())
                     })
@@ -2711,8 +2849,7 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
                 analyzer_options.set_jsx_factory(factory.map(Into::into));
             }
             if analyzer_options.jsx_fragment_factory().is_none() {
-                let fragment_factory = self
-                    .project_layout
+                let fragment_factory = project_layout
                     .query_tsconfig_for_path(path, |tsconfig| {
                         tsconfig
                             .jsx_fragment_factory_identifier()

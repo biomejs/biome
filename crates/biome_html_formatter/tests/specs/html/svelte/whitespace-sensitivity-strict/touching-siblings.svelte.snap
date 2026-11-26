@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/whitespace-sensitivity-strict/touching-siblings.svelte
+---
+
+# Input
+
+```svelte
+{#snippet parts()}{#if leftIcon}<span class="icon">{@render leftIcon()}</span>{/if}{@render children?.()}{#if rightIcon}<span class="icon">{@render rightIcon()}</span>{/if}{/snippet}
+
+<p><span class="label">{label}</span><Input value={label} /><span class="hint">{hint}</span>{#if showAddons}<span>addons</span>{/if}</p>
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "html": {
+    "formatter": {
+      "whitespaceSensitivity": "strict"
+    }
+  }
+}
+```
+
+# Formatted
+
+```svelte
+{#snippet parts()}
+	{#if leftIcon}
+		<span class="icon">{@render leftIcon()}</span>
+	{/if}{@render children?.()}{#if rightIcon}
+		<span class="icon">{@render rightIcon()}</span>
+	{/if}
+{/snippet}
+
+<p
+	><span class="label">{label}</span><Input value={label} /><span class="hint"
+		>{hint}</span
+	>{#if showAddons}
+		<span>addons</span>
+	{/if}</p
+>
+
+```

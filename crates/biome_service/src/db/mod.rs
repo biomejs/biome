@@ -11,12 +11,13 @@ use crate::WorkspaceError;
 #[cfg(feature = "module_graph")]
 use crate::frameworks::PackageFrameworks;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
-use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
+use crate::settings::{GitIgnoreMatcher, Settings, SettingsIdentity, VcsIgnoredPatterns};
 pub(crate) use crate::workspace::views::ViewId;
-use crate::workspace::views::{ClientId, Views};
+use crate::workspace::views::{ClientId, Views, new_views_map};
 use biome_configuration::Configuration;
 use biome_configuration::vcs::VcsClientKind;
 use biome_db::Source;
+use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
@@ -35,11 +36,11 @@ use biome_rowan::NodeCache;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
-use ignore::gitignore::Gitignore;
 use papaya::{Compute, HashMap, Operation};
 use parking_lot::Mutex;
 use salsa::{Setter, Storage};
 use std::convert::Infallible;
+use std::hash::RandomState;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -253,16 +254,15 @@ pub struct WorkspaceDb {
     /// The path info observed by the resolver.
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
-    /// The filesystem used to read the path info of new paths.
-    ///
-    /// Only the resolver reads it, through [ResolverDb::resolver_fs].
-    #[cfg(feature = "module_graph")]
-    resolver_fs: Arc<dyn FsWithResolverProxy>,
+    /// The filesystem adapter that anchors logical paths and serves resolver metadata.
+    fs: Arc<dyn FsWithResolverProxy>,
     /// It stores the file sources across projects.
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     /// The inline configurations that clients apply on top of the settings of
     /// the texts they publish.
     inline_configurations: Arc<boxcar::Vec<Configuration>>,
+    /// The project context assigned to each virtual-document source.
+    source_projects: Arc<HashMap<Source, ProjectKey>>,
     /// A map of projects loaded in the workspace.
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
     settings_queries: Arc<SettingsQueryCache>,
@@ -295,6 +295,7 @@ pub struct WorkspaceDbData {
     resolver_paths: ResolverPaths,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     inline_configurations: Arc<boxcar::Vec<Configuration>>,
+    source_projects: Arc<HashMap<Source, ProjectKey>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
 }
 
@@ -323,6 +324,24 @@ impl WorkspaceDbData {
                 || self.inline_configurations.push(configuration),
                 |(index, _)| index,
             )
+    }
+
+    pub(crate) fn project_key_for_source(&self, source: Source) -> Option<ProjectKey> {
+        self.source_projects.pin().get(&source).copied()
+    }
+
+    pub(crate) fn associate_source_with_project(
+        &self,
+        source: Source,
+        project_key: ProjectKey,
+    ) -> bool {
+        let projects = self.source_projects.pin();
+        if projects.get(&source).copied() == Some(project_key) {
+            false
+        } else {
+            projects.insert(source, project_key);
+            true
+        }
     }
 
     pub(crate) fn remove_project(&self, project_key: ProjectKey) {
@@ -518,14 +537,12 @@ impl WorkspaceDb {
     }
 
     fn with_storage(
-        #[cfg_attr(not(feature = "module_graph"), expect(unused_variables))] fs: Arc<
-            dyn FsWithResolverProxy,
-        >,
+        fs: Arc<dyn FsWithResolverProxy>,
         storage: Storage<Self>,
         settings_queries: Arc<SettingsQueryCache>,
     ) -> Self {
         let db = Self {
-            files: Arc::default(),
+            files: Arc::new(new_views_map(RandomState::default())),
             retained_files: Arc::default(),
             node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]
@@ -534,10 +551,10 @@ impl WorkspaceDb {
             frameworks: Arc::default(),
             #[cfg(feature = "module_graph")]
             resolver_paths: ResolverPaths::default(),
-            #[cfg(feature = "module_graph")]
-            resolver_fs: fs,
+            fs,
             file_sources: Arc::default(),
             inline_configurations: Arc::default(),
+            source_projects: Arc::default(),
             projects: Arc::default(),
             settings_queries,
             storage,
@@ -554,6 +571,11 @@ impl WorkspaceDb {
         DefaultProject::new(&db, default_project);
         ProjectsGeneration::new(&db, 0);
         db
+    }
+
+    /// Creates a logical Biome path using the database filesystem anchor.
+    pub(crate) fn biome_path(&self, path: &Utf8Path) -> BiomePath {
+        self.fs.biome_path(path)
     }
 
     /// Advances the [ProjectsGeneration], so that the queries that looked up
@@ -636,6 +658,7 @@ impl WorkspaceDb {
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),
+            source_projects: self.source_projects.clone(),
             projects: self.projects.clone(),
         }
     }
@@ -652,6 +675,10 @@ impl WorkspaceDb {
     /// [WorkspaceDbData::insert_inline_configuration].
     pub(crate) fn inline_configuration(&self, index: usize) -> Option<&Configuration> {
         self.inline_configurations.get(index)
+    }
+
+    pub(crate) fn project_key_for_source(&self, source: Source) -> Option<ProjectKey> {
+        self.data().project_key_for_source(source)
     }
 
     /// Publishes `file` as the disk view of `path`.
@@ -687,13 +714,28 @@ impl WorkspaceDb {
         text: impl Into<Arc<str>>,
         file_source: DocumentFileSource,
     ) -> Source {
+        self.upsert_file_with_configuration(path, text, file_source, None)
+    }
+
+    /// Publishes `text` as the disk view of `path`, parsed as `file_source`
+    /// with `configuration` on top of the settings of the path. The existing
+    /// [Source] input of the view changes through Salsa setters.
+    pub fn upsert_file_with_configuration(
+        &mut self,
+        path: &Utf8Path,
+        text: impl Into<Arc<str>>,
+        file_source: DocumentFileSource,
+        configuration: Option<Configuration>,
+    ) -> Source {
         let file_source_index = self.insert_source(file_source);
+        let configuration_index = configuration
+            .map(|configuration| self.data().insert_inline_configuration(configuration));
         self.update_or_insert_view(
             path,
             ViewId::Disk,
             text.into(),
             file_source_index,
-            None,
+            configuration_index,
             ParsedSourceUpdateMode::Setters,
         )
     }
@@ -1430,7 +1472,7 @@ impl WorkspaceDb {
         &self,
         project_key: ProjectKey,
         payload: &[(Utf8PathBuf, Vec<String>)],
-    ) -> Result<Vec<Gitignore>, WorkspaceError> {
+    ) -> Result<Vec<GitIgnoreMatcher>, WorkspaceError> {
         let project = self
             .get_project(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -1444,27 +1486,72 @@ impl WorkspaceDb {
                 .iter()
                 .map(|(path, patterns)| {
                     let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
-                    VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
+                    VcsIgnoredPatterns::git_ignore(&self.biome_path(path), patterns.as_slice())
                 })
                 .collect(),
             None => Ok(Vec::new()),
         }
     }
 
-    /// Adds `git_ignores` to the root settings of the project `project_key`.
-    /// [Self::nested_git_ignores] parses them from the nested ignore files.
-    pub(crate) fn insert_nested_git_ignores_with_mode(
+    pub(crate) fn has_nested_git_ignores_in(
+        &self,
+        project_key: ProjectKey,
+        scope: &BiomePath,
+    ) -> Result<bool, WorkspaceError> {
+        let project = self
+            .get_project(&project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        Ok(project
+            .root_settings(self)
+            .as_ref()
+            .vcs_settings
+            .ignore_matches
+            .as_ref()
+            .is_some_and(|ignore_matches| ignore_matches.has_git_matches_in(scope)))
+    }
+
+    /// Replaces the supplied root matcher and the nested matchers within `scope`.
+    pub(crate) fn replace_git_ignores_with_mode(
         &mut self,
         project_key: ProjectKey,
-        git_ignores: &[Gitignore],
+        root_git_ignore: Option<&GitIgnoreMatcher>,
+        scope: &BiomePath,
+        nested_git_ignores: &[GitIgnoreMatcher],
         mode: ProjectUpdateMode,
     ) -> Result<(), WorkspaceError> {
+        let project = self
+            .get_project(&project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let root_settings = project.root_settings(self);
+        let ignore_matches = root_settings.as_ref().vcs_settings.ignore_matches.as_ref();
+        // A root matcher for another VCS root is stale: the configuration changed after its
+        // ignore files were read.
+        if root_git_ignore.is_some_and(|root_git_ignore| {
+            ignore_matches
+                .is_none_or(|ignore_matches| ignore_matches.root_path() != root_git_ignore.root())
+        }) {
+            return Ok(());
+        }
+        let should_update = root_git_ignore.is_some()
+            || ignore_matches.is_some_and(|ignore_matches| {
+                !nested_git_ignores.is_empty() || ignore_matches.has_git_matches_in(scope)
+            });
+        drop(root_settings);
+        if !should_update {
+            return Ok(());
+        }
+
         let update_root_settings = |mut root_settings: SettingsIdentity| {
-            let settings = root_settings.make_mut();
-            if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
-                for git_ignore in git_ignores {
-                    ignore_matches.insert_git_match(git_ignore.clone());
+            if let Some(ignore_matches) = root_settings
+                .make_mut()
+                .vcs_settings
+                .ignore_matches
+                .as_mut()
+            {
+                if let Some(root_git_ignore) = root_git_ignore {
+                    ignore_matches.replace_root_git_match(root_git_ignore.clone());
                 }
+                ignore_matches.replace_git_matches(scope, nested_git_ignores);
             }
             root_settings
         };
@@ -1483,9 +1570,6 @@ impl WorkspaceDb {
                 .ok_or_else(WorkspaceError::no_project)?;
             }
             ProjectUpdateMode::Setters => {
-                let project = self
-                    .get_project(&project_key)
-                    .ok_or_else(WorkspaceError::no_project)?;
                 let root_settings = update_root_settings(project.root_settings(self));
                 project.set_root_settings(self).to(root_settings);
             }
@@ -1512,10 +1596,11 @@ pub struct SharedWorkspaceDb {
     frameworks: FrameworksByPackage,
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
-    #[cfg(feature = "module_graph")]
-    resolver_fs: Arc<dyn FsWithResolverProxy>,
+    /// The filesystem adapter shared by operation-local database forks.
+    fs: Arc<dyn FsWithResolverProxy>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     inline_configurations: Arc<boxcar::Vec<Configuration>>,
+    source_projects: Arc<HashMap<Source, ProjectKey>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
     settings_queries: Arc<SettingsQueryCache>,
     storage: salsa::StorageHandle<WorkspaceDb>,
@@ -1543,10 +1628,10 @@ impl SharedWorkspaceDb {
             frameworks,
             #[cfg(feature = "module_graph")]
             resolver_paths,
-            #[cfg(feature = "module_graph")]
-            resolver_fs,
+            fs,
             file_sources,
             inline_configurations,
+            source_projects,
             storage,
             projects,
             settings_queries,
@@ -1561,10 +1646,10 @@ impl SharedWorkspaceDb {
             frameworks,
             #[cfg(feature = "module_graph")]
             resolver_paths,
-            #[cfg(feature = "module_graph")]
-            resolver_fs,
+            fs,
             file_sources,
             inline_configurations,
+            source_projects,
             projects,
             settings_queries,
             storage: storage.into_zalsa_handle(),
@@ -1584,6 +1669,7 @@ impl SharedWorkspaceDb {
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),
+            source_projects: self.source_projects.clone(),
             projects: self.projects.clone(),
         }
     }
@@ -1595,14 +1681,14 @@ impl SharedWorkspaceDb {
             node_caches: self.node_caches.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),
+            source_projects: self.source_projects.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
             frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
-            #[cfg(feature = "module_graph")]
-            resolver_fs: self.resolver_fs.clone(),
+            fs: self.fs.clone(),
             projects: self.projects.clone(),
             settings_queries: self.settings_queries.clone(),
             storage: self.storage.clone().into_storage(),
@@ -1626,7 +1712,7 @@ impl biome_db::Db for WorkspaceDb {
 #[salsa::db]
 impl ResolverDb for WorkspaceDb {
     fn resolver_fs(&self) -> &dyn ResolverFsProxy {
-        self.resolver_fs.as_ref()
+        self.fs.as_ref()
     }
 
     fn resolver_paths(&self) -> &ResolverPaths {
@@ -1657,6 +1743,10 @@ impl ProjectDb for WorkspaceDb {
             .filter(|(_, project_data)| path.starts_with(project_data.path(self)))
             .max_by_key(|(_, project_data)| project_data.path(self).components().count())
             .map(|(key, _)| *key)
+    }
+
+    fn biome_path(&self, path: &Utf8Path) -> BiomePath {
+        Self::biome_path(self, path)
     }
 
     fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput)) {
@@ -1797,6 +1887,7 @@ mod tests {
         SettingsEditorState, SettingsHandle, SettingsQuery, SettingsQuerySelection,
         SettingsSelectionKey,
     };
+    use crate::workspace::IgnoreKind;
     #[cfg(feature = "lang_js")]
     use biome_analyze::AnalyzerOptions;
     #[cfg(feature = "lang_js")]
@@ -2970,7 +3061,7 @@ mod tests {
     }
 
     #[test]
-    fn store_nested_ignore_patterns_keeps_index_and_salsa_in_sync() {
+    fn replace_git_ignores_keeps_index_and_salsa_in_sync() {
         let mut db = test_db();
         let root_path = Utf8PathBuf::from("/project");
         let project_key = db.insert_project(root_path.clone());
@@ -2980,7 +3071,7 @@ mod tests {
         settings.vcs_settings.use_ignore_file = Some(true.into());
         settings
             .vcs_settings
-            .store_root_ignore_patterns(root_path.as_path(), &[])
+            .store_root_ignore_patterns(&db.biome_path(&root_path), &[])
             .unwrap();
         db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters);
         let nested_path = root_path.join("package");
@@ -2988,20 +3079,22 @@ mod tests {
 
         assert!(
             !project.root_settings(&db).as_ref().vcs_settings.is_ignored(
-                ignored_path.as_path(),
+                &db.biome_path(&ignored_path),
                 false,
-                None
+                IgnoreKind::Ancestors
             )
         );
 
         let git_ignores = db
             .nested_git_ignores(
                 project_key,
-                &[(nested_path, vec!["generated.js".to_string()])],
+                &[(nested_path.clone(), vec!["generated.js".to_string()])],
             )
             .unwrap();
-        db.insert_nested_git_ignores_with_mode(
+        db.replace_git_ignores_with_mode(
             project_key,
+            None,
+            &db.biome_path(&nested_path),
             &git_ignores,
             ProjectUpdateMode::Setters,
         )
@@ -3014,7 +3107,7 @@ mod tests {
                 .root_settings(&db)
                 .as_ref()
                 .vcs_settings
-                .is_ignored(ignored_path.as_path(), false, None)
+                .is_ignored(&db.biome_path(&ignored_path), false, IgnoreKind::Ancestors)
         );
     }
 

@@ -61,6 +61,8 @@ pub(crate) fn collect_snippets(
             assignability: assignability(snippet),
             fingerprint: fingerprint(snippet.root.syntax()),
             operands: first_operand..builder.data.operands.len() as u32,
+            has_comments: has_comments(snippet.root.syntax()),
+            name_scope: None,
         });
 
         match host {
@@ -165,6 +167,11 @@ pub(crate) fn fingerprint(node: &JsSyntaxNode) -> u64 {
         token.text_trimmed().hash(&mut hasher);
     }
     hasher.finish()
+}
+
+fn has_comments(node: &JsSyntaxNode) -> bool {
+    node.descendants_tokens(biome_rowan::Direction::Next)
+        .any(|token| token.has_leading_comments() || token.has_trailing_comments())
 }
 
 fn root_shape(builder: &mut ModelBuilder, snippet: &SfcSnippet, host: SnippetHost) -> RootShape {
@@ -317,15 +324,29 @@ fn expression_shape(
             }
         }
         AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
-            Ok(JsUnaryOperator::LogicalNot) => RootShape::Not,
+            Ok(JsUnaryOperator::LogicalNot) => {
+                if let Ok(AnyJsExpression::JsUnaryExpression(argument)) =
+                    unary.argument().map(AnyJsExpression::omit_parentheses)
+                    && argument.operator() == Ok(JsUnaryOperator::LogicalNot)
+                {
+                    return RootShape::DoubleNot;
+                }
+                unary
+                    .operator_token()
+                    .map_or(RootShape::Invalid, |token| RootShape::Not {
+                        operator: token.text_trimmed_range() + offset,
+                    })
+            }
             _ => RootShape::Other,
         },
-        AnyJsExpression::JsBinaryExpression(binary) => {
-            match binary.operator_token().map(|token| token.kind()) {
-                Ok(JsSyntaxKind::NEQ | JsSyntaxKind::NEQ2) => RootShape::NotEqual,
-                _ => RootShape::Binary,
+        AnyJsExpression::JsBinaryExpression(binary) => match binary.operator_token() {
+            Ok(token) if matches!(token.kind(), JsSyntaxKind::NEQ | JsSyntaxKind::NEQ2) => {
+                RootShape::NotEqual {
+                    operator: token.text_trimmed_range() + offset,
+                }
             }
-        }
+            _ => RootShape::Binary,
+        },
         AnyJsExpression::JsLogicalExpression(_) => {
             let mut group = 0;
             collect_operands(builder, &expression, offset, &mut group);

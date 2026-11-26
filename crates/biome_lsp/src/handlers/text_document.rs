@@ -30,16 +30,32 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let path = session.file_path(&url)?;
+    let document_text = content.clone();
+    let file_path = Session::filesystem_path(&url);
+    let document_path = session.document_path(&url);
+    let extension = match file_path.as_deref() {
+        Some(path) => path.extension(),
+        None => Session::virtual_document_extension(&url),
+    };
     let language_hint =
-        DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
+        DocumentFileSource::from_language_id(&params.text_document.language_id, extension);
 
-    let file_path = path.to_path_buf();
-    let config_path = session.resolve_configuration_path(Some(&file_path));
+    let project_path = file_path
+        .is_none()
+        .then(|| session.primary_project_path())
+        .flatten();
+    let configuration_target = project_path.as_ref().or(file_path.as_ref());
+    let config_path = session.resolve_configuration_path(configuration_target);
 
-    let Some(project_key) =
-        ensure_project_for_opened_document(session, &path, config_path.as_ref()).await
-    else {
+    let project_key = if let Some(file_path) = file_path.as_deref() {
+        ensure_project_for_opened_document(session, file_path, config_path.as_ref()).await
+    } else {
+        let Some(project_path) = project_path.as_deref() else {
+            return Ok(());
+        };
+        ensure_project_for_virtual_document(session, project_path, config_path.as_ref()).await
+    };
+    let Some(project_key) = project_key else {
         return Ok(());
     };
 
@@ -47,22 +63,19 @@ pub(crate) async fn did_open(
         .workspace()
         .is_path_ignored(PathIsIgnoredParams {
             project_key,
-            path: path.clone(),
+            path: document_path.clone(),
             is_dir: false,
             features: FeaturesBuilder::new().build(),
             ignore_kind: IgnoreKind::Ancestors,
         })
         .unwrap_or_default();
-
     if is_ignored {
         return Ok(());
     }
 
-    let doc = Document::new(project_key, version, &content);
-
     session.workspace().open_file(OpenFileParams {
         project_key,
-        path,
+        path: document_path.clone(),
         content: FileContent::FromClient { content, version },
         document_file_source: Some(language_hint),
         persist_node_cache: true,
@@ -70,6 +83,13 @@ pub(crate) async fn did_open(
         editor_features: Some(session.extension_settings.read().editor_features()),
     })?;
 
+    let doc = Document::new(
+        project_key,
+        document_path,
+        language_hint,
+        version,
+        &document_text,
+    );
     session.insert_document(url.clone(), doc);
 
     session.schedule_diagnostics(url, version);
@@ -139,6 +159,61 @@ async fn ensure_project_for_opened_document(
     }
 }
 
+/// Associates a virtual document with the primary filesystem-backed workspace project.
+async fn ensure_project_for_virtual_document(
+    session: &Arc<Session>,
+    project_path: &Utf8Path,
+    config_path: Option<&ConfigurationPathHint>,
+) -> Option<ProjectKey> {
+    let is_relative_config_path = session
+        .get_settings_configuration_path()
+        .is_some_and(|config_path| !config_path.is_absolute());
+
+    if let Some(project_key) = session.project_for_path(project_path) {
+        if !is_relative_config_path {
+            return Some(project_key);
+        }
+        if let Some(config_path) = config_path {
+            let status = session
+                .load_biome_configuration_file(config_path.clone(), false)
+                .await;
+            session.set_configuration_status(project_key, status);
+            return status.is_loaded().then_some(project_key);
+        }
+    }
+
+    if !session.has_initialized() {
+        session.load_extension_settings(None).await;
+    }
+    let status = match config_path {
+        Some(config_path) => {
+            session
+                .load_biome_configuration_file(config_path.clone(), false)
+                .await
+        }
+        None => {
+            session
+                .load_biome_configuration_file(
+                    ConfigurationPathHint::FromLsp(project_path.to_path_buf()),
+                    false,
+                )
+                .await
+        }
+    };
+
+    if let Some(project_key) = session.project_for_path(project_path) {
+        session.set_configuration_status(project_key, status);
+        if status.is_loaded() {
+            return Some(project_key);
+        }
+    }
+
+    session
+        .notify_broken_configuration_for_folder(project_path, status)
+        .await;
+    None
+}
+
 /// Load configuration anchored to the workspace root that contains `path`.
 async fn load_from_workspace_root_for_path(
     session: &Arc<Session>,
@@ -152,10 +227,7 @@ async fn load_from_workspace_root_for_path(
             .await;
     }
 
-    let project_path = path
-        .parent()
-        .map(|parent| parent.to_path_buf())
-        .unwrap_or_default();
+    let project_path = path.parent().map_or_default(|parent| parent.to_path_buf());
     info!("Loading configuration from text_document {}", &project_path);
     let project_path = resolve_workspace_base_path(session, &project_path);
 
@@ -195,16 +267,16 @@ pub(crate) async fn did_change(
     let url = params.text_document.uri;
     let version = params.text_document.version;
 
-    let path = session.file_path(&url)?;
     let Some(doc) = session.document(&url) else {
         return Ok(());
     };
+    let path = doc.path.clone();
     if !session.workspace().file_exists(path.clone().into())? {
         return Ok(());
     }
     let features = FeaturesBuilder::new().build();
     if session.workspace().is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
+        path: doc.path.clone(),
         is_dir: false,
         project_key: doc.project_key,
         features,
@@ -226,7 +298,16 @@ pub(crate) async fn did_change(
         params.content_changes,
     );
 
-    session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
+    session.insert_document(
+        url.clone(),
+        Document::new(
+            doc.project_key,
+            doc.path.clone(),
+            doc.file_source,
+            version,
+            &text,
+        ),
+    );
 
     session.workspace().change_file(ChangeFileParams {
         project_key: doc.project_key,
@@ -252,24 +333,30 @@ pub(crate) async fn did_save(
 
     // If text is provided in the notification (as per LSP spec), update the file
     if let Some(text) = params.text {
-        let path = session.file_path(&url)?;
         let Some(doc) = session.document(&url) else {
             debug!("Document wasn't open: {}", url.as_str());
             return Ok(());
         };
+        let path = doc.path.clone();
 
         session.workspace().change_file(ChangeFileParams {
             project_key: doc.project_key,
             path,
             content: text.clone(),
             version: doc.version,
-            inline_config: None,
+            inline_config: session.inline_config(),
             editor_features: None,
         })?;
 
         session.insert_document(
             url.clone(),
-            Document::new(doc.project_key, doc.version, &text),
+            Document::new(
+                doc.project_key,
+                doc.path,
+                doc.file_source,
+                doc.version,
+                &text,
+            ),
         );
 
         // Update diagnostics with fresh content
@@ -289,15 +376,17 @@ pub(crate) async fn did_close(
 ) -> Result<(), LspError> {
     let uri = params.text_document.uri;
     session.close_diagnostics(&uri);
-    let path = session.file_path(&uri)?;
-    let Some(project_key) = session.remove_document(&uri) else {
+    let Some(document) = session.remove_document(&uri) else {
         debug!("Document wasn't open: {}", uri.as_str());
         return Ok(());
     };
+    let path = document.path;
 
-    session
-        .workspace()
-        .close_file(CloseFileParams { project_key, path })?;
+    session.workspace().close_file(CloseFileParams {
+        project_key: document.project_key,
+        path,
+    })?;
+    session.close_detached_project_if_unused(document.project_key)?;
 
     session
         .client

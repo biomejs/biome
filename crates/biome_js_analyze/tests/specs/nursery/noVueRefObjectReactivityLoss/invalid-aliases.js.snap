@@ -1,0 +1,155 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-aliases.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { ref, ref as createRef } from 'vue'
+import * as Vue from 'vue'
+
+const count = ref(0)
+const alias = count
+const value1 = alias.value
+
+let later
+later = count
+const value2 = later.value
+
+let assigned
+assigned = ref(0)
+const value3 = assigned.value
+
+let target
+;({ value: target } = count)
+
+const renamed = createRef(0)
+const value4 = renamed.value
+
+const namespaced = Vue.ref(0)
+const value5 = namespaced.value
+
+```
+
+# Diagnostics
+```
+invalid-aliases.js:7:16 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    5 │ const count = ref(0)
+    6 │ const alias = count
+  > 7 │ const value1 = alias.value
+      │                ^^^^^^^^^^^
+    8 │ 
+    9 │ let later
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-aliases.js:11:16 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+     9 │ let later
+    10 │ later = count
+  > 11 │ const value2 = later.value
+       │                ^^^^^^^^^^^
+    12 │ 
+    13 │ let assigned
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-aliases.js:15:16 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    13 │ let assigned
+    14 │ assigned = ref(0)
+  > 15 │ const value3 = assigned.value
+       │                ^^^^^^^^^^^^^^
+    16 │ 
+    17 │ let target
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-aliases.js:18:3 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    17 │ let target
+  > 18 │ ;({ value: target } = count)
+       │   ^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ const renamed = createRef(0)
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-aliases.js:21:16 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    20 │ const renamed = createRef(0)
+  > 21 │ const value4 = renamed.value
+       │                ^^^^^^^^^^^^^
+    22 │ 
+    23 │ const namespaced = Vue.ref(0)
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-aliases.js:24:16 lint/nursery/noVueRefObjectReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reads the value of a ref only once, so it won't update when the ref changes.
+  
+    23 │ const namespaced = Vue.ref(0)
+  > 24 │ const value5 = namespaced.value
+       │                ^^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i This code runs only once, together with the code that creates the ref. The value read here is a copy, and Vue does not update it when the ref changes.
+  
+  i Read .value inside a function, such as a computed() getter, or pass the ref itself instead of its value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

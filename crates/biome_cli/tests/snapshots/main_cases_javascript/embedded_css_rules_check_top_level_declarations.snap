@@ -1,0 +1,149 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "correctness": { "noMissingVarFunction": "error" },
+      "suspicious": {
+        "noDuplicateProperties": "error",
+        "noDuplicateCustomProperties": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const Button = styled.div`
+  --size: 1px;
+  --size: 2px;
+  color: red;
+  color: blue;
+  width: --size;
+  &:hover {
+    height: --size;
+  }
+`;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:3:3 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ const Button = styled.div`
+    2 │   --size: 1px;
+  > 3 │   --size: 2px;
+      │   ^^^^^^
+    4 │   color: red;
+    5 │   color: blue;
+  
+  i --size is already defined here.
+  
+    1 │ const Button = styled.div`
+  > 2 │   --size: 1px;
+      │   ^^^^^^
+    3 │   --size: 2px;
+    4 │   color: red;
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```block
+file.js:5:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    3 │   --size: 2px;
+    4 │   color: red;
+  > 5 │   color: blue;
+      │   ^^^^^
+    6 │   width: --size;
+    7 │   &:hover {
+  
+  i color is already defined here.
+  
+    2 │   --size: 1px;
+    3 │   --size: 2px;
+  > 4 │   color: red;
+      │   ^^^^^
+    5 │   color: blue;
+    6 │   width: --size;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```block
+file.js:6:10 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--size' is used without the 'var()' function
+  
+    4 │   color: red;
+    5 │   color: blue;
+  > 6 │   width: --size;
+      │          ^^^^^^
+    7 │   &:hover {
+    8 │     height: --size;
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--size).
+  
+
+```
+
+```block
+file.js:8:13 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--size' is used without the 'var()' function
+  
+     6 │   width: --size;
+     7 │   &:hover {
+   > 8 │     height: --size;
+       │             ^^^^^^
+     9 │   }
+    10 │ `;
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--size).
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 4 errors.
+```

@@ -12,12 +12,15 @@ use biome_js_syntax::{
     TsGlobalDeclaration, TsModuleBlock, binding_ext::AnyJsBindingDeclaration, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, SyntaxKindSet, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
+use either::Either;
 
 use crate::{
     JsAmbientModule, JsImport, JsImportPhase, JsModuleInfo, JsReexport,
     js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
+    js_module_info::flow::FlowRootScanner,
 };
 
 use super::collector::JsModuleInfoCollector;
@@ -46,17 +49,33 @@ impl JsModuleVisitor {
 
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
+        let mut flow_roots = FlowRootScanner::default();
+        // Declaration files contain no code that runs, so no root can need flow.
+        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
+            && !JsFileSource::try_from(self.file_path.as_path())
+                .is_ok_and(|source| source.language().is_definition_file());
+
         let kinds = AnyJsImportLike::KIND_SET
             .union(JsExport::KIND_SET)
             .union(JsxAttribute::KIND_SET)
             .union(TsExternalModuleDeclaration::KIND_SET)
             .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
         let root = self.root.syntax().clone();
-        self.collect_from(&root, kinds, &mut collector);
+        self.collect_from(
+            &root,
+            kinds,
+            &mut collector,
+            scan_flow_roots.then_some(&mut flow_roots),
+        );
         let ambient_modules = self.collect_ambient_modules(&collector);
         collector.ambient_modules = ambient_modules;
 
-        JsModuleInfo::new(collector, self.semantic_model, self.inference_mode)
+        JsModuleInfo::new(
+            collector,
+            self.semantic_model,
+            self.inference_mode,
+            flow_roots,
+        )
     }
 
     /// Visits the nodes of `kinds` in `node` and its descendants, and collects
@@ -71,11 +90,22 @@ impl JsModuleVisitor {
         node: &JsSyntaxNode,
         kinds: SyntaxKindSet<JsLanguage>,
         collector: &mut JsModuleInfoCollector,
+        mut flow_roots: Option<&mut FlowRootScanner>,
     ) {
         let is_script = is_script(&self.root);
-        for event in node.preorder_of_kinds(kinds) {
+        // The flow root scanner must see every node, not only the kinds that
+        // the collector visits.
+        let events = if flow_roots.is_some() {
+            Either::Left(node.preorder())
+        } else {
+            Either::Right(node.preorder_of_kinds(kinds))
+        };
+        for event in events {
             match event {
                 WalkEvent::Enter(node) => {
+                    if let Some(flow_roots) = flow_roots.as_deref_mut() {
+                        flow_roots.enter(&node);
+                    }
                     if let Some(declaration) = TsExternalModuleDeclaration::cast_ref(&node) {
                         if is_script {
                             collector.export_scope =
@@ -90,6 +120,9 @@ impl JsModuleVisitor {
                     }
                 }
                 WalkEvent::Leave(node) => {
+                    if let Some(flow_roots) = flow_roots.as_deref_mut() {
+                        flow_roots.leave(&node);
+                    }
                     if let Some(declaration) = TsExternalModuleDeclaration::cast_ref(&node)
                         && is_script
                     {
@@ -177,13 +210,14 @@ impl JsModuleVisitor {
         let kinds = AnyJsImportLike::KIND_SET
             .union(JsExport::KIND_SET)
             .union(biome_js_syntax::JsImport::KIND_SET);
-        self.collect_from(block.syntax(), kinds, &mut collector);
+        self.collect_from(block.syntax(), kinds, &mut collector, None);
         register_implicit_exports(&self.semantic_model, declaration, &mut collector);
 
         JsModuleInfo::new(
             collector,
             self.semantic_model.clone(),
             TypeInferenceMode::Disabled,
+            FlowRootScanner::default(),
         )
     }
 

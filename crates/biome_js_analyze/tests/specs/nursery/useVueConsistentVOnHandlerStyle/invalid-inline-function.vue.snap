@@ -1,0 +1,294 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-inline-function.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button @click="foo" />
+  <button @click="foo()" />
+  <button @click="foo($event)" />
+  <button @click="count++" />
+  <button @click="foo( )" />
+  <button @click="{foo();foo();}" />
+  <button @click="foo();foo();" />
+  <button @click="foo();" />
+  <button @click=" foo() " />
+  <button @click="foo() /* comment */" />
+  <button @click=foo() />
+  <button @click="foo(), bar()" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-inline-function.vue:3:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This event handler is written as a method handler instead of an inline function.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <button @click="foo" />
+      │                   ^^^
+    4 │   <button @click="foo()" />
+    5 │   <button @click="foo($event)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Wrap the handler in a function that passes on the arguments of the event, such as @click="(event) => save(event)".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-inline-function.vue:4:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    2 │ <template>
+    3 │   <button @click="foo" />
+  > 4 │   <button @click="foo()" />
+      │                   ^^^^^
+    5 │   <button @click="foo($event)" />
+    6 │   <button @click="count++" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·foo()
+      │ ++++++     
+
+```
+
+```
+invalid-inline-function.vue:5:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    3 │   <button @click="foo" />
+    4 │   <button @click="foo()" />
+  > 5 │   <button @click="foo($event)" />
+      │                   ^^^^^^^^^^^
+    6 │   <button @click="count++" />
+    7 │   <button @click="foo( )" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Wrap the handler in a function, such as @click="() => save()". If the handler reads $event, read a parameter of the function instead, such as @click="(event) => save(event)".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-inline-function.vue:6:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    4 │   <button @click="foo()" />
+    5 │   <button @click="foo($event)" />
+  > 6 │   <button @click="count++" />
+      │                   ^^^^^^^
+    7 │   <button @click="foo( )" />
+    8 │   <button @click="{foo();foo();}" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·count++
+      │ ++++++       
+
+```
+
+```
+invalid-inline-function.vue:7:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    5 │   <button @click="foo($event)" />
+    6 │   <button @click="count++" />
+  > 7 │   <button @click="foo( )" />
+      │                   ^^^^^^
+    8 │   <button @click="{foo();foo();}" />
+    9 │   <button @click="foo();foo();" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·foo(·)
+      │ ++++++      
+
+```
+
+```
+invalid-inline-function.vue:8:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+     6 │   <button @click="count++" />
+     7 │   <button @click="foo( )" />
+   > 8 │   <button @click="{foo();foo();}" />
+       │                   ^^^^^^^^^^^^^^
+     9 │   <button @click="foo();foo();" />
+    10 │   <button @click="foo();" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·{foo();foo();}
+      │ ++++++              
+
+```
+
+```
+invalid-inline-function.vue:9:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+     7 │   <button @click="foo( )" />
+     8 │   <button @click="{foo();foo();}" />
+   > 9 │   <button @click="foo();foo();" />
+       │                   ^^^^^^^^^^^^
+    10 │   <button @click="foo();" />
+    11 │   <button @click=" foo() " />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·{foo();foo();}
+      │ +++++++            +
+
+```
+
+```
+invalid-inline-function.vue:10:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+     8 │   <button @click="{foo();foo();}" />
+     9 │   <button @click="foo();foo();" />
+  > 10 │   <button @click="foo();" />
+       │                   ^^^^^^
+    11 │   <button @click=" foo() " />
+    12 │   <button @click="foo() /* comment */" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·{foo();}
+      │ +++++++      +
+
+```
+
+```
+invalid-inline-function.vue:11:20 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+     9 │   <button @click="foo();foo();" />
+    10 │   <button @click="foo();" />
+  > 11 │   <button @click=" foo() " />
+       │                    ^^^^^
+    12 │   <button @click="foo() /* comment */" />
+    13 │   <button @click=foo() />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ·()·=>·foo()·
+      │  ++++++      
+
+```
+
+```
+invalid-inline-function.vue:12:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    10 │   <button @click="foo();" />
+    11 │   <button @click=" foo() " />
+  > 12 │   <button @click="foo() /* comment */" />
+       │                   ^^^^^
+    13 │   <button @click=foo() />
+    14 │   <button @click="foo(), bar()" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·foo()·/*·comment·*/
+      │ ++++++                   
+
+```
+
+```
+invalid-inline-function.vue:13:18 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    11 │   <button @click=" foo() " />
+    12 │   <button @click="foo() /* comment */" />
+  > 13 │   <button @click=foo() />
+       │                  ^^^^^
+    14 │   <button @click="foo(), bar()" />
+    15 │ </template>
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Wrap the handler in a function, such as @click="() => save()". If the handler reads $event, read a parameter of the function instead, such as @click="(event) => save(event)".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-inline-function.vue:14:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━
+
+  × This event handler is written as an inline handler instead of an inline function.
+  
+    12 │   <button @click="foo() /* comment */" />
+    13 │   <button @click=foo() />
+  > 14 │   <button @click="foo(), bar()" />
+       │                   ^^^^^^^^^^^^
+    15 │ </template>
+    16 │ 
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the handler in an inline function.
+  
+    1 │ ()·=>·(foo(),·bar())
+      │ +++++++            +
+
+```

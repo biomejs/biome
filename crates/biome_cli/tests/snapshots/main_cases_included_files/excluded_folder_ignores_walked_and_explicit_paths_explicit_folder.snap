@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/excluded_folder_ignores_walked_and_explicit_paths_explicit_folder/src/generated/deep'
+```
+
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**", "!**/generated"] } }
+```
+
+## `src/generated/deep/more.js`
+
+```js
+  statement(  )  
+```
+
+## `src/generated/out.js`
+
+```js
+  statement(  )  
+```
+
+## `src/index.js`
+
+```js
+  statement(  )  
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - <TEMP_DIR>/excluded_folder_ignores_walked_and_explicit_paths_explicit_folder/src/generated/deep
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 0 files in <TIME>. No fixes applied.
+```

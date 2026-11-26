@@ -1,0 +1,54 @@
+/* should not generate diagnostics */
+.a {
+    .b {
+        color: red;
+    }
+}
+
+.a {
+    @media print {
+        color: red;
+    }
+}
+
+@media print {
+    .a {
+        .b {
+            color: red;
+        }
+    }
+}
+
+@layer base {
+    @media print {
+        .a {
+            color: red;
+        }
+    }
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@page :first {
+    @top-left {
+        content: "Title";
+    }
+}
+
+@font-feature-values Font One {
+    @styleset {
+        nice-style: 12;
+    }
+}
+
+@font-face {
+    font-family: Example;
+}

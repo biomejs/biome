@@ -1,6 +1,6 @@
 use crate::fonts::is_function_keyword;
 use crate::services::semantic::Semantic;
-use crate::utils::is_custom_function;
+use crate::utils::{is_custom_function, is_scss_built_in_function};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
@@ -8,7 +8,6 @@ use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
-use std::cmp::Ordering;
 
 declare_lint_rule! {
     /// Disallow unrecognized CSS value functions.
@@ -72,99 +71,6 @@ declare_lint_rule! {
         sources: &[RuleSource::Stylelint("function-no-unknown").same()],
     }
 }
-
-const SCSS_BUILT_IN_FUNCTIONS: &[&str] = &[
-    "abs",
-    "adjust-color",
-    "adjust-hue",
-    "alpha",
-    "append",
-    "blue",
-    "call",
-    "ceil",
-    "change-color",
-    "color",
-    "comparable",
-    "complement",
-    "content-exists",
-    "darken",
-    "desaturate",
-    "fade-in",
-    "fade-out",
-    "feature-exists",
-    "floor",
-    "function-exists",
-    "get-function",
-    "global-variable-exists",
-    "grayscale",
-    "green",
-    "hsl",
-    "hsla",
-    "hue",
-    "hwb",
-    "ie-hex-str",
-    "if",
-    "index",
-    "inspect",
-    "invert",
-    "is-bracketed",
-    "is-superselector",
-    "join",
-    "keywords",
-    "lab",
-    "lch",
-    "length",
-    "lighten",
-    "lightness",
-    "list-separator",
-    "map-get",
-    "map-has-key",
-    "map-keys",
-    "map-merge",
-    "map-remove",
-    "map-values",
-    "max",
-    "min",
-    "mix",
-    "mixin-exists",
-    "nth",
-    "oklab",
-    "oklch",
-    "opacify",
-    "opacity",
-    "percentage",
-    "quote",
-    "random",
-    "red",
-    "rgb",
-    "rgba",
-    "round",
-    "saturate",
-    "saturation",
-    "scale-color",
-    "selector-append",
-    "selector-extend",
-    "selector-nest",
-    "selector-parse",
-    "selector-replace",
-    "selector-unify",
-    "set-nth",
-    "simple-selectors",
-    "str-index",
-    "str-insert",
-    "str-length",
-    "str-slice",
-    "to-lower-case",
-    "to-upper-case",
-    "transparentize",
-    "type-of",
-    "unique-id",
-    "unit",
-    "unitless",
-    "unquote",
-    "variable-exists",
-    "zip",
-];
 
 pub struct NoUnknownFunctionState {
     function_name: Box<str>,
@@ -234,22 +140,6 @@ impl Rule for NoUnknownFunction {
     }
 }
 
-fn is_scss_built_in_function(name: &str) -> bool {
-    SCSS_BUILT_IN_FUNCTIONS
-        .binary_search_by(|built_in| compare_scss_function_names(built_in, name))
-        .is_ok()
-}
-
-fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
-    left.bytes()
-        .map(normalize_scss_function_name_byte)
-        .cmp(right.bytes().map(normalize_scss_function_name_byte))
-}
-
-fn normalize_scss_function_name_byte(byte: u8) -> u8 {
-    if byte == b'_' { b'-' } else { byte }
-}
-
 fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
     for ignore_pattern in &options.ignore {
         if name.eq_ignore_ascii_case(ignore_pattern) {
@@ -257,22 +147,4 @@ fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
         }
     }
     false
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn scss_built_in_functions_are_sorted() {
-        for pair in SCSS_BUILT_IN_FUNCTIONS.windows(2) {
-            assert_eq!(
-                compare_scss_function_names(pair[0], pair[1]),
-                Ordering::Less,
-                "{} should sort before {}",
-                pair[0],
-                pair[1]
-            );
-        }
-    }
 }

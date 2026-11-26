@@ -1,0 +1,218 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+let foo; async function x() { foo += bar; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = foo + bar; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = await bar + foo; }
+```
+
+# Input
+```cjs
+async function x() { let foo; foo += await bar; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = (await result)(foo); }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = bar(await something, foo) }
+```
+
+# Input
+```cjs
+function* x() { let foo; foo += yield bar; }
+```
+
+# Input
+```cjs
+const foo = {}; async function x() { foo.bar = await baz; }
+```
+
+# Input
+```cjs
+const foo = []; async function x() { foo[x] += 1;  }
+```
+
+# Input
+```cjs
+let foo; function* x() { foo = bar + foo; }
+```
+
+# Input
+```cjs
+async function x() { let foo; bar(() => baz += 1); foo += await amount; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = condition ? foo : await bar; }
+```
+
+# Input
+```cjs
+async function x() { let foo; bar(() => { let foo; blah(foo); }); foo += await result; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = foo + 1; await bar; }
+```
+
+# Input
+```cjs
+async function x() { foo += await bar; }
+```
+
+# Input
+```cjs
+async function foo() { if (1); if (2); if (3); if (4); if (5); if (6); if (7); if (8); if (9); if (10); if (11); if (12); if (13); if (14); if (15); if (16); if (17); if (18); if (19); if (20); }
+```
+
+# Input
+```cjs
+async function foo() { return [1 ? a : b, 2 ? a : b, 3 ? a : b, 4 ? a : b, 5 ? a : b, 6 ? a : b, 7 ? a : b, 8 ? a : b, 9 ? a : b, 10 ? a : b]; }
+```
+
+# Input
+```cjs
+async function f() { let records; records = await a.records; g(() => { records }); }
+```
+
+# Input
+```cjs
+async function f() { try { this.foo = doSomething(); } catch (e) { this.foo = null; await doElse(); } }
+```
+
+# Input
+```cjs
+async function f(foo) { let bar = await get(foo.id); bar.prop = foo.prop; }
+```
+
+# Input
+```cjs
+async function f(foo) { let bar = await get(foo.id); foo = bar.prop; }
+```
+
+# Input
+```cjs
+async function f() { let foo = {}; let bar = await get(foo.id); foo.prop = bar.prop; }
+```
+
+# Input
+```cjs
+let count = 0; async function A(...args) { count += 1; await new Promise(resolve => resolve()); count -= 1; return; }
+```
+
+# Input
+```cjs
+async function foo(e) {} async function run() { const input = []; const props = []; for (const entry of input) { const prop = props.find(a => a.id === entry.id) || null; await foo(entry); } for (const entry of input) { const prop = props.find(a => a.id === entry.id) || null; } }
+```
+
+# Input
+```cjs
+async function run() { { let entry; await entry; } { let entry; () => entry; entry = 1; } }
+```
+
+# Input
+```cjs
+async function run() { await a; b = 1; }
+```
+
+# Input
+```cjs
+let foo; function x() { foo += bar(); }
+```
+
+# Input
+```cjs
+let foo; async function x() { const value = await bar; foo += value; }
+```
+
+# Input
+```cjs
+let foo; async function x() { await bar; foo = foo + 1; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo++; await bar; foo++; }
+```
+
+# Input
+```cjs
+let foo; async function x() { use(foo); await bar; use(foo); foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function x() { if (cond) { use(foo); return; } await bar; foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function x() { use(foo); const inner = async () => { await bar; }; foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function x() { use(foo); await bar; const inner = () => { foo = 1; }; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = cond ? foo : await bar; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = await bar || foo; }
+```
+
+# Input
+```cjs
+let foo; async function x() { foo = [await bar, foo]; }
+```
+
+# Input
+```cjs
+let foo; async function x() { function foo2() {} foo = foo + 1; }
+```
+
+# Input
+```cjs
+async function x() { function inner() {} inner = inner + await bar; }
+```
+
+# Input
+```cjs
+let foo; async function f() { try { use(foo); await risky(); use(foo); } finally { release(); } foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function f() { try { if (c) { use(foo); await bar(); return; } } finally { release(); } foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function f() { try { try { use(foo); await bar(); return; } finally { a(); } } finally { b(); } foo = 1; }
+```
+
+# Input
+```cjs
+let foo; async function f() { for (const item of list) { foo = item; use(foo); } }
+```

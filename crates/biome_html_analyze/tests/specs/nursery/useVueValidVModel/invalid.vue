@@ -34,4 +34,5 @@
   <input v-for="x in list" v-model="x">
   <MyComponent v-slot="{ item }"><input v-model="item"></MyComponent>
   <MyComponent><template #default="{ item }"><input v-model="item"></template></MyComponent>
+  <mi v-model="x"></mi>
 </template>

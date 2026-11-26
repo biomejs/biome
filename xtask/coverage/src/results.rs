@@ -178,13 +178,29 @@ pub fn emit_compare(
         let passed_diff = base_passed - new_passed;
         let failed_diff = base_failed - new_failed;
         let panics_diff = base_panics - new_panics;
-        let passed_row: Vec<&dyn std::fmt::Display> =
-            vec![&"Passed", &base_passed, &new_passed, &passed_diff];
-        let failed_row: Vec<&dyn std::fmt::Display> =
-            vec![&"Failed", &base_failed, &new_failed, &failed_diff];
-        let panics_row: Vec<&dyn std::fmt::Display> =
-            vec![&"Panics", &base_panics, &new_panics, &panics_diff];
-        table.print(vec![passed_row, failed_row, panics_row]);
+        let passed_row = [
+            "Passed".to_string(),
+            base_passed.to_string(),
+            new_passed.to_string(),
+            passed_diff.to_string(),
+        ];
+        let failed_row = [
+            "Failed".to_string(),
+            base_failed.to_string(),
+            new_failed.to_string(),
+            failed_diff.to_string(),
+        ];
+        let panics_row = [
+            "Panics".to_string(),
+            base_panics.to_string(),
+            new_panics.to_string(),
+            panics_diff.to_string(),
+        ];
+        let mut output = Vec::new();
+        table
+            .writeln(&mut output, [passed_row, failed_row, panics_row])
+            .unwrap();
+        print!("{}", String::from_utf8(output).unwrap());
     }
 }
 

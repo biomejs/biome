@@ -745,3 +745,219 @@ insert_final_newline = false
         result,
     ));
 }
+
+#[test]
+fn should_apply_section_with_nested_alternates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{*.{js,json},biome.jsonc}]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("test.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_nested_alternates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_section_with_bracket_expression_in_alternates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{[ab],c}.json]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("a.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_bracket_expression_in_alternates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_treat_unbalanced_braces_literally() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{a,b}}.json]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("{a,b}}.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_treat_unbalanced_braces_literally",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_section_with_negative_numeric_range() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[file{-1..1}.js]
+indent_size = 2
+"#,
+    );
+
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
+"#;
+    // Inside the range: formatted with `indent_size = 2`
+    let negative_file = Utf8Path::new("file-1.js");
+    fs.insert(negative_file.into(), contents);
+    let zero_file = Utf8Path::new("file0.js");
+    fs.insert(zero_file.into(), contents);
+    // Outside the range: formatted with `indent_size = 4`
+    let outside_file = Utf8Path::new("file2.js");
+    fs.insert(outside_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                negative_file.as_str(),
+                zero_file.as_str(),
+                outside_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_section_with_negative_numeric_range",
+        fs,
+        console,
+        result,
+    ));
+}

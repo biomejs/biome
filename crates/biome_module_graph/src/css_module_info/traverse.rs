@@ -2,17 +2,59 @@ use crate::db::ModuleDb;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::traverse::{UpwardTraversalAction, UpwardTraversalVisitor};
 use crate::{CssPropertyDefinition, HtmlImport, JsImportPath, JsImportPhase, JsModuleInfo};
+use biome_astro_semantic::{BlockKind, astro_model_from_source};
 use biome_console::markup;
 use biome_css_semantic::db::{
-    css_property_definitions_from_snippet, css_property_definitions_from_source,
+    css_property_definitions_from_model, css_property_definitions_from_snippet,
+    css_property_definitions_from_source,
 };
+use biome_css_semantic::{
+    SemanticModelOptions, SyntheticCustomProperty, semantic_model_with_options,
+};
+use biome_css_syntax::{AnyCssRoot, decode_css_identifier};
 use biome_fs::normalize_path;
-use biome_parser::db::SourceExt;
+use biome_parser::db::{SourceExt, TrackedSnippet};
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::rc::Rc;
+
+#[salsa::tracked]
+fn css_property_definitions_from_embedded_snippet<'db>(
+    db: &'db dyn ModuleDb,
+    snippet: TrackedSnippet<'db>,
+) -> Vec<biome_css_semantic::db::CssPropertyDefinition> {
+    let Some(file_source) = db
+        .source_from_index(snippet.document_source_index(db))
+        .and_then(|source| source.to_css_file_source())
+    else {
+        return Vec::new();
+    };
+    if !file_source.as_embedding_kind().is_astro() {
+        return css_property_definitions_from_snippet(db, snippet).clone();
+    }
+    let mut options = SemanticModelOptions::default();
+
+    let astro_model = astro_model_from_source(db, snippet.source(db));
+    if let Some(block) = astro_model.blocks().find(|block| {
+        block.kind() == BlockKind::Style
+            && block
+                .content_range()
+                .is_some_and(|range| range.contains_range(snippet.content_range(db)))
+    }) {
+        options.synthetic_custom_properties = block
+            .define_vars()
+            .map(|variable| {
+                SyntheticCustomProperty::new(variable.semantic_name().clone())
+                    .with_host_range(variable.host_range())
+            })
+            .collect();
+    }
+    let root: AnyCssRoot = snippet.parsed(db).tree();
+    let model = semantic_model_with_options(&root, options);
+    css_property_definitions_from_model(&model)
+}
 
 /// Minimal step for efficient CSS class checking during traversal.
 /// Used in the happy path where we're just checking if classes exist.
@@ -53,101 +95,93 @@ pub struct ImportTreeNode {
     pub parent_components: Vec<Self>,
 }
 
-/// Traverses component importers to discover CSS classes visible to them.
+/// Returns the CSS classes that `importer` provides to the modules it imports.
 ///
-/// Modules are visited at most once across the entire traversal. Each eligible
-/// JavaScript importer contributes its static CSS imports. HTML importers
-/// contribute linked, static, and dynamic CSS imports together with classes
-/// from global inline styles.
-pub(crate) struct CssClassTraversal<'db> {
-    db: &'db dyn ModuleDb,
-    visited: FxHashSet<Utf8PathBuf>,
-}
-
-impl<'db> CssClassTraversal<'db> {
-    /// Creates a class traversal with `start` already visited.
-    ///
-    /// Seeding the starting module prevents an import cycle from yielding its
-    /// direct CSS imports a second time.
-    pub(crate) fn new(db: &'db dyn ModuleDb, start: &Utf8Path) -> Self {
-        Self {
-            db,
-            visited: [start.to_path_buf()].into_iter().collect(),
-        }
-    }
-}
-
-impl UpwardTraversalVisitor for CssClassTraversal<'_> {
-    type Branch = ();
-    type Item = CssClassStep;
-
-    fn db(&self) -> &dyn ModuleDb {
-        self.db
-    }
-
-    fn should_visit_importer(
-        &self,
-        imported_path: &Utf8Path,
-        importer: ModuleInfo,
-        _branch: &Self::Branch,
-    ) -> bool {
-        let importer_path = importer.path(self.db);
-        let importer_kind = importer.kind(self.db);
-        !matches!(importer_kind, ModuleInfoKind::Css(_))
-            && !self.visited.contains(importer_path)
-            && imports_path(self.db, importer, imported_path)
-    }
-
-    /// Collects the importer's CSS classes and continues through its importers.
-    ///
-    /// The importer is marked globally visited before traversal continues.
-    fn visit_importer(
-        &mut self,
-        _imported_path: &Utf8Path,
-        importer: ModuleInfo,
-        _branch: &Self::Branch,
-    ) -> Vec<UpwardTraversalAction<Self::Item, Self::Branch>> {
-        let db = self.db;
-        let importer_path = importer.path(db);
-        let importer_kind = importer.kind(db);
-        self.visited.insert(importer_path.to_path_buf());
-
-        let items = match importer_kind {
-            ModuleInfoKind::Js(js_info) => js_info
-                .import_paths
+/// A JavaScript module provides the CSS files it imports statically. An HTML
+/// module provides its linked stylesheets, the CSS files its scripts import,
+/// and the classes of its global inline styles. The global styles step is
+/// returned even when it contains no classes. A CSS module provides nothing.
+pub(crate) fn provided_css_class_steps(
+    db: &dyn ModuleDb,
+    importer: ModuleInfo,
+) -> Vec<CssClassStep> {
+    match importer.kind(db) {
+        ModuleInfoKind::Js(js_info) => js_info
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
+            .filter_map(|import_path| {
+                let resolved = import_path.resolve_js(db, importer);
+                css_class_step(db, resolved.path().as_path()?)
+            })
+            .collect(),
+        ModuleInfoKind::Html(html_info) => {
+            let mut items = html_info
+                .imported_stylesheets
                 .iter()
-                .filter(|import| import.kind.is_static())
                 .filter_map(|import_path| {
-                    let resolved = import_path.resolve_js(db, importer);
+                    let resolved = import_path.resolve_css(db, importer);
                     css_class_step(db, resolved.path().as_path()?)
                 })
-                .collect(),
-            ModuleInfoKind::Html(html_info) => {
-                let mut items = html_info
-                    .imported_stylesheets
-                    .iter()
-                    .filter_map(|import_path| {
-                        let resolved = import_path.resolve_css(db, importer);
-                        css_class_step(db, resolved.path().as_path()?)
-                    })
-                    .collect::<Vec<_>>();
-                items.extend(html_info.import_paths.iter().filter_map(|import_path| {
-                    let resolved = import_path.resolve_html(db, importer);
-                    css_class_step(db, resolved.path().as_path()?)
-                }));
-                items.push(CssClassStep {
-                    css_path: importer_path.to_path_buf(),
-                    css_classes: html_info.get_global_styles(),
-                });
-                items
-            }
-            ModuleInfoKind::Css(_) => Vec::new(),
-        };
+                .collect::<Vec<_>>();
+            items.extend(html_info.import_paths.iter().filter_map(|import_path| {
+                let resolved = import_path.resolve_html(db, importer);
+                css_class_step(db, resolved.path().as_path()?)
+            }));
+            items.push(CssClassStep {
+                css_path: importer.path(db).to_path_buf(),
+                css_classes: html_info.get_global_styles(),
+            });
+            items
+        }
+        ModuleInfoKind::Css(_) => Vec::new(),
+    }
+}
 
-        vec![UpwardTraversalAction {
-            items,
-            continue_with: Some(()),
-        }]
+/// Returns whether [provided_css_class_steps] returns at least one step for
+/// `module`.
+pub(crate) fn provides_css_classes(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
+    match module.kind(db) {
+        ModuleInfoKind::Js(js_info) => js_info
+            .import_paths
+            .iter()
+            .filter(|import| import.kind.is_static())
+            .any(|import_path| {
+                import_path
+                    .resolve_js(db, module)
+                    .path()
+                    .as_path()
+                    .is_some_and(|path| db.css_module_info_for_path(path).is_some())
+            }),
+        ModuleInfoKind::Html(_) => true,
+        ModuleInfoKind::Css(_) => false,
+    }
+}
+
+/// Returns the resolved paths that `module` imports and to which it provides
+/// CSS classes.
+///
+/// JavaScript type-only imports are skipped because they don't load the
+/// imported module. CSS modules return no paths: a CSS `@import` doesn't
+/// expose the importing stylesheet to components.
+pub(crate) fn css_class_import_paths(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf8PathBuf> {
+    match module.kind(db) {
+        ModuleInfoKind::Js(info) => js_import_paths_in_source_order(info)
+            .filter_map(|import| import.resolve_js(db, module).path().as_path())
+            .map(Utf8Path::to_path_buf)
+            .collect(),
+        ModuleInfoKind::Html(info) => info
+            .imported_stylesheets
+            .iter()
+            .filter_map(|import| import.resolve_css(db, module).path().as_path())
+            .chain(
+                info.import_paths
+                    .iter()
+                    .filter_map(|import| import.resolve_html(db, module).path().as_path()),
+            )
+            .map(Utf8Path::to_path_buf)
+            .collect(),
+        ModuleInfoKind::Css(_) => Vec::new(),
     }
 }
 
@@ -460,6 +494,46 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .collect::<Vec<_>>();
 
         if let Some(source) = self.db.parsed_source_for_path(path) {
+            let astro_model = self
+                .db
+                .source_from_index(source.document_source_index(self.db))
+                .and_then(|source_type| {
+                    source_type
+                        .to_html_file_source()
+                        .filter(|html| html.is_astro())
+                })
+                .map(|_| astro_model_from_source(self.db, source));
+            if let Some(astro_model) = astro_model {
+                let name = decode_css_identifier(self.name);
+                let semantic_name = name.strip_prefix("--");
+                contexts.extend(astro_model.blocks().filter_map(|block| {
+                    if block.kind() != BlockKind::Style
+                        || (only_global && !block.is_globally_scoped())
+                    {
+                        return None;
+                    }
+                    let semantic_name = semantic_name?;
+                    let range = block
+                        .define_vars()
+                        .find(|variable| {
+                            decode_css_identifier(variable.semantic_name()) == semantic_name
+                        })
+                        .map(|variable| variable.host_range())
+                        .or_else(|| {
+                            // Keys that can't be listed, such as a spread, may
+                            // declare any custom property.
+                            (!block.define_vars_open_reasons().is_empty())
+                                .then(|| block.host_range())
+                        })?;
+                    Some(HtmlPropertyContext {
+                        position: range.start(),
+                        kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
+                            module_path: normalize_path(path),
+                            range,
+                        }),
+                    })
+                }));
+            }
             for snippet in source.snippets(self.db) {
                 let Some(file_source) = self
                     .db
@@ -472,8 +546,9 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                     continue;
                 }
                 let snippet_is_global = file_source.embedding_applicability().is_global();
+                let definitions = css_property_definitions_from_embedded_snippet(self.db, *snippet);
                 contexts.extend(
-                    css_property_definitions_from_snippet(self.db, *snippet)
+                    definitions
                         .iter()
                         .filter(|definition| {
                             definition.matches(self.name)
@@ -482,8 +557,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                                     || definition.is_globally_scoped())
                         })
                         .map(|definition| {
-                            // Parsed snippet trees exclude their parser base offset.
-                            let range = definition.range() + snippet.content_offset(self.db);
+                            let range = definition.range_in_host(snippet.content_offset(self.db));
                             HtmlPropertyContext {
                                 position: range.start(),
                                 kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {

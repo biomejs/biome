@@ -1,7 +1,7 @@
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextContext, TextPrintMode};
+use crate::shared::{TextContext, TextPrintMode, TrimMode};
 use biome_formatter::write;
 use biome_markdown_syntax::{AnyMdInline, MdInlineItemList, MdInlineLink, MdInlineLinkFields};
 
@@ -43,7 +43,7 @@ impl FormatNodeRule<MdInlineLink> for FormatMdInlineLink {
             } else {
                 text.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::trim_all(),
+                        print_mode: TextPrintMode::Trim(TrimMode::NormalizeWordsPreserveLines),
                         keep_fences_in_italics: false,
                         text_context: TextContext::Neutral,
                     })

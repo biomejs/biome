@@ -3,31 +3,31 @@
 /* Nesting selectors with the same authored tail can resolve to different target compounds. */
 .card {
   .column {
-    :root[data-theme="dark"] & {}
+    :root[data-theme="dark"] & { color: red; }
   }
 
   code {
-    :root[data-theme="dark"] & {}
+    :root[data-theme="dark"] & { color: red; }
   }
 }
 
 /* Parent selector lists expand one nested selector into several resolved selectors. */
 .settings button {
-  #theme &:hover {}
+  #theme &:hover { color: red; }
 }
 
 .settings select,
 .settings .trigger,
 .editor select {
-  &:hover {}
+  &:hover { color: red; }
 }
 
 .files li.active {
-  #theme & {}
+  #theme & { color: red; }
 }
 
 .settings select,
 .settings .trigger,
 .editor select {
-  #theme & {}
+  #theme & { color: red; }
 }

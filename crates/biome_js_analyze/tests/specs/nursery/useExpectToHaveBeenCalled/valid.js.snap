@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+expect(method).toHaveBeenCalled();
+expect(method).not.toHaveBeenCalled();
+expect(method).toBeCalled();
+expect(method).not.toBeCalled();
+expect(method).resolves.not.toHaveBeenCalled();
+expect(a);
+expect(method).toBe([]);
+
+// Call counts other than a literal zero.
+expect(method).toHaveBeenCalledTimes(1);
+expect(method).not.toHaveBeenCalledTimes(1);
+expect(method).toBeCalledTimes(10);
+expect(method).not.toHaveBeenCalledTimes(x);
+expect(method).not.toHaveBeenCalledTimes(...x);
+expect(method).toBeCalledTimes();
+expect(method).toHaveBeenCalledTimes(-0);
+expect(method).toHaveBeenCalledTimes(0n);
+expect(method).toHaveBeenCalledTimes("0");
+expect(method).toHaveBeenCalledTimes(0 + 0);
+expect(method).toHaveBeenCalledTimes(1, 0);
+expect(method).toHaveBeenCalledTimes((sideEffect(), 0));
+expect(method).toHaveBeenCalledTimes(null);
+
+// Other matchers that accept zero.
+expect(method.mock.calls).toHaveLength;
+expect(method.mock.calls).toHaveLength(0);
+expect(fn.mock.calls).toEqual([]);
+expect(fn.mock.calls).toContain(1, 2, 3);
+expect(method).toHaveBeenNthCalledWith(0);
+expect(method).toHaveReturnedTimes(0);
+expect(method.mock.calls.length).toBe(0);
+
+// The matcher isn't called.
+expect(method).toHaveBeenCalledTimes;
+expect(method).not.toHaveBeenCalledTimes;
+new expect(method).toHaveBeenCalledTimes(0);
+
+// Modifiers in an unsupported order, or unknown modifiers.
+expect(method).not.resolves.toHaveBeenCalledTimes(0);
+expect(method).not.not.toHaveBeenCalledTimes(0);
+expect(method).resolves.rejects.toHaveBeenCalledTimes(0);
+expect(method).never.toHaveBeenCalledTimes(0);
+expect(method).to.toHaveBeenCalledTimes(0);
+expect(method)[not].toHaveBeenCalledTimes(0);
+expect(method)[toHaveBeenCalledTimes](0);
+
+// Optional chaining can't be kept by the replacement.
+expect(method)?.toHaveBeenCalledTimes(0);
+expect(method).not?.toHaveBeenCalledTimes(0);
+expect(method).toHaveBeenCalledTimes?.(0);
+
+// Calls that don't start with `expect()`.
+assert(method).toHaveBeenCalledTimes(0);
+expect.toHaveBeenCalledTimes(0);
+expect.soft.toHaveBeenCalledTimes(0);
+expect.extend(method).toHaveBeenCalledTimes(0);
+expectation(method).not.toHaveBeenCalledTimes(0);
+method.toHaveBeenCalledTimes(0);
+toHaveBeenCalledTimes(0);
+expect(method).mock.calls.toHaveBeenCalledTimes(0);
+expect(method).#toHaveBeenCalledTimes(0);
+
+```

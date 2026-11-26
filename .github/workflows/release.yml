@@ -124,9 +124,11 @@ jobs:
           - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
+            rustflags: '-C link-arg=-Wl,-z,pack-relative-relocs'
           - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
+            rustflags: '-C link-arg=-Wl,-z,pack-relative-relocs'
           - os: depot-macos-latest
             target: x86_64-apple-darwin
             code-target: darwin-x64
@@ -171,7 +173,9 @@ jobs:
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
-          RUSTFLAGS: '-C strip=symbols -C codegen-units=1'
+          # The musl targets also pack their relative relocations. Their binaries are
+          # static, so they don't depend on the loader of the system supporting it.
+          RUSTFLAGS: '-C strip=symbols -C codegen-units=1 ${{ matrix.rustflags }}'
           # Inline the version of the npm package in the CLI binary
           BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
 
@@ -212,11 +216,13 @@ jobs:
       RUST_BACKTRACE: 1
     strategy:
       matrix:
+        # The fat-LTO link of the CLI peaks at about 10 GB on x86_64 and 20 GB on aarch64.
+        # On runners with less memory the build thrashes for hours instead of failing.
         include:
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-8
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: depot-ubuntu-24.04-arm-4
+          - os: depot-ubuntu-24.04-arm-8
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
 

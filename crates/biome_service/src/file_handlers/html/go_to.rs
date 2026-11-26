@@ -9,8 +9,6 @@ use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_embeds::bindings::{
     InternedBindingTokenText, get_binding_by_token_text, get_binding_with_source,
 };
-#[cfg(feature = "module_graph")]
-use biome_fs::BiomePath;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
 #[cfg(feature = "html_embeds")]
 use biome_html_syntax::{HtmlComponentName, HtmlTextExpression};
@@ -180,7 +178,7 @@ fn resolve_import_definition(
     };
 
     result.store(
-        BiomePath::new(target_path),
+        module_db.biome_path(target_path),
         TextRange::new(0.into(), 0.into()),
     );
 

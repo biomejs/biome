@@ -82,6 +82,152 @@ biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━
 ```
 
 ```block
+test1.js:1:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API describe is used as a global variable.
+  
+  > 1 │ describe.only("bar", () => {});
+      │ ^^^^^^^^
+    2 │ 
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import describe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import describe from @jest/globals.
+  
+      1 │ + import·{·describe·}·from·"@jest/globals";
+    1 2 │   describe.only("bar", () => {});
+    2 3 │   
+  
+
+```
+
+```block
+test2.js:2:1 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API describe is used as a global variable.
+  
+  > 2 │ describe("foo", () => {
+      │ ^^^^^^^^
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import describe from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import describe from @jest/globals.
+  
+    1  1 │   
+       2 │ + import·{·describe·}·from·"@jest/globals";
+    2  3 │   describe("foo", () => {
+    3  4 │   	beforeEach(() => {});
+  
+
+```
+
+```block
+test2.js:3:2 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    2 │ describe("foo", () => {
+  > 3 │ 	beforeEach(() => {});
+      │ 	^^^^^^^^^^
+    4 │     beforeEach(() => {});
+    5 │     test("bar", () => {
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+test2.js:3:2 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API beforeEach is used as a global variable.
+  
+    2 │ describe("foo", () => {
+  > 3 │ 	beforeEach(() => {});
+      │ 	^^^^^^^^^^
+    4 │     beforeEach(() => {});
+    5 │     test("bar", () => {
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import beforeEach from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import beforeEach from @jest/globals.
+  
+    1  1 │   
+       2 │ + import·{·beforeEach·}·from·"@jest/globals";
+    2  3 │   describe("foo", () => {
+    3  4 │   	beforeEach(() => {});
+  
+
+```
+
+```block
+test2.js:4:5 lint/nursery/noTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The beforeEach hook is not allowed.
+  
+    2 │ describe("foo", () => {
+    3 │ 	beforeEach(() => {});
+  > 4 │     beforeEach(() => {});
+      │     ^^^^^^^^^^
+    5 │     test("bar", () => {
+    6 │         someFn();
+  
+  i Hooks run code away from the tests that depend on it, and they encourage tests to share variables. This makes a test harder to understand on its own, and lets one test change the result of another.
+  
+  i Move this code into the tests that need it, for example by calling a helper function at the start of each test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+test2.js:4:5 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API beforeEach is used as a global variable.
+  
+    2 │ describe("foo", () => {
+    3 │ 	beforeEach(() => {});
+  > 4 │     beforeEach(() => {});
+      │     ^^^^^^^^^^
+    5 │     test("bar", () => {
+    6 │         someFn();
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import beforeEach from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import beforeEach from @jest/globals.
+  
+    1  1 │   
+       2 │ + import·{·beforeEach·}·from·"@jest/globals";
+    2  3 │   describe("foo", () => {
+    3  4 │   	beforeEach(() => {});
+  
+
+```
+
+```block
 test2.js:5:5 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The test function test is inconsistent with the configured preferred function it.
@@ -103,6 +249,34 @@ test2.js:5:5 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━�
       5 │ + ····it("bar",·()·=>·{
     6 6 │           someFn();
     7 7 │       });
+  
+
+```
+
+```block
+test2.js:5:5 lint/nursery/noTestGlobals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test API test is used as a global variable.
+  
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+      │     ^^^^
+    6 │         someFn();
+    7 │     });
+  
+  i Whether this global variable exists depends on the configuration of the test runner. An import shows where the test API comes from and works with any configuration.
+  
+  i Import test from @jest/globals instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Import test from @jest/globals.
+  
+    1  1 │   
+       2 │ + import·{·test·}·from·"@jest/globals";
+    2  3 │   describe("foo", () => {
+    3  4 │   	beforeEach(() => {});
   
 
 ```
@@ -170,5 +344,5 @@ test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
 Found 2 warnings.
-Found 1 info.
+Found 8 infos.
 ```

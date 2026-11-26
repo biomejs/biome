@@ -1,0 +1,93 @@
+# Blocks that keep their source indentation
+
+- item
+
+  <div>
+    html
+  </div>
+
+      indented code
+
+  > quote
+  > more
+
+  [ref]: /url
+
+  paragraph
+
+# Block on the line after a blockquote
+
+- item
+  > quote
+  ```
+  code
+  ```
+
+  paragraph
+
+# Nested list that cannot move
+
+- item
+  - nested
+
+    <div>
+      html
+    </div>
+
+  paragraph
+
+- item
+  - nested
+    > quote
+
+  paragraph
+
+# Suppressed blocks
+
+- item
+
+  <!-- biome-ignore format: reason -->
+  suppressed   paragraph
+
+  paragraph
+
+- item
+
+  <!-- biome-ignore format: reason -->
+  - suppressed   list
+    - suppressed   nested
+
+  paragraph
+
+# List in a blockquote
+
+> - item
+>
+>   paragraph
+>   - nested
+
+# First block
+
+- - nested
+  - sibling
+
+  paragraph
+
+- # heading
+
+  paragraph
+
+- ```
+  code
+  ```
+
+  paragraph
+
+# Paragraph line that starts with a block marker
+
+- item
+
+  The count is
+  14. More text.
+
+  paragraph

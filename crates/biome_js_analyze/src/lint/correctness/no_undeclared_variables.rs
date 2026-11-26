@@ -98,8 +98,27 @@ impl Rule for NoUndeclaredVariables {
             return None;
         }
 
-        if embedded.contains_binding(token_text)
+        if let Some(is_unresolved) =
+            embedded.is_known_unresolved_reference(token.text_trimmed_range())
+        {
+            if !is_unresolved {
+                return None;
+            }
+        } else if embedded.contains_binding(token_text)
             || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
+        {
+            return None;
+        }
+
+        // The content of an MDX document receives `props` from the code that
+        // renders it. ESM blocks are module code, where `props` isn't defined.
+        // The components that JSX tags name can come from that code too,
+        // through the `components` prop or an `MDXProvider`, which also
+        // provides them to the functions that ESM blocks export.
+        let embedding_kind = source_type.as_embedding_kind();
+        if embedding_kind.is_mdx()
+            && ((text == "props" && !embedding_kind.is_mdx_esm())
+                || matches!(identifier, AnyJsIdentifierReference::JsxReferenceIdentifier(_)))
         {
             return None;
         }

@@ -57,6 +57,12 @@ pub struct GritExecContext<'a> {
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
 
     pub diagnostics: Mutex<Vec<(RuleDiagnostic, Applicability)>>,
+
+    /// Whether the query was compiled as a node selector.
+    ///
+    /// Selector queries allow snippets to match multi-child lists. Regular
+    /// Grit queries keep their existing list-matching behavior.
+    pub node_selector: bool,
 }
 
 impl GritExecContext<'_> {
@@ -329,7 +335,7 @@ fn file_owner_from_matches(
         std::env::current_dir()?
     };
 
-    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+    let absolute_path = name.absolutize_from(base_dir).to_path_buf();
 
     Ok(Some(FileOwner {
         name,
@@ -361,7 +367,7 @@ pub(crate) fn new_file_owner(
         std::env::current_dir()?
     };
 
-    let absolute_path = name.absolutize_from(base_dir)?.to_path_buf();
+    let absolute_path = name.absolutize_from(base_dir).to_path_buf();
 
     Ok(Some(FileOwner {
         name,

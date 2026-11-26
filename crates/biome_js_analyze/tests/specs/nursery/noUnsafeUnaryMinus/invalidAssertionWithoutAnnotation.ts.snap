@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertionWithoutAnnotation.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// TypeScript ignores assertion functions declared as variables without a type
+// annotation (TS2775), so `value` keeps its declared type after the call.
+const assertNumber = (value: unknown): asserts value is number => {
+	if (typeof value !== "number") {
+		throw new Error();
+	}
+};
+
+function negate(value: number | string) {
+	assertNumber(value);
+	return -value;
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertionWithoutAnnotation.ts:12:9 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    10 │ function negate(value: number | string) {
+    11 │ 	assertNumber(value);
+  > 12 │ 	return -value;
+       │ 	       ^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

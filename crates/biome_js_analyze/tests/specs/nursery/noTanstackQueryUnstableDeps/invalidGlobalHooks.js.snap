@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGlobalHooks.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+function Component() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+
+	useEffect(() => {}, [query]);
+	React.useMemo(() => query.data, [query]);
+}
+
+```
+
+# Diagnostics
+```
+invalidGlobalHooks.js:7:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    5 │ 	const query = useQuery({ queryKey: ["a"], queryFn });
+    6 │ 
+  > 7 │ 	useEffect(() => {}, [query]);
+      │ 	                     ^^^^^
+    8 │ 	React.useMemo(() => query.data, [query]);
+    9 │ }
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidGlobalHooks.js:8:35 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useMemo.
+  
+     7 │ 	useEffect(() => {}, [query]);
+   > 8 │ 	React.useMemo(() => query.data, [query]);
+       │ 	                                 ^^^^^
+     9 │ }
+    10 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useMemo treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

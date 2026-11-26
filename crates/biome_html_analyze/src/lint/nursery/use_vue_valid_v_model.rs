@@ -165,15 +165,10 @@ impl Rule for UseVueValidVModel {
 
         if has_empty_value(directive) {
             violations.push(ViolationKind::MissingValue);
-        } else if let Some(snippet) =
-            ctx.model()
-                .element_at(directive.range())
-                .and_then(|element| {
-                    element
-                        .attrs()
-                        .find(|attr| attr.range() == directive.range())?
-                        .value_snippet()
-                })
+        } else if let Some(snippet) = ctx
+            .model()
+            .attr_of(directive)
+            .and_then(|attr| attr.value_snippet())
         {
             violations.extend(value_violation(&snippet));
         }
@@ -340,7 +335,7 @@ fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> 
 }
 
 /// Returns `true` when Vue renders `element` as a component: its name isn't a
-/// known HTML or SVG tag, or it has an `is` attribute.
+/// known HTML, SVG, or MathML tag, or it has an `is` attribute.
 fn is_component(element: &AnyHtmlTagElement, tag_kind: Option<HtmlSyntaxKind>) -> bool {
     tag_kind.is_none_or(|kind| kind == HtmlSyntaxKind::HTML_UNKNOWN_TAG)
         || element.find_attribute_or_vue_binding("is").is_some()

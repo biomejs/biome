@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTopLevel.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+arguments.map(() => {});
+const arrow = () => arguments.map(() => {});
+function outer(value = { [arguments.at(0)]() {} }) {}
+
+```
+
+# Diagnostics
+```
+invalidTopLevel.cjs:2:1 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ arguments.map(() => {});
+      │ ^^^^^^^^^^^^^
+    3 │ const arrow = () => arguments.map(() => {});
+    4 │ function outer(value = { [arguments.at(0)]() {} }) {}
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTopLevel.cjs:3:21 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ arguments.map(() => {});
+  > 3 │ const arrow = () => arguments.map(() => {});
+      │                     ^^^^^^^^^^^^^
+    4 │ function outer(value = { [arguments.at(0)]() {} }) {}
+    5 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTopLevel.cjs:4:27 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a at() method.
+  
+    2 │ arguments.map(() => {});
+    3 │ const arrow = () => arguments.map(() => {});
+  > 4 │ function outer(value = { [arguments.at(0)]() {} }) {}
+      │                           ^^^^^^^^^^^^
+    5 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

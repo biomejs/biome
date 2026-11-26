@@ -152,6 +152,14 @@ pub enum LoweredTypeData {
         object: LoweredTypeReference,
         index: LoweredTypeReference,
     },
+    Extends {
+        check_type: LoweredTypeReference,
+        extends_type: LoweredTypeReference,
+        true_type: LoweredTypeReference,
+        false_type: LoweredTypeReference,
+        infer_types: Box<[LoweredTypeReference]>,
+        distributive: bool,
+    },
     InstanceOf {
         ty: LoweredTypeReference,
         type_parameters: Box<[LoweredTypeReference]>,
@@ -274,6 +282,7 @@ pub struct LoweredFunction {
     name: Option<Text>,
     parameters: Box<[LoweredFunctionParameter]>,
     return_type: LoweredTypeReference,
+    return_kind: LoweredReturnKind,
 }
 
 impl LoweredFunction {
@@ -297,10 +306,24 @@ impl LoweredFunction {
         &self.parameters
     }
 
-    /// Function return type.
+    /// Function return type, or the type that a predicate narrows to.
     pub fn return_type(&self) -> &LoweredTypeReference {
         &self.return_type
     }
+
+    /// Whether the function returns its return type or narrows a parameter to it.
+    pub fn return_kind(&self) -> &LoweredReturnKind {
+        &self.return_kind
+    }
+}
+
+/// What a function's return annotation states about the return type.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LoweredReturnKind {
+    /// The function returns a value of the return type.
+    Type,
+    /// `parameter is T`: the function returns whether `parameter` is of the return type.
+    Predicate { parameter_name: Text },
 }
 
 /// Parameter data shared by generated functions and constructors.

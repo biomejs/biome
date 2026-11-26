@@ -6,11 +6,11 @@ use crate::token_source::{
 };
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HTML_TAG_NAMES, HtmlSyntaxKind, T, TextLen, TextSize, VOID_ELEMENTS};
+use biome_js_extent::{JsExpressionPosition, JsExtent, Jsx};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{Dispatch::*, lookup_byte};
-use smallvec::SmallVec;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -364,7 +364,7 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::VueDirectiveArgument] context.
     fn consume_token_vue_directive_argument(&mut self) -> HtmlSyntaxKind {
-        let length = JsScanner::argument_length(&self.source.as_bytes()[self.position..]);
+        let length = JsExtent::argument_length(&self.source.as_bytes()[self.position..]);
         self.advance(length);
 
         if length > 0 {
@@ -722,7 +722,7 @@ impl<'src> HtmlLexer<'src> {
     /// JavaScript, as it is in Astro.
     fn consume_astro_frontmatter_body(&mut self) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
-        let length = JsScanner::frontmatter_length(&self.source.as_bytes()[self.position..]);
+        let length = JsExtent::frontmatter_length(&self.source.as_bytes()[self.position..]);
         // The lexer must make progress even if a fence sits at offset zero.
         self.advance(length.max(1));
 
@@ -761,94 +761,69 @@ impl<'src> HtmlLexer<'src> {
             return self.consume_newline_or_whitespaces();
         }
 
-        let length = JsScanner::expression_length(
-            &self.source.as_bytes()[self.position..],
-            self.options.framework == HtmlFramework::Astro,
-        );
+        let jsx = if self.options.framework == HtmlFramework::Astro {
+            Jsx::Enabled { is_void_element }
+        } else {
+            Jsx::Disabled
+        };
+        let length = JsExtent::expression_length(&self.source.as_bytes()[self.position..], jsx);
         self.advance(length);
 
         HTML_LITERAL
     }
 
-    /// Consumes a restricted single text expression that stops at specific keywords
-    /// (e.g., 'as' in Svelte #each blocks). Tracks nested brackets and stops when
-    /// encountering a keyword at the top level.
+    /// Consumes a Svelte block expression that ends where `kind` says, before a closing `}`, or
+    /// at the end of the source. Returns `ERROR_TOKEN`, without consuming anything, when the
+    /// expression is empty.
     ///
-    /// Finding a `{` at the top level will emit an error token.
+    /// Only top-level code can end the expression: strings, template literals, regular
+    /// expressions, comments, and nested brackets are always part of it. At the top level:
+    ///
+    /// - The punctuation of `kind` ends the expression.
+    /// - A keyword of `kind` ends the expression when whitespace precedes it and the code
+    ///   before it is a complete operand, as `items` is in `{#each items as item}`. The `as` of
+    ///   a TypeScript `as const` assertion never ends it, because `const` cannot be a binding.
+    /// - Markup ends the expression: a `<` with no code before it, an HTML comment, or a
+    ///   line break followed by a tag. A `<` that follows code on the same line is a
+    ///   comparison or a type argument.
+    ///
+    /// When the expression would otherwise run to its end without a delimiter, it ends at the
+    /// first keyword that appears where an operand was expected, if a binding follows. This
+    /// recovers `{#each items. as item}` as the expression `items.` and its binding.
     fn consume_restricted_single_text_expression(
         &mut self,
         kind: RestrictedExpressionStopAt,
     ) -> HtmlSyntaxKind {
-        let start_pos = self.position;
-        let mut brackets_stack = 0;
-        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
-        // already been skipped (i.e., the TypeScript `as` in `as const`).
-        let mut first_stop_keyword_seen = false;
-
-        let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
-        let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
-
-        while let Some(current) = self.current_byte() {
-            match current {
-                // That's usually the case where we find a tag
-                _ if current == b'<' && brackets_stack == 0 => break,
-                _ if is_opening_paren(current) && !kind.matches_punct(current) => {
-                    brackets_stack += 1;
-                    self.advance(1)
+        let source = &self.source.as_bytes()[self.position..];
+        let byte_before_source = self.prev_byte();
+        let mut delimited = false;
+        let mut fallback = None;
+        let scanned_length =
+            JsExtent::expression_length_until(source, |position| match restricted_expression_stop(
+                kind,
+                source,
+                byte_before_source,
+                &position,
+            ) {
+                RestrictedExpressionStop::Delimiter => {
+                    delimited = true;
+                    true
                 }
-                _ if is_closing_paren(current) => {
-                    if brackets_stack == 0 {
-                        // Reached the closing brace
-                        break;
-                    } else {
-                        brackets_stack -= 1;
-                        self.advance(1)
-                    }
+                RestrictedExpressionStop::Markup => true,
+                RestrictedExpressionStop::Fallback => {
+                    fallback.get_or_insert(position.offset());
+                    false
                 }
+                RestrictedExpressionStop::Continue => false,
+            });
+        let length = if delimited {
+            scanned_length
+        } else {
+            fallback.unwrap_or(scanned_length)
+        };
+        self.advance(length);
 
-                _ if brackets_stack == 0 && !is_at_start_identifier(current) => {
-                    let should_stop = kind.matches_punct(current);
-                    if should_stop {
-                        break;
-                    }
-                    self.advance(1);
-                }
-                _ if brackets_stack == 0 && is_at_start_identifier(current) => {
-                    // Check if we're at a stop keyword
-                    let checkpoint_pos = self.position;
-                    let prev_byte = self.prev_byte();
-                    if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        let should_stop =
-                            kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
-
-                        if should_stop {
-                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
-                                && !first_stop_keyword_seen
-                            {
-                                // First `as` belongs to a TypeScript `as const` assertion;
-                                // the parser determined this via lookahead. Skip it and
-                                // continue scanning for the Svelte binding `as`.
-                                first_stop_keyword_seen = true;
-                            } else {
-                                // Rewind — don't consume the keyword
-                                self.position = checkpoint_pos;
-                                break;
-                            }
-                        }
-                        // Not a stop keyword (or skipped), continue
-                        // (position already advanced by consume_language_identifier)
-                    } else {
-                        // Not a keyword, advance one byte (position was reset by consume_language_identifier)
-                        self.advance_byte_or_char(current);
-                    }
-                }
-                _ => {
-                    self.advance(1);
-                }
-            }
-        }
-
-        if self.position > start_pos {
+        if length > 0 {
             HTML_LITERAL
         } else {
             ERROR_TOKEN
@@ -938,7 +913,6 @@ impl<'src> HtmlLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            LSS if self.at_start_cdata() => self.consume_cdata_start(),
             BTC if self.at_end_cdata() => self.consume_cdata_end(),
             _ => {
                 while let Some(char) = self.current_byte() {
@@ -1238,12 +1212,14 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes a tag-name token starting with the given byte, classifying it
     /// into a specific token kind according to `mode`:
     ///
-    /// - A known HTML/SVG tag name becomes its keyword kind (e.g. `div` -> `DIV_KW`,
-    ///   `circle` -> `CIRCLE_KW`). HTML names are matched case-insensitively; SVG
-    ///   camelCase names (e.g. `feGaussianBlur`) match by their exact spelling.
-    /// - Any name containing `-` or `_` becomes `HTML_COMPONENT_LITERAL`.
     /// - In a framework file a PascalCase name, or any name immediately followed by
     ///   `.` (a member expression base), becomes `HTML_COMPONENT_LITERAL`.
+    /// - A known HTML/SVG/MathML tag name becomes its keyword kind (e.g. `div` ->
+    ///   `DIV_KW`, `circle` -> `CIRCLE_KW`, `annotation-xml` -> `ANNOTATION_XML_KW`).
+    ///   HTML and MathML names are matched case-insensitively; SVG camelCase names
+    ///   (e.g. `feGaussianBlur`) match by their exact spelling.
+    /// - In a framework file any other name containing `-` becomes
+    ///   `HTML_COMPONENT_LITERAL`.
     /// - In the component-name context (`ComponentOnly`) every name becomes
     ///   `HTML_COMPONENT_LITERAL`.
     /// - Anything else (custom elements, namespaced names, unknown tags) becomes
@@ -1290,39 +1266,40 @@ impl<'src> HtmlLexer<'src> {
         }
 
         // Component / member-expression detection.
-        if (mode.allows_components() && has_component_separator)
-            || mode == TagNameMode::ComponentOnly
+        if mode == TagNameMode::ComponentOnly
+            || (mode.allows_components()
+                && (first.is_ascii_uppercase() || self.current_byte() == Some(b'.')))
         {
             return HTML_COMPONENT_LITERAL;
-        }
-        if mode.allows_components()
-            && (first.is_ascii_uppercase() || self.current_byte() == Some(b'.'))
-        {
-            return HTML_COMPONENT_LITERAL;
-        }
-
-        // A name too long to be a known tag is always unknown.
-        if overflow {
-            return HTML_UNKNOWN_TAG;
         }
 
         // Tag names are keywords. Try the exact spelling first (so case-sensitive
         // SVG names like `feGaussianBlur` match), then a lower-cased fallback (so
         // HTML names like `<DIV>` match case-insensitively). Keywords that aren't
-        // tag names (e.g. the Svelte `bind` keyword) are rejected and lex as
-        // `HTML_UNKNOWN_TAG`.
+        // tag names (e.g. the Svelte `bind` keyword) are rejected. A name too long
+        // to be a known tag skips the lookup.
         let lookup = |name: &str| {
             HtmlSyntaxKind::from_keyword(name).filter(|kind| HTML_TAG_NAMES.contains(*kind))
         };
         let name = &buffer[..len];
-        let kind = std::str::from_utf8(name).ok().and_then(lookup).or_else(|| {
-            let mut lower = [0u8; BUFFER_SIZE];
-            lower[..len].copy_from_slice(name);
-            lower[..len].make_ascii_lowercase();
-            std::str::from_utf8(&lower[..len]).ok().and_then(lookup)
-        });
+        let kind = if overflow {
+            None
+        } else {
+            std::str::from_utf8(name).ok().and_then(lookup).or_else(|| {
+                let mut lower = [0u8; BUFFER_SIZE];
+                lower[..len].copy_from_slice(name);
+                lower[..len].make_ascii_lowercase();
+                std::str::from_utf8(&lower[..len]).ok().and_then(lookup)
+            })
+        };
 
-        kind.unwrap_or(HTML_UNKNOWN_TAG)
+        // Hyphenated names are components in framework files, unless they are known
+        // tags such as `annotation-xml` or `font-face`.
+        match kind {
+            Some(kind) => kind,
+            None if mode.allows_components() && has_component_separator => HTML_COMPONENT_LITERAL,
+            None => HTML_UNKNOWN_TAG,
+        }
     }
 
     /// Consumes a quoted string literal token.
@@ -1461,7 +1438,8 @@ impl<'src> HtmlLexer<'src> {
             Some(b'@') => T!["{@"],
             Some(b'#') => T!["{#"],
             Some(b':') => T!["{:"],
-            Some(b'/') => T!["{/"],
+            Some(b'/') if self.at_svelte_closing_block() => T!["{/"],
+            Some(b'/') => return self.consume_byte(T!['{']),
             _ => unimplemented!(
                 "Svelte block not correctly lexed. Char not expected {:?}",
                 next_byte
@@ -1544,6 +1522,35 @@ impl<'src> HtmlLexer<'src> {
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    /// Returns whether the `{/` at the current position starts a closing block such as `{/if}`.
+    /// Otherwise the `{` opens a text expression that starts with `/`, such as a regular
+    /// expression or a comment.
+    ///
+    /// A name followed by `}`, a line break, the end of the source, or another block opener
+    /// closes a block, so a closing block with a missing `}` still parses as one.
+    fn at_svelte_closing_block(&self) -> bool {
+        let Some(rest) = self.source.as_bytes().get(self.position + 2..) else {
+            return false;
+        };
+        let rest = rest.trim_ascii_start();
+        if !rest.first().copied().is_some_and(is_at_start_identifier) {
+            return false;
+        }
+        let name_length = rest
+            .iter()
+            .take_while(|byte| is_at_continue_identifier(**byte))
+            .count();
+        let after_name = &rest[name_length..];
+        let next = after_name.trim_ascii_start();
+        after_name[..after_name.len() - next.len()]
+            .iter()
+            .any(|byte| matches!(byte, b'\n' | b'\r'))
+            || matches!(
+                next,
+                [] | [b'}', ..] | [b'{', b'@' | b'#' | b':' | b'/', ..]
+            )
     }
 
     fn at_svelte_opening_block(&self) -> bool {
@@ -2022,18 +2029,6 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
-fn slash_starts_regex(scanned: &[u8]) -> bool {
-    let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
-        return true;
-    };
-    match lookup_byte(scanned[end]) {
-        // A keyword such as `return` leaves an operand position; other words do not.
-        IDT => ends_with_expression_keyword(&scanned[..=end]),
-        DOL | DIG | ZER | PNC | BTC | PLS | MIN => false,
-        _ => true,
-    }
-}
-
 /// Check if a char is a linebreak (for JS-style comments in Svelte)
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
@@ -2190,6 +2185,96 @@ fn is_at_start_identifier(byte: u8) -> bool {
     byte.is_ascii_alphabetic() || byte == b'_'
 }
 
+/// What a top-level position means for a restricted Svelte block expression.
+enum RestrictedExpressionStop {
+    /// The expression ends before a keyword or punctuation of the block.
+    Delimiter,
+    /// The expression ends before markup, unless an earlier fallback ends it first.
+    Markup,
+    /// A keyword where an operand was expected. The expression ends here only if no delimiter
+    /// follows.
+    Fallback,
+    Continue,
+}
+
+/// Classifies `position` in `source`, the restricted expression being lexed. `byte_before_source`
+/// is the byte that precedes `source` in the document.
+fn restricted_expression_stop(
+    kind: RestrictedExpressionStopAt,
+    source: &[u8],
+    byte_before_source: Option<u8>,
+    position: &JsExpressionPosition,
+) -> RestrictedExpressionStop {
+    let offset = position.offset();
+    let rest = position.remaining();
+    let Some(&current) = rest.first() else {
+        return RestrictedExpressionStop::Continue;
+    };
+    if kind.matches_punct(current) {
+        return RestrictedExpressionStop::Delimiter;
+    }
+    let preceding = &source[..offset];
+    if current == b'<' {
+        let whitespace_before = &preceding[preceding.trim_ascii_end().len()..];
+        let starts_tag = rest
+            .get(1)
+            .is_some_and(|byte| byte.is_ascii_alphabetic() || matches!(byte, b'/' | b'!'));
+        let after_line_break = whitespace_before
+            .iter()
+            .any(|byte| matches!(byte, b'\n' | b'\r'));
+        return if !position.has_preceding_code()
+            || rest.starts_with(b"<!--")
+            || (starts_tag && after_line_break)
+        {
+            RestrictedExpressionStop::Markup
+        } else {
+            RestrictedExpressionStop::Continue
+        };
+    }
+    let byte_before = if offset == 0 {
+        byte_before_source
+    } else {
+        preceding.last().copied()
+    };
+    if !is_at_start_identifier(current)
+        || !byte_before.is_some_and(|byte| byte.is_ascii_whitespace())
+    {
+        return RestrictedExpressionStop::Continue;
+    }
+    let keyword_length = word_length(rest);
+    if !kind.matches_keyword(&rest[..keyword_length]) {
+        return RestrictedExpressionStop::Continue;
+    }
+    let after_keyword = &rest[keyword_length..];
+    let next = after_keyword.trim_ascii_start();
+    let followed_by_whitespace = next.len() < after_keyword.len();
+    if position.has_preceding_code() && !position.can_end_expression() {
+        let binding_follows = next
+            .first()
+            .is_some_and(|byte| is_at_start_identifier(*byte) || matches!(byte, b'{' | b'['));
+        return if followed_by_whitespace && binding_follows {
+            RestrictedExpressionStop::Fallback
+        } else {
+            RestrictedExpressionStop::Continue
+        };
+    }
+    if &rest[..keyword_length] == b"as"
+        && followed_by_whitespace
+        && &next[..word_length(next)] == b"const"
+    {
+        return RestrictedExpressionStop::Continue;
+    }
+    RestrictedExpressionStop::Delimiter
+}
+
+/// Returns the length of the identifier at the start of `bytes`.
+fn word_length(bytes: &[u8]) -> usize {
+    bytes
+        .iter()
+        .take_while(|byte| is_at_continue_identifier(**byte))
+        .count()
+}
+
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
     /// Between the opening `"` and closing `"` quotes.
@@ -2214,491 +2299,6 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
     }
 }
 
-/// Scans embedded JavaScript for the delimiter that ends the construct holding
-/// it: the `}` of an Astro or Svelte expression, the `---` fence of Astro
-/// frontmatter, or the `]` of a Vue dynamic directive argument.
-///
-/// The closing delimiter must be plain code: a `}`, `---`, or `]` that sits
-/// inside a string, a comment, a regex literal, a template literal, or JSX is
-/// ordinary content and does not end the construct. The scanner recognises
-/// those nested constructs with a stack of [`JsContext`] frames: opening one
-/// pushes a frame, its terminator pops the frame again, and the scan stops at
-/// the first stop delimiter found while no frame is open.
-const CODE_BYTES: u8 = 1 << 0;
-const TEMPLATE_BYTES: u8 = 1 << 1;
-const JSX_TAG_BYTES: u8 = 1 << 2;
-const TYPE_ARGUMENT_BYTES: u8 = 1 << 3;
-const JSX_CHILDREN_BYTES: u8 = 1 << 4;
-
-/// For each byte, the [`JsContext`]s whose [`JsScanner::run`] arm does more
-/// than advance past it.
-static INTERESTING_BYTES: [u8; 256] = {
-    let mut table = [0u8; 256];
-    let mut index = 0;
-    while index < 256 {
-        let byte = index as u8;
-        let mut mask = 0u8;
-        if matches!(
-            byte,
-            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<'
-        ) {
-            mask |= CODE_BYTES;
-        }
-        if matches!(byte, b'\\' | b'`' | b'$') {
-            mask |= TEMPLATE_BYTES;
-        }
-        if matches!(byte, b'"' | b'\'' | b'`' | b'{' | b'=' | b'>' | b',' | b'<')
-            || byte.is_ascii_whitespace()
-        {
-            mask |= JSX_TAG_BYTES;
-        }
-        if matches!(byte, b'"' | b'\'' | b'`' | b'<' | b'=' | b'>') {
-            mask |= TYPE_ARGUMENT_BYTES;
-        }
-        if matches!(byte, b'{' | b'<') {
-            mask |= JSX_CHILDREN_BYTES;
-        }
-        table[index] = mask;
-        index += 1;
-    }
-    table
-};
-
-const fn interest_mask(context: Option<JsContext>) -> u8 {
-    match context {
-        None | Some(JsContext::Code(_)) => CODE_BYTES,
-        Some(JsContext::Template) => TEMPLATE_BYTES,
-        Some(JsContext::JsxTag { .. }) => JSX_TAG_BYTES,
-        Some(JsContext::TypeArguments) => TYPE_ARGUMENT_BYTES,
-        Some(JsContext::JsxChildren) => JSX_CHILDREN_BYTES,
-    }
-}
-
-struct JsScanner<'src> {
-    source: &'src [u8],
-    /// The offset of the byte being classified.
-    position: usize,
-    /// The constructs the current position is nested in, innermost last; an
-    /// empty stack means plain code, the only place the stop delimiter ends
-    /// the scan. Eight inline frames cover typical nesting depths without a
-    /// heap allocation.
-    stack: SmallVec<[JsContext; 8]>,
-    /// Whether `<` in expression position may open a JSX element.
-    jsx: bool,
-    /// Whether the scan ever entered JSX from code position.
-    entered_jsx: bool,
-}
-
-/// One level of JavaScript nesting tracked by [`JsScanner`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum JsContext {
-    /// Code nested inside a delimiter, closed by the given byte.
-    Code(u8),
-    /// The body of a template literal, between backticks.
-    Template,
-    /// A JSX tag, between `<` and its `>`.
-    JsxTag {
-        /// Whether the tag opened with `</`, which never has children.
-        closing: bool,
-        /// The offset of the tag name, just past the `<` or `</`.
-        name_start: usize,
-        /// Whether the scan is inside an unquoted attribute value, where a `/`
-        /// is part of the value.
-        in_unquoted_value: bool,
-    },
-    /// A type argument list on a JSX tag, between `<` and its `>`.
-    TypeArguments,
-    /// The children of a JSX element, where quotes and braces are text.
-    JsxChildren,
-}
-
-impl JsContext {
-    /// A tag whose name starts at `name_start`, before any attribute is seen.
-    const fn jsx_tag(closing: bool, name_start: usize) -> Self {
-        Self::JsxTag {
-            closing,
-            name_start,
-            in_unquoted_value: false,
-        }
-    }
-}
-
-/// The delimiter a [`JsScanner`] run stops at.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum JsScanStop {
-    /// The `}` closing an Astro or Svelte text expression.
-    ExpressionEnd,
-    /// The `---` closing Astro frontmatter.
-    FrontmatterFence,
-    /// The `]` closing a Vue dynamic directive argument.
-    ArgumentEnd,
-}
-
-impl JsScanStop {
-    /// Returns whether `byte` on its own closes the construct for this stop.
-    /// [`Self::FrontmatterFence`] never matches here: its delimiter is the
-    /// three-byte `---`, which [`JsScanner::run`] matches separately.
-    const fn ends_at(self, byte: u8) -> bool {
-        matches!(
-            (self, byte),
-            (Self::ExpressionEnd, b'}') | (Self::ArgumentEnd, b']')
-        )
-    }
-}
-
-impl<'src> JsScanner<'src> {
-    /// Returns the offset of the `}` that closes a text expression, or
-    /// `source.len()` when the expression is unterminated.
-    fn expression_length(source: &'src [u8], jsx: bool) -> usize {
-        Self::scan(source, JsScanStop::ExpressionEnd, jsx)
-    }
-
-    /// Returns the offset of the `---` that closes Astro frontmatter, or
-    /// `source.len()` when the fence is missing. Astro's component script is
-    /// TypeScript, so `<` there opens a type assertion rather than JSX.
-    fn frontmatter_length(source: &'src [u8]) -> usize {
-        Self::scan(source, JsScanStop::FrontmatterFence, false)
-    }
-
-    /// Returns the offset of the `]` that closes a Vue dynamic directive
-    /// argument, or `source.len()` when the bracket is unbalanced.
-    fn argument_length(source: &'src [u8]) -> usize {
-        Self::scan(source, JsScanStop::ArgumentEnd, false)
-    }
-
-    fn scan(source: &'src [u8], stop: JsScanStop, jsx: bool) -> usize {
-        let mut scanner = Self {
-            source,
-            position: 0,
-            stack: SmallVec::new(),
-            jsx,
-            entered_jsx: false,
-        };
-        let length = scanner.run(stop);
-        if length < source.len() || !scanner.entered_jsx {
-            return length;
-        }
-
-        // Running off the end inside JSX means a `<` was really a comparison
-        // or a cast, misread as an element whose closing tag never comes;
-        // rescan reading `<` as an operator.
-        scanner.position = 0;
-        scanner.stack.clear();
-        scanner.jsx = false;
-        scanner.run(stop)
-    }
-
-    fn current_byte(&self) -> Option<u8> {
-        self.source.get(self.position).copied()
-    }
-
-    fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source.get(self.position + offset).copied()
-    }
-
-    /// Clamped to the source end, so an escape at the very end cannot step past it.
-    fn advance(&mut self, count: usize) {
-        self.position = (self.position + count).min(self.source.len());
-    }
-
-    fn scanned(&self) -> &[u8] {
-        &self.source[..self.position]
-    }
-
-    fn previous_non_whitespace(&self) -> Option<u8> {
-        self.scanned()
-            .iter()
-            .rev()
-            .copied()
-            .find(|byte| !byte.is_ascii_whitespace())
-    }
-
-    fn set_in_unquoted_value(&mut self, value: bool) {
-        if let Some(JsContext::JsxTag {
-            in_unquoted_value, ..
-        }) = self.stack.last_mut()
-        {
-            *in_unquoted_value = value;
-        }
-    }
-
-    /// Advances past every byte the current context handles with a plain
-    /// `advance(1)`, so the per-byte cost stays one table load and one add.
-    fn skip_uninteresting(&mut self, mask: u8) {
-        while let Some(&byte) = self.source.get(self.position) {
-            if INTERESTING_BYTES[byte as usize] & mask != 0 {
-                break;
-            }
-            self.position += 1;
-        }
-    }
-
-    fn run(&mut self, stop: JsScanStop) -> usize {
-        while let Some(byte) = self.current_byte() {
-            let context = self.stack.last().copied();
-            let mask = interest_mask(context);
-            if INTERESTING_BYTES[byte as usize] & mask == 0 {
-                self.skip_uninteresting(mask);
-                continue;
-            }
-            match context {
-                None | Some(JsContext::Code(_)) => match lookup_byte(byte) {
-                    QOT => self.skip_string(byte),
-                    TPL => {
-                        self.stack.push(JsContext::Template);
-                        self.advance(1);
-                    }
-                    SLH => self.skip_slash(),
-                    BEO => {
-                        self.stack.push(JsContext::Code(b'}'));
-                        self.advance(1);
-                    }
-                    BTO if stop == JsScanStop::ArgumentEnd => {
-                        self.stack.push(JsContext::Code(b']'));
-                        self.advance(1);
-                    }
-                    BEC | BTC => {
-                        if self.stack.last() == Some(&JsContext::Code(byte)) {
-                            self.stack.pop();
-                        } else if self.stack.is_empty() && stop.ends_at(byte) {
-                            return self.position;
-                        }
-                        self.advance(1);
-                    }
-                    MIN if stop == JsScanStop::FrontmatterFence
-                        && self.stack.is_empty()
-                        && self.source[self.position..].starts_with(b"---") =>
-                    {
-                        return self.position;
-                    }
-                    LSS if self.jsx && self.jsx_element_starts() => {
-                        self.entered_jsx = true;
-                        self.stack
-                            .push(JsContext::jsx_tag(false, self.position + 1));
-                        self.advance(1);
-                    }
-                    _ => self.advance(1),
-                },
-
-                Some(JsContext::Template) => match lookup_byte(byte) {
-                    BSL => self.advance(2),
-                    TPL => {
-                        self.stack.pop();
-                        self.advance(1);
-                    }
-                    DOL if self.byte_at(1) == Some(b'{') => {
-                        self.stack.push(JsContext::Code(b'}'));
-                        self.advance(2);
-                    }
-                    _ => self.advance(1),
-                },
-
-                Some(JsContext::JsxTag {
-                    closing,
-                    name_start,
-                    in_unquoted_value,
-                }) => match lookup_byte(byte) {
-                    QOT => self.skip_string(byte),
-                    TPL => {
-                        self.stack.push(JsContext::Template);
-                        self.advance(1);
-                    }
-                    BEO => {
-                        self.stack.push(JsContext::Code(b'}'));
-                        self.advance(1);
-                    }
-                    EQL => {
-                        self.set_in_unquoted_value(starts_unquoted_value(self.byte_at(1)));
-                        self.advance(1);
-                    }
-                    MOR => {
-                        self.stack.pop();
-                        let self_closing =
-                            !in_unquoted_value && self.previous_non_whitespace() == Some(b'/');
-                        if !closing && !self_closing && !is_void_element(self.tag_name(name_start))
-                        {
-                            self.stack.push(JsContext::JsxChildren);
-                        }
-                        self.advance(1);
-                    }
-                    // A `,` cannot appear in a JSX tag, so this was a type parameter list.
-                    COM => {
-                        self.stack.pop();
-                        self.advance(1);
-                    }
-                    LSS => {
-                        self.stack.push(JsContext::TypeArguments);
-                        self.advance(1);
-                    }
-                    _ if in_unquoted_value && byte.is_ascii_whitespace() => {
-                        self.set_in_unquoted_value(false);
-                        self.advance(1);
-                    }
-                    _ => self.advance(1),
-                },
-
-                Some(JsContext::TypeArguments) => match lookup_byte(byte) {
-                    QOT => self.skip_string(byte),
-                    TPL => {
-                        self.stack.push(JsContext::Template);
-                        self.advance(1);
-                    }
-                    LSS => {
-                        self.stack.push(JsContext::TypeArguments);
-                        self.advance(1);
-                    }
-                    // The `>` of a function type's arrow does not close the list.
-                    EQL if self.byte_at(1) == Some(b'>') => self.advance(2),
-                    MOR => {
-                        self.stack.pop();
-                        self.advance(1);
-                    }
-                    _ => self.advance(1),
-                },
-
-                Some(JsContext::JsxChildren) => match lookup_byte(byte) {
-                    BEO => {
-                        self.stack.push(JsContext::Code(b'}'));
-                        self.advance(1);
-                    }
-                    LSS => match self.byte_at(1) {
-                        Some(b'/') => {
-                            self.stack.pop();
-                            self.stack.push(JsContext::jsx_tag(true, self.position + 2));
-                            self.advance(2);
-                        }
-                        Some(next) if starts_tag_name(next) => {
-                            self.stack
-                                .push(JsContext::jsx_tag(false, self.position + 1));
-                            self.advance(1);
-                        }
-                        _ => self.advance(1),
-                    },
-                    _ => self.advance(1),
-                },
-            }
-        }
-
-        self.position
-    }
-
-    /// Skips the string literal whose opening `quote` is the current byte,
-    /// stopping just past the closing quote or at the end of the source.
-    fn skip_string(&mut self, quote: u8) {
-        self.advance(1);
-        while let Some(byte) = self.current_byte() {
-            self.advance(1);
-            if byte == b'\\' {
-                self.advance(1);
-            } else if byte == quote {
-                break;
-            }
-        }
-    }
-
-    /// Skips from a `/` in code position past the comment or regex literal it
-    /// opens, or past the slash alone.
-    fn skip_slash(&mut self) {
-        match self.byte_at(1) {
-            Some(b'/') => {
-                self.advance(2);
-                self.skip_line_comment();
-            }
-            Some(b'*') => {
-                self.advance(2);
-                self.skip_block_comment();
-            }
-            // `/>` closes a tag that was not recognized as JSX, unless the slash
-            // sits where only an operand can start: `s.replace(/>/g, "")`.
-            Some(b'>') if !self.at_operand_start() => self.advance(1),
-            _ if self.scanned().last() != Some(&b'<') && slash_starts_regex(self.scanned()) => {
-                self.advance(1);
-                self.skip_regex();
-            }
-            _ => self.advance(1),
-        }
-    }
-
-    /// Returns whether the previous token leaves the scanner where an operand
-    /// must start (after `(`, `,`, `=`, `=>`, `return`, ...), so a `/` there
-    /// can only open a regex literal, never close a tag.
-    fn at_operand_start(&self) -> bool {
-        let scanned = self.scanned();
-        let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
-            return true;
-        };
-        match lookup_byte(scanned[end]) {
-            MOR => end > 0 && scanned[end - 1] == b'=',
-            PNO | COM | EQL | COL | BTO | EXL | AMP | PIP | QST | SEM | BEO | TLD | CRT | PRC
-            | MUL => true,
-            IDT => ends_with_expression_keyword(&scanned[..=end]),
-            _ => false,
-        }
-    }
-
-    /// Skips the regex literal body, stopping just past the closing `/` or at
-    /// the end of the source. A `/` inside a `[…]` character class does not
-    /// close the literal.
-    fn skip_regex(&mut self) {
-        let mut in_character_class = false;
-
-        while let Some(byte) = self.current_byte() {
-            self.advance(1);
-            match byte {
-                b'\\' => self.advance(1),
-                b'[' => in_character_class = true,
-                b']' => in_character_class = false,
-                b'/' if !in_character_class => break,
-                _ => {}
-            }
-        }
-    }
-
-    /// Skips just past the terminating newline, or to the end of the source.
-    fn skip_line_comment(&mut self) {
-        while let Some(byte) = self.current_byte() {
-            self.advance(1);
-            if byte == b'\n' {
-                break;
-            }
-        }
-    }
-
-    /// Skips just past the closing `*/`, or to the end of the source.
-    fn skip_block_comment(&mut self) {
-        while let Some(byte) = self.current_byte() {
-            if byte == b'*' && self.byte_at(1) == Some(b'/') {
-                self.advance(2);
-                return;
-            }
-            self.advance(1);
-        }
-    }
-
-    /// Returns whether the `<` at the current position opens a JSX element
-    /// rather than a comparison, a shift, or a TypeScript type argument list.
-    fn jsx_element_starts(&self) -> bool {
-        self.byte_at(1).is_some_and(starts_tag_name) && at_expression_position(self.scanned())
-    }
-
-    /// Returns the tag name starting at `start`, which is empty for a fragment.
-    fn tag_name(&self, start: usize) -> &[u8] {
-        let name = self.source.get(start..).unwrap_or_default();
-        let length = name
-            .iter()
-            .position(|byte| !is_tag_name_byte(*byte))
-            .unwrap_or(name.len());
-
-        &name[..length]
-    }
-}
-
-/// Returns whether a byte can follow `<` in a JSX element, counting the `>` of
-/// a fragment.
-fn starts_tag_name(byte: u8) -> bool {
-    byte == b'>' || byte == b'_' || byte.is_ascii_alphabetic()
-}
-
 /// Returns whether `name` is a [void element](https://html.spec.whatwg.org/#void-elements),
 /// which never has children. The keyword lookup is exact because Astro matches
 /// the spec names case-sensitively: `<BR>` is a component, not a line break.
@@ -2707,363 +2307,4 @@ fn is_void_element(name: &[u8]) -> bool {
         .ok()
         .and_then(HtmlSyntaxKind::from_keyword)
         .is_some_and(|kind| VOID_ELEMENTS.contains(kind))
-}
-
-/// Returns whether `byte`, the one right after an `=` in a tag, opens an
-/// unquoted attribute value.
-fn starts_unquoted_value(byte: Option<u8>) -> bool {
-    byte.is_some_and(|byte| {
-        !matches!(byte, b'"' | b'\'' | b'`' | b'{') && !byte.is_ascii_whitespace()
-    })
-}
-
-/// Returns whether the code scanned so far ends where an expression may start.
-/// After an operand (a non-keyword identifier, a literal, or a closing bracket),
-/// the next `<` is an operator instead.
-fn at_expression_position(scanned: &[u8]) -> bool {
-    let Some(index) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
-        return true;
-    };
-
-    if is_js_word_byte(scanned[index]) {
-        return ends_with_expression_keyword(&scanned[..=index]);
-    }
-
-    !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
-}
-
-/// Returns whether `code` ends with a reserved word that an expression can
-/// directly follow, such as `return`. Contextual keywords such as `of` are left
-/// out because they are also plain names (`of / 2`), and a word after `.` or
-/// `#` is a property name, like the operand in `pool.yield / 100`.
-fn ends_with_expression_keyword(code: &[u8]) -> bool {
-    let start = code
-        .iter()
-        .rposition(|byte| !is_js_word_byte(*byte))
-        .map_or(0, |index| index + 1);
-    let before = code[..start]
-        .iter()
-        .rposition(|byte| !byte.is_ascii_whitespace());
-    if before.is_some_and(|index| matches!(lookup_byte(code[index]), PRD | HAS)) {
-        return false;
-    }
-
-    matches!(
-        &code[start..],
-        b"await"
-            | b"case"
-            | b"delete"
-            | b"do"
-            | b"else"
-            | b"in"
-            | b"instanceof"
-            | b"new"
-            | b"return"
-            | b"throw"
-            | b"typeof"
-            | b"void"
-            | b"yield"
-    )
-}
-
-fn is_js_word_byte(byte: u8) -> bool {
-    byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'$'
-}
-
-#[cfg(test)]
-mod js_scanner {
-    use crate::lexer::JsScanner;
-
-    /// The offset of the closing `---` fence, or `None` when the scan reaches
-    /// the end of the source without finding one.
-    fn fence(source: &str) -> Option<usize> {
-        let length = JsScanner::frontmatter_length(source.as_bytes());
-        (length < source.len()).then_some(length)
-    }
-
-    /// The offset of the `}` closing a text expression, or `None` when the
-    /// expression is unterminated.
-    fn expression(source: &str) -> Option<usize> {
-        let length = JsScanner::expression_length(source.as_bytes(), true);
-        (length < source.len()).then_some(length)
-    }
-
-    #[test]
-    fn unterminated_quotes_hide_the_fence() {
-        assert_eq!(fence("'\"`\n---\n"), None);
-        assert_eq!(fence("`'\"\"'\n---\n"), None);
-    }
-
-    #[test]
-    fn balanced_quotes_leave_the_fence_visible() {
-        assert_eq!(fence(" '\"``\"' \n---\n"), Some(9));
-    }
-
-    #[test]
-    fn issue_9108_double_quoted_with_apostrophe() {
-        assert!(fence("\"test'\"\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9108_single_quoted_with_double_quote() {
-        assert!(fence("'it\"s'\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9108_template_with_mixed_quotes() {
-        assert!(fence("`it's a \"test\"`\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9108_multiple_strings_with_mixed_quotes() {
-        assert!(fence("const a = \"it's\"; const b = 'say \"hi\"';\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_8882_multiline_block_comment_with_apostrophe() {
-        assert!(fence("/*\n * Doesn't that stink?\n */\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_8882_jsdoc_comment_then_code() {
-        let source = "/**\n * In this comment, if you add any string opening or closing, such as an apostrophe, the file will show \n * a bunch of errors. Doesn't (remove the apostrophe in the previous word to fix) that stink? \n */\nimport type { HTMLAttributes } from \"astro/types\";\nconst { class: className } = Astro.props;\n---\n";
-        assert!(fence(source).is_some());
-    }
-
-    #[test]
-    fn issue_8882_multiline_block_comment_quotes_every_line() {
-        let source = "/* line one 'unclosed\n   line two `unclosed\n   line three \"unclosed */\nconst x = 1;\n---\n";
-        assert!(fence(source).is_some());
-    }
-
-    #[test]
-    fn fence_inside_single_line_comment_is_not_a_fence() {
-        assert_eq!(fence("// ---"), None);
-    }
-
-    #[test]
-    fn fence_inside_block_comment_is_not_a_fence() {
-        assert_eq!(fence("/*\n---\n"), None);
-    }
-
-    #[test]
-    fn a_line_comment_ends_at_its_newline() {
-        assert!(fence("// ---\nconst f = \"something\"\n---\n").is_some());
-    }
-
-    #[test]
-    fn escaped_double_quote_inside_double_string() {
-        assert!(fence("\"\\\"\"\n---\n").is_some());
-    }
-
-    #[test]
-    fn escaped_single_quote_inside_single_string() {
-        assert!(fence("'\\''\n---\n").is_some());
-    }
-
-    #[test]
-    fn escaped_backtick_inside_template() {
-        assert!(fence("`\\``\n---\n").is_some());
-    }
-
-    #[test]
-    fn double_backslash_then_quote() {
-        assert!(fence("\"\\\\\"\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9187_regex_with_single_quote() {
-        assert!(fence("const test = /'/\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9187_regex_with_double_quote() {
-        assert!(fence("const test = /\"/\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9187_regex_with_dashes() {
-        assert!(fence("const test = /---/\n---\n").is_some());
-    }
-
-    #[test]
-    fn issue_9187_regex_with_escape_and_quantifier() {
-        assert!(fence("const test = /\\d{4}/\n---\n").is_some());
-    }
-
-    #[test]
-    fn regex_character_class_may_contain_a_slash() {
-        assert!(fence("const a = /[/]'/;\n---\n").is_some());
-    }
-
-    #[test]
-    fn nested_template_interpolation_closes_the_fence() {
-        assert!(fence("const a = `x${`/y`}`;\n---\n").is_some());
-    }
-
-    #[test]
-    fn nested_template_interpolation_ends_the_expression() {
-        let source = "`/blog${n === 0 ? '' : `/${n + 1}`}`}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn apostrophe_in_jsx_text_ends_the_expression() {
-        let source = "items.map((i) => <li>it's {i}</li>)}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_self_closing_element_ends_the_expression() {
-        let source = "<Icon />}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_void_element_has_no_children() {
-        let source = "cond && <span>It's<br>ok</span>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-        let source = "open && <label><input type=\"text\">don't</label>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    /// Astro matches the void element names case-sensitively.
-    #[test]
-    fn an_uppercase_void_name_is_a_component() {
-        let source = "x && <BR>it's</BR>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_slash_in_an_unquoted_value_does_not_close_the_tag() {
-        let source = "x && <div a=4/>it's</div>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_slash_after_an_unquoted_value_closes_the_tag() {
-        let source = "x && <div a=4 />}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_template_attribute_value_may_contain_an_angle_bracket() {
-        let source = "x && <C a=`b > c` />}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn type_arguments_do_not_end_a_tag() {
-        let source = "x && <List<string>>it's</List>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-        let source = "x && <Table<Map<string, number>>>it's</Table>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_function_type_argument_does_not_end_the_list() {
-        let source = "x && <C<(x: A) => B>>don't</C>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-        let source = "x && <C<() => B> />}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_fragment_ends_the_expression() {
-        let source = "<><b>a</b></>}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn returned_jsx_ends_the_expression() {
-        let source = "() => { return <div>a</div>; }}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_comparison_does_not_start_jsx() {
-        let source = "a < c}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-        let source = "a<c}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_generic_call_does_not_start_jsx() {
-        let source = "new Map<string, number>()}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_type_parameter_list_does_not_start_jsx() {
-        let source = "<T,>(x: T) => x}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    /// A `<` that opens neither JSX nor a recognisably non-JSX construct
-    /// swallows the rest of the source; the scan retries without JSX rather
-    /// than letting the expression run away.
-    #[test]
-    fn a_runaway_element_falls_back_to_scanning_without_jsx() {
-        let source = "await <T extends U>(v)}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_trailing_escape_does_not_scan_past_the_input() {
-        let source = "`a\\";
-        assert_eq!(expression(source), None);
-        assert_eq!(
-            JsScanner::expression_length(source.as_bytes(), true),
-            source.len()
-        );
-    }
-
-    /// Astro's frontmatter is TypeScript, where `<` opens a type assertion.
-    #[test]
-    fn a_type_assertion_in_frontmatter_closes_the_fence() {
-        assert_eq!(fence("const a = <string>x;\n---\n"), Some(21));
-    }
-
-    #[test]
-    fn a_regex_starting_with_a_closing_angle_bracket_is_a_regex() {
-        assert!(fence("const a = s.replace(/>/g, '&gt;');\n---\n<p>{a}</p>\n").is_some());
-        assert!(fence("const isTag = (s) => />$/.test(s);\n---\n").is_some());
-        assert!(fence("const r = [/>/, /</];\n---\n").is_some());
-        let source = "s.replace(/>/g, '')}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_regex_after_an_expression_keyword_is_a_regex() {
-        assert!(fence("function hasTag(s) {\n  return />'/.test(s);\n}\n---\n").is_some());
-        assert!(fence("function hasQuote(s) {\n  return /'/.test(s);\n}\n---\n").is_some());
-        let source = "typeof />'/}";
-        assert_eq!(expression(source), Some(source.len() - 1));
-    }
-
-    #[test]
-    fn a_slash_after_a_property_or_other_identifier_is_a_division() {
-        assert!(fence("const apy = pool.yield / 100;\n---\n<p>{apy}</p>\n").is_some());
-        assert!(fence("const a = this.#return / 2, b = \"/'\";\n---\n").is_some());
-        assert!(fence("const a = begin / 2, b = \"/'\";\n---\n").is_some());
-        assert!(fence("const a = pool. yield / 2, b = \"/'\";\n---\n").is_some());
-        assert!(fence("const a = pool.\n  yield / 2, b = \"/'\";\n---\n").is_some());
-    }
-
-    #[test]
-    fn a_slash_after_a_contextual_keyword_used_as_a_name_is_a_division() {
-        assert!(fence("const of = 8, n = of / 2, s = \"/'\";\n---\n").is_some());
-    }
-
-    #[test]
-    fn a_self_closing_tag_in_frontmatter_still_closes() {
-        assert!(fence("const el = <Foo bar={1} />;\n---\n").is_some());
-        assert!(fence("const el = <Foo bar=\"x\" />;\n---\n").is_some());
-    }
-
-    #[test]
-    fn a_closing_tag_in_frontmatter_does_not_open_a_regex() {
-        assert!(fence("const items = xs.map((x) => <li>{x}</li>);\n---\n").is_some());
-    }
 }

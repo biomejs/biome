@@ -1,0 +1,289 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script lang="ts">
+/* should generate diagnostics */
+export default {
+  props: {
+    a: Number,
+    b: [Number, String],
+    c: {
+      type: Number,
+    },
+    d: {
+      type: Number,
+      required: false,
+    },
+    e: [Boolean, String],
+    f: {
+      type: [Boolean, String],
+    },
+    g: {
+      type: String,
+    } as PropOptions<string>,
+    h: Date,
+    i: {},
+    'k': String,
+    ['l']: String,
+    m: (Number),
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop a has no default value.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     a: Number,
+      │     ^
+    6 │     b: [Number, String],
+    7 │     c: {
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop b has no default value.
+  
+    4 │   props: {
+    5 │     a: Number,
+  > 6 │     b: [Number, String],
+      │     ^
+    7 │     c: {
+    8 │       type: Number,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop c has no default value.
+  
+    5 │     a: Number,
+    6 │     b: [Number, String],
+  > 7 │     c: {
+      │     ^
+    8 │       type: Number,
+    9 │     },
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:10:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop d has no default value.
+  
+     8 │       type: Number,
+     9 │     },
+  > 10 │     d: {
+       │     ^
+    11 │       type: Number,
+    12 │       required: false,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:14:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop e has no default value.
+  
+    12 │       required: false,
+    13 │     },
+  > 14 │     e: [Boolean, String],
+       │     ^
+    15 │     f: {
+    16 │       type: [Boolean, String],
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop f has no default value.
+  
+    13 │     },
+    14 │     e: [Boolean, String],
+  > 15 │     f: {
+       │     ^
+    16 │       type: [Boolean, String],
+    17 │     },
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:18:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop g has no default value.
+  
+    16 │       type: [Boolean, String],
+    17 │     },
+  > 18 │     g: {
+       │     ^
+    19 │       type: String,
+    20 │     } as PropOptions<string>,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:21:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop h has no default value.
+  
+    19 │       type: String,
+    20 │     } as PropOptions<string>,
+  > 21 │     h: Date,
+       │     ^
+    22 │     i: {},
+    23 │     'k': String,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:22:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop i has no default value.
+  
+    20 │     } as PropOptions<string>,
+    21 │     h: Date,
+  > 22 │     i: {},
+       │     ^
+    23 │     'k': String,
+    24 │     ['l']: String,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:23:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop k has no default value.
+  
+    21 │     h: Date,
+    22 │     i: {},
+  > 23 │     'k': String,
+       │     ^^^
+    24 │     ['l']: String,
+    25 │     m: (Number),
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:24:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop l has no default value.
+  
+    22 │     i: {},
+    23 │     'k': String,
+  > 24 │     ['l']: String,
+       │     ^^^^^
+    25 │     m: (Number),
+    26 │   },
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:25:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop m has no default value.
+  
+    23 │     'k': String,
+    24 │     ['l']: String,
+  > 25 │     m: (Number),
+       │     ^
+    26 │   },
+    27 │ };
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

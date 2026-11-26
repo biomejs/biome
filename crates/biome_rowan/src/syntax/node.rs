@@ -1,6 +1,6 @@
 use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
-use crate::syntax::borrowed_token::BorrowedTokensIterator;
+use crate::syntax::borrowed_token::{BorrowedTokensIterator, BorrowedTokensWithCommentsIterator};
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
     AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxKindSet, SyntaxList,
@@ -267,11 +267,26 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.ancestors().map(Self::from)
     }
 
+    /// Returns the topmost node of the tree containing this node.
+    pub fn tree_top(&self) -> Self {
+        Self::from(self.raw.tree_top())
+    }
+
     pub fn children(&self) -> SyntaxNodeChildren<L> {
         SyntaxNodeChildren {
             raw: self.raw.children(),
             _p: PhantomData,
         }
+    }
+
+    /// Returns the direct child nodes whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax nodes are allocated.
+    pub fn children_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = Self> + Clone + use<L> {
+        self.raw.children_of_kinds(kinds).map(Self::from)
     }
 
     /// Returns the slot at `index`, or [None] if this node has no slot with that index.
@@ -298,6 +313,18 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Returns the direct child elements whose kinds are in `kinds`.
+    ///
+    /// Rejected children are filtered before their syntax elements are allocated.
+    pub fn children_with_tokens_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> impl Iterator<Item = SyntaxElement<L>> + Clone + use<L> {
+        self.raw
+            .children_with_tokens_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxToken<L>> + '_ {
         self.raw.tokens().map(SyntaxToken::from)
     }
@@ -305,6 +332,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child(&self) -> Option<Self> {
         self.raw.first_child().map(Self::from)
     }
+
+    /// Returns the first direct child node whose kind is in `kinds`.
+    pub fn first_child_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.first_child_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn last_child(&self) -> Option<Self> {
         self.raw.last_child().map(Self::from)
     }
@@ -312,6 +345,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn first_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.first_child_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the first direct child element whose kind is in `kinds`.
+    pub fn first_child_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .first_child_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn last_child_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.last_child_or_token().map(NodeOrToken::from)
     }
@@ -319,6 +363,12 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling(&self) -> Option<Self> {
         self.raw.next_sibling().map(Self::from)
     }
+
+    /// Returns the next sibling node whose kind is in `kinds`.
+    pub fn next_sibling_of_kinds(&self, kinds: SyntaxKindSet<L>) -> Option<Self> {
+        self.raw.next_sibling_of_kinds(kinds).map(Self::from)
+    }
+
     pub fn prev_sibling(&self) -> Option<Self> {
         self.raw.prev_sibling().map(Self::from)
     }
@@ -326,6 +376,17 @@ impl<L: Language> SyntaxNode<L> {
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.next_sibling_or_token().map(NodeOrToken::from)
     }
+
+    /// Returns the next sibling element whose kind is in `kinds`.
+    pub fn next_sibling_or_token_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> Option<SyntaxElement<L>> {
+        self.raw
+            .next_sibling_or_token_of_kinds(kinds)
+            .map(SyntaxElement::from)
+    }
+
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
         self.raw.prev_sibling_or_token().map(NodeOrToken::from)
     }
@@ -337,6 +398,40 @@ impl<L: Language> SyntaxNode<L> {
     /// Return the rightmost token in the subtree of this node.
     pub fn last_token(&self) -> Option<SyntaxToken<L>> {
         self.raw.last_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately after this node's subtree.
+    pub fn next_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.next_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the token immediately before this node's subtree.
+    pub fn prev_token(&self) -> Option<SyntaxToken<L>> {
+        self.raw.prev_token().map(SyntaxToken::from)
+    }
+
+    /// Returns the trivia before this node's first token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.first_token()
+            .map(|token| token.trivia_before())
+            .into_iter()
+            .flatten()
+    }
+
+    /// Returns the trivia after this node's last token, in source order.
+    ///
+    /// Returns an empty iterator if this node contains no tokens.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.last_token()
+            .map(|token| token.trivia_after())
+            .into_iter()
+            .flatten()
     }
 
     pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = Self> + use<L> {
@@ -438,6 +533,77 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Rewrites the subtree rooted at the current node. Returns the rewritten subtree as a new tree
+    /// without a parent, or `None` when `rewrite` replaces no node.
+    ///
+    /// The method offers each node of a kind in `kinds` to `rewrite`, in preorder and starting with
+    /// the current node, like [Self::preorder_of_kinds]. It never offers tokens. Each offered node
+    /// belongs to the original tree, so its parent, siblings, tokens, and ranges are the ones
+    /// before any replacement. `rewrite` answers with a [RewriteSignal]:
+    ///
+    /// - [RewriteSignal::Replace] puts the given node in place of the offered node and continues
+    ///   after the offered node. The new tree takes only the content of the replacement, so the
+    ///   replacement can have any kind and belong to any tree. A replacement equal to the offered
+    ///   node leaves the tree unchanged.
+    /// - [RewriteSignal::Skip] keeps the offered node and continues after it.
+    /// - [RewriteSignal::Descend] keeps the offered node and continues with its descendants.
+    ///
+    /// The walk reads each node of the subtree at most once and copies each changed node once.
+    /// Like [Self::preorder_of_kinds], it allocates a [SyntaxNode] only for the offered nodes and
+    /// their ancestors. An empty `kinds` returns `None` without reading the tree.
+    ///
+    /// `rewrite` may call this method on a descendant of the offered node, for example to rewrite
+    /// an operand before building a replacement. It must then answer [RewriteSignal::Replace] or
+    /// [RewriteSignal::Skip], because [RewriteSignal::Descend] would offer the descendants that the
+    /// nested call already offered a second time.
+    ///
+    /// ```
+    /// # use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::{RewriteSignal, SyntaxKindSet};
+    /// let literal = |text: &str| {
+    ///     let mut builder = RawSyntaxTreeBuilder::new();
+    ///     builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    ///     builder.token(RawLanguageKind::NUMBER_TOKEN, text);
+    ///     builder.finish_node();
+    ///     builder.finish()
+    /// };
+    ///
+    /// let mut builder = RawSyntaxTreeBuilder::new();
+    /// builder.start_node(RawLanguageKind::ROOT);
+    /// builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+    /// for text in ["1", "2"] {
+    ///     builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    ///     builder.token(RawLanguageKind::NUMBER_TOKEN, text);
+    ///     builder.finish_node();
+    /// }
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// let root = builder.finish();
+    ///
+    /// let literals = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::LITERAL_EXPRESSION);
+    /// let rewritten = root.rewrite_of_kinds(literals, |node| {
+    ///     if node.text_trimmed() == "1" {
+    ///         RewriteSignal::Replace(literal("3"))
+    ///     } else {
+    ///         RewriteSignal::Skip
+    ///     }
+    /// });
+    /// assert_eq!(rewritten.unwrap().text_trimmed().to_string(), "32");
+    ///
+    /// // The original tree is unchanged, and a rewrite that replaces nothing returns `None`.
+    /// assert_eq!(root.text_trimmed().to_string(), "12");
+    /// assert!(root.rewrite_of_kinds(literals, |_| RewriteSignal::Skip).is_none());
+    /// ```
+    pub fn rewrite_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+        mut rewrite: impl FnMut(Self) -> RewriteSignal<L>,
+    ) -> Option<Self> {
+        self.raw
+            .rewrite_of_kinds(kinds, |node| rewrite(Self::from(node)))
+            .map(Self::from)
+    }
+
     /// Traverse the subtree rooted at the current node (including the current
     /// node) in preorder, including tokens.
     pub fn preorder_with_tokens(&self, direction: Direction) -> PreorderWithTokens<L> {
@@ -486,6 +652,36 @@ impl<L: Language> SyntaxNode<L> {
     /// ```
     pub fn borrowed_tokens(&self) -> BorrowedTokensIterator<'_, L> {
         BorrowedTokensIterator::new(self.raw.green(), self.raw.text_range().start())
+    }
+
+    /// Returns the tokens in this node's subtree whose leading or trailing
+    /// trivia contains a comment, in source order.
+    ///
+    /// This is [Self::borrowed_tokens] without the tokens that have no
+    /// comments, but it never enters a subtree without comments, so it
+    /// visits far fewer tokens when comments are sparse.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; // a",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::single_line_comment(4)],
+    ///     );
+    /// });
+    /// let mut tokens = node.borrowed_tokens_with_comments();
+    ///
+    /// let token = tokens.next().unwrap();
+    /// assert_eq!(token.kind(), RawLanguageKind::SEMICOLON_TOKEN);
+    /// assert_eq!(token.text_range(), TextRange::new(3.into(), 9.into()));
+    /// assert!(tokens.next().is_none());
+    /// ```
+    pub fn borrowed_tokens_with_comments(&self) -> BorrowedTokensWithCommentsIterator<'_, L> {
+        BorrowedTokensWithCommentsIterator::new(self.raw.green(), self.raw.text_range().start())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.
@@ -558,6 +754,37 @@ impl<L: Language> SyntaxNode<L> {
                     .into_iter()
                     .map(|element| element.map(cursor::SyntaxElement::from)),
             ),
+            _p: PhantomData,
+        }
+    }
+
+    /// Return a clone of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` is expected in ascending slot order. An edit is ignored if its
+    /// index is not greater than the index of an earlier edit, or if it is past
+    /// the last slot. For edits in ascending order without duplicates that
+    /// only name existing slots, the result is the same as calling
+    /// [Self::splice_slots] once per edit in descending order, but the slots
+    /// are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> Self
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<SyntaxElement<L>>>,
+    {
+        Self {
+            raw: self
+                .raw
+                .splice_many_slots(edits.into_iter().map(|(index, replacement)| {
+                    (
+                        index,
+                        replacement
+                            .into_iter()
+                            .map(|element| element.map(cursor::SyntaxElement::from)),
+                    )
+                })),
             _p: PhantomData,
         }
     }
@@ -1021,8 +1248,9 @@ pub struct SendNode {
 impl SendNode {
     /// Consumes this node and returns its source text.
     pub fn into_source_text(self) -> String {
-        let mut source = String::with_capacity(self.green.text_len().into());
-        self.green.write_source_text(&mut source);
+        let green = self.green.as_ref();
+        let mut source = String::with_capacity(green.text_len().into());
+        green.write_source_text(&mut source);
         source
     }
 
@@ -1136,6 +1364,7 @@ impl<L: Language> Iterator for SyntaxElementChildren<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Preorder<L: Language> {
     raw: cursor::Preorder,
     _p: PhantomData<L>,
@@ -1171,6 +1400,17 @@ impl<L: Language> Iterator for PreorderOfKinds<'_, L> {
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
     }
+}
+
+/// Tells [SyntaxNode::rewrite_of_kinds] what to do with the node that it offered.
+#[derive(Debug, Clone)]
+pub enum RewriteSignal<L: Language> {
+    /// Replaces the offered node with this node and continues after the offered node.
+    Replace(SyntaxNode<L>),
+    /// Keeps the offered node and continues with its descendants.
+    Descend,
+    /// Keeps the offered node and continues after it.
+    Skip,
 }
 
 pub struct PrunedDescendents<L: Language, P: Fn(&SyntaxNode<L>) -> bool> {
@@ -1210,6 +1450,7 @@ impl<L: Language> Iterator for PreorderTokens<L> {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct PreorderWithTokens<L: Language> {
     raw: cursor::PreorderWithTokens,
     _p: PhantomData<L>,

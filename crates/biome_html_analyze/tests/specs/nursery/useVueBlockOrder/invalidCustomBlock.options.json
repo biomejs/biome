@@ -1,0 +1,12 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useVueBlockOrder": {
+          "level": "error",
+          "options": { "order": ["template", "script", "i18n", "style"] }
+        }
+      }
+    }
+  }
+}

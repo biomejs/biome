@@ -75,11 +75,14 @@ impl Rule for NoTypeOnlyImportAttributes {
                 AnyJsExportClause::JsExportNamedFromClause(clause) => {
                     let assertion_range = clause.assertion()?.range();
                     let type_token = clause.type_token().or_else(|| {
-                        clause
-                            .specifiers()
-                            .iter()
-                            .filter_map(|specifier| specifier.ok())
-                            .find_map(|specifier| specifier.type_token())
+                        let mut first_type_token = None;
+                        for specifier in clause.specifiers().iter().filter_map(|s| s.ok()) {
+                            let token = specifier.type_token()?;
+                            if first_type_token.is_none() {
+                                first_type_token = Some(token);
+                            }
+                        }
+                        first_type_token
                     })?;
                     Some(RuleState {
                         assertion_range,
@@ -88,17 +91,8 @@ impl Rule for NoTypeOnlyImportAttributes {
                 }
             },
             AnyJsModuleItem::JsImport(import) => match import.import_clause().ok()? {
-                AnyJsImportClause::JsImportBareClause(_) => None,
-                AnyJsImportClause::JsImportCombinedClause(clause) => {
-                    let assertion_range = clause.assertion()?.range();
-                    let type_token = find_first_type_token(
-                        clause.specifier().ok()?.as_js_named_import_specifiers()?,
-                    )?;
-                    Some(RuleState {
-                        assertion_range,
-                        type_token_range: type_token.text_trimmed_range(),
-                    })
-                }
+                AnyJsImportClause::JsImportBareClause(_)
+                | AnyJsImportClause::JsImportCombinedClause(_) => None,
                 AnyJsImportClause::JsImportDefaultClause(clause) => Some(RuleState {
                     assertion_range: clause.assertion()?.range(),
                     type_token_range: clause.type_token()?.text_trimmed_range(),
@@ -153,9 +147,12 @@ pub struct RuleState {
 }
 
 fn find_first_type_token(named_specifiers: &JsNamedImportSpecifiers) -> Option<JsSyntaxToken> {
-    named_specifiers
-        .specifiers()
-        .iter()
-        .filter_map(|specifier| specifier.ok())
-        .find_map(|specifier| specifier.type_token())
+    let mut first_type_token = None;
+    for specifier in named_specifiers.specifiers().iter().filter_map(|s| s.ok()) {
+        let token = specifier.type_token()?;
+        if first_type_token.is_none() {
+            first_type_token = Some(token);
+        }
+    }
+    first_type_token
 }

@@ -197,7 +197,6 @@ safeFix.kind = "unsafe";
 registerDiagnostic(node, "warning", "Diagnostic.", mutation);
 // @ts-expect-error Optional diagnostic targets must be checked first.
 registerDiagnostic(node.parent, "warning", "Diagnostic.", safeFix);
-// @ts-expect-error Diagnostic targets cannot be tokens, even with a fix.
 registerDiagnostic(token, "warning", "Diagnostic.", safeFix);
 
 defineRule({

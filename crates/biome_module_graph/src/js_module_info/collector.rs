@@ -1,3 +1,4 @@
+use super::flow::{FlowRootScanner, ModuleFlow};
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
@@ -6,8 +7,8 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration,
-    TsTypeParameter, inner_string_text,
+    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
+    TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -146,8 +147,7 @@ impl JsModuleInfoCollector {
                 .tree()
                 .name_token()
                 .ok()
-                .map(|t| t.token_text_trimmed().into())
-                .unwrap_or_default();
+                .map_or_default(|t| t.token_text_trimmed().into());
             let range = binding.range();
 
             bindings.push(JsBindingData {
@@ -498,8 +498,7 @@ impl JsModuleInfoCollector {
     ) -> Vec<Reference> {
         semantic_model
             .as_binding_by_range(range)
-            .map(|binding| binding.all_writes().collect())
-            .unwrap_or_default()
+            .map_or_default(|binding| binding.all_writes().collect())
     }
 
     fn infer_type(
@@ -570,25 +569,26 @@ impl JsModuleInfoCollector {
                 {
                     return ty;
                 }
-                return self
+                let ty = self
                     .function_parameters
                     .get(param.syntax())
-                    .map(|param| param.binding_type(binding_name))
-                    .unwrap_or_default();
+                    .map_or_default(|param| param.binding_type(binding_name));
+                if self.has_writable_reference(semantic_model, binding.range) {
+                    return ty;
+                }
+                return self.defaulted_parameter_binding_type(scope_id, &param, ty);
             } else if let Some(param) = JsRestParameter::cast_ref(&ancestor) {
                 return self
                     .function_parameters
                     .get(param.syntax())
-                    .map(|param| param.binding_type(binding_name))
-                    .unwrap_or_default();
+                    .map_or_default(|param| param.binding_type(binding_name));
             } else if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&ancestor)
                 && let Ok(AnyJsArrowFunctionParameters::AnyJsBinding(param)) = arrow.parameters()
                 && param.syntax().text_trimmed_range() == node.text_trimmed_range()
             {
                 // `value => value` has no `JsFormalParameter` node.
                 return TypeData::from_contextual_js_arrow_function_binding(self, scope_id, &arrow)
-                    .map(|ty| self.reference_to_owned_data(ty))
-                    .unwrap_or_default();
+                    .map_or_default(|ty| self.reference_to_owned_data(ty));
             } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
@@ -596,6 +596,11 @@ impl JsModuleInfoCollector {
                 };
             } else if let Some(mapped) = TsMappedType::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_mapped_type(&mapped) {
+                    Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
+                    None => TypeReference::unknown(),
+                };
+            } else if let Some(infer) = TsInferType::cast_ref(&ancestor) {
+                return match GenericTypeParameter::from_ts_infer_type(self, scope_id, &infer) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
                     None => TypeReference::unknown(),
                 };
@@ -627,6 +632,33 @@ impl JsModuleInfoCollector {
             return Some(RawTypeId::Local(self.optional(ty)).into());
         }
         Some(ty)
+    }
+
+    /// Binding type of a parameter declared as `name: T = default`, whose
+    /// default replaces `undefined` in `ty`. Returns `ty` for any other
+    /// parameter.
+    ///
+    /// The caller must keep `ty` for a parameter that is reassigned, since an
+    /// assignment can bring `undefined` back.
+    fn defaulted_parameter_binding_type(
+        &mut self,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+        ty: TypeReference,
+    ) -> TypeReference {
+        let Some(default) = param
+            .initializer()
+            .and_then(|initializer| initializer.expression().ok())
+        else {
+            return ty;
+        };
+        if param.type_annotation().is_none()
+            || !matches!(param.binding(), Ok(AnyJsBindingPattern::AnyJsBinding(_)))
+        {
+            return ty;
+        }
+        let data = TypeData::from_defaulted_parameter(self, scope_id, ty, &default);
+        self.reference_to_owned_data(data)
     }
 
     /// Widen the type of binding from its writable references.
@@ -933,8 +965,7 @@ impl RawTypeCollector for JsModuleInfoCollector {
     ) -> TypeReference {
         self.parsed_expressions
             .get(&expression.range())
-            .map(|id| TypeReference::Resolved(RawTypeId::Local(*id)))
-            .unwrap_or_default()
+            .map_or_default(|id| TypeReference::Resolved(RawTypeId::Local(*id)))
     }
 }
 
@@ -1045,6 +1076,7 @@ impl JsModuleInfo {
         mut collector: JsModuleInfoCollector,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         inference_mode: TypeInferenceMode,
+        flow_roots: FlowRootScanner,
     ) -> Self {
         collector.inference_mode = inference_mode;
         let finalised = collector.finalise(&semantic_model);
@@ -1069,6 +1101,16 @@ impl JsModuleInfo {
             &finalised.raw_types,
             &finalised.raw_binding_types,
         );
+        let flow = if collector.inference_mode == TypeInferenceMode::Disabled {
+            ModuleFlow::default()
+        } else {
+            ModuleFlow::collect(
+                flow_roots,
+                &semantic_model,
+                &finalised.raw_types,
+                &finalised.raw_binding_types,
+            )
+        };
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
@@ -1083,6 +1125,7 @@ impl JsModuleInfo {
             namespace_members,
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
+            flow,
             referenced_classes: collector.referenced_classes,
             ambient_modules: collector.ambient_modules,
         }))

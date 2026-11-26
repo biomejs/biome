@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_additional_directives.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-t="foo">bar</div>
+  <div v-html="foo">baz</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid_additional_directives.vue:3:18 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-t directive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-t="foo">bar</div>
+      │                  ^^^
+    4 │   <div v-html="foo">baz</div>
+    5 │ </template>
+  
+  i This directive replaces the content of the element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-t="foo">bar</div>
+      │        ^^^^^^^^^
+    4 │   <div v-html="foo">baz</div>
+    5 │ </template>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-t and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    3 │ ··<div·v-t="foo">bar</div>
+      │                  ---      
+
+```
+
+```
+invalid_additional_directives.vue:4:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    2 │ <template>
+    3 │   <div v-t="foo">bar</div>
+  > 4 │   <div v-html="foo">baz</div>
+      │                     ^^^
+    5 │ </template>
+    6 │ 
+  
+  i This directive replaces the content of the element.
+  
+    2 │ <template>
+    3 │   <div v-t="foo">bar</div>
+  > 4 │   <div v-html="foo">baz</div>
+      │        ^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    4 │ ··<div·v-html="foo">baz</div>
+      │                     ---      
+
+```

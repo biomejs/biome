@@ -63,6 +63,7 @@ impl<'a> SpecTestFile<'a> {
 
     pub fn relative_file_name(&self) -> String {
         self.input_file
+            .as_path()
             .strip_prefix(self.root_path)
             .unwrap_or_else(|_| {
                 panic!(
@@ -205,7 +206,6 @@ impl<'a> SpecSnapshot<'a> {
                 editor_features: None,
             })
             .unwrap();
-
         // 5. Format — try without formatWithErrors first to detect parse errors
         let text_range = self.test_file.range();
         let is_range_format = text_range.is_some();

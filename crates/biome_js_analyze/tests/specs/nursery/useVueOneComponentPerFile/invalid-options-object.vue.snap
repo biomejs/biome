@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid-options-object.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import { createApp, defineComponent } from "vue";
+
+const TodoItem = defineComponent({ props: ["title"] });
+createApp({ name: "Root" });
+
+export default {
+  components: { TodoItem },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-object.vue:5:18 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    3 │ import { createApp, defineComponent } from "vue";
+    4 │ 
+  > 5 │ const TodoItem = defineComponent({ props: ["title"] });
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ createApp({ name: "Root" });
+    7 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-object.vue:6:1 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    5 │ const TodoItem = defineComponent({ props: ["title"] });
+  > 6 │ createApp({ name: "Root" });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ export default {
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

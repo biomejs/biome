@@ -4,10 +4,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsRoot, JsIdentifierAssignment};
+use biome_js_syntax::{JsIdentifierAssignment, JsLanguage};
 use biome_rowan::AstNode;
 use biome_rule_options::no_vue_mutating_props::NoVueMutatingPropsOptions;
-use biome_vue_semantic::{Access, Namespace, Origin, RefBase, Reference, SnippetHost, SymbolKind};
+use biome_vue_semantic::{
+    Access, AnalyzedVueModel, Namespace, Origin, RefBase, Reference, SnippetHost, SymbolKind,
+};
 
 declare_lint_rule! {
     /// Disallow changing the props of a Vue component.
@@ -133,7 +135,7 @@ impl Rule for NoVueMutatingProps {
         // copy, not the prop.
         if access == Access::Write
             && !is_in_template(reference)
-            && is_variable_assignment(&ctx.root(), reference)
+            && is_variable_assignment(ctx.vue_model(), reference)
         {
             return None;
         }
@@ -196,10 +198,12 @@ fn is_props_member(reference: &Reference) -> bool {
 
 /// Returns `true` when `reference` is a variable being assigned to, as in
 /// `count = 1`, rather than a member of an object.
-fn is_variable_assignment(root: &AnyJsRoot, reference: &Reference) -> bool {
-    root.syntax()
-        .covering_element(reference.range())
-        .parent()
+fn is_variable_assignment(
+    vue_model: &AnalyzedVueModel<JsLanguage>,
+    reference: &Reference,
+) -> bool {
+    vue_model
+        .node(reference)
         .is_some_and(|node| JsIdentifierAssignment::can_cast(node.kind()))
 }
 

@@ -3,6 +3,8 @@
 mod lexer;
 mod parser;
 mod syntax;
+#[cfg(test)]
+mod test_support;
 mod token_source;
 
 use crate::lexer::BASENAME_STORE;

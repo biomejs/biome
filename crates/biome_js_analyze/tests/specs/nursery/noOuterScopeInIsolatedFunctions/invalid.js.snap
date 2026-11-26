@@ -1,0 +1,740 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import makeSynchronous from "make-synchronous";
+import { helper } from "./helper.js";
+
+const foo = "hi";
+let counter = 0;
+
+makeSynchronous(() => foo.slice());
+makeSynchronous(async () => foo.slice());
+makeSynchronous(function () {
+	return foo.slice();
+});
+makeSynchronous(async function named() {
+	return foo.slice();
+});
+makeSynchronous((() => foo.slice()));
+makeSynchronous(() => helper());
+makeSynchronous(() => {
+	counter = 1;
+});
+workerize(() => foo.slice());
+browser.execute(() => foo.slice());
+page.evaluate(() => foo.slice());
+
+chrome.scripting.executeScript({
+	target: { tabId: 1 },
+	func: () => foo.slice(),
+});
+browser.scripting.executeScript({
+	target: { tabId: 1 },
+	func: function () {
+		return foo.slice();
+	},
+});
+browser.scripting.executeScript({
+	func() {
+		return foo.slice();
+	},
+});
+chrome.scripting.executeScript({
+	["func"]: () => foo.slice(),
+});
+chrome.scripting.executeScript({
+	[`func`]: () => foo.slice(),
+});
+
+// A nested function still runs inside the isolated function.
+makeSynchronous(() => {
+	function getValue() {
+		return foo.slice();
+	}
+	return getValue;
+});
+
+makeSynchronous(function () {
+	return this.foo;
+});
+
+// Arrow functions use the `this` of the isolated function.
+makeSynchronous(function () {
+	return () => this.foo;
+});
+
+// The `extends` clause and computed names of a nested class run inside the isolated function.
+makeSynchronous(() => class extends this.Base {});
+makeSynchronous(() => class {
+	[this.key]() {}
+});
+
+// Each use is reported.
+makeSynchronous(() => foo + foo);
+
+```
+
+# Diagnostics
+```
+invalid.js:8:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+     6 │ let counter = 0;
+     7 │ 
+   > 8 │ makeSynchronous(() => foo.slice());
+       │                       ^^^
+     9 │ makeSynchronous(async () => foo.slice());
+    10 │ makeSynchronous(function () {
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:29 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+     8 │ makeSynchronous(() => foo.slice());
+   > 9 │ makeSynchronous(async () => foo.slice());
+       │                             ^^^
+    10 │ makeSynchronous(function () {
+    11 │ 	return foo.slice();
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+     9 │ makeSynchronous(async () => foo.slice());
+    10 │ makeSynchronous(function () {
+  > 11 │ 	return foo.slice();
+       │ 	       ^^^
+    12 │ });
+    13 │ makeSynchronous(async function named() {
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    12 │ });
+    13 │ makeSynchronous(async function named() {
+  > 14 │ 	return foo.slice();
+       │ 	       ^^^
+    15 │ });
+    16 │ makeSynchronous((() => foo.slice()));
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:24 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    14 │ 	return foo.slice();
+    15 │ });
+  > 16 │ makeSynchronous((() => foo.slice()));
+       │                        ^^^
+    17 │ makeSynchronous(() => helper());
+    18 │ makeSynchronous(() => {
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable helper is declared outside of this isolated function.
+  
+    15 │ });
+    16 │ makeSynchronous((() => foo.slice()));
+  > 17 │ makeSynchronous(() => helper());
+       │                       ^^^^^^
+    18 │ makeSynchronous(() => {
+    19 │ 	counter = 1;
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import makeSynchronous from "make-synchronous";
+  > 3 │ import { helper } from "./helper.js";
+      │          ^^^^^^
+    4 │ 
+    5 │ const foo = "hi";
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:2 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable counter is declared outside of this isolated function.
+  
+    17 │ makeSynchronous(() => helper());
+    18 │ makeSynchronous(() => {
+  > 19 │ 	counter = 1;
+       │ 	^^^^^^^
+    20 │ });
+    21 │ workerize(() => foo.slice());
+  
+  i The variable is declared here.
+  
+    5 │ const foo = "hi";
+  > 6 │ let counter = 0;
+      │     ^^^^^^^
+    7 │ 
+    8 │ makeSynchronous(() => foo.slice());
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:17 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    19 │ 	counter = 1;
+    20 │ });
+  > 21 │ workerize(() => foo.slice());
+       │                 ^^^
+    22 │ browser.execute(() => foo.slice());
+    23 │ page.evaluate(() => foo.slice());
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to workerize() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    20 │ });
+    21 │ workerize(() => foo.slice());
+  > 22 │ browser.execute(() => foo.slice());
+       │                       ^^^
+    23 │ page.evaluate(() => foo.slice());
+    24 │ 
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to browser.execute() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:21 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    21 │ workerize(() => foo.slice());
+    22 │ browser.execute(() => foo.slice());
+  > 23 │ page.evaluate(() => foo.slice());
+       │                     ^^^
+    24 │ 
+    25 │ chrome.scripting.executeScript({
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to page.evaluate() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:14 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    25 │ chrome.scripting.executeScript({
+    26 │ 	target: { tabId: 1 },
+  > 27 │ 	func: () => foo.slice(),
+       │ 	            ^^^
+    28 │ });
+    29 │ browser.scripting.executeScript({
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i The func function passed to chrome.scripting.executeScript() runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    30 │ 	target: { tabId: 1 },
+    31 │ 	func: function () {
+  > 32 │ 		return foo.slice();
+       │ 		       ^^^
+    33 │ 	},
+    34 │ });
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i The func function passed to browser.scripting.executeScript() runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    35 │ browser.scripting.executeScript({
+    36 │ 	func() {
+  > 37 │ 		return foo.slice();
+       │ 		       ^^^
+    38 │ 	},
+    39 │ });
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i The func function passed to browser.scripting.executeScript() runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:18 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    39 │ });
+    40 │ chrome.scripting.executeScript({
+  > 41 │ 	["func"]: () => foo.slice(),
+       │ 	                ^^^
+    42 │ });
+    43 │ chrome.scripting.executeScript({
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i The func function passed to chrome.scripting.executeScript() runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:18 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    42 │ });
+    43 │ chrome.scripting.executeScript({
+  > 44 │ 	[`func`]: () => foo.slice(),
+       │ 	                ^^^
+    45 │ });
+    46 │ 
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i The func function passed to chrome.scripting.executeScript() runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    48 │ makeSynchronous(() => {
+    49 │ 	function getValue() {
+  > 50 │ 		return foo.slice();
+       │ 		       ^^^
+    51 │ 	}
+    52 │ 	return getValue;
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    55 │ makeSynchronous(function () {
+  > 56 │ 	return this.foo;
+       │ 	       ^^^^
+    57 │ });
+    58 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:15 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    59 │ // Arrow functions use the `this` of the isolated function.
+    60 │ makeSynchronous(function () {
+  > 61 │ 	return () => this.foo;
+       │ 	             ^^^^
+    62 │ });
+    63 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:37 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    64 │ // The `extends` clause and computed names of a nested class run inside the isolated function.
+  > 65 │ makeSynchronous(() => class extends this.Base {});
+       │                                     ^^^^
+    66 │ makeSynchronous(() => class {
+    67 │ 	[this.key]() {}
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:3 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    65 │ makeSynchronous(() => class extends this.Base {});
+    66 │ makeSynchronous(() => class {
+  > 67 │ 	[this.key]() {}
+       │ 	 ^^^^
+    68 │ });
+    69 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    70 │ // Each use is reported.
+  > 71 │ makeSynchronous(() => foo + foo);
+       │                       ^^^
+    72 │ 
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:29 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    70 │ // Each use is reported.
+  > 71 │ makeSynchronous(() => foo + foo);
+       │                             ^^^
+    72 │ 
+  
+  i The variable is declared here.
+  
+    3 │ import { helper } from "./helper.js";
+    4 │ 
+  > 5 │ const foo = "hi";
+      │       ^^^
+    6 │ let counter = 0;
+    7 │ 
+  
+  i Functions passed to makeSynchronous() run apart from the code around them.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

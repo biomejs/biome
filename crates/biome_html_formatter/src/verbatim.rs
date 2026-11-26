@@ -1,6 +1,7 @@
 use crate::HtmlFormatter;
 use crate::context::HtmlFormatContext;
 use biome_formatter::comments::{CommentKind, SourceComment};
+use biome_formatter::format_element::TextWidth;
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::rowan::prelude::{
@@ -13,8 +14,8 @@ use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatRefWithRule, FormatResult,
     LINE_TERMINATORS, normalize_newlines,
 };
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
-use biome_rowan::{Direction, SyntaxElement, TextRange};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlSyntaxNode};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 use biome_suppression::SuppressionKind;
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
@@ -30,10 +31,46 @@ use biome_suppression::SuppressionKind;
 pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
-        kind: VerbatimKind::Verbatim {
+        kind: Some(VerbatimKind::Verbatim {
             length: node.text_range_with_trivia().len(),
-        },
+        }),
         format_comments: true,
+        preserve_line_endings: false,
+    }
+}
+
+pub(crate) fn format_html_verbatim_node_preserving_line_endings(
+    node: &HtmlSyntaxNode,
+) -> FormatHtmlVerbatimNode<'_> {
+    FormatHtmlVerbatimNode {
+        node,
+        kind: Some(VerbatimKind::Verbatim {
+            length: node.text_range_with_trivia().len(),
+        }),
+        format_comments: true,
+        preserve_line_endings: true,
+    }
+}
+
+pub(crate) fn format_html_source_node_preserving_line_endings(
+    node: &HtmlSyntaxNode,
+) -> FormatHtmlVerbatimNode<'_> {
+    FormatHtmlVerbatimNode {
+        node,
+        kind: None,
+        format_comments: true,
+        preserve_line_endings: true,
+    }
+}
+
+pub(crate) fn format_verbatim_skipped_preserving_line_endings(
+    node: &HtmlSyntaxNode,
+) -> FormatHtmlVerbatimNode<'_> {
+    FormatHtmlVerbatimNode {
+        node,
+        kind: Some(VerbatimKind::Skipped),
+        format_comments: true,
+        preserve_line_endings: true,
     }
 }
 
@@ -42,16 +79,18 @@ pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNod
 pub fn format_verbatim_skipped(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
-        kind: VerbatimKind::Skipped,
+        kind: Some(VerbatimKind::Skipped),
         format_comments: true,
+        preserve_line_endings: false,
     }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatHtmlVerbatimNode<'node> {
     node: &'node HtmlSyntaxNode,
-    kind: VerbatimKind,
+    kind: Option<VerbatimKind>,
     format_comments: bool,
+    preserve_line_endings: bool,
 }
 
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
@@ -99,7 +138,9 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             self.node.text_trimmed_range().start()
         };
 
-        f.write_element(FormatElement::Tag(Tag::StartVerbatim(self.kind)))?;
+        if let Some(kind) = self.kind {
+            f.write_element(FormatElement::Tag(Tag::StartVerbatim(kind)))?;
+        }
 
         // Format all leading comments that are outside of the node's source range.
         if self.format_comments {
@@ -149,11 +190,25 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             },
         );
 
-        text(
-            &normalize_newlines(&original_source, LINE_TERMINATORS),
-            Some(verbatim_text_start),
-        )
-        .fmt(f)?;
+        if self.preserve_line_endings {
+            if f.source_map_generation().is_enabled() {
+                f.write_element(FormatElement::SourcePosition(verbatim_text_start))?;
+            }
+            let text_width = TextWidth::from_text_preserving_line_endings(
+                &original_source,
+                f.options().indent_width(),
+            );
+            f.write_element(FormatElement::Text {
+                text: original_source.into_boxed_str(),
+                text_width,
+            })?;
+        } else {
+            text(
+                &normalize_newlines(&original_source, LINE_TERMINATORS),
+                Some(verbatim_text_start),
+            )
+            .fmt(f)?;
+        }
 
         for comment in f.context().comments().dangling_comments(self.node) {
             comment.mark_formatted();
@@ -182,6 +237,88 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             )?;
         }
 
+        if self.kind.is_some() {
+            f.write_element(FormatElement::Tag(Tag::EndVerbatim))?;
+        }
+        Ok(())
+    }
+}
+
+/// Prints the source between an element's opening `>` and closing `<`, including
+/// comments and whitespace attached to either tag. The tag formatters must leave
+/// these comments and whitespace to this formatter by enabling their
+/// `verbatim_children` options.
+pub(crate) struct FormatHtmlVerbatimElementChildren<'a> {
+    pub node: &'a HtmlElement,
+    pub preserve_line_endings: bool,
+}
+
+impl Format<HtmlFormatContext> for FormatHtmlVerbatimElementChildren<'_> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let opening = self.node.opening_element()?.r_angle_token()?;
+        let closing = self.node.closing_element()?.l_angle_token()?;
+        let range = TextRange::new(
+            opening.text_trimmed_range().end(),
+            closing.text_trimmed_range().start(),
+        );
+        let node = self.node.syntax();
+        for element in node.descendants_with_tokens(Direction::Next) {
+            match element {
+                SyntaxElement::Token(token) => {
+                    if range.contains_range(token.text_trimmed_range()) {
+                        f.state_mut().track_token(&token);
+                    }
+                }
+                SyntaxElement::Node(node) => {
+                    let comments = f.context().comments();
+                    if range.contains_range(node.text_trimmed_range()) {
+                        comments.mark_suppression_checked(&node);
+                    }
+                    for comment in comments.leading_dangling_trailing_comments(&node) {
+                        if range.contains_range(comment.piece().text_range()) {
+                            comment.mark_formatted();
+                        }
+                    }
+                }
+            }
+        }
+        if range.is_empty() {
+            return Ok(());
+        }
+        let source_range = f
+            .context()
+            .source_map()
+            .map_or(range, |map| map.source_range(range));
+        let source = f.context().source_map().map_or_else(
+            || {
+                node.text_with_trivia()
+                    .slice(range - node.text_range_with_trivia().start())
+                    .to_string()
+            },
+            |map| map.source().text_slice(source_range).to_string(),
+        );
+        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
+            VerbatimKind::Verbatim {
+                length: source_range.len(),
+            },
+        )))?;
+        if self.preserve_line_endings {
+            if f.source_map_generation().is_enabled() {
+                f.write_element(FormatElement::SourcePosition(range.start()))?;
+            }
+            let text_width =
+                TextWidth::from_text_preserving_line_endings(&source, f.options().indent_width());
+            f.write_element(FormatElement::Text {
+                text: source.into_boxed_str(),
+                text_width,
+            })?;
+        } else {
+            text(
+                &normalize_newlines(&source, LINE_TERMINATORS),
+                Some(range.start()),
+            )
+            .fmt(f)?;
+        }
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))
     }
 }
@@ -191,8 +328,9 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
 pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
-        kind: VerbatimKind::Bogus,
+        kind: Some(VerbatimKind::Bogus),
         format_comments: true,
+        preserve_line_endings: false,
     }
 }
 
@@ -200,8 +338,9 @@ pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
 pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
-        kind: VerbatimKind::Suppressed,
+        kind: Some(VerbatimKind::Suppressed),
         format_comments: true,
+        preserve_line_endings: false,
     }
 }
 

@@ -46,6 +46,18 @@ suite('', () => {});
 suite(' leading space', () => {});
 suite.each([[1, 2]])('', () => {});
 
+// Table and conditional calls with invalid titles
+test.each`
+  value
+  ${1}
+`('', () => {});
+describe.each`
+  value
+  ${1}
+`(' leading space', () => {});
+test.skipIf(condition)('', () => {});
+describe.runIf(condition)('trailing space ', () => {});
+
 ```
 
 # Diagnostics
@@ -554,6 +566,7 @@ invalid.js:41:22 lint/nursery/useValidTestTitle ━━━━━━━━━━�
   > 41 │ suite.each([[1, 2]])('', () => {});
        │                      ^^
     42 │ 
+    43 │ // Table and conditional calls with invalid titles
   
   i A title is required to identify the describe in test reports.
   
@@ -561,5 +574,96 @@ invalid.js:41:22 lint/nursery/useValidTestTitle ━━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+
+```
+
+```
+invalid.js:47:3 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title is empty.
+  
+    45 │   value
+    46 │   ${1}
+  > 47 │ `('', () => {});
+       │   ^^
+    48 │ describe.each`
+    49 │   value
+  
+  i A title is required to identify the test in test reports.
+  
+  i Provide a descriptive title for this test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:3 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The describe title has leading or trailing whitespace.
+  
+    49 │   value
+    50 │   ${1}
+  > 51 │ `(' leading space', () => {});
+       │   ^^^^^^^^^^^^^^^^
+    52 │ test.skipIf(condition)('', () => {});
+    53 │ describe.runIf(condition)('trailing space ', () => {});
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
+  
+  i Remove the accidental whitespace at the start of the title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Trim leading and trailing whitespace from the title.
+  
+    51 │ `('·leading·space',·()·=>·{});
+       │    -                          
+
+```
+
+```
+invalid.js:52:24 lint/nursery/useValidTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title is empty.
+  
+    50 │   ${1}
+    51 │ `(' leading space', () => {});
+  > 52 │ test.skipIf(condition)('', () => {});
+       │                        ^^
+    53 │ describe.runIf(condition)('trailing space ', () => {});
+    54 │ 
+  
+  i A title is required to identify the test in test reports.
+  
+  i Provide a descriptive title for this test.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:27 lint/nursery/useValidTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The describe title has leading or trailing whitespace.
+  
+    51 │ `(' leading space', () => {});
+    52 │ test.skipIf(condition)('', () => {});
+  > 53 │ describe.runIf(condition)('trailing space ', () => {});
+       │                           ^^^^^^^^^^^^^^^^^
+    54 │ 
+  
+  i Accidental whitespace can cause inconsistent test output and formatting issues in reports.
+  
+  i Remove the accidental whitespace at the end of the title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Trim leading and trailing whitespace from the title.
+  
+    53 │ describe.runIf(condition)('trailing·space·',·()·=>·{});
+       │                                          -             
 
 ```

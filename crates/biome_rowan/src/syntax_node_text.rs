@@ -1,11 +1,11 @@
 use crate::{
     Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
-    green::{GreenNodeData, Slot},
+    green::{GreenNodeRef, GreenTokensForRange},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
-use std::{cmp::Ordering, fmt, slice};
+use std::{cmp::Ordering, fmt};
 
 #[derive(Clone)]
 pub struct SyntaxNodeText {
@@ -214,21 +214,20 @@ impl SyntaxNodeText {
 /// part of the range that each token covers, in source order.
 ///
 /// Unlike [SyntaxNodeTokenWithRanges], it allocates no red node or token per
-/// token, and it skips subtrees that end before the range starts.
+/// token, and it skips the children that end before the range starts without
+/// visiting them.
 struct GreenChunks<'a> {
     range: TextRange,
-    /// For each node the walk has entered, outermost first: its children that
-    /// haven't been visited yet, and the offset where the node starts.
-    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    tokens: GreenTokensForRange<'a>,
 }
 
 impl<'a> GreenChunks<'a> {
     /// Creates the iterator for `range` of `node`, whose text starts at
     /// `offset`. `range` must lie inside the node's text.
-    fn new(node: &'a GreenNodeData, offset: TextSize, range: TextRange) -> Self {
+    fn new(node: GreenNodeRef<'a>, offset: TextSize, range: TextRange) -> Self {
         Self {
             range,
-            pending_children: vec![(node.slice().iter(), offset)],
+            tokens: GreenTokensForRange::new(node, offset, range),
         }
     }
 }
@@ -238,37 +237,15 @@ impl<'a> Iterator for GreenChunks<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let (slots, node_offset) = self.pending_children.last_mut()?;
-            let Some(slot) = slots.next() else {
-                self.pending_children.pop();
-                continue;
-            };
-
-            let start = *node_offset + slot.rel_offset();
-            if start >= self.range.end() {
-                self.pending_children.clear();
-                return None;
-            }
-
-            match slot {
-                Slot::Token { token, .. } => {
-                    let token_range = TextRange::at(start, token.text_len());
-                    if let Some(range) = token_range.intersect(self.range) {
-                        // Slicing before the emptiness check panics on an
-                        // empty range inside a character, as the red token
-                        // walk does.
-                        let text = &token.text()[range - start];
-                        if !text.is_empty() {
-                            return Some(text);
-                        }
-                    }
+            let token = self.tokens.next()?;
+            let token_range = TextRange::at(token.offset, token.green.text_len());
+            if let Some(range) = token_range.intersect(self.range) {
+                // Slicing before the emptiness check panics on an empty range
+                // inside a character, as the red token walk does.
+                let text = &token.green.text()[range - token.offset];
+                if !text.is_empty() {
+                    return Some(text);
                 }
-                Slot::Node { node, .. } => {
-                    if start + node.text_len() > self.range.start() {
-                        self.pending_children.push((node.slice().iter(), start));
-                    }
-                }
-                Slot::Empty { .. } => {}
             }
         }
     }
@@ -755,9 +732,9 @@ mod tests {
     /// Text of the tree that [build_edge_case_tree] returns.
     const EDGE_CASE_TEXT: &str = "  é界ab é界😀xy ";
 
-    /// Builds a tree with zero-width tokens and nodes, trivia, characters of
-    /// two to four bytes, a node whose only token is trivia, and the same
-    /// subtree at two offsets, which the node cache stores once.
+    /// Builds a tree with zero-width tokens and nodes, an empty slot, trivia,
+    /// characters of two to four bytes, a node whose only token is trivia, and
+    /// the same subtree at two offsets, which the node cache stores once.
     fn build_edge_case_tree() -> SyntaxNode<RawLanguage> {
         let whitespace = [TriviaPiece::whitespace(1)];
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -778,6 +755,9 @@ mod tests {
         shared_subtree(&mut builder);
 
         builder.token(RawLanguageKind::STRING_TOKEN, "ab");
+        // A literal without a token holds an empty slot.
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
         builder.start_node(RawLanguageKind::BOGUS);
         builder.finish_node();
         shared_subtree(&mut builder);
@@ -1002,10 +982,10 @@ mod tests {
             shared[0].text_range_with_trivia().start(),
             shared[1].text_range_with_trivia().start()
         );
-        assert!(std::ptr::eq(
-            shared[0].text_with_trivia().node.green(),
-            shared[1].text_with_trivia().node.green()
-        ));
+        assert_eq!(
+            shared[0].text_with_trivia().node.green().as_ptr(),
+            shared[1].text_with_trivia().node.green().as_ptr()
+        );
     }
 
     #[test]
@@ -1020,6 +1000,9 @@ mod tests {
         check_methods(&text.slice(..), "");
     }
 
+    // Skipped under Miri. Comparing every slice of every node with every
+    // slice of the root takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn methods_on_every_range() {
         let root = build_edge_case_tree();

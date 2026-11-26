@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  data() {
+    return { greeting: "Hello" };
+  },
+  async beforeRouteEnter(to, from, next = this.fallback) {
+    this.method();
+    this.attribute = this.method();
+    if (this.value === 42) {
+    }
+    if (true) {
+      this.nested();
+    }
+    await Promise.resolve().then(() => this.inArrow());
+    next();
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:7:43 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    5 │     return { greeting: "Hello" };
+    6 │   },
+  > 7 │   async beforeRouteEnter(to, from, next = this.fallback) {
+      │                                           ^^^^
+    8 │     this.method();
+    9 │     this.attribute = this.method();
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+     6 │   },
+     7 │   async beforeRouteEnter(to, from, next = this.fallback) {
+   > 8 │     this.method();
+       │     ^^^^
+     9 │     this.attribute = this.method();
+    10 │     if (this.value === 42) {
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+     7 │   async beforeRouteEnter(to, from, next = this.fallback) {
+     8 │     this.method();
+   > 9 │     this.attribute = this.method();
+       │     ^^^^
+    10 │     if (this.value === 42) {
+    11 │     }
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:22 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+     7 │   async beforeRouteEnter(to, from, next = this.fallback) {
+     8 │     this.method();
+   > 9 │     this.attribute = this.method();
+       │                      ^^^^
+    10 │     if (this.value === 42) {
+    11 │     }
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:9 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+     8 │     this.method();
+     9 │     this.attribute = this.method();
+  > 10 │     if (this.value === 42) {
+       │         ^^^^
+    11 │     }
+    12 │     if (true) {
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:7 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    11 │     }
+    12 │     if (true) {
+  > 13 │       this.nested();
+       │       ^^^^
+    14 │     }
+    15 │     await Promise.resolve().then(() => this.inArrow());
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:40 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    13 │       this.nested();
+    14 │     }
+  > 15 │     await Promise.resolve().then(() => this.inArrow());
+       │                                        ^^^^
+    16 │     next();
+    17 │   },
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
