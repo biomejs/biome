@@ -60,6 +60,7 @@ biome migrate eslint --include-inspired --include-nursery --write
       },
       "nursery": {
         "noSvelteLegacyConst": "error",
+        "noTailwindLegacyImportant": "error",
         "noVueRestrictedVOn": "error",
         "useControlLabel": "error",
         "usePromiseRejectErrors": "error",
@@ -109,9 +110,9 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 133 ESLint rules found
     - 17 are obsolete because of Biome's formatter
-    - 73 have been migrated to Biome's rules
-    - 67% (90) of your ESLint rules are fully covered by Biome
-      - 54% (73) via direct migration to Biome rules
+    - 74 have been migrated to Biome's rules
+    - 68% (91) of your ESLint rules are fully covered by Biome
+      - 55% (74) via direct migration to Biome rules
   
   
   i Migrated rules:
@@ -179,6 +180,7 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - svelte/no-target-blank
   - svelte/prefer-const
   - tailwindcss/enforces-shorthand
+  - tailwindcss/important-modifier-suffix
   - vue/camelcase
   - vue/component-api-style
   - vue/eqeqeq
@@ -257,7 +259,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - n/no-hide-core-modules
   - n/shebang
   - qwik/no-async-prevent-default
-  - tailwindcss/important-modifier-suffix
   - vue/valid-model-definition
   - vue/valid-v-bind-sync
   

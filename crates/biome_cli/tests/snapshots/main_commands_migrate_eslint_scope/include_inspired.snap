@@ -103,7 +103,7 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   i 133 ESLint rules found
     - 17 are obsolete because of Biome's formatter
     - 68 have been migrated to Biome's rules
-    - 67% (90) of your ESLint rules are fully covered by Biome
+    - 68% (91) of your ESLint rules are fully covered by Biome
       - 51% (68) via direct migration to Biome rules
   
   
@@ -184,6 +184,7 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - astro/jsx-a11y/control-has-associated-label
   - svelte/no-at-const-tags
   - tailwindcss/enforces-shorthand
+  - tailwindcss/important-modifier-suffix
   - vue/no-restricted-v-on
   
   i Unsupported rules (21 incompatible with formatter, 11 made obsolete by the formatter, 6 covered by a formatter option, 0 not yet implemented, 0 unknown source):
@@ -253,7 +254,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - n/no-hide-core-modules
   - n/shebang
   - qwik/no-async-prevent-default
-  - tailwindcss/important-modifier-suffix
   - vue/valid-model-definition
   - vue/valid-v-bind-sync
   
