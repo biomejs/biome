@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+
+// Type assertions are ignored.
+(defineTable({ author: v.string(), channel: v.string() }) as any)
+	.index("by_author" as const, ["author"] as const)
+	.index("by_author_and_channel", { fields: ["author", "channel"] } satisfies object)!
+	.index("by_author_and_channel_and_body", ["author", "channel", "body"]);
+
+```
+
+# Diagnostics
+```
+invalid.ts:7:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    5 │ // Type assertions are ignored.
+    6 │ (defineTable({ author: v.string(), channel: v.string() }) as any)
+  > 7 │ 	.index("by_author" as const, ["author"] as const)
+      │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	.index("by_author_and_channel", { fields: ["author", "channel"] } satisfies object)!
+    9 │ 	.index("by_author_and_channel_and_body", ["author", "channel", "body"]);
+  
+  i The index by_author_and_channel is defined here.
+  
+     6 │ (defineTable({ author: v.string(), channel: v.string() }) as any)
+     7 │ 	.index("by_author" as const, ["author"] as const)
+   > 8 │ 	.index("by_author_and_channel", { fields: ["author", "channel"] } satisfies object)!
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	.index("by_author_and_channel_and_body", ["author", "channel", "body"]);
+    10 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author_and_channel is redundant because the index by_author_and_channel_and_body starts with the same fields.
+  
+     6 │ (defineTable({ author: v.string(), channel: v.string() }) as any)
+     7 │ 	.index("by_author" as const, ["author"] as const)
+   > 8 │ 	.index("by_author_and_channel", { fields: ["author", "channel"] } satisfies object)!
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	.index("by_author_and_channel_and_body", ["author", "channel", "body"]);
+    10 │ 
+  
+  i The index by_author_and_channel_and_body is defined here.
+  
+     7 │ 	.index("by_author" as const, ["author"] as const)
+     8 │ 	.index("by_author_and_channel", { fields: ["author", "channel"] } satisfies object)!
+   > 9 │ 	.index("by_author_and_channel_and_body", ["author", "channel", "body"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author_and_channel find the same documents with by_author_and_channel_and_body, so delete by_author_and_channel and use by_author_and_channel_and_body instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author_and_channel sorts matching documents by _creationTime, while by_author_and_channel_and_body sorts them by body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

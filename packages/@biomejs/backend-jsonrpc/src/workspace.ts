@@ -3064,6 +3064,11 @@ export interface Nursery {
 	 */
 	noConstantComparisons?: NoConstantComparisonsConfiguration;
 	/**
+	 * Disallow Convex database indexes whose fields are the first fields of another index on the same table.
+	 * See https://biomejs.dev/linter/rules/no-convex-duplicate-indexes
+	 */
+	noConvexDuplicateIndexes?: NoConvexDuplicateIndexesConfiguration;
+	/**
 	 * Disallow scheduling Convex cron jobs at the start of the hour.
 	 * See https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons
 	 */
@@ -7017,6 +7022,9 @@ export type NoConsoleSpacesConfiguration =
 export type NoConstantComparisonsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantComparisonsOptions;
+export type NoConvexDuplicateIndexesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexDuplicateIndexesOptions;
 export type NoConvexTopOfHourCronsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConvexTopOfHourCronsOptions;
@@ -10247,6 +10255,10 @@ export interface RuleWithNoConsoleSpacesOptions {
 export interface RuleWithNoConstantComparisonsOptions {
 	level: RulePlainConfiguration;
 	options?: NoConstantComparisonsOptions;
+}
+export interface RuleWithNoConvexDuplicateIndexesOptions {
+	level: RulePlainConfiguration;
+	options?: NoConvexDuplicateIndexesOptions;
 }
 export interface RuleWithNoConvexTopOfHourCronsOptions {
 	level: RulePlainConfiguration;
@@ -14120,6 +14132,7 @@ export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
+export type NoConvexDuplicateIndexesOptions = {};
 export type NoConvexTopOfHourCronsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
@@ -16708,6 +16721,7 @@ export type Category =
 	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
+	| "lint/nursery/noConvexDuplicateIndexes"
 	| "lint/nursery/noConvexTopOfHourCrons"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
