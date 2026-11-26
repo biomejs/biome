@@ -601,6 +601,7 @@ pub mod use_consistent_type_definitions;
 pub mod use_consistent_unicode_bom;
 pub mod use_const;
 pub mod use_control_label;
+pub mod use_convex_explicit_table_ids;
 pub mod use_date_now;
 pub mod use_default_parameter_last;
 pub mod use_default_switch_clause;
