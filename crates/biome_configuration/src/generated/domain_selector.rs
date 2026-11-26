@@ -17,8 +17,12 @@ static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
         RuleFilter::Rule("nursery", "useBiomeTopLevelTypes"),
     ]
 });
-static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
-    LazyLock::new(|| vec![RuleFilter::Rule("nursery", "noConvexTopOfHourCrons")]);
+static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noConvexTopOfHourCrons"),
+        RuleFilter::Rule("nursery", "useConvexArgsValidator"),
+    ]
+});
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noDrizzleDbObjectInsideTransaction"),

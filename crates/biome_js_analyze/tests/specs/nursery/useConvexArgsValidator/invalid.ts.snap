@@ -1,0 +1,190 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+export const typedArguments = query({
+	handler: async (ctx, { id }: { id: Id<"tasks"> }) => {
+		return await ctx.db.get(id);
+	},
+});
+
+export const asserted = query({
+	handler: async (ctx) => {},
+} as const);
+
+export const wrappedCall = query({
+	handler: async (ctx, args) => {},
+}) satisfies unknown;
+
+export const wrappedHandler = query({
+	handler: (async (ctx) => {}) as Handler,
+});
+
+export const thisParameter = query({
+	handler: async function (this: unknown, ctx) {},
+});
+
+export const thisParameterWithArguments = query({
+	handler: async function (this: unknown, ctx, args) {},
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:31 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export const typedArguments = query({
+      │                               ^^^^^
+    3 │ 	handler: async (ctx, { id }: { id: Id<"tasks"> }) => {
+    4 │ 		return await ctx.db.get(id);
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:25 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+     6 │ });
+     7 │ 
+   > 8 │ export const asserted = query({
+       │                         ^^^^^
+     9 │ 	handler: async (ctx) => {},
+    10 │ } as const);
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+     7  7 │   
+     8  8 │   export const asserted = query({
+     9    │ - → handler:·async·(ctx)·=>·{},
+        9 │ + → args:·{},
+       10 │ + → handler:·async·(ctx)·=>·{},
+    10 11 │   } as const);
+    11 12 │   
+  
+
+```
+
+```
+invalid.ts:12:28 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    10 │ } as const);
+    11 │ 
+  > 12 │ export const wrappedCall = query({
+       │                            ^^^^^
+    13 │ 	handler: async (ctx, args) => {},
+    14 │ }) satisfies unknown;
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:31 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    14 │ }) satisfies unknown;
+    15 │ 
+  > 16 │ export const wrappedHandler = query({
+       │                               ^^^^^
+    17 │ 	handler: (async (ctx) => {}) as Handler,
+    18 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    15 15 │   
+    16 16 │   export const wrappedHandler = query({
+    17    │ - → handler:·(async·(ctx)·=>·{})·as·Handler,
+       17 │ + → args:·{},
+       18 │ + → handler:·(async·(ctx)·=>·{})·as·Handler,
+    18 19 │   });
+    19 20 │   
+  
+
+```
+
+```
+invalid.ts:20:30 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    18 │ });
+    19 │ 
+  > 20 │ export const thisParameter = query({
+       │                              ^^^^^
+    21 │ 	handler: async function (this: unknown, ctx) {},
+    22 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    19 19 │   
+    20 20 │   export const thisParameter = query({
+    21    │ - → handler:·async·function·(this:·unknown,·ctx)·{},
+       21 │ + → args:·{},
+       22 │ + → handler:·async·function·(this:·unknown,·ctx)·{},
+    22 23 │   });
+    23 24 │   
+  
+
+```
+
+```
+invalid.ts:24:43 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    22 │ });
+    23 │ 
+  > 24 │ export const thisParameterWithArguments = query({
+       │                                           ^^^^^
+    25 │ 	handler: async function (this: unknown, ctx, args) {},
+    26 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

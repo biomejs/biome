@@ -1,0 +1,583 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export const listTasks = query({
+	handler: async (ctx) => {
+		return await ctx.db.query("tasks").collect();
+	},
+});
+
+export const getTask = query({
+	handler: async (ctx, { id }) => {
+		return await ctx.db.get(id);
+	},
+});
+
+export const updateTask = mutation({ handler: async (ctx, args) => {} });
+
+export const sendEmail = action({ handler: async function (ctx) {} });
+
+export const methodHandler = internalQuery({
+	async handler(ctx, args) {},
+});
+
+export const emptyPattern = internalMutation({
+	handler: async (ctx, {}) => {},
+});
+
+export const restParameter = internalAction({
+	handler: async (ctx, ...rest) => {},
+});
+
+export const singleParameter = query({
+	handler: async ctx => {},
+});
+
+export const referencedHandler = query({ handler });
+
+export const noHandler = query({});
+
+export const withComment = query({
+	// Lists every task.
+	handler: async (ctx) => {},
+});
+
+export const oldSyntax = query(async (ctx) => {});
+
+export const oldSyntaxWithArguments = mutation(async (ctx, { id }) => {});
+
+export const oldSyntaxFunction = action(async function (ctx) {});
+
+export const parenthesized = query(({ handler: async (ctx) => {} }));
+
+export const first = query({ handler: async (ctx) => {} }),
+	second = mutation({ handler: async (ctx, args) => {} });
+
+export let reassignable = query({ handler: async (ctx) => {} });
+
+export default query({ handler: async (ctx) => {} });
+
+export const onlyRestParameter = query({ handler: async (...params) => {} });
+
+export const oldSyntaxWithComment = query(
+	// Lists every task.
+	async (ctx) => {}, // The handler.
+);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:26 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export const listTasks = query({
+      │                          ^^^^^
+    3 │ 	handler: async (ctx) => {
+    4 │ 		return await ctx.db.query("tasks").collect();
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   export const listTasks = query({
+     3    │ - → handler:·async·(ctx)·=>·{
+        3 │ + → args:·{},
+        4 │ + → handler:·async·(ctx)·=>·{
+     4  5 │       return await ctx.db.query("tasks").collect();
+     5  6 │     },
+  
+
+```
+
+```
+invalid.js:8:24 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+     6 │ });
+     7 │ 
+   > 8 │ export const getTask = query({
+       │                        ^^^^^
+     9 │ 	handler: async (ctx, { id }) => {
+    10 │ 		return await ctx.db.get(id);
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:27 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    12 │ });
+    13 │ 
+  > 14 │ export const updateTask = mutation({ handler: async (ctx, args) => {} });
+       │                           ^^^^^^^^
+    15 │ 
+    16 │ export const sendEmail = action({ handler: async function (ctx) {} });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:26 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    14 │ export const updateTask = mutation({ handler: async (ctx, args) => {} });
+    15 │ 
+  > 16 │ export const sendEmail = action({ handler: async function (ctx) {} });
+       │                          ^^^^^^
+    17 │ 
+    18 │ export const methodHandler = internalQuery({
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    16 │ export·const·sendEmail·=·action({·args:·{},·handler:·async·function·(ctx)·{}·});
+       │                                   ++++++++++                                    
+
+```
+
+```
+invalid.js:18:30 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    16 │ export const sendEmail = action({ handler: async function (ctx) {} });
+    17 │ 
+  > 18 │ export const methodHandler = internalQuery({
+       │                              ^^^^^^^^^^^^^
+    19 │ 	async handler(ctx, args) {},
+    20 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:29 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    20 │ });
+    21 │ 
+  > 22 │ export const emptyPattern = internalMutation({
+       │                             ^^^^^^^^^^^^^^^^
+    23 │ 	handler: async (ctx, {}) => {},
+    24 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    21 21 │   
+    22 22 │   export const emptyPattern = internalMutation({
+    23    │ - → handler:·async·(ctx,·{})·=>·{},
+       23 │ + → args:·{},
+       24 │ + → handler:·async·(ctx,·{})·=>·{},
+    24 25 │   });
+    25 26 │   
+  
+
+```
+
+```
+invalid.js:26:30 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    24 │ });
+    25 │ 
+  > 26 │ export const restParameter = internalAction({
+       │                              ^^^^^^^^^^^^^^
+    27 │ 	handler: async (ctx, ...rest) => {},
+    28 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:32 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    28 │ });
+    29 │ 
+  > 30 │ export const singleParameter = query({
+       │                                ^^^^^
+    31 │ 	handler: async ctx => {},
+    32 │ });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    29 29 │   
+    30 30 │   export const singleParameter = query({
+    31    │ - → handler:·async·ctx·=>·{},
+       31 │ + → args:·{},
+       32 │ + → handler:·async·ctx·=>·{},
+    32 33 │   });
+    33 34 │   
+  
+
+```
+
+```
+invalid.js:34:34 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    32 │ });
+    33 │ 
+  > 34 │ export const referencedHandler = query({ handler });
+       │                                  ^^^^^
+    35 │ 
+    36 │ export const noHandler = query({});
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, or args: {} if the function doesn't take arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:26 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    34 │ export const referencedHandler = query({ handler });
+    35 │ 
+  > 36 │ export const noHandler = query({});
+       │                          ^^^^^
+    37 │ 
+    38 │ export const withComment = query({
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, or args: {} if the function doesn't take arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:28 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    36 │ export const noHandler = query({});
+    37 │ 
+  > 38 │ export const withComment = query({
+       │                            ^^^^^
+    39 │ 	// Lists every task.
+    40 │ 	handler: async (ctx) => {},
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    37 37 │   
+    38 38 │   export const withComment = query({
+    39    │ - → //·Lists·every·task.
+       39 │ + → args:·{},
+       40 │ + → //·Lists·every·task.
+    40 41 │     handler: async (ctx) => {},
+    41 42 │   });
+  
+
+```
+
+```
+invalid.js:43:26 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    41 │ });
+    42 │ 
+  > 43 │ export const oldSyntax = query(async (ctx) => {});
+       │                          ^^^^^
+    44 │ 
+    45 │ export const oldSyntaxWithArguments = mutation(async (ctx, { id }) => {});
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Replace the handler with an object that has the properties args: {} and handler, so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    43 │ export·const·oldSyntax·=·query({·args:·{},·handler:·async·(ctx)·=>·{}·});
+       │                                +++++++++++++++++++++                 ++  
+
+```
+
+```
+invalid.js:45:39 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    43 │ export const oldSyntax = query(async (ctx) => {});
+    44 │ 
+  > 45 │ export const oldSyntaxWithArguments = mutation(async (ctx, { id }) => {});
+       │                                       ^^^^^^^^
+    46 │ 
+    47 │ export const oldSyntaxFunction = action(async function (ctx) {});
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Replace the handler with an object that has an args property describing each argument, for example args: { id: v.id("tasks") }, and a handler property with the handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:34 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    45 │ export const oldSyntaxWithArguments = mutation(async (ctx, { id }) => {});
+    46 │ 
+  > 47 │ export const oldSyntaxFunction = action(async function (ctx) {});
+       │                                  ^^^^^^
+    48 │ 
+    49 │ export const parenthesized = query(({ handler: async (ctx) => {} }));
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Replace the handler with an object that has the properties args: {} and handler, so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    47 │ export·const·oldSyntaxFunction·=·action({·args:·{},·handler:·async·function·(ctx)·{}·});
+       │                                         +++++++++++++++++++++                       ++  
+
+```
+
+```
+invalid.js:49:30 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    47 │ export const oldSyntaxFunction = action(async function (ctx) {});
+    48 │ 
+  > 49 │ export const parenthesized = query(({ handler: async (ctx) => {} }));
+       │                              ^^^^^
+    50 │ 
+    51 │ export const first = query({ handler: async (ctx) => {} }),
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    49 │ export·const·parenthesized·=·query(({·args:·{},·handler:·async·(ctx)·=>·{}·}));
+       │                                       ++++++++++                               
+
+```
+
+```
+invalid.js:51:22 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    49 │ export const parenthesized = query(({ handler: async (ctx) => {} }));
+    50 │ 
+  > 51 │ export const first = query({ handler: async (ctx) => {} }),
+       │                      ^^^^^
+    52 │ 	second = mutation({ handler: async (ctx, args) => {} });
+    53 │ 
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    51 │ export·const·first·=·query({·args:·{},·handler:·async·(ctx)·=>·{}·}),
+       │                              ++++++++++                              
+
+```
+
+```
+invalid.js:52:11 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    51 │ export const first = query({ handler: async (ctx) => {} }),
+  > 52 │ 	second = mutation({ handler: async (ctx, args) => {} });
+       │ 	         ^^^^^^^^
+    53 │ 
+    54 │ export let reassignable = query({ handler: async (ctx) => {} });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:27 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    52 │ 	second = mutation({ handler: async (ctx, args) => {} });
+    53 │ 
+  > 54 │ export let reassignable = query({ handler: async (ctx) => {} });
+       │                           ^^^^^
+    55 │ 
+    56 │ export default query({ handler: async (ctx) => {} });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    54 │ export·let·reassignable·=·query({·args:·{},·handler:·async·(ctx)·=>·{}·});
+       │                                   ++++++++++                              
+
+```
+
+```
+invalid.js:56:16 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    54 │ export let reassignable = query({ handler: async (ctx) => {} });
+    55 │ 
+  > 56 │ export default query({ handler: async (ctx) => {} });
+       │                ^^^^^
+    57 │ 
+    58 │ export const onlyRestParameter = query({ handler: async (...params) => {} });
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add args: {} so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    56 │ export·default·query({·args:·{},·handler:·async·(ctx)·=>·{}·});
+       │                        ++++++++++                              
+
+```
+
+```
+invalid.js:58:34 lint/nursery/useConvexArgsValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    56 │ export default query({ handler: async (ctx) => {} });
+    57 │ 
+  > 58 │ export const onlyRestParameter = query({ handler: async (...params) => {} });
+       │                                  ^^^^^
+    59 │ 
+    60 │ export const oldSyntaxWithComment = query(
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Add an args property that describes each argument, for example args: { id: v.id("tasks") }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:37 lint/nursery/useConvexArgsValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Convex function doesn't have an args validator.
+  
+    58 │ export const onlyRestParameter = query({ handler: async (...params) => {} });
+    59 │ 
+  > 60 │ export const oldSyntaxWithComment = query(
+       │                                     ^^^^^
+    61 │ 	// Lists every task.
+    62 │ 	async (ctx) => {}, // The handler.
+  
+  i Without an args validator, Convex doesn't check the arguments of a call before the handler runs, so the handler can receive values of any type.
+  
+  i Replace the handler with an object that has the properties args: {} and handler, so that Convex rejects calls that pass arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add an empty args validator.
+  
+    62 │ → {·args:·{},·handler:·async·(ctx)·=>·{}·},·//·The·handler.
+       │   +++++++++++++++++++++                 ++                 
+
+```
