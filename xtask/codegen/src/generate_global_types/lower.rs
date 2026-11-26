@@ -423,13 +423,24 @@ impl LoweredTypeMember {
 /// Lowered member kind.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredMemberKind {
-    Named { optional: bool },
+    /// An instance property or method, which is `readonly` only for a
+    /// property declared with the modifier.
+    Named {
+        optional: bool,
+        readonly: bool,
+    },
     NamedStatic,
     Constructor,
     CallSignature,
-    ComputedValue { key_reference: LoweredTypeReference },
-    ComputedStatic { key_reference: LoweredTypeReference },
-    IndexSignature { key_reference: LoweredTypeReference },
+    ComputedValue {
+        key_reference: LoweredTypeReference,
+    },
+    ComputedStatic {
+        key_reference: LoweredTypeReference,
+    },
+    IndexSignature {
+        key_reference: LoweredTypeReference,
+    },
 }
 
 /// Lowered type reference.

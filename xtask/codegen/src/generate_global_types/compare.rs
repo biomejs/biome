@@ -270,7 +270,10 @@ fn assert_promise_method(
     let expected_kind = if shape.is_static {
         LoweredMemberKind::NamedStatic
     } else {
-        LoweredMemberKind::Named { optional: false }
+        LoweredMemberKind::Named {
+            optional: false,
+            readonly: false,
+        }
     };
     if member.kind() != &expected_kind
         || member.type_reference() != &LoweredTypeReference::Predefined(shape.member_type_id)
@@ -517,7 +520,12 @@ fn assert_error_named_string_member(
     let Some(member) = class.member(name) else {
         bail!("missing required Error member {name}");
     };
-    if member.kind() != &(LoweredMemberKind::Named { optional }) {
+    if member.kind()
+        != &(LoweredMemberKind::Named {
+            optional,
+            readonly: false,
+        })
+    {
         bail!(
             "generated Error member {} has unexpected kind",
             member.name()
@@ -538,7 +546,12 @@ fn assert_error_stack_member(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(member) = class.member("stack") else {
         bail!("missing required Error member stack");
     };
-    if member.kind() != &(LoweredMemberKind::Named { optional: true }) {
+    if member.kind()
+        != &(LoweredMemberKind::Named {
+            optional: true,
+            readonly: false,
+        })
+    {
         bail!("generated Error member stack has unexpected kind");
     }
     if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID") {

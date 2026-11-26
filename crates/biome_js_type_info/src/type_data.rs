@@ -1103,6 +1103,14 @@ impl TypeMember {
         self.kind.is_const_asserted()
     }
 
+    /// Returns whether this member is a property declared `readonly` or a
+    /// property of an object literal under an `as const` assertion. See
+    /// [`TypeMemberKind::is_readonly`].
+    #[inline]
+    pub fn is_readonly(&self) -> bool {
+        self.kind.is_readonly()
+    }
+
     pub fn has_name(&self, name: &str) -> bool {
         self.kind.has_name(name)
     }
@@ -1179,6 +1187,13 @@ pub enum TypeMemberKind {
     Named(Text),
     NamedOptional(Text),
     NamedStatic(Text),
+    /// A [`Self::Named`] property declared `readonly`, as `v` in
+    /// `{ readonly v: string }`, in a class field, or in a constructor
+    /// parameter property. A `static readonly` field stays
+    /// [`Self::NamedStatic`].
+    ReadonlyNamed(Text),
+    /// A [`Self::NamedOptional`] property declared `readonly`.
+    ReadonlyNamedOptional(Text),
 }
 
 impl TypeMemberKind {
@@ -1200,7 +1215,9 @@ impl TypeMemberKind {
             | Self::NamedOptional(own_name)
             | Self::ConstAssertedNamedOptional(own_name)
             | Self::NamedStatic(own_name)
-            | Self::ConstAssertedNamedStatic(own_name) => *own_name == name,
+            | Self::ConstAssertedNamedStatic(own_name)
+            | Self::ReadonlyNamed(own_name)
+            | Self::ReadonlyNamedOptional(own_name) => *own_name == name,
         }
     }
 
@@ -1209,7 +1226,31 @@ impl TypeMemberKind {
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
-            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+            Self::NamedOptional(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ReadonlyNamedOptional(_)
+        )
+    }
+
+    /// Returns whether this member is a property that can't be assigned
+    /// through its type: one declared `readonly`, or a property of an object
+    /// literal under an `as const` assertion, including one with a computed
+    /// key.
+    ///
+    /// A getter is never readonly here. Setters aren't collected, so a getter
+    /// with a setter looks the same as one without.
+    #[inline]
+    pub fn is_readonly(&self) -> bool {
+        matches!(
+            self,
+            Self::ReadonlyNamed(_)
+                | Self::ReadonlyNamedOptional(_)
+                | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
+                | Self::ConstAssertedIndexSignature(_)
+                | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedStatic(_)
         )
     }
 
@@ -1275,10 +1316,12 @@ impl TypeMemberKind {
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 Self::ConstAssertedIndexSignature(index_signature_type)
             }
-            Self::Named(name) | Self::ConstAssertedNamed(name) => Self::ConstAssertedNamed(name),
-            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
-                Self::ConstAssertedNamedOptional(name)
+            Self::Named(name) | Self::ConstAssertedNamed(name) | Self::ReadonlyNamed(name) => {
+                Self::ConstAssertedNamed(name)
             }
+            Self::NamedOptional(name)
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::ReadonlyNamedOptional(name) => Self::ConstAssertedNamedOptional(name),
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
                 Self::ConstAssertedNamedStatic(name)
             }
@@ -1303,20 +1346,39 @@ impl TypeMemberKind {
         }
     }
 
-    /// Makes named properties optional while preserving `as const` provenance.
+    /// Makes named properties optional while preserving `as const` provenance
+    /// and `readonly`.
     pub fn with_optional(self) -> Self {
         match self {
             Self::Named(name) => Self::NamedOptional(name),
             Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::ReadonlyNamed(name) => Self::ReadonlyNamedOptional(name),
             other => other,
         }
     }
 
-    /// Makes optional named properties required while preserving `as const` provenance.
+    /// Makes optional named properties required while preserving `as const`
+    /// provenance and `readonly`.
     pub fn without_optional(self) -> Self {
         match self {
             Self::NamedOptional(name) => Self::Named(name),
             Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            Self::ReadonlyNamedOptional(name) => Self::ReadonlyNamed(name),
+            other => other,
+        }
+    }
+
+    /// Marks a named instance property as declared `readonly` and returns
+    /// other kinds unchanged.
+    ///
+    /// Static members aren't marked because property lookups don't read them.
+    /// Getters aren't marked because Biome doesn't collect setters, so it never
+    /// treats a getter as readonly. A member under an `as const` assertion is
+    /// readonly already.
+    pub fn with_readonly(self) -> Self {
+        match self {
+            Self::Named(name) => Self::ReadonlyNamed(name),
+            Self::NamedOptional(name) => Self::ReadonlyNamedOptional(name),
             other => other,
         }
     }
@@ -1341,7 +1403,9 @@ impl TypeMemberKind {
             | Self::NamedOptional(name)
             | Self::ConstAssertedNamedOptional(name)
             | Self::NamedStatic(name)
-            | Self::ConstAssertedNamedStatic(name) => Some(name.clone()),
+            | Self::ConstAssertedNamedStatic(name)
+            | Self::ReadonlyNamed(name)
+            | Self::ReadonlyNamedOptional(name) => Some(name.clone()),
         }
     }
 }

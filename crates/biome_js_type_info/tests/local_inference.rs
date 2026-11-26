@@ -1,8 +1,12 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter, TsTypeAliasDeclaration};
-use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
+use biome_js_syntax::{
+    JsArrowFunctionExpression, JsClassDeclaration, JsFormalParameter, TsTypeAliasDeclaration,
+};
+use biome_js_type_info::{
+    Object, ObjectKind, RawTypeCollector, ReturnType, TypeData, TypeMember, TypeReference,
+};
 use biome_rowan::AstNode;
 
 use utils::{
@@ -802,5 +806,177 @@ fn infer_type_of_mapped_type_with_parenthesized_keys() {
     mapped_type_alias_snapshot(
         "type Copy<T> = { [K in (keyof T)]: T[K] };",
         "infer_type_of_mapped_type_with_parenthesized_keys",
+    );
+}
+
+/// Returns the name, `is_readonly`, and `is_optional` of each named member.
+fn readonly_summary(members: &[TypeMember]) -> Vec<(String, bool, bool)> {
+    members
+        .iter()
+        .filter_map(|member| {
+            let name = member.name()?;
+            Some((
+                name.text().to_owned(),
+                member.is_readonly(),
+                member.is_optional(),
+            ))
+        })
+        .collect()
+}
+
+fn summary(entries: &[(&str, bool, bool)]) -> Vec<(String, bool, bool)> {
+    entries
+        .iter()
+        .map(|(name, is_readonly, is_optional)| ((*name).to_owned(), *is_readonly, *is_optional))
+        .collect()
+}
+
+#[test]
+fn infer_type_of_readonly_property_signatures() {
+    const CODE: &str = r#"interface Frozen {
+    readonly value: string | null;
+    readonly label?: string;
+    count: number;
+    readonly [key: string]: unknown;
+    get size(): number;
+    find(): number;
+}"#;
+    let root = parse_ts(CODE);
+    let decl = get_interface_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_interface_declaration(&mut collector, ScopeId::GLOBAL, &decl).unwrap();
+    let TypeData::Interface(interface) = &ty else {
+        panic!("expected an interface");
+    };
+    // Getters aren't readonly, because Biome doesn't collect setters.
+    assert_eq!(
+        readonly_summary(&interface.members),
+        summary(&[
+            ("value", true, false),
+            ("label", true, true),
+            ("count", false, false),
+            ("size", false, false),
+            ("find", false, false),
+        ])
+    );
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_readonly_property_signatures",
+    );
+}
+
+#[test]
+fn infer_type_of_readonly_type_literal_properties() {
+    mapped_type_alias_snapshot(
+        "type Point = { readonly x: number; y?: number; readonly z?: number };",
+        "infer_type_of_readonly_type_literal_properties",
+    );
+}
+
+/// Snapshots the members of the first class in `code` and returns them.
+///
+/// A class is formatted without its members, so the snapshot shows them as
+/// the members of an object.
+fn class_members_snapshot(code: &str, test_name: &str) -> Box<[TypeMember]> {
+    let root = parse_ts(code);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(JsClassDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let TypeData::Class(class) =
+        TypeData::from_js_class_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+    else {
+        panic!("expected a class");
+    };
+    let members = TypeData::Object(Box::new(Object {
+        prototype: None,
+        members: class.members.clone(),
+        has_unknown_members: false,
+        kind: ObjectKind::Shape,
+    }));
+    assert_type_data_snapshot(code, &members, &collector, test_name);
+    class.members
+}
+
+#[test]
+fn infer_type_of_readonly_class_fields() {
+    const CODE: &str = r#"class Fields {
+    readonly value: string | null = null;
+    readonly label?: string;
+    count = 0;
+    static readonly shared = 1;
+    declare readonly declared: string;
+    get size() { return 1; }
+    constructor(readonly first: string, private readonly second?: number, public third: boolean, fourth: number) {}
+}"#;
+    let members = class_members_snapshot(CODE, "infer_type_of_readonly_class_fields");
+    // `static readonly` fields stay plain static members, because property
+    // lookups don't read static members. `fourth` is a plain parameter.
+    assert_eq!(
+        readonly_summary(&members),
+        summary(&[
+            ("value", true, false),
+            ("label", true, true),
+            ("count", false, false),
+            ("shared", false, false),
+            ("declared", true, false),
+            ("size", false, false),
+            ("constructor", false, false),
+            ("first", true, false),
+            ("second", true, true),
+            ("third", false, false),
+        ])
+    );
+}
+
+#[test]
+fn infer_type_of_readonly_ambient_class_fields() {
+    const CODE: &str = r#"declare class Ambient {
+    readonly value: string;
+    readonly initialized = 1;
+    readonly label?: string;
+    count: number;
+}"#;
+    let members = class_members_snapshot(CODE, "infer_type_of_readonly_ambient_class_fields");
+    assert_eq!(
+        readonly_summary(&members),
+        summary(&[
+            ("value", true, false),
+            ("initialized", true, false),
+            ("label", true, true),
+            ("count", false, false),
+        ])
+    );
+}
+
+#[test]
+fn infer_type_of_const_asserted_object_and_readonly_tuple() {
+    const CODE: &str =
+        r#"({ value: "a", nested: { flag: true }, get size() { return 1; } } as const)"#;
+    let root = parse_ts(CODE);
+    let expression = get_expression(&root);
+    let mut collector = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut collector, ScopeId::GLOBAL, &expression);
+    let TypeData::Object(object) = &ty else {
+        panic!("expected an object");
+    };
+    // Members under `as const` are readonly, except getters.
+    assert_eq!(
+        readonly_summary(&object.members),
+        summary(&[
+            ("value", true, false),
+            ("nested", true, false),
+            ("size", false, false),
+        ])
+    );
+    assert_type_data_snapshot(CODE, &ty, &collector, "infer_type_of_const_asserted_object");
+    mapped_type_alias_snapshot(
+        "type Pair = readonly [string | null, number?];",
+        "infer_type_of_readonly_tuple",
     );
 }
