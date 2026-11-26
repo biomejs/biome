@@ -12,8 +12,8 @@ pub use borrowed_token::{
 };
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderOfKinds, PreorderWithTokens, SendNode,
-    SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
+    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderOfKinds, PreorderWithTokens, RewriteSignal,
+    SendNode, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
     SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};

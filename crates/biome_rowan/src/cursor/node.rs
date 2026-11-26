@@ -2,8 +2,8 @@ use crate::cursor::node_rc::NodeRc;
 use crate::cursor::{NodeData, SyntaxElement, SyntaxToken, SyntaxTrivia};
 use crate::green::{Child, Children, GreenElementRef, Slot};
 use crate::{
-    Direction, GreenNode, GreenNodeRef, Language, NodeOrToken, RawSyntaxKind, SyntaxKindSet,
-    SyntaxNodeText, TokenAtOffset, WalkEvent,
+    Direction, GreenNode, GreenNodeRef, Language, NodeOrToken, RawSyntaxKind, RewriteSignal,
+    SyntaxKindSet, SyntaxNodeText, TokenAtOffset, WalkEvent,
 };
 use biome_text_size::{TextRange, TextSize};
 use std::borrow::Cow;
@@ -459,6 +459,18 @@ impl SyntaxNode {
         kinds: SyntaxKindSet<L>,
     ) -> PreorderMatching<'_, L> {
         PreorderMatching::new(self, kinds)
+    }
+
+    /// Implements [crate::SyntaxNode::rewrite_of_kinds].
+    pub fn rewrite_of_kinds<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+        rewrite: impl FnMut(Self) -> RewriteSignal<L>,
+    ) -> Option<Self> {
+        if kinds == SyntaxKindSet::EMPTY {
+            return None;
+        }
+        RewriteOfKinds::new(self, kinds, rewrite).run()
     }
 
     #[inline]
@@ -1092,6 +1104,177 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
 
 impl<L: Language> FusedIterator for PreorderMatching<'_, L> {}
 
+/// State of a [crate::SyntaxNode::rewrite_of_kinds] walk.
+///
+/// The walk records each replacement as an edit of its parent's slot. When it leaves a node with
+/// edits, it rebuilds that node once with [GreenNodeRef::splice_many_slots] and records the result
+/// as an edit of the node's parent.
+struct RewriteOfKinds<'a, L: Language, F> {
+    kinds: SyntaxKindSet<L>,
+    rewrite: F,
+    start: &'a SyntaxNode,
+    /// Kept out of `path` so that a walk that pushes no segment doesn't allocate.
+    start_segment: RewriteSegment<'a>,
+    /// Segments from a child of `start` to the node being read. Only nodes that match `kinds` or
+    /// have a child node are pushed.
+    path: Vec<RewriteSegment<'a>>,
+    /// Slot index and new node of each edit. A segment's edits are the tail from its
+    /// `edits_start`, in slot order.
+    edits: Vec<(usize, GreenNode)>,
+}
+
+struct RewriteSegment<'a> {
+    green: GreenNodeRef<'a>,
+    /// Index of the next slot of `green` to read.
+    next_slot: u32,
+    slot: u32,
+    offset: TextSize,
+    /// Created when this node or a descendant is offered. `None` for `start`, because `start` is
+    /// already a cursor node.
+    node: Option<SyntaxNode>,
+    /// Length of `edits` when the walk entered this node.
+    edits_start: usize,
+}
+
+impl<'a, L, F> RewriteOfKinds<'a, L, F>
+where
+    L: Language,
+    F: FnMut(SyntaxNode) -> RewriteSignal<L>,
+{
+    fn new(start: &'a SyntaxNode, kinds: SyntaxKindSet<L>, rewrite: F) -> Self {
+        Self {
+            kinds,
+            rewrite,
+            start,
+            start_segment: RewriteSegment {
+                green: start.green(),
+                next_slot: 0,
+                slot: start.data().slot(),
+                offset: start.offset(),
+                node: None,
+                edits_start: 0,
+            },
+            path: Vec::new(),
+            edits: Vec::new(),
+        }
+    }
+
+    fn run(mut self) -> Option<SyntaxNode> {
+        if self.kinds.matches_raw(self.start_segment.green.kind()) {
+            match (self.rewrite)(self.start.clone()) {
+                RewriteSignal::Replace(replacement) => {
+                    let replacement = SyntaxNode::from(replacement);
+                    return (replacement != *self.start).then(|| replacement.detach());
+                }
+                RewriteSignal::Skip => return None,
+                RewriteSignal::Descend => {}
+            }
+        }
+
+        loop {
+            let parent = self.path.last_mut().unwrap_or(&mut self.start_segment);
+            let next_child = parent
+                .green
+                .slice()
+                .get(parent.next_slot as usize..)
+                .unwrap_or_default()
+                .iter()
+                .enumerate()
+                .find_map(|(index, slot)| match slot {
+                    Slot::Node { rel_offset, node } => Some((index, *rel_offset, node.as_ref())),
+                    Slot::Token { .. } | Slot::Empty { .. } => None,
+                });
+            let Some((index, rel_offset, green)) = next_child else {
+                match self.path.pop() {
+                    Some(segment) => self.leave(segment),
+                    None => {
+                        return (!self.edits.is_empty()).then(|| {
+                            SyntaxNode::new_root(splice_edits(
+                                self.start_segment.green,
+                                self.edits.drain(..),
+                            ))
+                        });
+                    }
+                }
+                continue;
+            };
+            let slot = parent.next_slot + index as u32;
+            parent.next_slot = slot + 1;
+            let offset = parent.offset + rel_offset;
+            let is_match = self.kinds.matches_raw(green.kind());
+            let has_child_node = green
+                .slice()
+                .iter()
+                .any(|slot| matches!(slot, Slot::Node { .. }));
+            if !is_match && !has_child_node {
+                continue;
+            }
+            self.path.push(RewriteSegment {
+                green,
+                next_slot: 0,
+                slot,
+                offset,
+                node: None,
+                edits_start: self.edits.len(),
+            });
+            if !is_match {
+                continue;
+            }
+
+            let node = self.current_node();
+            match (self.rewrite)(node.clone()) {
+                RewriteSignal::Descend => {}
+                RewriteSignal::Skip => {
+                    self.path.pop();
+                }
+                RewriteSignal::Replace(replacement) => {
+                    self.path.pop();
+                    let replacement = SyntaxNode::from(replacement);
+                    if replacement != node {
+                        self.edits
+                            .push((slot as usize, replacement.green().to_owned()));
+                    }
+                }
+            }
+        }
+    }
+
+    /// Records the rebuilt node of `segment` as an edit of its parent, if `segment` has edits.
+    fn leave(&mut self, segment: RewriteSegment<'a>) {
+        if self.edits.len() > segment.edits_start {
+            let green = splice_edits(segment.green, self.edits.drain(segment.edits_start..));
+            self.edits.push((segment.slot as usize, green));
+        }
+    }
+
+    /// Returns the cursor node of the last path segment, allocating the cursor nodes that the
+    /// path is still missing.
+    fn current_node(&mut self) -> SyntaxNode {
+        let (first_missing, mut node) = self
+            .path
+            .iter()
+            .enumerate()
+            .rev()
+            .find_map(|(index, segment)| Some((index + 1, segment.node.clone()?)))
+            .unwrap_or_else(|| (0, self.start.clone()));
+        for segment in self.path.iter_mut().skip(first_missing) {
+            node = SyntaxNode::new_child(segment.green, node, segment.slot, segment.offset);
+            segment.node = Some(node.clone());
+        }
+        node
+    }
+}
+
+/// Returns a copy of `green` with the new node of each edit in its slot.
+fn splice_edits(
+    green: GreenNodeRef<'_>,
+    edits: impl Iterator<Item = (usize, GreenNode)>,
+) -> GreenNode {
+    green.splice_many_slots(
+        edits.map(|(slot, node)| (slot, iter::once(Some(NodeOrToken::Node(node))))),
+    )
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct PreorderWithTokens {
     start: SyntaxElement,
@@ -1652,6 +1835,320 @@ mod tests {
             }
         }
         assert!(skipped > 0);
+    }
+
+    mod rewrite_of_kinds {
+        use super::{
+            ObservedEvent, detached_node, observed, preorder_kind_sets, preorder_test_tree,
+        };
+        use crate::raw_language::{RawLanguage, RawLanguageKind};
+        use crate::{
+            RewriteSignal, SyntaxKindSet, SyntaxNode, SyntaxRewriter, SyntaxToken, TextSize,
+            VisitNodeSignal, WalkEvent,
+        };
+        use std::collections::HashSet;
+        use std::iter;
+
+        /// Selects what a rewrite does with an offered node. [KindsRewrite] and
+        /// [TraverseRewrite] make the same decision for the same node.
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        enum Decision {
+            Descend,
+            Skip,
+            ReplaceWithItself,
+            ReplaceWithLiteral,
+            /// Replaces the node with its first child node, a node of the original tree.
+            ReplaceWithFirstChild,
+            /// Rewrites the first child node with a nested rewrite, then replaces the node with a
+            /// copy that holds the rewritten child.
+            RewriteFirstChild,
+        }
+
+        const DECISIONS: [Decision; 6] = [
+            Decision::Descend,
+            Decision::Skip,
+            Decision::ReplaceWithItself,
+            Decision::ReplaceWithLiteral,
+            Decision::ReplaceWithFirstChild,
+            Decision::RewriteFirstChild,
+        ];
+
+        fn decide(seed: usize, node: &SyntaxNode<RawLanguage>) -> Decision {
+            let depth = node.ancestors().count();
+            DECISIONS[(seed + depth + node.index()) % DECISIONS.len()]
+        }
+
+        fn literal_node(text: &str) -> SyntaxNode<RawLanguage> {
+            let token = SyntaxToken::new_detached(RawLanguageKind::NUMBER_TOKEN, text, [], []);
+            detached_node(
+                RawLanguageKind::LITERAL_EXPRESSION,
+                vec![Some(token.into())],
+            )
+        }
+
+        fn replace_child(
+            node: &SyntaxNode<RawLanguage>,
+            child: &SyntaxNode<RawLanguage>,
+            replacement: SyntaxNode<RawLanguage>,
+        ) -> SyntaxNode<RawLanguage> {
+            let index = child.index();
+            node.clone()
+                .splice_slots(index..=index, [Some(replacement.into())])
+        }
+
+        fn offered(node: &SyntaxNode<RawLanguage>) -> ObservedEvent {
+            observed(iter::once(WalkEvent::Enter(node.clone())))
+                .pop()
+                .unwrap()
+        }
+
+        struct KindsRewrite {
+            kinds: SyntaxKindSet<RawLanguage>,
+            seed: usize,
+            offered: Vec<ObservedEvent>,
+            decisions: Vec<Decision>,
+        }
+
+        impl KindsRewrite {
+            fn new(kinds: SyntaxKindSet<RawLanguage>, seed: usize) -> Self {
+                Self {
+                    kinds,
+                    seed,
+                    offered: Vec::new(),
+                    decisions: Vec::new(),
+                }
+            }
+
+            fn visit(&mut self, node: SyntaxNode<RawLanguage>) -> RewriteSignal<RawLanguage> {
+                self.offered.push(offered(&node));
+                let decision = decide(self.seed, &node);
+                self.decisions.push(decision);
+                match decision {
+                    Decision::Descend => RewriteSignal::Descend,
+                    Decision::Skip => RewriteSignal::Skip,
+                    Decision::ReplaceWithItself => RewriteSignal::Replace(node),
+                    Decision::ReplaceWithLiteral => RewriteSignal::Replace(literal_node("9")),
+                    Decision::ReplaceWithFirstChild => {
+                        RewriteSignal::Replace(node.first_child().unwrap_or(node))
+                    }
+                    Decision::RewriteFirstChild => match node.first_child() {
+                        Some(child) => {
+                            let kinds = self.kinds;
+                            let rewritten = child
+                                .rewrite_of_kinds(kinds, |node| self.visit(node))
+                                .unwrap_or_else(|| child.clone());
+                            RewriteSignal::Replace(replace_child(&node, &child, rewritten))
+                        }
+                        None => RewriteSignal::Skip,
+                    },
+                }
+            }
+        }
+
+        /// Runs the rewrite of [KindsRewrite] with [SyntaxRewriter::transform].
+        struct TraverseRewrite {
+            kinds: SyntaxKindSet<RawLanguage>,
+            seed: usize,
+            offered: Vec<ObservedEvent>,
+        }
+
+        impl SyntaxRewriter for TraverseRewrite {
+            type Language = RawLanguage;
+
+            fn visit_node(
+                &mut self,
+                node: SyntaxNode<RawLanguage>,
+            ) -> VisitNodeSignal<RawLanguage> {
+                if !self.kinds.matches(node.kind()) {
+                    return VisitNodeSignal::Traverse(node);
+                }
+                self.offered.push(offered(&node));
+                match decide(self.seed, &node) {
+                    Decision::Descend => VisitNodeSignal::Traverse(node),
+                    Decision::Skip | Decision::ReplaceWithItself => VisitNodeSignal::Replace(node),
+                    Decision::ReplaceWithLiteral => VisitNodeSignal::Replace(literal_node("9")),
+                    Decision::ReplaceWithFirstChild => {
+                        VisitNodeSignal::Replace(node.first_child().unwrap_or(node))
+                    }
+                    Decision::RewriteFirstChild => match node.first_child() {
+                        Some(child) => {
+                            let rewritten = self.transform(child.clone());
+                            VisitNodeSignal::Replace(replace_child(&node, &child, rewritten))
+                        }
+                        None => VisitNodeSignal::Replace(node),
+                    },
+                }
+            }
+        }
+
+        #[test]
+        fn matches_syntax_rewriter() {
+            let root = preorder_test_tree();
+            let mut rewritten = 0;
+            let mut decisions = HashSet::new();
+            for start in root.descendants() {
+                for kinds in preorder_kind_sets() {
+                    for seed in 0..DECISIONS.len() {
+                        let context = format!("from {start:?} with {kinds:?} and seed {seed}");
+
+                        let mut rewrite = KindsRewrite::new(kinds, seed);
+                        let actual = start.rewrite_of_kinds(kinds, |node| rewrite.visit(node));
+                        let mut oracle = TraverseRewrite {
+                            kinds,
+                            seed,
+                            offered: Vec::new(),
+                        };
+                        let expected = oracle.transform(start.clone());
+
+                        assert_eq!(rewrite.offered, oracle.offered, "{context}");
+                        match actual {
+                            None => assert_eq!(expected, start, "{context}"),
+                            Some(actual) => {
+                                assert_ne!(expected, start, "{context}");
+                                assert!(actual.parent().is_none(), "{context}");
+                                assert_eq!(
+                                    format!("{actual:#?}"),
+                                    format!("{:#?}", expected.detach()),
+                                    "{context}"
+                                );
+                                rewritten += 1;
+                            }
+                        }
+                        decisions.extend(rewrite.decisions);
+                    }
+                }
+            }
+            assert!(rewritten > 0);
+            for decision in DECISIONS {
+                assert!(decisions.contains(&decision), "{decision:?} was never made");
+            }
+        }
+
+        #[test]
+        fn returns_none_for_no_kinds_without_offering_nodes() {
+            let root = preorder_test_tree();
+            let rewritten =
+                root.rewrite_of_kinds(SyntaxKindSet::EMPTY, |node| panic!("offered {node:?}"));
+            assert!(rewritten.is_none());
+        }
+
+        #[test]
+        fn never_offers_tokens() {
+            let root = preorder_test_tree();
+            let tokens = SyntaxKindSet::of(RawLanguageKind::NUMBER_TOKEN)
+                .union(SyntaxKindSet::of(RawLanguageKind::STRING_TOKEN));
+            let rewritten = root.rewrite_of_kinds(tokens, |node| panic!("offered {node:?}"));
+            assert!(rewritten.is_none());
+        }
+
+        #[test]
+        fn returns_none_when_nodes_are_replaced_by_themselves() {
+            let root = preorder_test_tree();
+            let all_kinds = preorder_kind_sets()[5];
+            let rewritten = root.rewrite_of_kinds(all_kinds, |node| {
+                if node.kind() == RawLanguageKind::ROOT {
+                    RewriteSignal::Descend
+                } else {
+                    RewriteSignal::Replace(node)
+                }
+            });
+            assert!(rewritten.is_none());
+        }
+
+        #[test]
+        fn detaches_a_replaced_start_node() {
+            let root = preorder_test_tree();
+            let start = root.first_child().unwrap();
+            let replacement = root.children().nth(1).unwrap();
+            assert!(start.text_range_with_trivia().start() > TextSize::from(0));
+
+            let rewritten = start
+                .rewrite_of_kinds(SyntaxKindSet::of(start.kind()), |_| {
+                    RewriteSignal::Replace(replacement.clone())
+                })
+                .unwrap();
+
+            assert!(rewritten.parent().is_none());
+            assert_eq!(
+                rewritten.text_range_with_trivia().start(),
+                TextSize::from(0)
+            );
+            assert_eq!(
+                format!("{rewritten:#?}"),
+                format!("{:#?}", replacement.detach())
+            );
+        }
+
+        #[test]
+        fn offers_nodes_of_the_original_tree() {
+            let root = preorder_test_tree();
+            let literals = SyntaxKindSet::of(RawLanguageKind::LITERAL_EXPRESSION);
+            let outer_literals = root.descendants().filter(|node| {
+                node.kind() == RawLanguageKind::LITERAL_EXPRESSION
+                    && !node
+                        .ancestors()
+                        .skip(1)
+                        .any(|ancestor| ancestor.kind() == RawLanguageKind::LITERAL_EXPRESSION)
+            });
+
+            let mut offered_nodes = Vec::new();
+            let rewritten = root.rewrite_of_kinds(literals, |node| {
+                offered_nodes.push(offered(&node));
+                RewriteSignal::Replace(literal_node("99"))
+            });
+
+            assert!(rewritten.is_some());
+            assert_eq!(
+                offered_nodes,
+                outer_literals
+                    .map(|node| offered(&node))
+                    .collect::<Vec<_>>()
+            );
+        }
+
+        /// Rewrites literals to `0`. Rewrites any other node by first rewriting its last child node
+        /// with a nested call.
+        fn rewrite_last_operand_first(
+            node: SyntaxNode<RawLanguage>,
+            kinds: SyntaxKindSet<RawLanguage>,
+            offered_nodes: &mut Vec<SyntaxNode<RawLanguage>>,
+        ) -> RewriteSignal<RawLanguage> {
+            offered_nodes.push(node.clone());
+            if node.kind() == RawLanguageKind::LITERAL_EXPRESSION {
+                return RewriteSignal::Replace(literal_node("0"));
+            }
+            let Some(operand) = node.last_child() else {
+                return RewriteSignal::Skip;
+            };
+            match operand.rewrite_of_kinds(kinds, |node| {
+                rewrite_last_operand_first(node, kinds, offered_nodes)
+            }) {
+                Some(rewritten) => {
+                    RewriteSignal::Replace(replace_child(&node, &operand, rewritten))
+                }
+                None => RewriteSignal::Skip,
+            }
+        }
+
+        #[test]
+        fn supports_nested_rewrites() {
+            let root = preorder_test_tree();
+            assert_eq!(root.text_trimmed().to_string(), "'a'12234+5");
+            let kinds = SyntaxKindSet::of(RawLanguageKind::CONDITION)
+                .union(SyntaxKindSet::of(RawLanguageKind::LITERAL_EXPRESSION));
+
+            let mut offered_nodes = Vec::new();
+            let rewritten = root
+                .rewrite_of_kinds(kinds, |node| {
+                    rewrite_last_operand_first(node, kinds, &mut offered_nodes)
+                })
+                .unwrap();
+
+            assert_eq!(rewritten.text_trimmed().to_string(), "'a'1000+0");
+            let unique: HashSet<_> = offered_nodes.iter().collect();
+            assert_eq!(unique.len(), offered_nodes.len(), "{offered_nodes:#?}");
+            assert_eq!(offered_nodes.len(), 8);
+        }
     }
 
     #[test]
