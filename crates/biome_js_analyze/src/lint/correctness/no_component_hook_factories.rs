@@ -119,7 +119,8 @@ impl Rule for NoComponentHookFactories {
                 }
 
                 // Capitalised object keys are often fixed API names, so require the function to render JSX.
-                if matches!(decl, AnyPotentialReactComponentDeclaration::JsPropertyObjectMember(_))
+                if let AnyPotentialReactComponentDeclaration::JsPropertyObjectMember(member) = decl
+                    && !matches!(member.value(), Ok(AnyJsExpression::JsClassExpression(_)))
                     && !syntax
                         .descendants()
                         .skip(1)

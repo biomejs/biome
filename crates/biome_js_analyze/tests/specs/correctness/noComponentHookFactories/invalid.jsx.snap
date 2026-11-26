@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 196
 expression: invalid.jsx
 ---
 # Input
@@ -207,6 +206,11 @@ function createSlots(theme) {
     Header: () => <header style={{ color: theme.primary }} />,
     Footer: function () {
       return <footer style={{ color: theme.secondary }} />;
+    },
+    Body: class extends React.Component {
+      render() {
+        return null;
+      }
     },
   };
 }
@@ -650,6 +654,23 @@ invalid.jsx:201:5 lint/correctness/noComponentHookFactories ━━━━━━�
         │     ^^^^^^
     202 │       return <footer style={{ color: theme.secondary }} />;
     203 │     },
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+
+```
+
+```
+invalid.jsx:204:5 lint/correctness/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Body inside a function.
+  
+    202 │       return <footer style={{ color: theme.secondary }} />;
+    203 │     },
+  > 204 │     Body: class extends React.Component {
+        │     ^^^^
+    205 │       render() {
+    206 │         return null;
   
   i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
   

@@ -201,5 +201,10 @@ function createSlots(theme) {
     Footer: function () {
       return <footer style={{ color: theme.secondary }} />;
     },
+    Body: class extends React.Component {
+      render() {
+        return null;
+      }
+    },
   };
 }
