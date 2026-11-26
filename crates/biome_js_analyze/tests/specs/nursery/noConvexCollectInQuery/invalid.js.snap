@@ -1,0 +1,303 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+async function handler(ctx, db) {
+	await ctx.db.query("messages").collect();
+	await db.query("messages").collect();
+	await ctx.db
+		.query("messages")
+		.withIndex("by_channel", (q) => q.eq("channel", "general"))
+		.order("desc")
+		.collect();
+	await ctx.db.query("messages").filter((q) => q.eq(q.field("done"), true)).collect();
+	await ctx.db?.query("messages").collect();
+	await ctx.db.query("messages")?.collect();
+	await (ctx.db.query("messages")).collect();
+	await (await ctx.db.query("messages")).collect();
+	await this.db.query("messages").collect();
+	await db.privateSystem.query("_storage").collect();
+	await ctx.db.privateSystem.query("_storage").collect();
+	await ctx.db.query("messages").fullTableScan().collect();
+	await ctx.db.query("messages").withSearchIndex("search", (q) => q.search("body", "hi")).collect();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:33 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    1 │ /* should generate diagnostics */
+    2 │ async function handler(ctx, db) {
+  > 3 │ 	await ctx.db.query("messages").collect();
+      │ 	                               ^^^^^^^^^
+    4 │ 	await db.query("messages").collect();
+    5 │ 	await ctx.db
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:29 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    2 │ async function handler(ctx, db) {
+    3 │ 	await ctx.db.query("messages").collect();
+  > 4 │ 	await db.query("messages").collect();
+      │ 	                           ^^^^^^^^^
+    5 │ 	await ctx.db
+    6 │ 		.query("messages")
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:4 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+     7 │ 		.withIndex("by_channel", (q) => q.eq("channel", "general"))
+     8 │ 		.order("desc")
+   > 9 │ 		.collect();
+       │ 		 ^^^^^^^^^
+    10 │ 	await ctx.db.query("messages").filter((q) => q.eq(q.field("done"), true)).collect();
+    11 │ 	await ctx.db?.query("messages").collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:76 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+     8 │ 		.order("desc")
+     9 │ 		.collect();
+  > 10 │ 	await ctx.db.query("messages").filter((q) => q.eq(q.field("done"), true)).collect();
+       │ 	                                                                          ^^^^^^^^^
+    11 │ 	await ctx.db?.query("messages").collect();
+    12 │ 	await ctx.db.query("messages")?.collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:34 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+     9 │ 		.collect();
+    10 │ 	await ctx.db.query("messages").filter((q) => q.eq(q.field("done"), true)).collect();
+  > 11 │ 	await ctx.db?.query("messages").collect();
+       │ 	                                ^^^^^^^^^
+    12 │ 	await ctx.db.query("messages")?.collect();
+    13 │ 	await (ctx.db.query("messages")).collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:34 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    10 │ 	await ctx.db.query("messages").filter((q) => q.eq(q.field("done"), true)).collect();
+    11 │ 	await ctx.db?.query("messages").collect();
+  > 12 │ 	await ctx.db.query("messages")?.collect();
+       │ 	                                ^^^^^^^^^
+    13 │ 	await (ctx.db.query("messages")).collect();
+    14 │ 	await (await ctx.db.query("messages")).collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:35 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    11 │ 	await ctx.db?.query("messages").collect();
+    12 │ 	await ctx.db.query("messages")?.collect();
+  > 13 │ 	await (ctx.db.query("messages")).collect();
+       │ 	                                 ^^^^^^^^^
+    14 │ 	await (await ctx.db.query("messages")).collect();
+    15 │ 	await this.db.query("messages").collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:41 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    12 │ 	await ctx.db.query("messages")?.collect();
+    13 │ 	await (ctx.db.query("messages")).collect();
+  > 14 │ 	await (await ctx.db.query("messages")).collect();
+       │ 	                                       ^^^^^^^^^
+    15 │ 	await this.db.query("messages").collect();
+    16 │ 	await db.privateSystem.query("_storage").collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:34 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    13 │ 	await (ctx.db.query("messages")).collect();
+    14 │ 	await (await ctx.db.query("messages")).collect();
+  > 15 │ 	await this.db.query("messages").collect();
+       │ 	                                ^^^^^^^^^
+    16 │ 	await db.privateSystem.query("_storage").collect();
+    17 │ 	await ctx.db.privateSystem.query("_storage").collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:43 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    14 │ 	await (await ctx.db.query("messages")).collect();
+    15 │ 	await this.db.query("messages").collect();
+  > 16 │ 	await db.privateSystem.query("_storage").collect();
+       │ 	                                         ^^^^^^^^^
+    17 │ 	await ctx.db.privateSystem.query("_storage").collect();
+    18 │ 	await ctx.db.query("messages").fullTableScan().collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:47 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    15 │ 	await this.db.query("messages").collect();
+    16 │ 	await db.privateSystem.query("_storage").collect();
+  > 17 │ 	await ctx.db.privateSystem.query("_storage").collect();
+       │ 	                                             ^^^^^^^^^
+    18 │ 	await ctx.db.query("messages").fullTableScan().collect();
+    19 │ 	await ctx.db.query("messages").withSearchIndex("search", (q) => q.search("body", "hi")).collect();
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:49 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    16 │ 	await db.privateSystem.query("_storage").collect();
+    17 │ 	await ctx.db.privateSystem.query("_storage").collect();
+  > 18 │ 	await ctx.db.query("messages").fullTableScan().collect();
+       │ 	                                               ^^^^^^^^^
+    19 │ 	await ctx.db.query("messages").withSearchIndex("search", (q) => q.search("body", "hi")).collect();
+    20 │ }
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:90 lint/nursery/noConvexCollectInQuery ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This database query loads every matching document with .collect().
+  
+    17 │ 	await ctx.db.privateSystem.query("_storage").collect();
+    18 │ 	await ctx.db.query("messages").fullTableScan().collect();
+  > 19 │ 	await ctx.db.query("messages").withSearchIndex("search", (q) => q.search("body", "hi")).collect();
+       │ 	                                                                                        ^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i A query that returns many documents uses a lot of bandwidth, makes mutations more likely to conflict, and fails once it reaches the Convex query limits.
+  
+  i Use .take() to load only the first few documents, or .paginate() to load them one page at a time. If this query always returns a small number of documents, suppress this diagnostic with a biome-ignore comment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
