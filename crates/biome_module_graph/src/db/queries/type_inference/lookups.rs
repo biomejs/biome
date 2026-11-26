@@ -89,16 +89,17 @@ fn infer_flow_expression_type_impl<'db>(
 }
 
 /// Resolves the type that flow refinement starts from, shared by every read of
-/// a binding.
+/// a binding. When the range is a destructuring pattern's, every read of the
+/// pattern's elements shares it.
 ///
 /// Returns `None` when the module does not support inference, the binding has
 /// no collected type, or no supported runtime test can change its type. The
 /// last case applies when the type contains `any` or an undetermined
 /// (`Unknown`) member, because either one absorbs the whole union and narrowing
 /// leaves both unchanged; TypeScript's `unknown` can still narrow. For a
-/// binding that conditions narrow only through tests of its properties, it
-/// also returns `None` when its type is not a union that such a test can
-/// narrow.
+/// binding that conditions narrow only through tests of its properties, and
+/// for a pattern, it also returns `None` when its type is not a union that
+/// such a test can narrow.
 ///
 /// `Unknown` means the type exceeds the refinement budget or a query cycle
 /// passes through this lookup; a relevant test then produces an `Unknown`

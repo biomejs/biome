@@ -173,6 +173,18 @@ one of its own variables or a path on its own `this`. Its parts live in
   nothing. For a destructuring element,
   the decomposer adds the property's path, such as `s.kind`, to the subject
   table, so that the write scan can find writes to it.
+  A runtime test of a variable that is an element of a destructuring pattern
+  also adds a property guard on the pattern, a subject that stands for the
+  value the pattern destructures, following TypeScript's
+  `getNarrowedTypeOfSymbol`: `kind === "c"` applies to `{ kind, v }` after
+  `const { kind, v } = s` and in `function f({ kind, v }: S)`.
+  `narrowing_pattern` in `subjects.rs` accepts a pattern that a `const` or a
+  parameter whose variables are never written declares, with at least two
+  direct elements that have no default and are not rest elements, and the
+  subject table records those elements with their keys when it first stores
+  the pattern. No write changes the values that a pattern destructured, so
+  such a guard is never marked as aliased, and it applies inside an inlined
+  aliased condition too.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -204,16 +216,23 @@ one of its own variables or a path on its own `this`. Its parts live in
   root's `this`, so `super.v = x` cancels `this.v`.
 
 Collection then keeps only the reads that a runtime test of their subject can
-reach, and only for subjects that can narrow. A subject that conditions narrow
-only through property guards is in `RootFlow::property_only`. A property
+reach, and only for subjects that can narrow. A read of an element of a
+pattern is also kept when a test of the pattern reaches it: its point becomes
+a read point of the pattern, and `RootFlow::pattern_elements` maps the
+element to the pattern. A subject that conditions narrow
+only through property guards is in `RootFlow::property_only`, and every
+pattern is. The declared type of a pattern is the collected type of the value
+that its elements' collected `Destructure` types read from
+(`ModuleFlow::pattern_type`). A property
 guard can narrow only a union with at least two object types, so collection
-drops a variable in it when its collected type shows that it is not one,
+drops a variable or a pattern in it when its collected type shows that it is not one,
 without resolving anything (`raw_may_be_object_union` in
 `biome_js_type_info`): a primitive, a single object type or class written in
 place, a union with at most one object type, or the result of `new`. A
 variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
 declared in the root, never written, neither untyped nor annotated `any`, and
 not supplied by a destructuring default, which the declared type ignores. A
+pattern can narrow when its elements can. A
 property path can narrow when its variable can, or when it starts at a `this`
 that is a subject, and the write scan finds no write that cancels it; the scan
 runs only when the root reads a tested path or has an aliased property guard
@@ -222,9 +241,10 @@ Those reads, plus the enclosing expressions that can use a narrowed operand,
 become candidates. A test inside a nested function never reaches reads in the
 enclosing one, and an array or object literal ends the chain of enclosing
 candidates. A candidate that only reads of one variable in
-`RootFlow::property_only` make a candidate records that variable
-(`ModuleFlow::property_only_candidate`), so inference can skip it as a whole
-when that variable can't narrow. A root that declares no variable that can narrow and has no `this`
+`RootFlow::property_only`, or only reads of elements of one pattern that no
+test of the elements themselves reaches, make a candidate records that
+variable or pattern (`ModuleFlow::property_only_candidate`), so inference can
+skip it as a whole when that variable or pattern can't narrow. A root that declares no variable that can narrow and has no `this`
 subject gets no graph.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
@@ -239,7 +259,13 @@ variable's declared type once. For a read of a property path, the declared
 type is the type of the member access at that read, computed from the
 narrowed type of its object when the object has one, as TypeScript types
 property reads. Facts about the variable therefore reach its
-paths only through that member lookup. `infer_flow_subject_states` then
+paths only through that member lookup. A read of an element of a pattern
+first narrows the pattern at the read, from its declared type resolved by
+`infer_flow_binding_baseline` for the pattern's range. When the pattern
+narrows there, the element's declared type at the read is the element's
+field on the narrowed pattern, resolved as its collected `Destructure` type is
+(`resolve_destructure_field`), and the element's own tests narrow it from that
+type, as a path's tests narrow it from its member type. `infer_flow_subject_states` then
 applies the guards on every path to all reads of the subject in one root in a
 single solve, and `infer_flow_subject_type` takes the result at the read's
 incoming flow point. Both queries take the starting type as part of their
@@ -259,7 +285,9 @@ imports differently from the flow queries, so they keep using the queries.
 A subject in `RootFlow::property_only` starts from `property_baseline`
 instead of `narrowing_baseline`. It has no baseline, so its reads keep their
 declared types without a solve, unless its flattened type is a union with at
-least two object types (`may_narrow_by_property`). To flatten it, local types
+least two object types (`may_narrow_by_property`). A pattern starts from
+`pattern_baseline`, which is `property_baseline` without the `null` and
+`undefined` members, because destructuring throws on them. To flatten it, local types
 of the module resolve through the context instead of `infer_local_type`, so in
 complete module inference, which holds all of them, finding that most such
 variables can't narrow costs cache reads. Before evaluating a candidate that

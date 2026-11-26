@@ -1007,12 +1007,14 @@ mod tests {
     }
 
     impl Built {
-        /// Returns the source of the variable that `subject` starts at, or
-        /// `this`, followed by the names along its path, as in `o.v` or
-        /// `this.#w`.
+        /// Returns the source of the variable or the pattern that `subject`
+        /// starts at, or `this`, followed by the names along its path, as in
+        /// `o.v` or `this.#w`.
         fn subject_name(&self, subject: FlowSubjectId) -> String {
             match &self.root().subjects.as_slice()[subject as usize] {
-                FlowSubject::Binding(binding) => self.source[*binding].to_owned(),
+                FlowSubject::Binding(binding) | FlowSubject::Pattern(binding) => {
+                    self.source[*binding].to_owned()
+                }
                 FlowSubject::This => "this".to_owned(),
                 FlowSubject::Member {
                     object,
