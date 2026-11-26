@@ -4,8 +4,8 @@ use std::collections::hash_map::Entry;
 use std::env::temp_dir;
 use std::fs::{FileType, Metadata};
 use std::process::Command;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, PoisonError};
 use std::{
     env, fs,
     io::{self, Read, Seek, Write},
@@ -13,6 +13,7 @@ use std::{
 
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity, category};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
+use parking_lot::Mutex;
 use rayon::{Scope, scope};
 use rustc_hash::FxHashMap;
 use tracing::instrument;
@@ -298,10 +299,7 @@ impl<'scope> FileOwners<'scope> {
             return;
         }
 
-        let mut candidates = self
-            .candidates
-            .lock()
-            .unwrap_or_else(PoisonError::into_inner);
+        let mut candidates = self.candidates.lock();
         let candidate = Candidate {
             context,
             logical_path,
@@ -326,12 +324,7 @@ impl<'scope> FileOwners<'scope> {
     /// Returns the candidates that own their physical file. Call it only after the walk ends,
     /// when every path to each file is known.
     fn take_candidates(&self) -> Vec<Candidate<'scope>> {
-        let candidates = std::mem::take(
-            &mut *self
-                .candidates
-                .lock()
-                .unwrap_or_else(PoisonError::into_inner),
-        );
+        let candidates = std::mem::take(&mut *self.candidates.lock());
         let canonical = self.canonical.pin();
         candidates
             .into_iter()
@@ -963,7 +956,7 @@ mod tests {
         }
 
         fn handle_path(&self, path: BiomePath) {
-            self.handled.lock().unwrap().push(path.clone());
+            self.handled.lock().push(path.clone());
             self.visited.pin().insert(path);
         }
 
@@ -1015,7 +1008,7 @@ mod tests {
             scope.evaluate_and_handle(&ctx, project.clone());
         }));
 
-        let mut handled = ctx.handled.into_inner().unwrap();
+        let mut handled = ctx.handled.into_inner();
         handled.sort();
         assert_eq!(
             handled,
