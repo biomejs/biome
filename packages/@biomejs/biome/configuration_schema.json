@@ -11308,6 +11308,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConvexExplicitTableIds": {
+					"description": "Require the table name as the first argument of Convex database calls.\nSee https://biomejs.dev/linter/rules/use-convex-explicit-table-ids",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConvexExplicitTableIdsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDescribeFunctionTitle": {
 					"description": "Require passing an imported function as a test suite title instead of a string with its name.\nSee https://biomejs.dev/linter/rules/use-describe-function-title",
 					"anyOf": [
@@ -19190,6 +19197,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConvexExplicitTableIdsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConvexExplicitTableIdsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDateNowOptions": {
 			"type": "object",
 			"properties": {
@@ -25179,6 +25195,16 @@
 		},
 		"UseControlLabelOptions": {
 			"description": "Configuration for the `useControlLabel` lint rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConvexExplicitTableIdsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConvexExplicitTableIdsOptions" }
+			]
+		},
+		"UseConvexExplicitTableIdsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

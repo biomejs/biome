@@ -1,0 +1,254 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export const run = async (ctx, messageId, storageId) => {
+	await ctx.db.get(messageId);
+	await ctx.db.patch(messageId, { text: "updated" });
+	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+	await ctx.db.delete(messageId);
+	await ctx.db.system.get(storageId);
+	await (ctx.db).get(messageId);
+	await (ctx.db.get)(messageId);
+	await ctx?.db?.get(messageId);
+	await ctx.db.get?.(messageId);
+	await this.ctx.db.delete(messageId);
+	await ctx.db.get(args.messageId);
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:3:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export const run = async (ctx, messageId, storageId) => {
+  > 3 │ 	await ctx.db.get(messageId);
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	await ctx.db.patch(messageId, { text: "updated" });
+    5 │ 	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.patch() call doesn't include the table name.
+  
+    2 │ export const run = async (ctx, messageId, storageId) => {
+    3 │ 	await ctx.db.get(messageId);
+  > 4 │ 	await ctx.db.patch(messageId, { text: "updated" });
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+    6 │ 	await ctx.db.delete(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.patch("messages", id, value).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.replace() call doesn't include the table name.
+  
+    3 │ 	await ctx.db.get(messageId);
+    4 │ 	await ctx.db.patch(messageId, { text: "updated" });
+  > 5 │ 	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	await ctx.db.delete(messageId);
+    7 │ 	await ctx.db.system.get(storageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.replace("messages", id, value).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.delete() call doesn't include the table name.
+  
+    4 │ 	await ctx.db.patch(messageId, { text: "updated" });
+    5 │ 	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+  > 6 │ 	await ctx.db.delete(messageId);
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	await ctx.db.system.get(storageId);
+    8 │ 	await (ctx.db).get(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.delete("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.system.get() call doesn't include the table name.
+  
+    5 │ 	await ctx.db.replace(messageId, { text: "replaced", author: "Alice" });
+    6 │ 	await ctx.db.delete(messageId);
+  > 7 │ 	await ctx.db.system.get(storageId);
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	await (ctx.db).get(messageId);
+    9 │ 	await (ctx.db.get)(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.system.get("_storage", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+     6 │ 	await ctx.db.delete(messageId);
+     7 │ 	await ctx.db.system.get(storageId);
+   > 8 │ 	await (ctx.db).get(messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	await (ctx.db.get)(messageId);
+    10 │ 	await ctx?.db?.get(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+     7 │ 	await ctx.db.system.get(storageId);
+     8 │ 	await (ctx.db).get(messageId);
+   > 9 │ 	await (ctx.db.get)(messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	await ctx?.db?.get(messageId);
+    11 │ 	await ctx.db.get?.(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+     8 │ 	await (ctx.db).get(messageId);
+     9 │ 	await (ctx.db.get)(messageId);
+  > 10 │ 	await ctx?.db?.get(messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	await ctx.db.get?.(messageId);
+    12 │ 	await this.ctx.db.delete(messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+     9 │ 	await (ctx.db.get)(messageId);
+    10 │ 	await ctx?.db?.get(messageId);
+  > 11 │ 	await ctx.db.get?.(messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	await this.ctx.db.delete(messageId);
+    13 │ 	await ctx.db.get(args.messageId);
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.delete() call doesn't include the table name.
+  
+    10 │ 	await ctx?.db?.get(messageId);
+    11 │ 	await ctx.db.get?.(messageId);
+  > 12 │ 	await this.ctx.db.delete(messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	await ctx.db.get(args.messageId);
+    14 │ };
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.delete("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:8 lint/nursery/useConvexExplicitTableIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This db.get() call doesn't include the table name.
+  
+    11 │ 	await ctx.db.get?.(messageId);
+    12 │ 	await this.ctx.db.delete(messageId);
+  > 13 │ 	await ctx.db.get(args.messageId);
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ };
+    15 │ 
+  
+  i Without the table name, an ID with the wrong type can read or change a document in a different table than the one you expect. Convex also plans to deprecate calls without a table name.
+  
+  i Pass the name of the table as the first argument, for example db.get("messages", id).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

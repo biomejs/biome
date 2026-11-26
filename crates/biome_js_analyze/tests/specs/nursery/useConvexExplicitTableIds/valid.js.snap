@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export const run = async (ctx, messageId, storageId, args) => {
+	await ctx.db.get("messages", messageId);
+	await ctx.db.patch("messages", messageId, { text: "updated" });
+	await ctx.db.replace("messages", messageId, { text: "replaced", author: "Alice" });
+	await ctx.db.delete("messages", messageId);
+	await ctx.db.system.get("_storage", storageId);
+
+	// Other database methods.
+	await ctx.db.insert("messages", { text: "hello" });
+	await ctx.db.query("messages").collect();
+	ctx.db.normalizeId("messages", messageId);
+
+	// Spread arguments can include the table name.
+	await ctx.db.get(...args);
+	await ctx.db.patch(...args, { text: "updated" });
+
+	// Calls that aren't on a `db` object.
+	await db.get(messageId);
+	await ctx.cache.get(messageId);
+	await map.delete(messageId);
+	await ctx.storage.delete(storageId);
+	await ctx.db.other.get(messageId);
+	await ctx.system.get(storageId);
+	await ctx.db["get"](messageId);
+	await ctx[db].get(messageId);
+
+	// `db.system` only reads documents.
+	await ctx.db.system.delete(storageId);
+	await ctx.db.system.patch(storageId, { name: "file" });
+
+	// A different number of arguments than Convex's database methods accept.
+	await ctx.db.get();
+	await ctx.db.patch(messageId);
+};
+
+```

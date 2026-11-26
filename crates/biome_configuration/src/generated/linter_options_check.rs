@@ -2767,6 +2767,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_control_label::UseControlLabelOptions>(),
     ));
     result.push((
+        "nursery",
+        "useConvexExplicitTableIds",
+        TypeId::of::<
+            biome_rule_options::use_convex_explicit_table_ids::UseConvexExplicitTableIdsOptions,
+        >(),
+    ));
+    result.push((
         "complexity",
         "useDateNow",
         TypeId::of::<biome_rule_options::use_date_now::UseDateNowOptions>(),

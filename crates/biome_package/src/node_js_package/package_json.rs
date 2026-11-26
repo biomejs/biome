@@ -123,6 +123,43 @@ impl PackageJson {
         false
     }
 
+    /// Checks whether `specifier` is defined in `dependencies`,
+    /// `dev_dependencies` or `peer_dependencies`, and none of its versions can
+    /// satisfy `range`.
+    ///
+    /// Returns `false` when `specifier` isn't defined, or when one of its
+    /// versions isn't a semantic version range, such as `latest`,
+    /// `workspace:*`, or a `catalog:` reference without a matching catalog
+    /// entry, because the installed version is unknown.
+    pub fn dependency_excludes_range(&self, specifier: &str, range: &str) -> bool {
+        let Ok(range) = Range::from_str(range) else {
+            return false;
+        };
+        let mut found = false;
+        let iter = self
+            .dependencies
+            .iter()
+            .chain(self.dev_dependencies.iter())
+            .chain(self.peer_dependencies.iter());
+        for (dependency_name, dependency_version) in iter {
+            if dependency_name.as_ref() != specifier {
+                continue;
+            }
+            found = true;
+            let version = resolve_dependency_version(
+                specifier,
+                dependency_version.as_ref(),
+                self.catalog.as_ref(),
+            );
+            match Version::from(version) {
+                Version::SemVer(version) if !version.intersects(&range) => {}
+                _ => return false,
+            }
+        }
+
+        found
+    }
+
     /// Extract catalog entries from a pnpm workspace file, supporting both the
     /// default `catalog:` and named catalogs under `catalogs:`.
     pub fn parse_pnpm_workspace_catalog(source: &str) -> Option<Catalogs> {
@@ -896,6 +933,37 @@ mod tests {
         };
 
         assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn dependency_excludes_range() {
+        let package_json = |version: &str| PackageJson {
+            dependencies: Dependencies(Box::new([("convex".into(), version.into())])),
+            ..Default::default()
+        };
+
+        assert!(package_json("1.20.0").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(package_json("~1.20.0").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("^1.20.0").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("^1.31.0").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("latest").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("workspace:*").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("catalog:").dependency_excludes_range("convex", ">=1.31.0"));
+        assert!(!package_json("1.20.0").dependency_excludes_range("react", ">=1.31.0"));
+    }
+
+    #[test]
+    fn dependency_excludes_range_with_pnpm_catalog() {
+        let package_json = PackageJson {
+            dependencies: Dependencies(Box::new([("convex".into(), "catalog:".into())])),
+            catalog: Some(Catalogs {
+                default: Some(Dependencies(Box::new([("convex".into(), "1.20.0".into())]))),
+                named: FxHashMap::default(),
+            }),
+            ..Default::default()
+        };
+
+        assert!(package_json.dependency_excludes_range("convex", ">=1.31.0"));
     }
 
     #[test]

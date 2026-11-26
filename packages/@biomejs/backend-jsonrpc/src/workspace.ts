@@ -4205,6 +4205,11 @@ export interface Nursery {
 	 */
 	useControlLabel?: UseControlLabelConfiguration;
 	/**
+	 * Require the table name as the first argument of Convex database calls.
+	 * See https://biomejs.dev/linter/rules/use-convex-explicit-table-ids
+	 */
+	useConvexExplicitTableIds?: UseConvexExplicitTableIdsConfiguration;
+	/**
 	 * Require passing an imported function as a test suite title instead of a string with its name.
 	 * See https://biomejs.dev/linter/rules/use-describe-function-title
 	 */
@@ -7688,6 +7693,9 @@ export type UseConsistentUnicodeBomConfiguration =
 export type UseControlLabelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseControlLabelOptions;
+export type UseConvexExplicitTableIdsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConvexExplicitTableIdsOptions;
 export type UseDescribeFunctionTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDescribeFunctionTitleOptions;
@@ -11427,6 +11435,10 @@ export interface RuleWithUseControlLabelOptions {
 	level: RulePlainConfiguration;
 	options?: UseControlLabelOptions;
 }
+export interface RuleWithUseConvexExplicitTableIdsOptions {
+	level: RulePlainConfiguration;
+	options?: UseConvexExplicitTableIdsOptions;
+}
 export interface RuleWithUseDescribeFunctionTitleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -14747,6 +14759,7 @@ export interface UseConsistentUnicodeBomOptions {
  * Configuration for the `useControlLabel` lint rule.
  */
 export type UseControlLabelOptions = {};
+export type UseConvexExplicitTableIdsOptions = {};
 export type UseDescribeFunctionTitleOptions = {};
 export type UseDisposablesOptions = {};
 export interface UseEarlyContinueOptions {
@@ -16819,10 +16832,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"
@@ -16915,6 +16928,7 @@ export type Category =
 	| "lint/nursery/useConsistentTupleLabels"
 	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
+	| "lint/nursery/useConvexExplicitTableIds"
 	| "lint/nursery/useDescribeFunctionTitle"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useEarlyContinue"
