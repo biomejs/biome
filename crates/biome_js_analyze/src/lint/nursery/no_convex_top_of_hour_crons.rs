@@ -27,12 +27,6 @@ declare_lint_rule! {
     /// - calls to `cron()` whose cron expression runs at minute `0`, for example `"0 3 * * *"`,
     ///   `"0,30 * * * *"`, or `"0-5 * * * *"`.
     ///
-    /// The rule checks every call to a method with one of these names, whatever object the
-    /// method is called on.
-    ///
-    /// If a job must run at the start of the hour, you can suppress the diagnostic with a
-    /// `biome-ignore` comment.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
