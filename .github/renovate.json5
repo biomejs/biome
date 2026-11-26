@@ -60,7 +60,10 @@
         // `wasm-bindgen` and requires an exact `wasm-bindgen` version.
         "wasm-bindgen-cli",
         "wasm-bindgen",
-        "js-sys"
+        "js-sys",
+        // Pinned in the root Cargo.toml; see the comment above the pin.
+        "mimalloc",
+        "libmimalloc-sys"
       ]
     },
     {
