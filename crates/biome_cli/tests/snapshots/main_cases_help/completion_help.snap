@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome completion --help
+```
+
+# Emitted Messages
+
+```block
+Prints a script to install shell completions for the Biome CLI.
+Supported shells: Bash, Zsh, fish, and Elvish are supported. Use `--write` to let Biome install the
+script.
+### Examples
+```shell
+biome completion zsh > ~/.zfunc/_biome
+```
+```shell
+biome completion --write zsh
+```
+
+Usage: completion [--write] SHELL
+
+Available positional items:
+    SHELL        The shell to produce the script for: `bash`, `zsh`, `fish`, or `elvish`.
+
+Available options:
+        --write  Installs the autocompletion script.
+                 Bash: `~/.local/share/bash-completion/completions/biome`. Zsh: `~/.zfunc/_biome`.
+                 Fish: `~/.config/fish/completions/biome.fish`.
+                 Elvish isn't supported.
+                 Bash and fish use `XDG_DATA_HOME` and `XDG_CONFIG_HOME` instead of `~/.local/share`
+                 and `~/.config` when those variables are set. Biome then prints any step needed to
+                 load the script.
+    -h, --help   Prints help information
+
+```

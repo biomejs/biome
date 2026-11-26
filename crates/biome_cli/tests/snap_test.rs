@@ -13,7 +13,7 @@ use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::CssFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
-use directories::ProjectDirs;
+use directories::{BaseDirs, ProjectDirs};
 use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -352,6 +352,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     output = replace_temp_dir(output);
     output = replace_biome_dir(output);
     output = replace_config_dir(output);
+    output = replace_home_dir(output);
 
     // Normalize Windows-specific path separators to "/"
     if cfg!(windows) {
@@ -565,6 +566,41 @@ fn replace_config_dir(input: Cow<str>) -> Cow<str> {
                 rest = after;
             }
         }
+    }
+
+    if result.is_empty() {
+        input
+    } else {
+        result.push_str(rest);
+        Cow::Owned(result)
+    }
+}
+
+/// Replaces the path to the home directory with "<HOME_DIR>".
+///
+/// It runs after the other directory replacements, because the temporary,
+/// cache, and configuration directories can be inside the home directory.
+fn replace_home_dir(input: Cow<str>) -> Cow<str> {
+    let Some(home_dir) = BaseDirs::new().map(|dirs| dirs.home_dir().display().to_string()) else {
+        return input;
+    };
+    let home_dir = home_dir.trim_end_matches(MAIN_SEPARATOR);
+    // A root home directory would match the start of every absolute path.
+    if home_dir.is_empty() {
+        return input;
+    }
+
+    let mut result = String::new();
+    let mut rest = input.as_ref();
+    while let Some(index) = rest.find(home_dir) {
+        let (before, after) = rest.split_at(index);
+        result.push_str(before);
+        if is_redaction_boundary(before.chars().next_back()) {
+            result.push_str("<HOME_DIR>");
+        } else {
+            result.push_str(home_dir);
+        }
+        rest = &after[home_dir.len()..];
     }
 
     if result.is_empty() {

@@ -1,0 +1,31 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome completion --write zsh
+```
+
+## `<HOME_DIR>/.zfunc/_biome`
+
+```zfunc/_biome
+#compdef biome
+local line
+line="${words[1]} --bpaf-complete-rev=7 ${words[@]:1}"
+if [[ ${words[-1]} == "" ]]; then
+    line="${line} \"\""
+fi
+source <(eval ${line})
+
+
+```
+
+# Emitted Messages
+
+```block
+Wrote zsh completions to <HOME_DIR>/.zfunc/_biome.
+To enable them, add this line to your .zshrc before compinit runs, then restart the shell:
+  fpath+=(~/.zfunc)
+```

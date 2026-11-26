@@ -59,9 +59,10 @@ biome_service            = { workspace = true, features = ["stable"] }
 biome_text_edit          = { workspace = true }
 biome_yaml_analyze       = { workspace = true }
 biome_yaml_syntax        = { workspace = true }
-bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
+bpaf                     = { workspace = true, features = ["autocomplete", "bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
+directories              = { workspace = true }
 indexmap                 = { workspace = true }
 notify                   = { workspace = true }
 papaya                   = { workspace = true }

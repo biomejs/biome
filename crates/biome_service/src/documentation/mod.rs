@@ -4,20 +4,7 @@ use biome_analyze::{
 };
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Padding, markup};
-#[cfg(feature = "lang_css")]
-use biome_css_syntax::CssLanguage;
-#[cfg(feature = "lang_graphql")]
-use biome_graphql_syntax::GraphqlLanguage;
-#[cfg(feature = "lang_html")]
-use biome_html_syntax::HtmlLanguage;
-#[cfg(feature = "lang_js")]
-use biome_js_syntax::JsLanguage;
-use biome_json_syntax::JsonLanguage;
-#[cfg(feature = "lang_md")]
-use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
-#[cfg(feature = "lang_yaml")]
-use biome_yaml_syntax::YamlLanguage;
 use std::{collections::BTreeMap, str::FromStr};
 
 #[derive(Debug, Clone)]
@@ -51,12 +38,45 @@ pub struct ExplainRule {
     category: &'static str,
 }
 
-struct RulesVisitor {
+impl ExplainRule {
+    pub fn name(&self) -> &'static str {
+        self.metadata.name
+    }
+
+    pub fn group(&self) -> &'static str {
+        self.group
+    }
+
+    /// Returns the first line of the rule's documentation.
+    pub fn summary(&self) -> &'static str {
+        self.metadata.docs.lines().next().unwrap_or_default().trim()
+    }
+
+    pub fn domains(&self) -> &'static [RuleDomain] {
+        self.metadata.domains
+    }
+
+    /// Returns whether this is an assist action rather than a lint rule.
+    pub fn is_action(&self) -> bool {
+        self.category == RuleCategory::Action.as_suppression_category()
+    }
+}
+
+/// Collects the lint rules and assist actions of every language, keyed by
+/// rule name. Each rule name belongs to exactly one group, so rules that
+/// several languages implement share one entry.
+pub struct RulesVisitor {
     rules_metadata: BTreeMap<&'static str, ExplainRule>,
 }
 
+impl Default for RulesVisitor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RulesVisitor {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut visitor = Self {
             rules_metadata: BTreeMap::new(),
         };
@@ -78,100 +98,30 @@ impl RulesVisitor {
         visitor
     }
 
+    /// Returns the collected rules, sorted by name.
+    pub fn rules(&self) -> impl Iterator<Item = &ExplainRule> {
+        self.rules_metadata.values()
+    }
+
     fn get_metadata(&mut self, name: &str) -> Option<ExplainRule> {
         self.rules_metadata.remove(name)
     }
+}
 
-    fn store_rule<R, L>(&mut self)
+impl<L: Language> RegistryVisitor<L> for RulesVisitor {
+    fn record_rule<R>(&mut self)
     where
-        L: Language,
-        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let category = <R::Group as RuleGroup>::Category::CATEGORY;
         if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
             let explain_rule = ExplainRule {
                 metadata: R::METADATA,
                 group: <R::Group as RuleGroup>::NAME,
-                category: <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY
-                    .as_suppression_category(),
+                category: category.as_suppression_category(),
             };
             self.rules_metadata.insert(R::METADATA.name, explain_rule);
         }
-    }
-}
-
-#[cfg(feature = "lang_js")]
-impl RegistryVisitor<JsLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
-    {
-        self.store_rule::<R, JsLanguage>();
-    }
-}
-
-impl RegistryVisitor<JsonLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, JsonLanguage>();
-    }
-}
-
-#[cfg(feature = "lang_css")]
-impl RegistryVisitor<CssLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, CssLanguage>();
-    }
-}
-
-#[cfg(feature = "lang_graphql")]
-impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, GraphqlLanguage>();
-    }
-}
-
-#[cfg(feature = "lang_html")]
-impl RegistryVisitor<HtmlLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, HtmlLanguage>();
-    }
-}
-
-#[cfg(feature = "lang_md")]
-impl RegistryVisitor<MarkdownLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, MarkdownLanguage>();
-    }
-}
-
-#[cfg(feature = "lang_yaml")]
-impl RegistryVisitor<YamlLanguage> for RulesVisitor {
-    fn record_rule<R>(&mut self)
-    where
-        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
-            + 'static,
-    {
-        self.store_rule::<R, YamlLanguage>();
     }
 }
 

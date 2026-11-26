@@ -68,6 +68,10 @@ impl FileSystem for OsFileSystem {
         }))
     }
 
+    fn create_dir_all(&self, path: &Utf8Path) -> io::Result<()> {
+        fs::create_dir_all(path)
+    }
+
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
         let working_directory = self
             .working_directory

@@ -140,6 +140,12 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
     -> io::Result<Box<dyn File>>;
 
+    /// Creates the directory at `path`, along with any missing parent
+    /// directories. Succeeds without changes when the directory already exists.
+    ///
+    /// Equivalent to [std::fs::create_dir_all].
+    fn create_dir_all(&self, path: &Utf8Path) -> io::Result<()>;
+
     /// Initiate a traversal of the filesystem
     ///
     /// This method creates a new "traversal scope" that can be used to
@@ -560,6 +566,10 @@ where
         options: OpenOptions,
     ) -> io::Result<Box<dyn File>> {
         T::open_with_options(self, path, options)
+    }
+
+    fn create_dir_all(&self, path: &Utf8Path) -> io::Result<()> {
+        T::create_dir_all(self, path)
     }
 
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {

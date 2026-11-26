@@ -83,6 +83,9 @@ impl<'app> CliSession<'app> {
                 commands::rage::rage(self, &cli_options, daemon_logs, formatter, linter)
             }
             BiomeCommand::Clean => commands::clean::clean(self),
+            BiomeCommand::Completion { write, shell } => {
+                commands::completion::completion(self, shell, write)
+            }
             BiomeCommand::Start {
                 log_options,
                 watcher_options,
