@@ -108,9 +108,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
         INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID => {
             TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
         }
-        INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID => {
-            TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
-        }
         INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID => {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
         }

@@ -456,7 +456,9 @@ impl<'db> InferredType<'db> {
             }
             processed += 1;
 
-            if is_instance_target && data.is_promise_class(self.db) {
+            if is_instance_target
+                && (data.is_promise_class(self.db) || data.is_promise_like_interface())
+            {
                 return Some(true);
             }
             let is_named_promise_like = is_instance_target

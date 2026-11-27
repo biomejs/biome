@@ -11,7 +11,7 @@ use std::cmp::Ordering;
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 34;
+const PREDEFINED_TYPE_COUNT: usize = 33;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -156,5 +156,4 @@ predefined_globals! {
     (INSTANCEOF_MAP_ID, INSTANCEOF_MAP_ID_NAME, INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, _, "instanceof Map", Helper),
     (INSTANCEOF_SET_ID, INSTANCEOF_SET_ID_NAME, INSTANCEOF_SET_ID_GLOBAL_TYPE_ID, _, "instanceof Set", Helper),
     (INSTANCEOF_WEAK_MAP_ID, INSTANCEOF_WEAK_MAP_ID_NAME, INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, _, "instanceof WeakMap", Helper),
-    (INSTANCEOF_ERROR_ID, INSTANCEOF_ERROR_ID_NAME, INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_ERROR_ID, "instanceof Error", Helper),
 }

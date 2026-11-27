@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsExpressionStatement,
+    JsSyntaxKind, T,
 };
 use biome_module_graph::type_inference::TypeInferenceClassification;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
@@ -346,6 +347,9 @@ impl Rule for NoFloatingPromises {
 /// - It calls its `.then()` method with two arguments, _or_
 /// - It calls its `.catch()` method with one argument.
 ///
+/// A method named by a string literal counts as well, as in
+/// `promise["then"](onFulfilled, onRejected)`.
+///
 /// # Returns
 ///
 /// * `Some(true)` if the expression is a handled Promise-like expression.
@@ -373,15 +377,13 @@ fn is_handled_promise(expression: AnyJsExpression) -> Option<bool> {
         _ => return None,
     };
 
-    let expr = js_call_expression.callee().ok()?;
-    let static_member_expr = expr.as_js_static_member_expression()?;
-    let member = static_member_expr.member().ok()?;
-    let js_name = member.as_js_name()?;
-    let value_token = js_name.value_token().ok()?;
-    let name = value_token.text_trimmed();
+    let callee = js_call_expression.callee().ok()?;
+    let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
+    let name = member_expression.member_name()?;
+    let name = name.text();
 
     if name == "finally" {
-        let expr = static_member_expr.object().ok()?;
+        let expr = member_expression.object().ok()?;
         return is_handled_promise(expr);
     }
     if name == "catch" {

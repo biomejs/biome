@@ -1,8 +1,8 @@
 //! Lowers collected global declaration groups into a codegen-friendly model.
 //!
 //! [`ids::GlobalIds`] gives every global declaration group an identity. Each identity is
-//! lowered from its declarations by the generic lowerer, except for the few globals whose
-//! hand-written projections type inference depends on (see `overrides`).
+//! lowered from its declarations by the generic lowerer, except for `Promise`, whose
+//! hand-written projection type inference depends on (see `overrides`).
 
 mod generic;
 pub mod ids;
@@ -18,9 +18,8 @@ use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter, AnyJsName, AnyJsObjectMemberName,
     AnyJsParameter, AnyJsRoot, AnyTsName, AnyTsReturnType, AnyTsType, AnyTsTypeMember,
     AnyTsVariableAnnotation, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, T,
-    TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsDeclarationModule,
-    TsInterfaceDeclaration, TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
-    TsTypeParameters,
+    TsConstructSignatureTypeMember, TsDeclarationModule, TsInterfaceDeclaration,
+    TsMethodSignatureTypeMember, TsPropertySignatureTypeMember, TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, Text, TextRange};
@@ -451,7 +450,7 @@ pub fn lower_global_types(
     let mut sources = ParsedSourceCache::new(source_files);
     let ids = ids::GlobalIds::assign(manifest, &mut sources)?;
     let mut lowerer = generic::GenericLowerer::new(manifest, &ids, sources);
-    let mut overridden = overrides::lower_overrides(manifest, &ids, &mut lowerer)?;
+    let mut overridden = overrides::lower_overrides(manifest, &mut lowerer)?;
 
     let mut globals = Vec::with_capacity(ids.slots().len() + overridden.len());
     for slot in ids.slots() {
@@ -474,7 +473,7 @@ pub fn lower_global_types(
         };
         globals.push(global);
     }
-    // Helper globals referenced by the hand-written projections.
+    // Helper globals referenced by the hand-written projection.
     globals.extend(overridden);
 
     let mut seen = std::collections::BTreeSet::new();

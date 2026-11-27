@@ -30,6 +30,8 @@ interface Disposable {
     [Symbol.dispose](): void;
 }
 
+interface PromiseLike<T> {}
+
 interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
