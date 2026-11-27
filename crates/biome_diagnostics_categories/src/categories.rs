@@ -367,6 +367,7 @@ define_categories! {
     "lint/nursery/noSyncMethods": "https://biomejs.dev/linter/rules/no-sync-methods",
     "lint/nursery/noTailwindArbitraryValue": "https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
     "lint/nursery/noTailwindConflictingClasses": "https://biomejs.dev/linter/rules/no-tailwind-conflicting-classes",
+    "lint/nursery/noTailwindLegacyImportant": "https://biomejs.dev/linter/rules/no-tailwind-legacy-important",
     "lint/nursery/noTailwindLegacyUtilities": "https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities",
     "lint/nursery/noTailwindRawColors": "https://biomejs.dev/linter/rules/no-tailwind-raw-colors",
     "lint/nursery/noTailwindRestrictedClasses": "https://biomejs.dev/linter/rules/no-tailwind-restricted-classes",
