@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+function foo1(a: boolean): number | undefined {
+    if (a) return 1;
+    return undefined;
+}
+
+declare function foo2(): number;
+
+function foo3(a: string): number;
+function foo3(a: number): number;
+function foo3(a: unknown): number {
+    return 1;
+}

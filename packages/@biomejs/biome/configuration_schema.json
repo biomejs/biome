@@ -5971,6 +5971,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMixedReturnsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMixedReturnsOptions" }
+			]
+		},
+		"NoMixedReturnsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMultiAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10080,6 +10090,13 @@
 					"description": "Disallow spreading values in ways that can cause unexpected results.\nSee https://biomejs.dev/linter/rules/no-misused-spread",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMixedReturns": {
+					"description": "Require return statements in a function to either always or never return a value.\nSee https://biomejs.dev/linter/rules/no-mixed-returns",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMixedReturnsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15398,6 +15415,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedSpreadOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMixedReturnsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMixedReturnsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -3284,6 +3284,11 @@ export interface Nursery {
 	 */
 	noMisusedSpread?: NoMisusedSpreadConfiguration;
 	/**
+	 * Require return statements in a function to either always or never return a value.
+	 * See https://biomejs.dev/linter/rules/no-mixed-returns
+	 */
+	noMixedReturns?: NoMixedReturnsConfiguration;
+	/**
 	 * Disallow exporting variables declared with let or var.
 	 * See https://biomejs.dev/linter/rules/no-mutable-exports
 	 */
@@ -7199,6 +7204,9 @@ export type NoMisusedPromisesConfiguration =
 export type NoMisusedSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedSpreadOptions;
+export type NoMixedReturnsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMixedReturnsOptions;
 export type NoMutableExportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMutableExportsOptions;
@@ -10559,6 +10567,10 @@ export interface RuleWithNoMisusedPromisesOptions {
 export interface RuleWithNoMisusedSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisusedSpreadOptions;
+}
+export interface RuleWithNoMixedReturnsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMixedReturnsOptions;
 }
 export interface RuleWithNoMutableExportsOptions {
 	level: RulePlainConfiguration;
@@ -14457,6 +14469,7 @@ export type NoMissingScssInterpolationOptions = {};
 export type NoMissingThrowOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMisusedSpreadOptions = {};
+export type NoMixedReturnsOptions = {};
 export type NoMutableExportsOptions = {};
 export type NoNegatedArrayPredicateOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
@@ -16924,6 +16937,7 @@ export type Category =
 	| "lint/nursery/noMissingThrow"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMisusedSpread"
+	| "lint/nursery/noMixedReturns"
 	| "lint/nursery/noMutableExports"
 	| "lint/nursery/noNegatedArrayPredicate"
 	| "lint/nursery/noNegationInEqualityCheck"
@@ -17041,10 +17055,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"

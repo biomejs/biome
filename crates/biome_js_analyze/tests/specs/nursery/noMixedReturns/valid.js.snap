@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function foo1() { return; }
+function foo2() { if (true) return; }
+function foo3() { if (true) return; else return; }
+function foo4() { if (true) return true; else return false; }
+f(function() { return; })
+f(function() { if (true) return; })
+f(function() { if (true) return; else return; })
+f(function() { if (true) return true; else return false; })
+function foo5() { function bar() { return true; } return; }
+function foo6() { function bar() { return; } return false; }
+function Foo7() { if (!(this instanceof Foo7)) return new Foo7(); }
+function Foo8() { if (true) return 1; }
+function Φ() { if (true) return 1; }
+function 𐐀() { if (true) return 1; }
+function foo9() { if (true) return 5; else return undefined; }
+function foo10() { if (true) return 5; else return void 0; }
+var x = () => {  return {}; };
+class Foo11 { constructor() { if (true) return foo; } }
+var Foo12 = class { constructor() { if (true) return foo; } }
+
+// Functions without a block body don't contain `return` statements.
+var foo13 = () => a ? 1 : undefined;
+
+// A first `return` without a value allows reaching the end of the body.
+function foo14() { if (a) return; log(); }
+
+// Every path ends with a `return` statement or a `throw` statement.
+function foo15() { if (a) return 1; throw new Error(); }
+function foo16() { while (true) { if (a) return 1; } }
+function foo17(x) {
+    switch (x) {
+        case 1: return 1;
+        default: return 2;
+    }
+}
+function foo18() {
+    try {
+        return 1;
+    } catch {
+        return 2;
+    }
+}
+function foo19() {
+    try {
+        log();
+    } finally {
+        return 1;
+    }
+}
+
+// The `return` statements of nested functions belong to them.
+function foo20() {
+    const bar = () => { return; };
+    const obj = { baz() { return; } };
+    class Qux { method() { return; } }
+    return 1;
+}
+
+f(function Foo21() { if (a) return 1; });
+
+```
