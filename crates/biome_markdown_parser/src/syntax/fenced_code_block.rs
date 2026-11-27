@@ -442,6 +442,12 @@ fn prepare_next_code_content_token(
 
     if *at_line_start && fence_indent > 0 {
         skip_fenced_content_indent(p, fence_indent);
+        // A whitespace-only line shorter than or equal to fence_indent leaves
+        // the parser on the line's newline; handle it here so at_line_start
+        // and virtual_line_start stay set for the next line.
+        if consume_code_newline(p) {
+            return CodeContentTokenAction::Skip;
+        }
         if at_closing_fence(p, is_tilde_fence, fence_len) {
             return CodeContentTokenAction::Break;
         }

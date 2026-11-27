@@ -792,19 +792,25 @@ impl FormatMdInlineItemList {
         for item in FencedCodeContentIterator::new(node.iter()) {
             match item {
                 FencedCodeContentItem::NewlineRun {
-                    newlines,
+                    removed_items,
+                    newline_count,
                     is_leading,
                 } => {
-                    let newline_count = newlines.len();
-
-                    for newline in &newlines {
-                        write!(
-                            f,
-                            [newline.format().with_options(FormatMdTextualOptions {
-                                print_mode: TextPrintMode::Remove,
-                                ..FormatMdTextualOptions::default()
-                            })]
-                        )?;
+                    for removed in &removed_items {
+                        match removed {
+                            RemovedFencedCodeItem::Text(text) => {
+                                write!(
+                                    f,
+                                    [text.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
+                                    })]
+                                )?;
+                            }
+                            RemovedFencedCodeItem::Indent(indent) => {
+                                format_removed_indent(indent, f)?;
+                            }
+                        }
                     }
 
                     if is_leading {
@@ -846,11 +852,7 @@ impl FormatMdInlineItemList {
                     }
                 }
                 FencedCodeContentItem::Indent(indent) => {
-                    f.context()
-                        .comments()
-                        .mark_suppression_checked(indent.syntax());
-                    let char_token = indent.md_indent_char_token()?;
-                    write!(f, [format_removed(&char_token)])?;
+                    format_removed_indent(&indent, f)?;
                 }
                 FencedCodeContentItem::Other(item) => {
                     write!(f, [item.format()])?;
@@ -1177,19 +1179,35 @@ impl FillEntry<'_> {
     }
 }
 
+fn format_removed_indent(indent: &MdIndentToken, f: &mut MarkdownFormatter) -> FormatResult<()> {
+    f.context()
+        .comments()
+        .mark_suppression_checked(indent.syntax());
+    let char_token = indent.md_indent_char_token()?;
+    write!(f, [format_removed(&char_token)])
+}
+
+/// Source nodes removed when collapsing a newline run in fenced code content.
+enum RemovedFencedCodeItem {
+    Text(MdTextual),
+    Indent(MdIndentToken),
+}
+
 /// Business-level items for fenced code content inside lists.
 ///
 /// The CST stores fenced code content as inline nodes, including source newlines
 /// and list continuation indentation. This enum groups those nodes by the
 /// formatting decision they require before `fmt_fenced_code_block` emits IR.
 enum FencedCodeContentItem {
-    /// One or more consecutive newline textual nodes.
+    /// One or more consecutive newline textual nodes, including any
+    /// indentation or whitespace-only tokens on blank lines between them.
     ///
     /// A leading run is the newline sequence immediately after the opening
     /// fence. Non-leading runs represent literal line breaks inside the code
     /// content and must preserve their exact blank-line count.
     NewlineRun {
-        newlines: Vec<MdTextual>,
+        removed_items: Vec<RemovedFencedCodeItem>,
+        newline_count: usize,
         is_leading: bool,
     },
     /// A non-newline textual node from the fenced code content.
@@ -1222,29 +1240,53 @@ impl FencedCodeContentIterator {
         }
     }
 
+    /// Returns the number of items making up the next blank or whitespace-only
+    /// line (including its terminating newline), or `None` if the next line has
+    /// non-whitespace content or reaches the end without a newline.
+    fn next_blank_line_item_count(&self) -> Option<usize> {
+        let mut lookahead = self.items.clone();
+        let mut count = 0usize;
+        loop {
+            match lookahead.next()? {
+                AnyMdInline::MdTextual(next) if next.is_newline().ok()? => {
+                    return Some(count + 1);
+                }
+                AnyMdInline::MdIndentToken(_) => {
+                    count += 1;
+                }
+                AnyMdInline::MdTextual(next) if next.is_empty_and_not_newline().ok()? => {
+                    count += 1;
+                }
+                _ => return None,
+            }
+        }
+    }
+
     fn next_text(&mut self, text: MdTextual) -> Option<FencedCodeContentItem> {
         if text.is_newline().ok()? {
             let is_leading = self.is_leading;
             self.is_leading = false;
-            let mut newlines = vec![text];
+            let mut removed_items = vec![RemovedFencedCodeItem::Text(text)];
+            let mut newline_count = 1usize;
 
-            loop {
-                let next_is_newline = match self.items.peek() {
-                    Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
-                    _ => false,
-                };
-
-                if !next_is_newline {
-                    break;
+            while let Some(item_count) = self.next_blank_line_item_count() {
+                for _ in 0..item_count {
+                    match self.items.next() {
+                        Some(AnyMdInline::MdTextual(text)) => {
+                            removed_items.push(RemovedFencedCodeItem::Text(text));
+                        }
+                        Some(AnyMdInline::MdIndentToken(indent)) => {
+                            removed_items.push(RemovedFencedCodeItem::Indent(indent));
+                        }
+                        _ => break,
+                    }
                 }
-
-                if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
-                    newlines.push(next);
-                }
+                newline_count += 1;
             }
 
             Some(FencedCodeContentItem::NewlineRun {
-                newlines,
+                removed_items,
+                newline_count,
                 is_leading,
             })
         } else {
