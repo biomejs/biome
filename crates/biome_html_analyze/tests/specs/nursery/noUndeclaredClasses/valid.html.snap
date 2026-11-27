@@ -22,7 +22,12 @@ expression: valid.html
 	.active.highlighted { background: yellow; }
 	.alpha + .beta { margin-top: 8px; }
 	.any-class { display: block; }
+	.foo\+bar, .md\:flex, .\31 0col { color: blue; }
 </style>
+<style>.\61{}</style>
+<style>.bar{}</style>
+<style>.foo{}</style>
+<style>.a{}</style>
 </head>
 <body>
 	<div class="card">Single defined class</div>
@@ -48,6 +53,8 @@ expression: valid.html
 	<div class="   ">Only whitespace</div>
 	<div class>No value</div>
 	<div class="any-class">Unstyled section</div>
+	<div class="foo+bar md:flex 10col">Escaped class names</div>
+	<div class="a bar foo">Classes at the same offset in separate style blocks</div>
 </body>
 </html>
 

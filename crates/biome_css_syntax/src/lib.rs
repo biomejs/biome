@@ -21,7 +21,7 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use css_escape::decode_css_identifier;
+pub use css_escape::{decode_css_identifier, decoded_identifier_text};
 pub use number_ext::{CssNumberScanOptions, scan_css_number};
 pub use property_ext::{CssGridTemplateProperty, css_grid_template_property};
 pub use scss_ext::{
