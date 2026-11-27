@@ -7,8 +7,8 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
-    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType,
-    TsModuleDeclaration, TsTypeParameter, inner_string_text,
+    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, TsInferType,
+    TsMappedType, TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -489,7 +489,16 @@ impl JsModuleInfoCollector {
                         .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
                         .unwrap_or_default();
 
-                    if self.has_writable_reference(semantic_model, binding.range) {
+                    let has_type_annotation = node
+                        .ancestors()
+                        .take_while(|ancestor| ancestor != decl.syntax())
+                        .find_map(JsVariableDeclarator::cast)
+                        .is_some_and(|declarator| declarator.variable_annotation().is_some());
+
+                    if !has_type_annotation
+                        && self.is_widenable_binding_type(&ty)
+                        && self.has_writable_reference(semantic_model, binding.range)
+                    {
                         self.widen_binding_from_writable_references(
                             scope_id,
                             &binding,

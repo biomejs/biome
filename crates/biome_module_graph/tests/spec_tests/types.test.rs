@@ -1740,3 +1740,46 @@ fn test_infer_module_types_resolves_this_member_in_object_method() {
         inferred.resolve_type(&db, result)
     ));
 }
+
+#[test]
+fn test_infer_module_types_does_not_widen_concrete_or_annotated_maps_on_reassignment() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/index.ts".into(),
+        r#"
+            let visits = new Map<string, number>();
+            export function resetVisits() {
+                visits = new Map();
+            }
+            export function entered(node: string) {
+                const count = visits.get(node) ?? 0;
+                return count;
+            }
+
+            let annotated: Map<string, number> = new Map();
+            export function resetAnnotated() {
+                annotated = new Map();
+            }
+            export function enteredAnnotated(node: string) {
+                const count = annotated.get(node) ?? 0;
+                return count;
+            }
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for fn_name in ["entered", "enteredAnnotated"] {
+        let return_ty = inferred_function_return_ty_by_name(&db, module, inferred, fn_name)
+            .unwrap_or_else(|| panic!("{fn_name} return type must be inferred"));
+        assert!(
+            is_inferred_number(&db, return_ty),
+            "{fn_name} should return number, got {}",
+            format_inferred_type(&db, return_ty),
+        );
+    }
+}

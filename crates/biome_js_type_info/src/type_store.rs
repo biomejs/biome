@@ -123,6 +123,12 @@ pub trait RawTypeCollector {
         Some(self.get_by_id(*id))
     }
 
+    /// Returns whether an unannotated variable binding's initial type should
+    /// widen from cross-scope assignments.
+    fn is_widenable_binding_type(&self, ty: &TypeReference) -> bool {
+        is_widenable_binding_type_inner(self, ty, 0)
+    }
+
     fn reference_to_id(&self, id: TypeId) -> TypeReference {
         TypeReference::Resolved(RawTypeId::Local(id))
     }
@@ -199,5 +205,32 @@ impl UnionCollector {
         Cow::Owned(TypeData::Union(Box::new(Union(
             self.types.into_boxed_slice(),
         ))))
+    }
+}
+
+fn is_widenable_binding_type_inner<C: RawTypeCollector + ?Sized>(
+    collector: &C,
+    ty: &TypeReference,
+    depth: u8,
+) -> bool {
+    if depth >= 8 {
+        return false;
+    }
+
+    let data = match ty {
+        TypeReference::Resolved(RawTypeId::Local(id)) => collector.get_by_id(*id),
+        TypeReference::Resolved(RawTypeId::Global(id)) => crate::globals::raw_global_type(*id),
+        TypeReference::Import(_) | TypeReference::Qualifier(_) => return false,
+    };
+
+    match data {
+        TypeData::Unknown | TypeData::Undefined | TypeData::Null => true,
+        TypeData::Literal(literal) => literal.is_primitive(),
+        TypeData::Reference(inner) => is_widenable_binding_type_inner(collector, inner, depth + 1),
+        TypeData::Union(union) => union
+            .types()
+            .iter()
+            .all(|variant| is_widenable_binding_type_inner(collector, variant, depth + 1)),
+        _ => false,
     }
 }

@@ -184,4 +184,22 @@ function readonlyUnknownArray(): ReadonlyArray<unknown> {
 	return [] as any[];
 }
 
+let visits = new Map<string, number>();
+export function resetVisits() {
+	visits = new Map();
+}
+export function entered(node: string) {
+	const count = visits.get(node) ?? 0;
+	return count;
+}
+
+let annotatedVisits: Map<string, number> = new Map();
+export function resetAnnotatedVisits() {
+	annotatedVisits = new Map();
+}
+export function enteredAnnotated(node: string) {
+	const count = annotatedVisits.get(node) ?? 0;
+	return count;
+}
+
 ```
