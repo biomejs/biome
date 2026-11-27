@@ -661,3 +661,60 @@ fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs_non_brea
         "<blockquote>\n<ul>\n<li>--x</li>\n</ul>\n</blockquote>\n",
     );
 }
+
+#[test]
+fn fenced_code_in_list_whitespace_only_line() {
+    use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock};
+    use biome_rowan::AstNodeList;
+
+    let source = "1. Item:\n\n   ```shell\n    echo a\n  \n    echo b\n   ```\n";
+    let parsed = parse_markdown(source, MarkdownParserOptions::default());
+    assert!(
+        parsed.diagnostics().is_empty(),
+        "unexpected diagnostics: {:?}",
+        parsed.diagnostics()
+    );
+    assert_eq!(
+        document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        ),
+        "<ol>\n<li>\n<p>Item:</p>\n<pre><code class=\"language-shell\"> echo a\n\n echo b\n</code></pre>\n</li>\n</ol>\n"
+    );
+
+    let fenced = parsed
+        .syntax()
+        .descendants()
+        .find_map(MdFencedCodeBlock::cast)
+        .expect("expected MdFencedCodeBlock");
+    let textuals: Vec<String> = fenced
+        .content()
+        .iter()
+        .filter_map(|item| match item {
+            AnyMdInline::MdTextual(text) => Some(text.value_token().ok()?.text().to_string()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(textuals, vec!["\n", " echo a", "\n", "\n", " echo b", "\n"]);
+
+    let quoted = "> 1. Item:\n>\n>    ```shell\n>     echo a\n>   \n>     echo b\n>    ```\n";
+    let parsed_quoted = parse_markdown(quoted, MarkdownParserOptions::default());
+    assert!(
+        parsed_quoted.diagnostics().is_empty(),
+        "unexpected diagnostics: {:?}",
+        parsed_quoted.diagnostics()
+    );
+    let quoted_fenced = parsed_quoted
+        .syntax()
+        .descendants()
+        .find_map(MdFencedCodeBlock::cast)
+        .expect("expected MdFencedCodeBlock");
+    let quote_prefix_count = quoted_fenced
+        .content()
+        .iter()
+        .filter(|item| matches!(item, AnyMdInline::MdQuotePrefix(_)))
+        .count();
+    assert_eq!(quote_prefix_count, 4);
+}

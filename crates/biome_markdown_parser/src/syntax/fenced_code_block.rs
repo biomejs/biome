@@ -442,6 +442,10 @@ fn prepare_next_code_content_token(
 
     if *at_line_start && fence_indent > 0 {
         skip_fenced_content_indent(p, fence_indent);
+        if consume_code_newline(p) {
+            *at_line_start = true;
+            return CodeContentTokenAction::Skip;
+        }
         if at_closing_fence(p, is_tilde_fence, fence_len) {
             return CodeContentTokenAction::Break;
         }

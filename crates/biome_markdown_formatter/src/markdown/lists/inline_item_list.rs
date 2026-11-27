@@ -194,14 +194,10 @@ fn format_source_line(
 
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    AnyMdInline, MarkdownLanguage, MdFencedCodeBlock, MdIndentCodeBlock, MdIndentToken,
-    MdInlineItemList, MdTextual,
+    AnyMdInline, MdFencedCodeBlock, MdIndentCodeBlock, MdIndentToken, MdInlineItemList, MdTextual,
 };
-use biome_rowan::{AstNode, AstNodeListIterator};
-use std::{
-    iter::{FusedIterator, Peekable},
-    ops::Range,
-};
+use biome_rowan::AstNode;
+use std::{iter::FusedIterator, ops::Range};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
@@ -789,22 +785,33 @@ impl FormatMdInlineItemList {
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        for item in FencedCodeContentIterator::new(node.iter()) {
+        for item in FencedCodeContentIterator::new(node.iter().collect()) {
             match item {
                 FencedCodeContentItem::NewlineRun {
-                    newlines,
+                    removed_items,
+                    newline_count,
                     is_leading,
                 } => {
-                    let newline_count = newlines.len();
-
-                    for newline in &newlines {
-                        write!(
-                            f,
-                            [newline.format().with_options(FormatMdTextualOptions {
-                                print_mode: TextPrintMode::Remove,
-                                ..FormatMdTextualOptions::default()
-                            })]
-                        )?;
+                    for removed in &removed_items {
+                        match removed {
+                            AnyMdInline::MdIndentToken(indent) => {
+                                f.context()
+                                    .comments()
+                                    .mark_suppression_checked(indent.syntax());
+                                let char_token = indent.md_indent_char_token()?;
+                                write!(f, [format_removed(&char_token)])?;
+                            }
+                            AnyMdInline::MdTextual(textual) => {
+                                write!(
+                                    f,
+                                    [textual.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove,
+                                        ..FormatMdTextualOptions::default()
+                                    })]
+                                )?;
+                            }
+                            _ => {}
+                        }
                     }
 
                     if is_leading {
@@ -831,13 +838,17 @@ impl FormatMdInlineItemList {
                             f.context()
                                 .comments()
                                 .mark_suppression_checked(md_text.syntax());
-                            write!(
-                                f,
-                                [format_replaced(
-                                    &token,
-                                    &text(trimmed, Some(token.text_trimmed_range().start()))
-                                )]
-                            )?;
+                            if trimmed.is_empty() {
+                                write!(f, [format_removed(&token)])?;
+                            } else {
+                                write!(
+                                    f,
+                                    [format_replaced(
+                                        &token,
+                                        &text(trimmed, Some(token.text_trimmed_range().start()))
+                                    )]
+                                )?;
+                            }
                         } else {
                             write!(f, [md_text.format()])?;
                         }
@@ -1183,13 +1194,15 @@ impl FillEntry<'_> {
 /// and list continuation indentation. This enum groups those nodes by the
 /// formatting decision they require before `fmt_fenced_code_block` emits IR.
 enum FencedCodeContentItem {
-    /// One or more consecutive newline textual nodes.
+    /// One or more consecutive newline textual nodes, including any
+    /// indentation or whitespace-only text on blank lines between them.
     ///
     /// A leading run is the newline sequence immediately after the opening
     /// fence. Non-leading runs represent literal line breaks inside the code
     /// content and must preserve their exact blank-line count.
     NewlineRun {
-        newlines: Vec<MdTextual>,
+        removed_items: Vec<AnyMdInline>,
+        newline_count: usize,
         is_leading: bool,
     },
     /// A non-newline textual node from the fenced code content.
@@ -1210,15 +1223,25 @@ enum FencedCodeContentItem {
 }
 
 struct FencedCodeContentIterator {
-    items: Peekable<AstNodeListIterator<MarkdownLanguage, AnyMdInline>>,
+    items: Vec<AnyMdInline>,
+    index: usize,
     is_leading: bool,
 }
 
 impl FencedCodeContentIterator {
-    fn new(items: AstNodeListIterator<MarkdownLanguage, AnyMdInline>) -> Self {
+    fn new(items: Vec<AnyMdInline>) -> Self {
         Self {
-            items: items.peekable(),
+            items,
+            index: 0,
             is_leading: true,
+        }
+    }
+
+    fn is_blank_line_item(item: &AnyMdInline) -> bool {
+        match item {
+            AnyMdInline::MdIndentToken(_) => true,
+            AnyMdInline::MdTextual(text) => text.is_empty_and_not_newline().unwrap_or(false),
+            _ => false,
         }
     }
 
@@ -1226,30 +1249,39 @@ impl FencedCodeContentIterator {
         if text.is_newline().ok()? {
             let is_leading = self.is_leading;
             self.is_leading = false;
-            let mut newlines = vec![text];
+            let mut removed_items = vec![AnyMdInline::MdTextual(text)];
+            let mut newline_count = 1;
 
             loop {
-                let next_is_newline = match self.items.peek() {
-                    Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
-                    _ => false,
-                };
+                let mut scan = self.index;
+                while self.items.get(scan).is_some_and(Self::is_blank_line_item) {
+                    scan += 1;
+                }
+
+                let next_is_newline = matches!(
+                    self.items.get(scan),
+                    Some(AnyMdInline::MdTextual(next)) if next.is_newline().unwrap_or(false)
+                );
 
                 if !next_is_newline {
                     break;
                 }
 
-                if let Some(AnyMdInline::MdTextual(next)) = self.items.next() {
-                    newlines.push(next);
+                if let Some(slice) = self.items.get(self.index..=scan) {
+                    removed_items.extend(slice.iter().cloned());
                 }
+                newline_count += 1;
+                self.index = scan + 1;
             }
 
             Some(FencedCodeContentItem::NewlineRun {
-                newlines,
+                removed_items,
+                newline_count,
                 is_leading,
             })
         } else {
             self.is_leading = false;
-            let next_is_newline_or_end = match self.items.peek() {
+            let next_is_newline_or_end = match self.items.get(self.index) {
                 Some(AnyMdInline::MdTextual(next)) => next.is_newline().ok()?,
                 None => true,
                 _ => false,
@@ -1267,7 +1299,8 @@ impl Iterator for FencedCodeContentIterator {
     type Item = FencedCodeContentItem;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.items.next()?;
+        let item = self.items.get(self.index)?.clone();
+        self.index += 1;
 
         match item {
             AnyMdInline::MdTextual(text) => self.next_text(text),
