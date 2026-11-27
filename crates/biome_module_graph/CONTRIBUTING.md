@@ -191,6 +191,14 @@ one of its own variables or a path on its own `this`. Its parts live in
   condition lists `x` with the objects of property guards, because `in` too
   narrows only a union with two object types. It adds no property guard:
   TypeScript narrows no object through `"a" in s.k`.
+  A test `x instanceof C` becomes a runtime test of `x` that holds the range
+  of `C`, which inference resolves only when the test can narrow. The
+  decomposed condition lists `x` with the objects of property guards, and
+  also among the subjects that `instanceof` tests, because `instanceof`
+  narrows only a type with an object type or `unknown`, which need not be a
+  union. It adds no property guard either. In the true branch, the receivers
+  of an optional chain narrow too, as in `o?.v instanceof C`, because an
+  instance is never nullish.
   A truthiness test of an aliased condition, a `const` that is not exported,
   has no type annotation, and binds a name to an initializer, as `ok` in
   `const ok = x !== null; if (ok)`, also decomposes that initializer and
@@ -225,9 +233,9 @@ Collection then keeps only the reads that a runtime test of their subject can
 reach, and only for subjects that can narrow. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
 a read point of the pattern, and `RootFlow::pattern_elements` maps the
-element to the pattern. A subject that conditions narrow
-only through property guards or `in` is in `RootFlow::property_only`, and every
-pattern is. The declared type of a pattern is the collected type of the value
+element to the pattern. A subject that conditions narrow only through
+property guards, `in`, or `instanceof` is in `RootFlow::property_only`, and
+every pattern is. The declared type of a pattern is the collected type of the value
 that its elements' collected `Destructure` types read from
 (`ModuleFlow::pattern_type`). A property
 guard or `in` can narrow only a union with at least two object types, so collection
@@ -235,6 +243,10 @@ drops a variable or a pattern in it when its collected type shows that it is not
 without resolving anything (`raw_may_be_object_union` in
 `biome_js_type_info`): a primitive, a single object type or class written in
 place, a union with at most one object type, or the result of `new`. A
+subject in `RootFlow::property_only` that an `instanceof` test checks is
+also in `RootFlow::instance_tested`, and collection drops it only when its
+collected type shows that it has no object type
+(`raw_may_narrow_by_instanceof`). A
 variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
 declared in the root, never written, neither untyped nor annotated `any`, and
 not supplied by a destructuring default, which the declared type ignores. A
@@ -250,8 +262,12 @@ candidates. A candidate that only reads of one variable in
 `RootFlow::property_only`, or only reads of elements of one pattern that no
 test of the elements themselves reaches, make a candidate records that
 variable or pattern (`ModuleFlow::property_only_candidate`), so inference can
-skip it as a whole when that variable or pattern can't narrow. A root that declares no variable that can narrow and has no `this`
-subject gets no graph.
+skip it as a whole when that variable or pattern can't narrow. A candidate
+made only by reads of one variable records the variable too when only
+`instanceof` tests reach those reads, even though other tests of the
+variable reach its other reads; a second walk from those other tests finds
+such reads. A root that declares no variable that can narrow and has no
+`this` subject gets no graph.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
 
@@ -291,7 +307,9 @@ imports differently from the flow queries, so they keep using the queries.
 A subject in `RootFlow::property_only` starts from `property_baseline`
 instead of `narrowing_baseline`. It has no baseline, so its reads keep their
 declared types without a solve, unless its flattened type is a union with at
-least two object types (`may_narrow_by_property`). A pattern starts from
+least two object types (`may_narrow_by_property`), or, for a subject in
+`RootFlow::instance_tested`, has an object type or is `unknown`
+(`may_narrow_by_instanceof`). A pattern starts from
 `pattern_baseline`, which is `property_baseline` without the `null` and
 `undefined` members, because destructuring throws on them. To flatten it, local types
 of the module resolve through the context instead of `infer_local_type`, so in
@@ -327,8 +345,15 @@ property in each member and treats object types as closed, but reports that
 it can't tell for a type whose member list Biome may not know completely,
 such as a class or a built-in type. The solve resolves the key from
 `raw_expressions` only when the subject's declared type is a union with two
-object types. It memoizes each property guard's and `in` test's result by
-guard and incoming type, because a loop applies the same guard again.
+object types. An `instanceof` test applies `narrow_by_instanceof`, following
+TypeScript's `narrowTypeByInstanceof`: `instance_types` in `type_relation.rs`
+finds the instance types of the constructor, and `is_derived_from` compares
+the members of the narrowed type with them by following `extends` clauses to
+the same declaration. The solve resolves the constructor from
+`raw_expressions` only when `may_narrow_by_instanceof` accepts the subject's
+declared type. It memoizes the result of each property guard, `in` test, and
+`instanceof` test by guard and incoming type, because a loop applies the same
+guard again.
 
 #### Caching
 
