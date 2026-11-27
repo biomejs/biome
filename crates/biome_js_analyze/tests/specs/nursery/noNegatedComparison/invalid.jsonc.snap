@@ -1,0 +1,402 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+foo
+!([a] === b)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ foo
+  > 2 │ !([a] === b)
+      │ ^^^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+foo
+!(a === b) + c
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ foo
+  > 2 │ !(a === b) + c
+      │ ^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+const foo = [a]
+!(b === c) + d
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ const foo = [a]
+  > 2 │ !(b === c) + d
+      │ ^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+setup()
+!({ value: 1 }.value === 1);
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ setup()
+  > 2 │ !({ value: 1 }.value === 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+foo
+!(a === b)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ foo
+  > 2 │ !(a === b)
+      │ ^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1 1 │   foo
+    2   │ - !(a·===·b)
+      2 │ + a·!==·b
+  
+
+```
+
+# Input
+```cjs
+foo;
+!([a] === b)
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ foo;
+  > 2 │ !([a] === b)
+      │ ^^^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1 1 │   foo;
+    2   │ - !([a]·===·b)
+      2 │ + [a]·!==·b
+  
+
+```
+
+# Input
+```cjs
+function foo() {
+	return!
+		(a === b);
+}
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:8 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ function foo() {
+  > 2 │ 	return!
+      │ 	      ^
+  > 3 │ 		(a === b);
+      │ 		^^^^^^^^^
+    4 │ }
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+function foo() {
+	throw!
+		(a === b);
+}
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:7 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ function foo() {
+  > 2 │ 	throw!
+      │ 	     ^
+  > 3 │ 		(a === b);
+      │ 		^^^^^^^^^
+    4 │ }
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+function* foo() { yield !
+(a === b); }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ function* foo() { yield !
+      │                         ^
+  > 2 │ (a === b); }
+      │ ^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+function foo() { return !
+(a === b) && ready; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ function foo() { return !
+      │                         ^
+  > 2 │ (a === b) && ready; }
+      │ ^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+function* foo() { yield (!
+(a === b)); }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:26 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ function* foo() { yield (!
+      │                          ^
+  > 2 │ (a === b)); }
+      │ ^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1   │ - function*·foo()·{·yield·(!
+    2   │ - (a·===·b));·}
+      1 │ + function*·foo()·{·yield·(
+      2 │ + a·!==·b);·}
+  
+
+```
+
+# Input
+```cjs
+function* foo() { yield* !
+(a === b); }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:26 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ function* foo() { yield* !
+      │                          ^
+  > 2 │ (a === b); }
+      │ ^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1   │ - function*·foo()·{·yield*·!
+    2   │ - (a·===·b);·}
+      1 │ + function*·foo()·{·yield*·
+      2 │ + a·!==·b;·}
+  
+
+```
+
+# Input
+```cjs
+function foo() { return !/* a
+ b */(a === b); }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/nursery/noNegatedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ function foo() { return !/* a
+      │                         ^^^^^
+  > 2 │  b */(a === b); }
+      │  ^^^^^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+!// keep
+(a === b);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+  > 1 │ !// keep
+      │ ^^^^^^^^
+  > 2 │ (a === b);
+      │ ^^^^^^^^^
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1   │ - !//·keep
+    2   │ - (a·===·b);
+      1 │ + //·keep
+      2 │ + a·!==·b;
+  
+
+```

@@ -1067,6 +1067,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noNegatedArrayPredicate", TypeId::of::<biome_rule_options::no_negated_array_predicate::NoNegatedArrayPredicateOptions>()));
     result.push((
+        "nursery",
+        "noNegatedComparison",
+        TypeId::of::<biome_rule_options::no_negated_comparison::NoNegatedComparisonOptions>(),
+    ));
+    result.push((
         "style",
         "noNegationElse",
         TypeId::of::<biome_rule_options::no_negation_else::NoNegationElseOptions>(),

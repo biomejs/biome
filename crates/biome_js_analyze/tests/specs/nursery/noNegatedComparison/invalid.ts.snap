@@ -1,0 +1,192 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+!(foo! === bar);
+!((foo as string) === bar);
+const foo1 = !(a === b) as boolean;
+const foo2 = !(a === b) satisfies boolean;
+const foo3 = <boolean>!(a === b);
+const foo4 = (!(a === b))!;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ !(foo! === bar);
+      │ ^^^^^^^^^^^^^^^
+    3 │ !((foo as string) === bar);
+    4 │ const foo1 = !(a === b) as boolean;
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - !(foo!·===·bar);
+      2 │ + foo!·!==·bar;
+    3 3 │   !((foo as string) === bar);
+    4 4 │   const foo1 = !(a === b) as boolean;
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ /* should generate diagnostics */
+    2 │ !(foo! === bar);
+  > 3 │ !((foo as string) === bar);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const foo1 = !(a === b) as boolean;
+    5 │ const foo2 = !(a === b) satisfies boolean;
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   !(foo! === bar);
+    3   │ - !((foo·as·string)·===·bar);
+      3 │ + (foo·as·string)·!==·bar;
+    4 4 │   const foo1 = !(a === b) as boolean;
+    5 5 │   const foo2 = !(a === b) satisfies boolean;
+  
+
+```
+
+```
+invalid.ts:4:14 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    2 │ !(foo! === bar);
+    3 │ !((foo as string) === bar);
+  > 4 │ const foo1 = !(a === b) as boolean;
+      │              ^^^^^^^^^^
+    5 │ const foo2 = !(a === b) satisfies boolean;
+    6 │ const foo3 = <boolean>!(a === b);
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    2 2 │   !(foo! === bar);
+    3 3 │   !((foo as string) === bar);
+    4   │ - const·foo1·=·!(a·===·b)·as·boolean;
+      4 │ + const·foo1·=·(a·!==·b)·as·boolean;
+    5 5 │   const foo2 = !(a === b) satisfies boolean;
+    6 6 │   const foo3 = <boolean>!(a === b);
+  
+
+```
+
+```
+invalid.ts:5:14 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    3 │ !((foo as string) === bar);
+    4 │ const foo1 = !(a === b) as boolean;
+  > 5 │ const foo2 = !(a === b) satisfies boolean;
+      │              ^^^^^^^^^^
+    6 │ const foo3 = <boolean>!(a === b);
+    7 │ const foo4 = (!(a === b))!;
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    3 3 │   !((foo as string) === bar);
+    4 4 │   const foo1 = !(a === b) as boolean;
+    5   │ - const·foo2·=·!(a·===·b)·satisfies·boolean;
+      5 │ + const·foo2·=·(a·!==·b)·satisfies·boolean;
+    6 6 │   const foo3 = <boolean>!(a === b);
+    7 7 │   const foo4 = (!(a === b))!;
+  
+
+```
+
+```
+invalid.ts:6:23 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    4 │ const foo1 = !(a === b) as boolean;
+    5 │ const foo2 = !(a === b) satisfies boolean;
+  > 6 │ const foo3 = <boolean>!(a === b);
+      │                       ^^^^^^^^^^
+    7 │ const foo4 = (!(a === b))!;
+    8 │ 
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    4 4 │   const foo1 = !(a === b) as boolean;
+    5 5 │   const foo2 = !(a === b) satisfies boolean;
+    6   │ - const·foo3·=·<boolean>!(a·===·b);
+      6 │ + const·foo3·=·<boolean>(a·!==·b);
+    7 7 │   const foo4 = (!(a === b))!;
+    8 8 │   
+  
+
+```
+
+```
+invalid.ts:7:15 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    5 │ const foo2 = !(a === b) satisfies boolean;
+    6 │ const foo3 = <boolean>!(a === b);
+  > 7 │ const foo4 = (!(a === b))!;
+      │               ^^^^^^^^^^
+    8 │ 
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    5 5 │   const foo2 = !(a === b) satisfies boolean;
+    6 6 │   const foo3 = <boolean>!(a === b);
+    7   │ - const·foo4·=·(!(a·===·b))!;
+      7 │ + const·foo4·=·(a·!==·b)!;
+    8 8 │   
+  
+
+```
