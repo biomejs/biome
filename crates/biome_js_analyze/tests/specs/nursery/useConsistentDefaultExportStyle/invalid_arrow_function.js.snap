@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_arrow_function.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo = () => {};
+export default foo;
+
+```
+
+# Diagnostics
+```
+invalid_arrow_function.js:3:1 lint/nursery/useConsistentDefaultExportStyle ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default-exported function is declared separately from its export default statement.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = () => {};
+  > 3 │ export default foo;
+      │ ^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i The function is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = () => {};
+      │       ^^^
+    3 │ export default foo;
+    4 │ 
+  
+  i This project declares default-exported functions inside the export default statement, so that all default exports look the same.
+  
+  i Rewrite the arrow function as a function declaration inside the export default statement, like export default function foo() {}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

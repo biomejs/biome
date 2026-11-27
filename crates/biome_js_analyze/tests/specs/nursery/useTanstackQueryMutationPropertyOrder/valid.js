@@ -1,0 +1,64 @@
+/* should not generate diagnostics */
+import { useMutation, mutationOptions } from "@tanstack/react-query";
+import { useMutation as other } from "other-package";
+import { useMutation as tableMutation } from "@tanstack/react-table";
+
+useMutation({
+	mutationFn: (todo) => saveTodo(todo),
+	onMutate: (todo) => ({ previous: readTodo(todo.id) }),
+	onError: (error, todo, saved) => restoreTodo(saved.previous),
+	onSettled: (data, error, todo, saved) => refreshTodo(saved.previous),
+});
+
+useMutation({
+	onMutate,
+	gcTime: 5 * 60 * 1000,
+	onSettled,
+	...sharedOptions,
+	onError,
+});
+
+useMutation({
+	onSettled,
+	onError,
+});
+
+useMutation({
+	mutationFn,
+	onMutate() {},
+});
+
+useMutation({
+	onError,
+	[onMutate]: () => {},
+});
+
+useMutation({
+	onError,
+	...{ onMutate },
+});
+
+useMutation(options);
+useMutation();
+useMutation(() => ({ onError, onMutate }));
+useMutation({ mutationFn }, { onError, onMutate });
+
+mutationOptions({ onError, onMutate });
+
+other({
+	onError,
+	onMutate,
+});
+
+tableMutation({
+	onError,
+	onMutate,
+});
+
+function local() {
+	const useMutation = () => {};
+	useMutation({ onError, onMutate });
+}
+
+import * as rq from "@tanstack/react-query";
+rq.useMutation({ onError, onMutate });

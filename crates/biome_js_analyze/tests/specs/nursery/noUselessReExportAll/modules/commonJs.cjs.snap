@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: commonJs.cjs
+---
+# Input
+```cjs
+/* should not generate diagnostics */
+module.exports = { a: 1 };
+
+```

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_named_exports.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export function foo() {}
+export class Foo {}
+const bar = () => {};
+export { bar };
+const baz = 1;
+export { baz as default };
+export { qux as default } from "qux";
+
+```

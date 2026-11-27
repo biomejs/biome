@@ -43,6 +43,21 @@ impl AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlString(string) => {
                 let token = string.value_token().ok()?;
+                let text = token.text_trimmed();
+                // A backtick value is an Astro template literal. An unescaped `${`
+                // starts a substitution, so the runtime value is unknown.
+                if text.starts_with('`') {
+                    let mut bytes = text.bytes().peekable();
+                    while let Some(byte) = bytes.next() {
+                        match byte {
+                            b'\\' => {
+                                bytes.next();
+                            }
+                            b'$' if bytes.peek() == Some(&b'{') => return None,
+                            _ => {}
+                        }
+                    }
+                }
                 Some(StaticValue::String(token))
             }
             Self::HtmlAttributeSingleTextExpression(expression) => {

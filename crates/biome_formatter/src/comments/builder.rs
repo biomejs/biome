@@ -730,7 +730,7 @@ enum SourceParentheses<'a> {
     Empty,
     SourceMap {
         map: &'a TransformSourceMap,
-        next: Option<DeletedRangeEntry<'a>>,
+        next: Option<DeletedRangeEntry>,
         tail: DeletedRanges<'a>,
     },
 }
@@ -770,12 +770,7 @@ impl<'a> SourceParentheses<'a> {
                 while let Some(range) = next {
                     #[expect(clippy::comparison_chain)]
                     if range.transformed == offset {
-                        // A deleted range can contain multiple tokens. See if there's any `)` in the deleted
-                        // range and compute its source range.
-                        return range.text.find(')').map(|r_paren_position| {
-                            let start = range.source + TextSize::from(r_paren_position as u32);
-                            TextRange::at(start, TextSize::from(1))
-                        });
+                        return range.r_paren;
                     } else if range.transformed > offset {
                         return None;
                     } else {
@@ -1372,7 +1367,9 @@ mod tests {
 /* comment */
 b;"#;
 
-        let mut source_map_builder = TransformSourceMapBuilder::with_source(source.to_string());
+        let root = parse_module(source, JsParserOptions::default()).syntax();
+
+        let mut source_map_builder = TransformSourceMapBuilder::new(&root);
         let l_paren_range = TextRange::new(TextSize::from(1), TextSize::from(2));
         let r_paren_range = TextRange::new(TextSize::from(27), TextSize::from(28));
 
@@ -1380,15 +1377,13 @@ b;"#;
         assert_eq!(&source[r_paren_range], ")");
 
         source_map_builder.add_deleted_range(l_paren_range);
-        source_map_builder.add_deleted_range(r_paren_range);
+        source_map_builder.add_deleted_r_paren(r_paren_range);
         source_map_builder.extend_trimmed_node_range(
             TextRange::new(TextSize::from(7), TextSize::from(8)),
             TextRange::new(l_paren_range.start(), r_paren_range.end()),
         );
 
         let source_map = source_map_builder.finish();
-
-        let root = parse_module(source, JsParserOptions::default()).syntax();
 
         // A lot of code that simply removes the parenthesized expression and moves the parens
         // trivia to the identifiers leading / trailing trivia.

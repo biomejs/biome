@@ -41,6 +41,57 @@ impl<'phase, L: Language> VisitorContext<'phase, '_, L> {
 pub struct VisitorStartContext<'a, L: Language> {
     pub root: &'a LanguageRoot<L>,
     pub services: &'a mut ServiceBag,
+    tree: AnalyzedTree<'a, L>,
+}
+
+impl<'a, L: Language> VisitorStartContext<'a, L> {
+    pub(crate) fn new(root: &'a LanguageRoot<L>, services: &'a mut ServiceBag) -> Self {
+        Self {
+            root,
+            services,
+            tree: AnalyzedTree { root },
+        }
+    }
+
+    /// The tree the analyzer is running on.
+    pub fn tree(&self) -> AnalyzedTree<'a, L> {
+        self.tree
+    }
+}
+
+/// The tree an analyzer is running on.
+///
+/// Only the analyzer creates a value of this type, for the tree it analyzes,
+/// and hands it to its visitors through [`VisitorStartContext::tree`]. Holding
+/// one proves that the holder runs inside an analysis of that tree, not just
+/// that it holds its root. A service shared between the analyzers of several
+/// languages can therefore require it before giving out syntax nodes of `L`,
+/// so that holding a root of another language's tree is not enough to reach
+/// them.
+///
+/// It does not prove which analyzer runs: code that starts an [`Analyzer`] of
+/// its own on a root receives a value for that root.
+///
+/// [`Analyzer`]: crate::Analyzer
+///
+/// A value can't be created from a root obtained elsewhere:
+///
+/// ```compile_fail
+/// # use biome_analyze::AnalyzedTree;
+/// # use biome_rowan::raw_language::{RawLanguage, RawLanguageRoot};
+/// fn forge(root: &RawLanguageRoot) -> AnalyzedTree<'_, RawLanguage> {
+///     AnalyzedTree { root }
+/// }
+/// ```
+#[derive(Clone, Copy)]
+pub struct AnalyzedTree<'a, L: Language> {
+    root: &'a LanguageRoot<L>,
+}
+
+impl<'a, L: Language> AnalyzedTree<'a, L> {
+    pub fn root(&self) -> &'a LanguageRoot<L> {
+        self.root
+    }
 }
 
 /// Mutable context objects provided to the finish hook of visitors

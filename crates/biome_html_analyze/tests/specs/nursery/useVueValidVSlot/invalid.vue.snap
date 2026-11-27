@@ -62,6 +62,7 @@ expression: invalid.vue
   <MyComponent v-slot>content</MyComponent>
   <MyComponent v-slot="">content</MyComponent>
   <MyComponent #default="  ">content</MyComponent>
+  <mrow v-slot="x">content</mrow>
 </template>
 
 ```
@@ -539,7 +540,7 @@ invalid.vue:57:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━�
   > 57 │   <MyComponent v-slot="">content</MyComponent>
        │                ^^^^^^^^^
     58 │   <MyComponent #default="  ">content</MyComponent>
-    59 │ </template>
+    59 │   <mrow v-slot="x">content</mrow>
   
   i Without a value, the directive has no effect: the content of the component already goes to its default slot.
   
@@ -559,12 +560,33 @@ invalid.vue:58:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━�
     57 │   <MyComponent v-slot="">content</MyComponent>
   > 58 │   <MyComponent #default="  ">content</MyComponent>
        │                ^^^^^^^^^^^^^
-    59 │ </template>
-    60 │ 
+    59 │   <mrow v-slot="x">content</mrow>
+    60 │ </template>
   
   i Without a value, the directive has no effect: the content of the component already goes to its default slot.
   
   i Add the slot props you want to use, such as v-slot="{ item }", or remove the directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:59:9 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive must be used on a component, but <mrow> is not a component.
+  
+    57 │   <MyComponent v-slot="">content</MyComponent>
+    58 │   <MyComponent #default="  ">content</MyComponent>
+  > 59 │   <mrow v-slot="x">content</mrow>
+       │         ^^^^^^^^^^
+    60 │ </template>
+    61 │ 
+  
+  i Slots belong to components. Vue rejects v-slot anywhere else.
+  
+  i Move the directive to a component, or to a <template> placed directly inside a component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

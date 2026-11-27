@@ -38,12 +38,12 @@ impl TokenText {
     }
 
     pub(crate) fn new(token: GreenToken) -> Self {
-        let range = TextRange::at(TextSize::default(), token.text_len());
+        let range = TextRange::at(TextSize::default(), token.as_ref().text_len());
         Self { token, range }
     }
 
     pub(crate) fn with_range(token: GreenToken, range: TextRange) -> Self {
-        debug_assert!(range.end() <= token.text_len());
+        debug_assert!(range.end() <= token.as_ref().text_len());
         Self { token, range }
     }
 
@@ -95,7 +95,7 @@ impl TokenText {
     }
 
     pub fn text(&self) -> &str {
-        &self.token.text()[self.range]
+        &self.token.as_ref().text()[self.range]
     }
 
     /// Returns a view into this `TokenText` with leading and trailing
@@ -266,7 +266,7 @@ impl<P: TokenTextPattern> Iterator for TokenTextSplit<P> {
             return None;
         }
 
-        let hay = &self.token.text()[self.remaining];
+        let hay = &self.token.as_ref().text()[self.remaining];
 
         if let Some((start, end)) = self.pattern.find(hay) {
             let piece_len = TextSize::from(start as u32);

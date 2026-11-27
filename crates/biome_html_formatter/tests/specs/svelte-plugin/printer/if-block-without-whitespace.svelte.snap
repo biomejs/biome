@@ -18,14 +18,12 @@ info: printer/if-block-without-whitespace.svelte
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,9 @@
+@@ -1,3 +1,7 @@
  {#each items as item}
 -    <b>{item.name}</b>{#if item.isNew}*{/if}{#if item.isUpdated}!{/if}
-+    <b>{item.name}</b>
-+    {#if item.isNew}
++    <b>{item.name}</b>{#if item.isNew}
 +        *
-+    {/if}
-+    {#if item.isUpdated}
++    {/if}{#if item.isUpdated}
 +        !
 +    {/if}
  {/each}
@@ -35,11 +33,9 @@ info: printer/if-block-without-whitespace.svelte
 
 ```svelte
 {#each items as item}
-    <b>{item.name}</b>
-    {#if item.isNew}
+    <b>{item.name}</b>{#if item.isNew}
         *
-    {/if}
-    {#if item.isUpdated}
+    {/if}{#if item.isUpdated}
         !
     {/if}
 {/each}

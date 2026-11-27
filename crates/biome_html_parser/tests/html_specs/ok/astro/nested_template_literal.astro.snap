@@ -26,9 +26,7 @@ HtmlRoot {
         },
         r_fence_token: FENCE@61..64 "---" [] [],
     },
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@64..66 "<" [Newline("\n")] [],
@@ -83,9 +81,7 @@ HtmlRoot {
     1: ASTRO_EMBEDDED_CONTENT@3..61
       0: HTML_LITERAL@3..61 "const href = `/blog${page === 0 ? '' : `/${page + 1}`}`;\n" [Newline("\n")] []
     2: FENCE@61..64 "---" [] []
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@64..97
+  2: HTML_ROOT_ITEM_LIST@64..97
     0: HTML_ELEMENT@64..97
       0: HTML_OPENING_ELEMENT@64..89
         0: L_ANGLE@64..66 "<" [Newline("\n")] []
@@ -112,6 +108,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@95..96
           0: A_KW@95..96 "a" [] []
         3: R_ANGLE@96..97 ">" [] []
-  5: EOF@97..98 "" [Newline("\n")] []
+  3: EOF@97..98 "" [Newline("\n")] []
 
 ```

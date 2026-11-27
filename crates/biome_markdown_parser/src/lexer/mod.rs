@@ -89,6 +89,11 @@ pub enum MarkdownReLexContext {
     /// Document-level fenced code content and runs of indentation characters
     /// use the same mechanism.
     Span,
+    /// After a block quote prefix the parser has matched. If the rest of the
+    /// line is only spaces and tabs, it becomes one `MD_TEXTUAL_LITERAL`
+    /// without the line ending, because a blank line has no hard line break.
+    /// Otherwise the token is lexed as in the regular context.
+    BlankLineRest,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -130,6 +135,9 @@ pub(crate) struct MarkdownLexer<'src> {
     /// Mirrors [MarkdownParserOptions::with_cjk_friendly_emphasis], which
     /// changes which `_` runs can open emphasis.
     cjk_friendly_emphasis: bool,
+
+    /// Whether the source is MDX, where `{` opens an expression.
+    mdx: bool,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -284,12 +292,28 @@ impl<'src> MarkdownLexer<'src> {
             relex_span: None,
             frontmatter_fence: Cell::new(None),
             cjk_friendly_emphasis: false,
+            mdx: false,
         }
     }
 
     pub(crate) fn with_options(mut self, options: &MarkdownParserOptions) -> Self {
         self.cjk_friendly_emphasis = options.cjk_friendly_emphasis;
+        self.mdx = options.is_mdx();
         self
+    }
+
+    /// Returns whether `{` is an `L_CURLY` token in `context`. Only MDX has
+    /// expressions, and they can't start inside code spans or link
+    /// destinations.
+    fn lexes_curly(&self, context: MarkdownLexContext) -> bool {
+        self.mdx
+            && matches!(
+                context,
+                MarkdownLexContext::Regular
+                    | MarkdownLexContext::HeadingContent
+                    | MarkdownLexContext::EmphasisInline
+                    | MarkdownLexContext::Table
+            )
     }
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
@@ -431,6 +455,7 @@ impl<'src> MarkdownLexer<'src> {
             }
             BTO => self.consume_byte(L_BRACK),
             BTC => self.consume_byte(R_BRACK),
+            BEO if self.lexes_curly(context) => self.consume_byte(L_CURLY),
             // `(` and `)` are only syntax inside link destinations and titles,
             // which the parser lexes with the LinkDefinition context.
             // Anywhere else they are plain text.
@@ -1552,6 +1577,7 @@ impl<'src> MarkdownLexer<'src> {
                 | BTC  // ]
                 | BSL  // \
                 => break,
+                BEO if self.lexes_curly(context) => break,
                 // Parens are only syntax in link destinations and titles
                 // (LinkDefinition context); elsewhere they are plain text.
                 PNO | PNC => {
@@ -1838,6 +1864,17 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             Some(_) if context == MarkdownReLexContext::TextualFallback => {
                 self.consume_textual_impl::<false>(MarkdownLexContext::Regular)
             }
+            // Consume a whitespace run that ends the line as one text token,
+            // leaving the line ending as its own token.
+            Some(b' ' | b'\t')
+                if context == MarkdownReLexContext::BlankLineRest
+                    && self.current_whitespace_run_ends_line() =>
+            {
+                while matches!(self.current_byte(), Some(b' ' | b'\t')) {
+                    self.advance(1);
+                }
+                MD_TEXTUAL_LITERAL
+            }
             // Consume everything up to the end position the parser measured
             // as one token of the kind the parser chose.
             Some(_) if context == MarkdownReLexContext::Span => {
@@ -1857,9 +1894,9 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
                     MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
                     // Handled by the arms above; these contexts have no
                     // corresponding lex context.
-                    MarkdownReLexContext::TextualFallback | MarkdownReLexContext::Span => {
-                        MarkdownLexContext::Regular
-                    }
+                    MarkdownReLexContext::TextualFallback
+                    | MarkdownReLexContext::Span
+                    | MarkdownReLexContext::BlankLineRest => MarkdownLexContext::Regular,
                 };
 
                 self.consume_token(current, lex_context)

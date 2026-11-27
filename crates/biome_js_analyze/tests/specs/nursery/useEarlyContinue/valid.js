@@ -1,0 +1,125 @@
+/* should not generate diagnostics */
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+	}
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		save(item);
+	}
+
+	finish(item);
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		save(item);
+	} else {
+		skip(item);
+	}
+}
+
+for (const item of items)
+	if (item.isActive) {
+		process(item);
+		save(item);
+	}
+
+for (const item of items) {
+	if (!item.isActive) {
+		continue;
+	}
+
+	process(item);
+	save(item);
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		if (item.isReady) {
+			process(item);
+		}
+	}
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		save(item);
+	};
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		;
+	}
+}
+
+function hide(childNodes) {
+	for (const child of childNodes) {
+		if (condition(child)) {
+			child.remove();
+			return;
+		}
+	}
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		break;
+	}
+}
+
+for (const item of items) {
+	if (item.isInvalid) {
+		process(item);
+		throw new Error("Invalid item");
+	}
+}
+
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		continue;
+	}
+}
+
+function run(items) {
+	for (const item of items) {
+		if (item.isActive) {
+			process(item);
+			return;
+			;
+		}
+	}
+}
+
+function notALoop(item) {
+	if (item.isActive) {
+		process(item);
+		save(item);
+	}
+}
+
+for (const item of items) {
+	{
+		if (item.isActive) {
+			process(item);
+			save(item);
+		}
+	}
+}
+
+switch (value) {
+	case 1:
+		if (item.isActive) {
+			process(item);
+			save(item);
+		}
+}

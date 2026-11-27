@@ -405,9 +405,7 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
         let Some(pieces) = node.first_leading_trivia().map(|trivia| trivia.pieces()) else {
             return;
         };
-        let (sibling, new_sibling) = if let Some(next_sibling) =
-            node.last_token().and_then(|x| x.next_token())
-        {
+        let (sibling, new_sibling) = if let Some(next_sibling) = node.next_token() {
             let mut next_sibling_leading_trivia = next_sibling.leading_trivia().pieces().peekable();
             // Remove next newline
             next_sibling_leading_trivia.next_if(|piece| piece.is_newline());

@@ -143,8 +143,7 @@ pub fn scan_definitions(
                     bogus
                         .items()
                         .next()
-                        .map(|item| item.kind().into())
-                        .unwrap_or_default(),
+                        .map_or_default(|item| item.kind().into()),
                 ));
             }
         }

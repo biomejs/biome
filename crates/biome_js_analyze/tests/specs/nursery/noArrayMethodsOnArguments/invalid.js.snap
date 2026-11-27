@@ -1,0 +1,1180 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function staticMember() { arguments.map(() => {}); }
+function stringMember() { arguments["map"](() => {}); }
+function templateMember() { arguments[`map`](() => {}); }
+function parenthesized() { (arguments).map(() => {}); }
+function optionalMember() { arguments?.map(() => {}); }
+function nestedArrow() { return () => arguments.map(() => {}); }
+function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+const expression = function () { arguments.at(0); };
+const object = {
+	method() { arguments.concat([]); },
+	get getter() { return arguments.join(); },
+	set setter(value) { arguments.push(value); },
+};
+class Foo {
+	constructor() { arguments.slice(); }
+	method() { arguments.some(() => {}); }
+	get getter() { return arguments.every(() => {}); }
+	set setter(value) { arguments.includes(value); }
+}
+export default function () { arguments.indexOf(0); }
+function allMethods() {
+	arguments.at(0);
+	arguments.concat([]);
+	arguments.copyWithin(0);
+	arguments.entries();
+	arguments.every(() => {});
+	arguments.fill(0);
+	arguments.filter(() => {});
+	arguments.find(() => {});
+	arguments.findIndex(() => {});
+	arguments.findLast(() => {});
+	arguments.findLastIndex(() => {});
+	arguments.flat();
+	arguments.flatMap(() => {});
+	arguments.forEach(() => {});
+	arguments.includes(0);
+	arguments.indexOf(0);
+	arguments.join();
+	arguments.keys();
+	arguments.lastIndexOf(0);
+	arguments.map(() => {});
+	arguments.pop();
+	arguments.push(0);
+	arguments.reduce(() => {});
+	arguments.reduceRight(() => {});
+	arguments.reverse();
+	arguments.shift();
+	arguments.slice();
+	arguments.some(() => {});
+	arguments.sort();
+	arguments.splice(0);
+	arguments.toReversed();
+	arguments.toSorted();
+	arguments.toSpliced(0);
+	arguments.unshift();
+	arguments.values();
+	arguments.with(0, 0);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:27 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function staticMember() { arguments.map(() => {}); }
+      │                           ^^^^^^^^^^^^^
+    3 │ function stringMember() { arguments["map"](() => {}); }
+    4 │ function templateMember() { arguments[`map`](() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:27 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function staticMember() { arguments.map(() => {}); }
+  > 3 │ function stringMember() { arguments["map"](() => {}); }
+      │                           ^^^^^^^^^^^^^^^^
+    4 │ function templateMember() { arguments[`map`](() => {}); }
+    5 │ function parenthesized() { (arguments).map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:29 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    2 │ function staticMember() { arguments.map(() => {}); }
+    3 │ function stringMember() { arguments["map"](() => {}); }
+  > 4 │ function templateMember() { arguments[`map`](() => {}); }
+      │                             ^^^^^^^^^^^^^^^^
+    5 │ function parenthesized() { (arguments).map(() => {}); }
+    6 │ function optionalMember() { arguments?.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:28 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    3 │ function stringMember() { arguments["map"](() => {}); }
+    4 │ function templateMember() { arguments[`map`](() => {}); }
+  > 5 │ function parenthesized() { (arguments).map(() => {}); }
+      │                            ^^^^^^^^^^^^^^^
+    6 │ function optionalMember() { arguments?.map(() => {}); }
+    7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:29 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    4 │ function templateMember() { arguments[`map`](() => {}); }
+    5 │ function parenthesized() { (arguments).map(() => {}); }
+  > 6 │ function optionalMember() { arguments?.map(() => {}); }
+      │                             ^^^^^^^^^^^^^^
+    7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+    8 │ function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:39 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    5 │ function parenthesized() { (arguments).map(() => {}); }
+    6 │ function optionalMember() { arguments?.map(() => {}); }
+  > 7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+      │                                       ^^^^^^^^^^^^^
+    8 │ function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+    9 │ const expression = function () { arguments.at(0); };
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:20 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+     6 │ function optionalMember() { arguments?.map(() => {}); }
+     7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+   > 8 │ function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+       │                    ^^^^^^^^^^^^^
+     9 │ const expression = function () { arguments.at(0); };
+    10 │ const object = {
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:45 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a filter() method.
+  
+     6 │ function optionalMember() { arguments?.map(() => {}); }
+     7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+   > 8 │ function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+       │                                             ^^^^^^^^^^^^^^^^
+     9 │ const expression = function () { arguments.at(0); };
+    10 │ const object = {
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:34 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a at() method.
+  
+     7 │ function nestedArrow() { return () => arguments.map(() => {}); }
+     8 │ function twice() { arguments.map(() => {}); arguments.filter(() => {}); }
+   > 9 │ const expression = function () { arguments.at(0); };
+       │                                  ^^^^^^^^^^^^
+    10 │ const object = {
+    11 │ 	method() { arguments.concat([]); },
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:13 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a concat() method.
+  
+     9 │ const expression = function () { arguments.at(0); };
+    10 │ const object = {
+  > 11 │ 	method() { arguments.concat([]); },
+       │ 	           ^^^^^^^^^^^^^^^^
+    12 │ 	get getter() { return arguments.join(); },
+    13 │ 	set setter(value) { arguments.push(value); },
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:24 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a join() method.
+  
+    10 │ const object = {
+    11 │ 	method() { arguments.concat([]); },
+  > 12 │ 	get getter() { return arguments.join(); },
+       │ 	                      ^^^^^^^^^^^^^^
+    13 │ 	set setter(value) { arguments.push(value); },
+    14 │ };
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:22 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a push() method.
+  
+    11 │ 	method() { arguments.concat([]); },
+    12 │ 	get getter() { return arguments.join(); },
+  > 13 │ 	set setter(value) { arguments.push(value); },
+       │ 	                    ^^^^^^^^^^^^^^
+    14 │ };
+    15 │ class Foo {
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:18 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a slice() method.
+  
+    14 │ };
+    15 │ class Foo {
+  > 16 │ 	constructor() { arguments.slice(); }
+       │ 	                ^^^^^^^^^^^^^^^
+    17 │ 	method() { arguments.some(() => {}); }
+    18 │ 	get getter() { return arguments.every(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:13 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a some() method.
+  
+    15 │ class Foo {
+    16 │ 	constructor() { arguments.slice(); }
+  > 17 │ 	method() { arguments.some(() => {}); }
+       │ 	           ^^^^^^^^^^^^^^
+    18 │ 	get getter() { return arguments.every(() => {}); }
+    19 │ 	set setter(value) { arguments.includes(value); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a every() method.
+  
+    16 │ 	constructor() { arguments.slice(); }
+    17 │ 	method() { arguments.some(() => {}); }
+  > 18 │ 	get getter() { return arguments.every(() => {}); }
+       │ 	                      ^^^^^^^^^^^^^^^
+    19 │ 	set setter(value) { arguments.includes(value); }
+    20 │ }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:22 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a includes() method.
+  
+    17 │ 	method() { arguments.some(() => {}); }
+    18 │ 	get getter() { return arguments.every(() => {}); }
+  > 19 │ 	set setter(value) { arguments.includes(value); }
+       │ 	                    ^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ export default function () { arguments.indexOf(0); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:30 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a indexOf() method.
+  
+    19 │ 	set setter(value) { arguments.includes(value); }
+    20 │ }
+  > 21 │ export default function () { arguments.indexOf(0); }
+       │                              ^^^^^^^^^^^^^^^^^
+    22 │ function allMethods() {
+    23 │ 	arguments.at(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a at() method.
+  
+    21 │ export default function () { arguments.indexOf(0); }
+    22 │ function allMethods() {
+  > 23 │ 	arguments.at(0);
+       │ 	^^^^^^^^^^^^
+    24 │ 	arguments.concat([]);
+    25 │ 	arguments.copyWithin(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a concat() method.
+  
+    22 │ function allMethods() {
+    23 │ 	arguments.at(0);
+  > 24 │ 	arguments.concat([]);
+       │ 	^^^^^^^^^^^^^^^^
+    25 │ 	arguments.copyWithin(0);
+    26 │ 	arguments.entries();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a copyWithin() method.
+  
+    23 │ 	arguments.at(0);
+    24 │ 	arguments.concat([]);
+  > 25 │ 	arguments.copyWithin(0);
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    26 │ 	arguments.entries();
+    27 │ 	arguments.every(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a entries() method.
+  
+    24 │ 	arguments.concat([]);
+    25 │ 	arguments.copyWithin(0);
+  > 26 │ 	arguments.entries();
+       │ 	^^^^^^^^^^^^^^^^^
+    27 │ 	arguments.every(() => {});
+    28 │ 	arguments.fill(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a every() method.
+  
+    25 │ 	arguments.copyWithin(0);
+    26 │ 	arguments.entries();
+  > 27 │ 	arguments.every(() => {});
+       │ 	^^^^^^^^^^^^^^^
+    28 │ 	arguments.fill(0);
+    29 │ 	arguments.filter(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a fill() method.
+  
+    26 │ 	arguments.entries();
+    27 │ 	arguments.every(() => {});
+  > 28 │ 	arguments.fill(0);
+       │ 	^^^^^^^^^^^^^^
+    29 │ 	arguments.filter(() => {});
+    30 │ 	arguments.find(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a filter() method.
+  
+    27 │ 	arguments.every(() => {});
+    28 │ 	arguments.fill(0);
+  > 29 │ 	arguments.filter(() => {});
+       │ 	^^^^^^^^^^^^^^^^
+    30 │ 	arguments.find(() => {});
+    31 │ 	arguments.findIndex(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a find() method.
+  
+    28 │ 	arguments.fill(0);
+    29 │ 	arguments.filter(() => {});
+  > 30 │ 	arguments.find(() => {});
+       │ 	^^^^^^^^^^^^^^
+    31 │ 	arguments.findIndex(() => {});
+    32 │ 	arguments.findLast(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a findIndex() method.
+  
+    29 │ 	arguments.filter(() => {});
+    30 │ 	arguments.find(() => {});
+  > 31 │ 	arguments.findIndex(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^
+    32 │ 	arguments.findLast(() => {});
+    33 │ 	arguments.findLastIndex(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a findLast() method.
+  
+    30 │ 	arguments.find(() => {});
+    31 │ 	arguments.findIndex(() => {});
+  > 32 │ 	arguments.findLast(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^
+    33 │ 	arguments.findLastIndex(() => {});
+    34 │ 	arguments.flat();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a findLastIndex() method.
+  
+    31 │ 	arguments.findIndex(() => {});
+    32 │ 	arguments.findLast(() => {});
+  > 33 │ 	arguments.findLastIndex(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 	arguments.flat();
+    35 │ 	arguments.flatMap(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a flat() method.
+  
+    32 │ 	arguments.findLast(() => {});
+    33 │ 	arguments.findLastIndex(() => {});
+  > 34 │ 	arguments.flat();
+       │ 	^^^^^^^^^^^^^^
+    35 │ 	arguments.flatMap(() => {});
+    36 │ 	arguments.forEach(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a flatMap() method.
+  
+    33 │ 	arguments.findLastIndex(() => {});
+    34 │ 	arguments.flat();
+  > 35 │ 	arguments.flatMap(() => {});
+       │ 	^^^^^^^^^^^^^^^^^
+    36 │ 	arguments.forEach(() => {});
+    37 │ 	arguments.includes(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a forEach() method.
+  
+    34 │ 	arguments.flat();
+    35 │ 	arguments.flatMap(() => {});
+  > 36 │ 	arguments.forEach(() => {});
+       │ 	^^^^^^^^^^^^^^^^^
+    37 │ 	arguments.includes(0);
+    38 │ 	arguments.indexOf(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a includes() method.
+  
+    35 │ 	arguments.flatMap(() => {});
+    36 │ 	arguments.forEach(() => {});
+  > 37 │ 	arguments.includes(0);
+       │ 	^^^^^^^^^^^^^^^^^^
+    38 │ 	arguments.indexOf(0);
+    39 │ 	arguments.join();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a indexOf() method.
+  
+    36 │ 	arguments.forEach(() => {});
+    37 │ 	arguments.includes(0);
+  > 38 │ 	arguments.indexOf(0);
+       │ 	^^^^^^^^^^^^^^^^^
+    39 │ 	arguments.join();
+    40 │ 	arguments.keys();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a join() method.
+  
+    37 │ 	arguments.includes(0);
+    38 │ 	arguments.indexOf(0);
+  > 39 │ 	arguments.join();
+       │ 	^^^^^^^^^^^^^^
+    40 │ 	arguments.keys();
+    41 │ 	arguments.lastIndexOf(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a keys() method.
+  
+    38 │ 	arguments.indexOf(0);
+    39 │ 	arguments.join();
+  > 40 │ 	arguments.keys();
+       │ 	^^^^^^^^^^^^^^
+    41 │ 	arguments.lastIndexOf(0);
+    42 │ 	arguments.map(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a lastIndexOf() method.
+  
+    39 │ 	arguments.join();
+    40 │ 	arguments.keys();
+  > 41 │ 	arguments.lastIndexOf(0);
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	arguments.map(() => {});
+    43 │ 	arguments.pop();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    40 │ 	arguments.keys();
+    41 │ 	arguments.lastIndexOf(0);
+  > 42 │ 	arguments.map(() => {});
+       │ 	^^^^^^^^^^^^^
+    43 │ 	arguments.pop();
+    44 │ 	arguments.push(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a pop() method.
+  
+    41 │ 	arguments.lastIndexOf(0);
+    42 │ 	arguments.map(() => {});
+  > 43 │ 	arguments.pop();
+       │ 	^^^^^^^^^^^^^
+    44 │ 	arguments.push(0);
+    45 │ 	arguments.reduce(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a push() method.
+  
+    42 │ 	arguments.map(() => {});
+    43 │ 	arguments.pop();
+  > 44 │ 	arguments.push(0);
+       │ 	^^^^^^^^^^^^^^
+    45 │ 	arguments.reduce(() => {});
+    46 │ 	arguments.reduceRight(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a reduce() method.
+  
+    43 │ 	arguments.pop();
+    44 │ 	arguments.push(0);
+  > 45 │ 	arguments.reduce(() => {});
+       │ 	^^^^^^^^^^^^^^^^
+    46 │ 	arguments.reduceRight(() => {});
+    47 │ 	arguments.reverse();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a reduceRight() method.
+  
+    44 │ 	arguments.push(0);
+    45 │ 	arguments.reduce(() => {});
+  > 46 │ 	arguments.reduceRight(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	arguments.reverse();
+    48 │ 	arguments.shift();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a reverse() method.
+  
+    45 │ 	arguments.reduce(() => {});
+    46 │ 	arguments.reduceRight(() => {});
+  > 47 │ 	arguments.reverse();
+       │ 	^^^^^^^^^^^^^^^^^
+    48 │ 	arguments.shift();
+    49 │ 	arguments.slice();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a shift() method.
+  
+    46 │ 	arguments.reduceRight(() => {});
+    47 │ 	arguments.reverse();
+  > 48 │ 	arguments.shift();
+       │ 	^^^^^^^^^^^^^^^
+    49 │ 	arguments.slice();
+    50 │ 	arguments.some(() => {});
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a slice() method.
+  
+    47 │ 	arguments.reverse();
+    48 │ 	arguments.shift();
+  > 49 │ 	arguments.slice();
+       │ 	^^^^^^^^^^^^^^^
+    50 │ 	arguments.some(() => {});
+    51 │ 	arguments.sort();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a some() method.
+  
+    48 │ 	arguments.shift();
+    49 │ 	arguments.slice();
+  > 50 │ 	arguments.some(() => {});
+       │ 	^^^^^^^^^^^^^^
+    51 │ 	arguments.sort();
+    52 │ 	arguments.splice(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a sort() method.
+  
+    49 │ 	arguments.slice();
+    50 │ 	arguments.some(() => {});
+  > 51 │ 	arguments.sort();
+       │ 	^^^^^^^^^^^^^^
+    52 │ 	arguments.splice(0);
+    53 │ 	arguments.toReversed();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a splice() method.
+  
+    50 │ 	arguments.some(() => {});
+    51 │ 	arguments.sort();
+  > 52 │ 	arguments.splice(0);
+       │ 	^^^^^^^^^^^^^^^^
+    53 │ 	arguments.toReversed();
+    54 │ 	arguments.toSorted();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a toReversed() method.
+  
+    51 │ 	arguments.sort();
+    52 │ 	arguments.splice(0);
+  > 53 │ 	arguments.toReversed();
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    54 │ 	arguments.toSorted();
+    55 │ 	arguments.toSpliced(0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a toSorted() method.
+  
+    52 │ 	arguments.splice(0);
+    53 │ 	arguments.toReversed();
+  > 54 │ 	arguments.toSorted();
+       │ 	^^^^^^^^^^^^^^^^^^
+    55 │ 	arguments.toSpliced(0);
+    56 │ 	arguments.unshift();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a toSpliced() method.
+  
+    53 │ 	arguments.toReversed();
+    54 │ 	arguments.toSorted();
+  > 55 │ 	arguments.toSpliced(0);
+       │ 	^^^^^^^^^^^^^^^^^^^
+    56 │ 	arguments.unshift();
+    57 │ 	arguments.values();
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a unshift() method.
+  
+    54 │ 	arguments.toSorted();
+    55 │ 	arguments.toSpliced(0);
+  > 56 │ 	arguments.unshift();
+       │ 	^^^^^^^^^^^^^^^^^
+    57 │ 	arguments.values();
+    58 │ 	arguments.with(0, 0);
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a values() method.
+  
+    55 │ 	arguments.toSpliced(0);
+    56 │ 	arguments.unshift();
+  > 57 │ 	arguments.values();
+       │ 	^^^^^^^^^^^^^^^^
+    58 │ 	arguments.with(0, 0);
+    59 │ }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:2 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a with() method.
+  
+    56 │ 	arguments.unshift();
+    57 │ 	arguments.values();
+  > 58 │ 	arguments.with(0, 0);
+       │ 	^^^^^^^^^^^^^^
+    59 │ }
+    60 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

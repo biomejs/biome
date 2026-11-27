@@ -61,10 +61,6 @@ impl GrowthGuard {
         self.previous_diff = diff;
 
         // Enforce limits
-        if self.growth_streak >= STREAK_LIMIT || self.accel_streak >= STREAK_LIMIT {
-            return false;
-        }
-
-        true
+        self.growth_streak < STREAK_LIMIT && self.accel_streak < STREAK_LIMIT
     }
 }

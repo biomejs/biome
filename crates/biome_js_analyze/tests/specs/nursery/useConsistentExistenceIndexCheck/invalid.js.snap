@@ -1,0 +1,536 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+{
+	const index = foo.indexOf(bar);
+	index < 0;
+}
+{
+	const index = foo.indexOf(bar);
+	index >= 0;
+}
+{
+	const index = foo.indexOf(bar);
+	index > -1;
+}
+{
+	const index = foo.lastIndexOf(bar);
+	if (index < 0) {}
+}
+{
+	const index = foo.findIndex((element) => element > 10);
+	if (index >= 0) {}
+}
+{
+	const index = foo.findLastIndex((element) => element > 10);
+	if (index > -1) {}
+}
+{
+	const index = (foo.indexOf(bar));
+	(index) < (0);
+}
+{
+	const index = foo.indexOf(bar);
+	index > -(1);
+}
+{
+	const index = _.indexOf([1, 2, 1, 2], 2);
+	index < 0;
+}
+{
+	const index = foo.indexOf(bar);
+	function inner() {
+		if (index < 0) {}
+	}
+}
+{
+	const index1 = foo.indexOf("1"),
+		index2 = foo.indexOf("2");
+	index1 < 0;
+	index2 >= 0;
+}
+{
+	const index = (foo.indexOf)(bar);
+	index < 0;
+}
+{
+	const index = foo.indexOf("1");
+	((
+		/* comment 1 */
+		((
+			/* comment 2 */
+			index
+			/* comment 3 */
+		))
+		/* comment 4 */
+		<
+		/* comment 5 */
+		((
+			/* comment 6 */
+			0
+			/* comment 7 */
+		))
+		/* comment 8 */
+	));
+}
+{
+	const index = foo.indexOf("1");
+	((
+		/* comment 1 */
+		((
+			/* comment 2 */
+			index
+			/* comment 3 */
+		))
+		/* comment 4 */
+		>
+		((
+			/* comment 5 */
+			- /* comment 6 */ (( /* comment 7 */ 1 /* comment 8 */ ))
+			/* comment 9 */
+		))
+	));
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    2 │ {
+    3 │ 	const index = foo.indexOf(bar);
+  > 4 │ 	index < 0;
+      │ 	      ^^^
+    5 │ }
+    6 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+     2  2 │   {
+     3  3 │     const index = foo.indexOf(bar);
+     4    │ - → index·<·0;
+        4 │ + → index·===·-1;
+     5  5 │   }
+     6  6 │   {
+  
+
+```
+
+```
+invalid.js:8:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses >= 0 to check whether indexOf() found an element.
+  
+     6 │ {
+     7 │ 	const index = foo.indexOf(bar);
+   > 8 │ 	index >= 0;
+       │ 	      ^^^^
+     9 │ }
+    10 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+     6  6 │   {
+     7  7 │     const index = foo.indexOf(bar);
+     8    │ - → index·>=·0;
+        8 │ + → index·!==·-1;
+     9  9 │   }
+    10 10 │   {
+  
+
+```
+
+```
+invalid.js:12:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses > -1 to check whether indexOf() found an element.
+  
+    10 │ {
+    11 │ 	const index = foo.indexOf(bar);
+  > 12 │ 	index > -1;
+       │ 	      ^^^^
+    13 │ }
+    14 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    10 10 │   {
+    11 11 │     const index = foo.indexOf(bar);
+    12    │ - → index·>·-1;
+       12 │ + → index·!==·-1;
+    13 13 │   }
+    14 14 │   {
+  
+
+```
+
+```
+invalid.js:16:12 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether lastIndexOf() found no element.
+  
+    14 │ {
+    15 │ 	const index = foo.lastIndexOf(bar);
+  > 16 │ 	if (index < 0) {}
+       │ 	          ^^^
+    17 │ }
+    18 │ {
+  
+  i lastIndexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    14 14 │   {
+    15 15 │     const index = foo.lastIndexOf(bar);
+    16    │ - → if·(index·<·0)·{}
+       16 │ + → if·(index·===·-1)·{}
+    17 17 │   }
+    18 18 │   {
+  
+
+```
+
+```
+invalid.js:20:12 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses >= 0 to check whether findIndex() found an element.
+  
+    18 │ {
+    19 │ 	const index = foo.findIndex((element) => element > 10);
+  > 20 │ 	if (index >= 0) {}
+       │ 	          ^^^^
+    21 │ }
+    22 │ {
+  
+  i findIndex() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    18 18 │   {
+    19 19 │     const index = foo.findIndex((element) => element > 10);
+    20    │ - → if·(index·>=·0)·{}
+       20 │ + → if·(index·!==·-1)·{}
+    21 21 │   }
+    22 22 │   {
+  
+
+```
+
+```
+invalid.js:24:12 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses > -1 to check whether findLastIndex() found an element.
+  
+    22 │ {
+    23 │ 	const index = foo.findLastIndex((element) => element > 10);
+  > 24 │ 	if (index > -1) {}
+       │ 	          ^^^^
+    25 │ }
+    26 │ {
+  
+  i findLastIndex() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    22 22 │   {
+    23 23 │     const index = foo.findLastIndex((element) => element > 10);
+    24    │ - → if·(index·>·-1)·{}
+       24 │ + → if·(index·!==·-1)·{}
+    25 25 │   }
+    26 26 │   {
+  
+
+```
+
+```
+invalid.js:28:10 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    26 │ {
+    27 │ 	const index = (foo.indexOf(bar));
+  > 28 │ 	(index) < (0);
+       │ 	        ^^^^^
+    29 │ }
+    30 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    26 26 │   {
+    27 27 │     const index = (foo.indexOf(bar));
+    28    │ - → (index)·<·(0);
+       28 │ + → (index)·===·(-1);
+    29 29 │   }
+    30 30 │   {
+  
+
+```
+
+```
+invalid.js:32:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses > -1 to check whether indexOf() found an element.
+  
+    30 │ {
+    31 │ 	const index = foo.indexOf(bar);
+  > 32 │ 	index > -(1);
+       │ 	      ^^^^^^
+    33 │ }
+    34 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    30 30 │   {
+    31 31 │     const index = foo.indexOf(bar);
+    32    │ - → index·>·-(1);
+       32 │ + → index·!==·-(1);
+    33 33 │   }
+    34 34 │   {
+  
+
+```
+
+```
+invalid.js:36:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    34 │ {
+    35 │ 	const index = _.indexOf([1, 2, 1, 2], 2);
+  > 36 │ 	index < 0;
+       │ 	      ^^^
+    37 │ }
+    38 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    34 34 │   {
+    35 35 │     const index = _.indexOf([1, 2, 1, 2], 2);
+    36    │ - → index·<·0;
+       36 │ + → index·===·-1;
+    37 37 │   }
+    38 38 │   {
+  
+
+```
+
+```
+invalid.js:41:13 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    39 │ 	const index = foo.indexOf(bar);
+    40 │ 	function inner() {
+  > 41 │ 		if (index < 0) {}
+       │ 		          ^^^
+    42 │ 	}
+    43 │ }
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    39 39 │     const index = foo.indexOf(bar);
+    40 40 │     function inner() {
+    41    │ - → → if·(index·<·0)·{}
+       41 │ + → → if·(index·===·-1)·{}
+    42 42 │     }
+    43 43 │   }
+  
+
+```
+
+```
+invalid.js:47:9 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    45 │ 	const index1 = foo.indexOf("1"),
+    46 │ 		index2 = foo.indexOf("2");
+  > 47 │ 	index1 < 0;
+       │ 	       ^^^
+    48 │ 	index2 >= 0;
+    49 │ }
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    45 45 │     const index1 = foo.indexOf("1"),
+    46 46 │       index2 = foo.indexOf("2");
+    47    │ - → index1·<·0;
+       47 │ + → index1·===·-1;
+    48 48 │     index2 >= 0;
+    49 49 │   }
+  
+
+```
+
+```
+invalid.js:48:9 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses >= 0 to check whether indexOf() found an element.
+  
+    46 │ 		index2 = foo.indexOf("2");
+    47 │ 	index1 < 0;
+  > 48 │ 	index2 >= 0;
+       │ 	       ^^^^
+    49 │ }
+    50 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    46 46 │       index2 = foo.indexOf("2");
+    47 47 │     index1 < 0;
+    48    │ - → index2·>=·0;
+       48 │ + → index2·!==·-1;
+    49 49 │   }
+    50 50 │   {
+  
+
+```
+
+```
+invalid.js:52:8 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    50 │ {
+    51 │ 	const index = (foo.indexOf)(bar);
+  > 52 │ 	index < 0;
+       │ 	      ^^^
+    53 │ }
+    54 │ {
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    50 50 │   {
+    51 51 │     const index = (foo.indexOf)(bar);
+    52    │ - → index·<·0;
+       52 │ + → index·===·-1;
+    53 53 │   }
+    54 54 │   {
+  
+
+```
+
+```
+invalid.js:64:3 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses < 0 to check whether indexOf() found no element.
+  
+    62 │ 		))
+    63 │ 		/* comment 4 */
+  > 64 │ 		<
+       │ 		^
+  > 65 │ 		/* comment 5 */
+        ...
+  > 69 │ 			/* comment 7 */
+  > 70 │ 		))
+       │ 		^^
+    71 │ 		/* comment 8 */
+    72 │ 	));
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use === -1 instead.
+  
+    62 62 │       ))
+    63 63 │       /* comment 4 */
+    64    │ - → → <
+       64 │ + → → ===
+    65 65 │       /* comment 5 */
+    66 66 │       ((
+    67 67 │         /* comment 6 */
+    68    │ - → → → 0
+       68 │ + → → → -1
+    69 69 │         /* comment 7 */
+    70 70 │       ))
+  
+
+```
+
+```
+invalid.js:84:3 lint/nursery/useConsistentExistenceIndexCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This uses > -1 to check whether indexOf() found an element.
+  
+    82 │ 		))
+    83 │ 		/* comment 4 */
+  > 84 │ 		>
+       │ 		^
+  > 85 │ 		((
+  > 86 │ 			/* comment 5 */
+  > 87 │ 			- /* comment 6 */ (( /* comment 7 */ 1 /* comment 8 */ ))
+  > 88 │ 			/* comment 9 */
+  > 89 │ 		))
+       │ 		^^
+    90 │ 	));
+    91 │ }
+  
+  i indexOf() returns -1 when it finds no element. Comparing the result with -1 makes it clear that the code checks for this value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use !== -1 instead.
+  
+    82 82 │       ))
+    83 83 │       /* comment 4 */
+    84    │ - → → >
+       84 │ + → → !==
+    85 85 │       ((
+    86 86 │         /* comment 5 */
+  
+
+```

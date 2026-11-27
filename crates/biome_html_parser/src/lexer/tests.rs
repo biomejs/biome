@@ -396,12 +396,32 @@ fn unquoted_attribute_value_invalid_chars() {
 }
 
 #[test]
-fn cdata_full() {
+fn cdata_start_in_regular_context() {
+    assert_lex! {
+        HtmlLexContext::Regular {
+            framework: HtmlFramework::Plain,
+        },
+        "<![CDATA[",
+        CDATA_START: 9,
+    }
+}
+
+#[test]
+fn cdata_content() {
     assert_lex! {
         HtmlLexContext::CdataSection,
-        "<![CDATA[1]]>",
-        CDATA_START: 9,
+        "1]]>",
         HTML_LITERAL: 1,
+        CDATA_END: 3,
+    }
+}
+
+#[test]
+fn cdata_start_in_content_is_literal() {
+    assert_lex! {
+        HtmlLexContext::CdataSection,
+        "<![CDATA[x]]>",
+        HTML_LITERAL: 10,
         CDATA_END: 3,
     }
 }
@@ -641,6 +661,79 @@ fn known_svg_tag_name_is_case_sensitive() {
         "<fegaussianblur>",
         L_ANGLE: 1,
         HTML_UNKNOWN_TAG: 14,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_mathml_tag_name_is_case_insensitive() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<mfrac>",
+        L_ANGLE: 1,
+        MFRAC_KW: 5,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<MATH>",
+        L_ANGLE: 1,
+        MATH_KW: 4,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<mI>",
+        L_ANGLE: 1,
+        MI_KW: 2,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn known_tag_name_with_dash_is_a_keyword() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },
+        "<ANNOTATION-XML>",
+        L_ANGLE: 1,
+        ANNOTATION_XML_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<annotation-xml>",
+        L_ANGLE: 1,
+        ANNOTATION_XML_KW: 14,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Svelte },
+        "<font-face>",
+        L_ANGLE: 1,
+        FONT_FACE_KW: 9,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn pascal_case_mathml_tag_is_a_component_in_frameworks() {
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Astro },
+        "<Math>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 4,
+        R_ANGLE: 1,
+    }
+
+    assert_lex! {
+        HtmlLexContext::InsideTag { framework: HtmlFramework::Vue },
+        "<Annotation-xml>",
+        L_ANGLE: 1,
+        HTML_COMPONENT_LITERAL: 14,
         R_ANGLE: 1,
     }
 }

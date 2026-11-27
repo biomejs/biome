@@ -3,6 +3,7 @@ use crate::settings::{
     LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings, VcsIgnoredPatterns,
     to_json_language_settings,
 };
+use crate::workspace::IgnoreKind;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, Style};
 use biome_configuration::html::{HtmlConfiguration, HtmlParserConfiguration};
@@ -563,17 +564,137 @@ fn test_project_scan_disables_module_graph_type_inference() {
 
 #[test]
 fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
+    let root = BiomePath::new("repo");
     let ignored_patterns = VcsIgnoredPatterns::Git {
         root: VcsIgnoredPatterns::git_ignore(
-            Utf8Path::new("repo"),
+            &root,
             &["/*", "!/src", "!/biome.jsonc", "!/.gitignore"],
         )
         .unwrap(),
         nested: vec![],
     };
 
-    assert!(!ignored_patterns.is_ignored(Utf8Path::new("repo/src/file.js"), false, None));
-    assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
+    assert!(!ignored_patterns.is_ignored(
+        &BiomePath::new("repo/src/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("repo/tests/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+}
+
+#[test]
+fn nested_vcs_ignore_patterns_override_parent_patterns() {
+    let root = BiomePath::new("repo");
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&root, &["*.js"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/src/generated"), &["keep.js"])
+            .unwrap(),
+    );
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/src"), &["!keep.js", "dist/"])
+            .unwrap(),
+    );
+
+    assert!(!ignored_patterns.is_ignored(
+        &BiomePath::new("repo/src/keep.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("repo/src/generated/keep.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("repo/src/dist/file.css"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("repo/other.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+}
+
+#[test]
+fn nested_vcs_whitelist_cannot_reinclude_file_below_ignored_parent() {
+    let root = BiomePath::new("repo");
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&root, &["ignored/"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("repo/ignored"), &["!file.js"]).unwrap(),
+    );
+
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("repo/ignored/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+}
+
+#[test]
+fn nested_vcs_directory_whitelist_does_not_reinclude_files_matched_by_parent_rules() {
+    let mut ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo"), &["*.js"]).unwrap(),
+        nested: vec![],
+    };
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg"), &["*.css", "!src/"]).unwrap(),
+    );
+    ignored_patterns.insert_git_match(
+        VcsIgnoredPatterns::git_ignore(&BiomePath::new("/repo/pkg/src"), &["!b/"]).unwrap(),
+    );
+
+    assert!(!ignored_patterns.is_ignored(
+        &BiomePath::new("/repo/pkg/src"),
+        true,
+        IgnoreKind::Ancestors
+    ));
+    assert!(!ignored_patterns.is_ignored(
+        &BiomePath::new("/repo/pkg/src/file.json"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("/repo/pkg/src/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("/repo/pkg/src/b/file.css"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+}
+
+#[test]
+fn relative_vcs_root_is_stripped_once() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(&BiomePath::new("lib"), &["/lib/file.js", "/rary"])
+            .unwrap(),
+        nested: vec![],
+    };
+
+    assert!(ignored_patterns.is_ignored(
+        &BiomePath::new("lib/lib/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
+    assert!(!ignored_patterns.is_ignored(
+        &BiomePath::new("lib/library/file.js"),
+        false,
+        IgnoreKind::Ancestors
+    ));
 }
 
 fn resolve_html_parse_options(

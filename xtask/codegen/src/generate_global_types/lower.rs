@@ -1,12 +1,10 @@
 //! Lowers collected global declaration groups into a codegen-friendly model.
 //!
 //! [`ids::GlobalIds`] gives every global declaration group an identity. Each identity is
-//! lowered from its declarations by the generic lowerer, except for the few globals whose
-//! hand-written projections type inference depends on (see `overrides`).
+//! lowered from its declarations by the generic lowerer.
 
 mod generic;
 pub mod ids;
-mod overrides;
 
 pub use generic::LoweringGap;
 
@@ -18,16 +16,14 @@ use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter, AnyJsName, AnyJsObjectMemberName,
     AnyJsParameter, AnyJsRoot, AnyTsName, AnyTsReturnType, AnyTsType, AnyTsTypeMember,
     AnyTsVariableAnnotation, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, T,
-    TsCallSignatureTypeMember, TsConstructSignatureTypeMember, TsDeclarationModule,
-    TsInterfaceDeclaration, TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
-    TsTypeParameters,
+    TsDeclarationModule, TsInterfaceDeclaration, TsPropertySignatureTypeMember, TsTypeParameters,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstNodeList, Text, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
 
 use crate::generate_global_types::{
     collect::{DeclarationKind, DeclarationRecord},
-    manifest::{GlobalDeclarationGroup, GlobalDeclarationRole, GlobalManifest},
+    manifest::{GlobalDeclarationGroup, GlobalManifest},
     source::DiscoveredFile,
 };
 
@@ -75,7 +71,7 @@ impl LoweredGlobal {
         &self.local_types
     }
 
-    /// Qualified TypeScript name, or a descriptive name for helper globals.
+    /// Qualified TypeScript name.
     pub fn name(&self) -> &str {
         self.name.text()
     }
@@ -105,8 +101,6 @@ impl LoweredGlobal {
 }
 
 /// Name lookups that resolve to a global.
-///
-/// Helper globals have neither role; only other globals refer to them.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct GlobalRoles {
     /// Type annotations can name this global.
@@ -151,6 +145,14 @@ pub enum LoweredTypeData {
     IndexedAccess {
         object: LoweredTypeReference,
         index: LoweredTypeReference,
+    },
+    Extends {
+        check_type: LoweredTypeReference,
+        extends_type: LoweredTypeReference,
+        true_type: LoweredTypeReference,
+        false_type: LoweredTypeReference,
+        infer_types: Box<[LoweredTypeReference]>,
+        distributive: bool,
     },
     InstanceOf {
         ty: LoweredTypeReference,
@@ -241,7 +243,7 @@ impl LoweredInterface {
     }
 }
 
-/// Lowered constructor helper data.
+/// Lowered constructor data.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredConstructor {
     type_parameters: Box<[LoweredTypeReference]>,
@@ -266,7 +268,7 @@ impl LoweredConstructor {
     }
 }
 
-/// Lowered function helper data.
+/// Lowered function data.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredFunction {
     is_async: bool,
@@ -274,6 +276,7 @@ pub struct LoweredFunction {
     name: Option<Text>,
     parameters: Box<[LoweredFunctionParameter]>,
     return_type: LoweredTypeReference,
+    return_kind: LoweredReturnKind,
 }
 
 impl LoweredFunction {
@@ -297,10 +300,24 @@ impl LoweredFunction {
         &self.parameters
     }
 
-    /// Function return type.
+    /// Function return type, or the type that a predicate narrows to.
     pub fn return_type(&self) -> &LoweredTypeReference {
         &self.return_type
     }
+
+    /// Whether the function returns its return type or narrows a parameter to it.
+    pub fn return_kind(&self) -> &LoweredReturnKind {
+        &self.return_kind
+    }
+}
+
+/// What a function's return annotation states about the return type.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LoweredReturnKind {
+    /// The function returns a value of the return type.
+    Type,
+    /// `parameter is T`: the function returns whether `parameter` is of the return type.
+    Predicate { parameter_name: Text },
 }
 
 /// Parameter data shared by generated functions and constructors.
@@ -428,45 +445,18 @@ pub fn lower_global_types(
     let mut sources = ParsedSourceCache::new(source_files);
     let ids = ids::GlobalIds::assign(manifest, &mut sources)?;
     let mut lowerer = generic::GenericLowerer::new(manifest, &ids, sources);
-    let mut overridden = overrides::lower_overrides(manifest, &ids, &mut lowerer)?;
-
-    let mut globals = Vec::with_capacity(ids.slots().len() + overridden.len());
-    for slot in ids.slots() {
-        let id_constant = slot.id_constant();
-        let global = match overridden
-            .iter()
-            .position(|global| global.id_constant() == id_constant)
-        {
-            Some(index) => {
-                let mut global = overridden.remove(index);
-                global.roles = GlobalRoles {
-                    type_name: slot.has_type_role(),
-                    value_name: slot.has_value_role(),
-                };
-                global
-            }
-            None => lowerer
+    let globals = ids
+        .slots()
+        .iter()
+        .map(|slot| {
+            lowerer
                 .lower_slot(slot)
-                .with_context(|| format!("while lowering {}", slot.name()))?,
-        };
-        globals.push(global);
-    }
-    // Helper globals referenced by the hand-written projections.
-    globals.extend(overridden);
-
-    let mut seen = std::collections::BTreeSet::new();
-    for global in &globals {
-        if !seen.insert(global.id_constant()) {
-            bail!(
-                "duplicate global type ID {} for {}",
-                global.id_constant(),
-                global.name()
-            );
-        }
-    }
+                .with_context(|| format!("while lowering {}", slot.name()))
+        })
+        .collect::<Result<_>>()?;
 
     Ok(LoweredGlobalTypes {
-        globals: globals.into_boxed_slice(),
+        globals,
         gaps: lowerer.into_gaps().into_boxed_slice(),
     })
 }

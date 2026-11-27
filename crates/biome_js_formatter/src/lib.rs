@@ -544,7 +544,7 @@ impl FormatLanguage for JsFormatLanguage {
         &self,
         root: &SyntaxNode<Self::SyntaxLanguage>,
     ) -> Option<(SyntaxNode<Self::SyntaxLanguage>, TransformSourceMap)> {
-        Some(transform(root.clone()))
+        transform(root)
     }
 
     fn is_range_formatting_node(&self, node: &JsSyntaxNode) -> bool {

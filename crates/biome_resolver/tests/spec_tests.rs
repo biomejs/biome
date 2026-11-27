@@ -1207,3 +1207,313 @@ fn test_resolve_exports_pattern_specificity() {
             .unwrap()
     );
 }
+
+fn sass_fs(files: &[&str]) -> MemoryFileSystem {
+    let fs = MemoryFileSystem::default();
+    for file in files {
+        fs.insert((*file).into(), "");
+    }
+    fs
+}
+
+fn resolve_sass_in_src(
+    fs: &MemoryFileSystem,
+    specifier: &str,
+    rule: SassLoadRule,
+) -> Result<Utf8PathBuf, ResolveError> {
+    resolve_sass(specifier, Utf8Path::new("/src"), fs, rule, &sass_options())
+}
+
+fn sass_options() -> ResolveOptions<'static> {
+    ResolveOptions {
+        assume_relative: true,
+        condition_names: &["sass", "style", "default"],
+        default_files: &["index"],
+        extensions: &["sass", "scss", "css"],
+        ..Default::default()
+    }
+}
+
+#[test]
+fn test_resolve_sass_extensions_and_partials() {
+    let fs = sass_fs(&[
+        "/src/_partial.scss",
+        "/src/plain.scss",
+        "/src/indented.sass",
+        "/src/only.css",
+        "/src/both.scss",
+        "/src/both.css",
+        "/src/_indented-over-css.sass",
+        "/src/_indented-over-css.css",
+        "/shared/_vars.scss",
+    ]);
+    for (specifier, expected) in [
+        ("partial", "/src/_partial.scss"),
+        ("_partial", "/src/_partial.scss"),
+        ("partial.scss", "/src/_partial.scss"),
+        ("plain", "/src/plain.scss"),
+        ("./plain", "/src/plain.scss"),
+        ("only", "/src/only.css"),
+        ("both", "/src/both.scss"),
+        ("both.css", "/src/both.css"),
+        ("indented", "/src/indented.sass"),
+        ("indented-over-css", "/src/_indented-over-css.sass"),
+        ("../shared/vars", "/shared/_vars.scss"),
+        ("/shared/vars", "/shared/_vars.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_ambiguous_urls() {
+    let fs = sass_fs(&[
+        "/src/theme.scss",
+        "/src/_theme.scss",
+        "/src/_double.scss",
+        "/src/__double.scss",
+        "/src/__only.scss",
+        "/src/syntax.sass",
+        "/src/_syntax.scss",
+    ]);
+    for specifier in ["theme", "theme.scss", "_double", "syntax"] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Err(ResolveError::AmbiguousSassUrl),
+            "{specifier}"
+        );
+    }
+    for (specifier, expected) in [
+        ("_theme", "/src/_theme.scss"),
+        ("_only", "/src/__only.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_index_files() {
+    let fs = sass_fs(&[
+        "/src/components/_index.scss",
+        "/src/layout/index.scss",
+        "/src/shadowed/_index.scss",
+        "/src/_shadowed.scss",
+        "/src/folder.scss/_index.scss",
+    ]);
+    for (specifier, expected) in [
+        ("components", "/src/components/_index.scss"),
+        ("layout", "/src/layout/index.scss"),
+        ("shadowed", "/src/_shadowed.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier}"
+        );
+    }
+    assert_eq!(
+        resolve_sass_in_src(&fs, "folder.scss", SassLoadRule::Module),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_resolve_sass_import_only_files() {
+    let fs = sass_fs(&[
+        "/src/_theme.scss",
+        "/src/_theme.import.scss",
+        "/src/legacy.scss",
+        "/src/legacy.import.css",
+        "/src/folder/_index.scss",
+        "/src/folder/_index.import.scss",
+    ]);
+    for (specifier, rule, expected) in [
+        ("theme", SassLoadRule::Import, "/src/_theme.import.scss"),
+        (
+            "theme.scss",
+            SassLoadRule::Import,
+            "/src/_theme.import.scss",
+        ),
+        ("theme", SassLoadRule::Module, "/src/_theme.scss"),
+        ("legacy", SassLoadRule::Import, "/src/legacy.import.css"),
+        ("legacy", SassLoadRule::Module, "/src/legacy.scss"),
+        (
+            "folder",
+            SassLoadRule::Import,
+            "/src/folder/_index.import.scss",
+        ),
+        ("folder", SassLoadRule::Module, "/src/folder/_index.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, rule),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier} {rule:?}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_skips_urls_with_a_scheme() {
+    let fs = sass_fs(&[
+        "/src/math.scss",
+        "/src/sass:math.scss",
+        "/node_modules/sass:math/index.scss",
+        "/node_modules/pkg:bootstrap/index.scss",
+    ]);
+    for specifier in ["sass:math", "pkg:bootstrap", "https://example.com/theme"] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Err(ResolveError::NotFound),
+            "{specifier}"
+        );
+    }
+    assert_eq!(
+        resolve_sass_in_src(&fs, "missing", SassLoadRule::Module),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_resolve_sass_bare_urls_fall_back_to_packages() {
+    let fs = sass_fs(&[
+        "/package.json",
+        "/node_modules/normalize.css/package.json",
+        "/node_modules/normalize.css/normalize.css",
+        "/src/_local.scss",
+        "/node_modules/local/index.scss",
+    ]);
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/node_modules/normalize.css/package.json".into(),
+        r#"{"name":"normalize.css"}"#,
+    );
+    for (specifier, expected) in [
+        (
+            "normalize.css/normalize",
+            Ok("/node_modules/normalize.css/normalize.css"),
+        ),
+        ("local", Ok("/src/_local.scss")),
+        ("./normalize.css/normalize", Err(ResolveError::NotFound)),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            expected.map(Utf8PathBuf::from),
+            "{specifier}"
+        );
+    }
+    let packages_only = ResolveOptions {
+        assume_relative: false,
+        ..sass_options()
+    };
+    assert_eq!(
+        resolve_sass(
+            "local",
+            Utf8Path::new("/src"),
+            &fs,
+            SassLoadRule::Module,
+            &packages_only
+        ),
+        Ok(Utf8PathBuf::from("/node_modules/local/index.scss"))
+    );
+}
+
+#[test]
+fn test_resolve_sass_ignores_query_and_fragment() {
+    let fs = sass_fs(&["/src/_card.scss"]);
+    for specifier in ["./card.scss?v=1", "./card?v=1", "card#section"] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from("/src/_card.scss")),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_trailing_slash_names_directory() {
+    let fs = sass_fs(&["/src/_theme.scss", "/src/theme/_index.scss"]);
+    for (specifier, expected) in [
+        ("./theme", "/src/_theme.scss"),
+        ("./theme/", "/src/theme/_index.scss"),
+        ("theme/", "/src/theme/_index.scss"),
+        ("./theme/.", "/src/theme/_index.scss"),
+        ("./theme/missing/..", "/src/theme/_index.scss"),
+    ] {
+        assert_eq!(
+            resolve_sass_in_src(&fs, specifier, SassLoadRule::Module),
+            Ok(Utf8PathBuf::from(expected)),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_sass_index_in_symlinked_directory() {
+    let base_dir = get_fixtures_path("resolver_cases_1");
+    let fs = OsFileSystem::new(base_dir.clone());
+    for specifier in ["./linked_folder", "linked_folder/"] {
+        assert_eq!(
+            resolve_sass(
+                specifier,
+                &base_dir,
+                &fs,
+                SassLoadRule::Module,
+                &sass_options()
+            ),
+            Ok(Utf8PathBuf::from(format!("{base_dir}/folder/_index.scss"))),
+            "{specifier}"
+        );
+    }
+}
+
+#[test]
+fn test_resolve_rejects_bare_export_targets() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/node_modules/cycle/package.json".into(),
+        r#"{"name":"cycle","exports":{"sass":"cycle"}}"#,
+    );
+    fs.insert(
+        "/node_modules/string/package.json".into(),
+        r#"{"name":"string","exports":"string"}"#,
+    );
+    fs.insert(
+        "/src/package.json".into(),
+        r##"{"name":"app","imports":{"#dep":"dep/style.css"}}"##,
+    );
+    fs.insert("/node_modules/dep/package.json".into(), r#"{"name":"dep"}"#);
+    fs.insert("/node_modules/dep/style.css".into(), "");
+    fs.insert(
+        "/node_modules/array/package.json".into(),
+        r#"{"name":"array","exports":{".":["dep/style.css"]}}"#,
+    );
+    fs.insert(
+        "/node_modules/fallback/package.json".into(),
+        r#"{"name":"fallback","exports":{".":["dep/style.css","./main.css"]}}"#,
+    );
+    fs.insert("/node_modules/fallback/main.css".into(), "");
+    assert_eq!(
+        resolve("#dep", Utf8Path::new("/src"), &fs, &sass_options()),
+        Ok(Utf8PathBuf::from("/node_modules/dep/style.css"))
+    );
+    assert_eq!(
+        resolve("fallback", Utf8Path::new("/src"), &fs, &sass_options()),
+        Ok(Utf8PathBuf::from("/node_modules/fallback/main.css"))
+    );
+    for specifier in ["cycle", "string", "array"] {
+        assert_eq!(
+            resolve(specifier, Utf8Path::new("/src"), &fs, &sass_options()),
+            Err(ResolveError::InvalidMappingTarget),
+            "{specifier}"
+        );
+    }
+}

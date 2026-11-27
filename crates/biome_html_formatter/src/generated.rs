@@ -1968,38 +1968,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteConstBlock {
         )
     }
 }
-impl FormatRule<biome_html_syntax::SvelteCurlyDestructuredName>
-    for crate::svelte::auxiliary::curly_destructured_name::FormatSvelteCurlyDestructuredName
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::SvelteCurlyDestructuredName,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteCurlyDestructuredName>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteCurlyDestructuredName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::SvelteCurlyDestructuredName,
-        crate::svelte::auxiliary::curly_destructured_name::FormatSvelteCurlyDestructuredName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: svelte :: auxiliary :: curly_destructured_name :: FormatSvelteCurlyDestructuredName :: default ())
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteCurlyDestructuredName {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteCurlyDestructuredName,
-        crate::svelte::auxiliary::curly_destructured_name::FormatSvelteCurlyDestructuredName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: svelte :: auxiliary :: curly_destructured_name :: FormatSvelteCurlyDestructuredName :: default ())
-    }
-}
 impl FormatRule<biome_html_syntax::SvelteDebugBlock>
     for crate::svelte::auxiliary::debug_block::FormatSvelteDebugBlock
 {
@@ -2152,41 +2120,41 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteDirectiveValue {
         )
     }
 }
-impl FormatRule<biome_html_syntax::SvelteEachAsKeyedItem>
-    for crate::svelte::auxiliary::each_as_keyed_item::FormatSvelteEachAsKeyedItem
+impl FormatRule<biome_html_syntax::SvelteEachBindingClause>
+    for crate::svelte::auxiliary::each_binding_clause::FormatSvelteEachBindingClause
 {
     type Context = HtmlFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_html_syntax::SvelteEachAsKeyedItem,
+        node: &biome_html_syntax::SvelteEachBindingClause,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteEachAsKeyedItem>::fmt(self, node, f)
+        FormatNodeRule::<biome_html_syntax::SvelteEachBindingClause>::fmt(self, node, f)
     }
 }
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachAsKeyedItem {
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachBindingClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_html_syntax::SvelteEachAsKeyedItem,
-        crate::svelte::auxiliary::each_as_keyed_item::FormatSvelteEachAsKeyedItem,
+        biome_html_syntax::SvelteEachBindingClause,
+        crate::svelte::auxiliary::each_binding_clause::FormatSvelteEachBindingClause,
     >;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
-            crate::svelte::auxiliary::each_as_keyed_item::FormatSvelteEachAsKeyedItem::default(),
+            crate::svelte::auxiliary::each_binding_clause::FormatSvelteEachBindingClause::default(),
         )
     }
 }
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachAsKeyedItem {
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachBindingClause {
     type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteEachAsKeyedItem,
-        crate::svelte::auxiliary::each_as_keyed_item::FormatSvelteEachAsKeyedItem,
+        biome_html_syntax::SvelteEachBindingClause,
+        crate::svelte::auxiliary::each_binding_clause::FormatSvelteEachBindingClause,
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
-            crate::svelte::auxiliary::each_as_keyed_item::FormatSvelteEachAsKeyedItem::default(),
+            crate::svelte::auxiliary::each_binding_clause::FormatSvelteEachBindingClause::default(),
         )
     }
 }
@@ -2301,44 +2269,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachIndex {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::auxiliary::each_index::FormatSvelteEachIndex::default(),
-        )
-    }
-}
-impl FormatRule<biome_html_syntax::SvelteEachKey>
-    for crate::svelte::auxiliary::each_key::FormatSvelteEachKey
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::SvelteEachKey,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteEachKey>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachKey {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::SvelteEachKey,
-        crate::svelte::auxiliary::each_key::FormatSvelteEachKey,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::svelte::auxiliary::each_key::FormatSvelteEachKey::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteEachKey {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteEachKey,
-        crate::svelte::auxiliary::each_key::FormatSvelteEachKey,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::svelte::auxiliary::each_key::FormatSvelteEachKey::default(),
         )
     }
 }
@@ -2946,44 +2876,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteOutDirective {
         )
     }
 }
-impl FormatRule<biome_html_syntax::SvelteRenameBinding>
-    for crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::SvelteRenameBinding,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteRenameBinding>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenameBinding {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::SvelteRenameBinding,
-        crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenameBinding {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteRenameBinding,
-        crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::svelte::auxiliary::rename_binding::FormatSvelteRenameBinding::default(),
-        )
-    }
-}
 impl FormatRule<biome_html_syntax::SvelteRenderBlock>
     for crate::svelte::auxiliary::render_block::FormatSvelteRenderBlock
 {
@@ -3019,44 +2911,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRenderBlock {
         FormatOwnedWithRule::new(
             self,
             crate::svelte::auxiliary::render_block::FormatSvelteRenderBlock::default(),
-        )
-    }
-}
-impl FormatRule<biome_html_syntax::SvelteRestBinding>
-    for crate::svelte::auxiliary::rest_binding::FormatSvelteRestBinding
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::SvelteRestBinding,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteRestBinding>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteRestBinding {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::SvelteRestBinding,
-        crate::svelte::auxiliary::rest_binding::FormatSvelteRestBinding,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::svelte::auxiliary::rest_binding::FormatSvelteRestBinding::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteRestBinding {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteRestBinding,
-        crate::svelte::auxiliary::rest_binding::FormatSvelteRestBinding,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::svelte::auxiliary::rest_binding::FormatSvelteRestBinding::default(),
         )
     }
 }
@@ -3160,38 +3014,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteSnippetOpeningBl
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: svelte :: auxiliary :: snippet_opening_block :: FormatSvelteSnippetOpeningBlock :: default ())
-    }
-}
-impl FormatRule<biome_html_syntax::SvelteSquareDestructuredName>
-    for crate::svelte::auxiliary::square_destructured_name::FormatSvelteSquareDestructuredName
-{
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_html_syntax::SvelteSquareDestructuredName,
-        f: &mut HtmlFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::SvelteSquareDestructuredName>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteSquareDestructuredName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::SvelteSquareDestructuredName,
-        crate::svelte::auxiliary::square_destructured_name::FormatSvelteSquareDestructuredName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: svelte :: auxiliary :: square_destructured_name :: FormatSvelteSquareDestructuredName :: default ())
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteSquareDestructuredName {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::SvelteSquareDestructuredName,
-        crate::svelte::auxiliary::square_destructured_name::FormatSvelteSquareDestructuredName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: svelte :: auxiliary :: square_destructured_name :: FormatSvelteSquareDestructuredName :: default ())
     }
 }
 impl FormatRule<biome_html_syntax::SvelteStyleDirective>
@@ -4108,6 +3930,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElementList {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlRootItemList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlRootItemList,
+        crate::html::lists::root_item_list::FormatHtmlRootItemList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::lists::root_item_list::FormatHtmlRootItemList::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlRootItemList {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlRootItemList,
+        crate::html::lists::root_item_list::FormatHtmlRootItemList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::lists::root_item_list::FormatHtmlRootItemList::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteAwaitClausesList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4131,18 +3978,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteAwaitClausesList
             self,
             crate::svelte::lists::await_clauses_list::FormatSvelteAwaitClausesList::default(),
         )
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingAssignmentBindingList {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_html_syntax :: SvelteBindingAssignmentBindingList , crate :: svelte :: lists :: binding_assignment_binding_list :: FormatSvelteBindingAssignmentBindingList > ;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: svelte :: lists :: binding_assignment_binding_list :: FormatSvelteBindingAssignmentBindingList :: default ())
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingAssignmentBindingList {
-    type Format = FormatOwnedWithRule < biome_html_syntax :: SvelteBindingAssignmentBindingList , crate :: svelte :: lists :: binding_assignment_binding_list :: FormatSvelteBindingAssignmentBindingList > ;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: svelte :: lists :: binding_assignment_binding_list :: FormatSvelteBindingAssignmentBindingList :: default ())
     }
 }
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::SvelteBindingList {
@@ -4781,6 +4616,31 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlElement {
         )
     }
 }
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlRootItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::AnyHtmlRootItem,
+        crate::html::any::root_item::FormatAnyHtmlRootItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::any::root_item::FormatAnyHtmlRootItem::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlRootItem {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::AnyHtmlRootItem,
+        crate::html::any::root_item::FormatAnyHtmlRootItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::any::root_item::FormatAnyHtmlRootItem::default(),
+        )
+    }
+}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlTagName {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4854,25 +4714,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteAwaitClauses 
             self,
             crate::svelte::any::await_clauses::FormatAnySvelteAwaitClauses::default(),
         )
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteBindingAssignmentBinding {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::AnySvelteBindingAssignmentBinding,
-        crate::svelte::any::binding_assignment_binding::FormatAnySvelteBindingAssignmentBinding,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: svelte :: any :: binding_assignment_binding :: FormatAnySvelteBindingAssignmentBinding :: default ())
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteBindingAssignmentBinding {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::AnySvelteBindingAssignmentBinding,
-        crate::svelte::any::binding_assignment_binding::FormatAnySvelteBindingAssignmentBinding,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: svelte :: any :: binding_assignment_binding :: FormatAnySvelteBindingAssignmentBinding :: default ())
     }
 }
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteBindingProperty {
@@ -4950,31 +4791,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteBlockItem {
         )
     }
 }
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteDestructuredName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::AnySvelteDestructuredName,
-        crate::svelte::any::destructured_name::FormatAnySvelteDestructuredName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::svelte::any::destructured_name::FormatAnySvelteDestructuredName::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteDestructuredName {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::AnySvelteDestructuredName,
-        crate::svelte::any::destructured_name::FormatAnySvelteDestructuredName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::svelte::any::destructured_name::FormatAnySvelteDestructuredName::default(),
-        )
-    }
-}
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteDirective {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -5017,31 +4833,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteDirectiveInit
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: svelte :: any :: directive_initializer_clause :: FormatAnySvelteDirectiveInitializerClause :: default ())
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteEachName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::AnySvelteEachName,
-        crate::svelte::any::each_name::FormatAnySvelteEachName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::svelte::any::each_name::FormatAnySvelteEachName::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteEachName {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::AnySvelteEachName,
-        crate::svelte::any::each_name::FormatAnySvelteEachName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::svelte::any::each_name::FormatAnySvelteEachName::default(),
-        )
     }
 }
 impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnySvelteMemberObject {

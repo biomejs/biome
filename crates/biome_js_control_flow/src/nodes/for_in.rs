@@ -27,6 +27,10 @@ impl NodeVisitor for ForInVisitor {
         let loop_block = builder.append_block();
         let break_block = builder.append_block();
 
+        // The iterated value is computed once, before the first iteration
+        builder
+            .append_statement()
+            .with_node(node.expression()?.into_syntax());
         builder.append_jump(false, continue_block);
 
         builder.set_cursor(continue_block);

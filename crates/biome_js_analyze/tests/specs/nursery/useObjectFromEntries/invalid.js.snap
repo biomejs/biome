@@ -1,0 +1,1248 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+pairs.reduce(object => ({...object, key}), {});
+pairs.reduce(object => ({...object, /* keep this */ key}), {});
+pairs.reduce(object => ({...object, key}), {},);
+pairs.reduce(object => ({...object, key,}), {});
+pairs.reduce(object => ({...object, key}), (( {} )));
+pairs.reduce( (( object => ({...object, key}) )) , {});
+pairs.reduce( (( (object) => ({...object, key}) )) , {});
+pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+pairs.reduce(object => ({...object, 0: value}), {});
+pairs.reduce(object => ({...object, true: value}), {});
+pairs.reduce(object => ({...object, default: value}), {});
+pairs.reduce(object => ({...object, "string": value}), {});
+pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+pairs.reduce(object => ({...object, [0]: value}), {});
+pairs.reduce(object => ({...object, 0n: value}), {});
+pairs.reduce(object => Object.assign(object, {key}), {});
+pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+pairs.reduce((object, element, index, array) => ({...object, key}), {});
+pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+pairs.reduce(object => ({...object, key}), /* keep */ {});
+[1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+(
+	(pairs)
+		.reduce(
+			((object,) => ((
+				Object.assign(
+					((object)),
+					({
+						[((key))]: ((value)),
+					})
+				)
+			))),
+			({})
+		)
+);
+
+_.fromPairs(pairs);
+lodash.fromPairs(pairs);
+(_.fromPairs)(pairs);
+
+const object2 = {};
+for (const [key, value] of pairs) {
+	object2[key] = value;
+}
+
+const object3 = ({});
+for (let [key, value] of ((pairs))) object3[(key)] = (value);
+
+const object4 = {
+	// Comment
+};
+for (const [key, value] of pairs) {
+	object4[key] = value;
+}
+
+const object5 = {};
+// Comment
+for (const [key, value] of pairs) {
+	object5[key] = value;
+}
+
+const object6 = {};
+for (const [key, value] of pairs) {
+	object6[key] = value;
+} // Comment
+
+const object7 = {}
+for (const [key, value] of pairs) {
+	object7[key] = value;
+}
+[1].forEach(foo);
+
+// The fix would move the optional chain inside `Object.fromEntries()`.
+a?.b.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+
+// The fix would call the local `Object` variable.
+function shadowedObject(Object) {
+	const object = {};
+	for (const [key, value] of pairs) {
+		object[key] = value;
+	}
+	return [_.fromPairs(pairs), pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {})];
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ pairs.reduce(object => ({...object, key}), {});
+      │       ^^^^^^
+    3 │ pairs.reduce(object => ({...object, /* keep this */ key}), {});
+    4 │ pairs.reduce(object => ({...object, key}), {},);
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - pairs.reduce(object·=>·({...object,·key}),·{});
+        2 │ + Object.fromEntries(pairs.map(()·=>·["key",·key]));
+     3  3 │   pairs.reduce(object => ({...object, /* keep this */ key}), {});
+     4  4 │   pairs.reduce(object => ({...object, key}), {},);
+  
+
+```
+
+```
+invalid.js:3:7 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    1 │ /* should generate diagnostics */
+    2 │ pairs.reduce(object => ({...object, key}), {});
+  > 3 │ pairs.reduce(object => ({...object, /* keep this */ key}), {});
+      │       ^^^^^^
+    4 │ pairs.reduce(object => ({...object, key}), {},);
+    5 │ pairs.reduce(object => ({...object, key,}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    2 │ pairs.reduce(object => ({...object, key}), {});
+    3 │ pairs.reduce(object => ({...object, /* keep this */ key}), {});
+  > 4 │ pairs.reduce(object => ({...object, key}), {},);
+      │       ^^^^^^
+    5 │ pairs.reduce(object => ({...object, key,}), {});
+    6 │ pairs.reduce(object => ({...object, key}), (( {} )));
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     2  2 │   pairs.reduce(object => ({...object, key}), {});
+     3  3 │   pairs.reduce(object => ({...object, /* keep this */ key}), {});
+     4    │ - pairs.reduce(object·=>·({...object,·key}),·{},);
+        4 │ + Object.fromEntries(pairs.map(()·=>·["key",·key]));
+     5  5 │   pairs.reduce(object => ({...object, key,}), {});
+     6  6 │   pairs.reduce(object => ({...object, key}), (( {} )));
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    3 │ pairs.reduce(object => ({...object, /* keep this */ key}), {});
+    4 │ pairs.reduce(object => ({...object, key}), {},);
+  > 5 │ pairs.reduce(object => ({...object, key,}), {});
+      │       ^^^^^^
+    6 │ pairs.reduce(object => ({...object, key}), (( {} )));
+    7 │ pairs.reduce( (( object => ({...object, key}) )) , {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     3  3 │   pairs.reduce(object => ({...object, /* keep this */ key}), {});
+     4  4 │   pairs.reduce(object => ({...object, key}), {},);
+     5    │ - pairs.reduce(object·=>·({...object,·key,}),·{});
+        5 │ + Object.fromEntries(pairs.map(()·=>·["key",·key]));
+     6  6 │   pairs.reduce(object => ({...object, key}), (( {} )));
+     7  7 │   pairs.reduce( (( object => ({...object, key}) )) , {});
+  
+
+```
+
+```
+invalid.js:6:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    4 │ pairs.reduce(object => ({...object, key}), {},);
+    5 │ pairs.reduce(object => ({...object, key,}), {});
+  > 6 │ pairs.reduce(object => ({...object, key}), (( {} )));
+      │       ^^^^^^
+    7 │ pairs.reduce( (( object => ({...object, key}) )) , {});
+    8 │ pairs.reduce( (( (object) => ({...object, key}) )) , {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     4  4 │   pairs.reduce(object => ({...object, key}), {},);
+     5  5 │   pairs.reduce(object => ({...object, key,}), {});
+     6    │ - pairs.reduce(object·=>·({...object,·key}),·((·{}·)));
+        6 │ + Object.fromEntries(pairs.map(()·=>·["key",·key]));
+     7  7 │   pairs.reduce( (( object => ({...object, key}) )) , {});
+     8  8 │   pairs.reduce( (( (object) => ({...object, key}) )) , {});
+  
+
+```
+
+```
+invalid.js:7:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    5 │ pairs.reduce(object => ({...object, key,}), {});
+    6 │ pairs.reduce(object => ({...object, key}), (( {} )));
+  > 7 │ pairs.reduce( (( object => ({...object, key}) )) , {});
+      │       ^^^^^^
+    8 │ pairs.reduce( (( (object) => ({...object, key}) )) , {});
+    9 │ pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     5  5 │   pairs.reduce(object => ({...object, key,}), {});
+     6  6 │   pairs.reduce(object => ({...object, key}), (( {} )));
+     7    │ - pairs.reduce(·((·object·=>·({...object,·key})·))·,·{});
+        7 │ + Object.fromEntries(pairs.map(·((·()·=>·["key",·key]·))·));
+     8  8 │   pairs.reduce( (( (object) => ({...object, key}) )) , {});
+     9  9 │   pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+     6 │ pairs.reduce(object => ({...object, key}), (( {} )));
+     7 │ pairs.reduce( (( object => ({...object, key}) )) , {});
+   > 8 │ pairs.reduce( (( (object) => ({...object, key}) )) , {});
+       │       ^^^^^^
+     9 │ pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+    10 │ pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     6  6 │   pairs.reduce(object => ({...object, key}), (( {} )));
+     7  7 │   pairs.reduce( (( object => ({...object, key}) )) , {});
+     8    │ - pairs.reduce(·((·(object)·=>·({...object,·key})·))·,·{});
+        8 │ + Object.fromEntries(pairs.map(·((·()·=>·["key",·key]·))·));
+     9  9 │   pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+    10 10 │   pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+     7 │ pairs.reduce( (( object => ({...object, key}) )) , {});
+     8 │ pairs.reduce( (( (object) => ({...object, key}) )) , {});
+   > 9 │ pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+       │       ^^^^^^
+    10 │ pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+    11 │ pairs.reduce(object => ({...object, 0: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     7  7 │   pairs.reduce( (( object => ({...object, key}) )) , {});
+     8  8 │   pairs.reduce( (( (object) => ({...object, key}) )) , {});
+     9    │ - pairs.reduce(·((·(object,)·=>·({...object,·key})·))·,·{});
+        9 │ + Object.fromEntries(pairs.map(·((·()·=>·["key",·key]·))·));
+    10 10 │   pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+    11 11 │   pairs.reduce(object => ({...object, 0: value}), {});
+  
+
+```
+
+```
+invalid.js:10:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+     8 │ pairs.reduce( (( (object) => ({...object, key}) )) , {});
+     9 │ pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+  > 10 │ pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+       │       ^^^^^^
+    11 │ pairs.reduce(object => ({...object, 0: value}), {});
+    12 │ pairs.reduce(object => ({...object, true: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     8  8 │   pairs.reduce( (( (object) => ({...object, key}) )) , {});
+     9  9 │   pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+    10    │ - pairs.reduce(object·=>·({...object,·[((key))]·:·((value))}),·{});
+       10 │ + Object.fromEntries(pairs.map(()·=>·[((key)),·((value))]));
+    11 11 │   pairs.reduce(object => ({...object, 0: value}), {});
+    12 12 │   pairs.reduce(object => ({...object, true: value}), {});
+  
+
+```
+
+```
+invalid.js:11:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+     9 │ pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+    10 │ pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+  > 11 │ pairs.reduce(object => ({...object, 0: value}), {});
+       │       ^^^^^^
+    12 │ pairs.reduce(object => ({...object, true: value}), {});
+    13 │ pairs.reduce(object => ({...object, default: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+     9  9 │   pairs.reduce( (( (object,) => ({...object, key}) )) , {});
+    10 10 │   pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+    11    │ - pairs.reduce(object·=>·({...object,·0:·value}),·{});
+       11 │ + Object.fromEntries(pairs.map(()·=>·[0,·value]));
+    12 12 │   pairs.reduce(object => ({...object, true: value}), {});
+    13 13 │   pairs.reduce(object => ({...object, default: value}), {});
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    10 │ pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+    11 │ pairs.reduce(object => ({...object, 0: value}), {});
+  > 12 │ pairs.reduce(object => ({...object, true: value}), {});
+       │       ^^^^^^
+    13 │ pairs.reduce(object => ({...object, default: value}), {});
+    14 │ pairs.reduce(object => ({...object, "string": value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    10 10 │   pairs.reduce(object => ({...object, [((key))] : ((value))}), {});
+    11 11 │   pairs.reduce(object => ({...object, 0: value}), {});
+    12    │ - pairs.reduce(object·=>·({...object,·true:·value}),·{});
+       12 │ + Object.fromEntries(pairs.map(()·=>·["true",·value]));
+    13 13 │   pairs.reduce(object => ({...object, default: value}), {});
+    14 14 │   pairs.reduce(object => ({...object, "string": value}), {});
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    11 │ pairs.reduce(object => ({...object, 0: value}), {});
+    12 │ pairs.reduce(object => ({...object, true: value}), {});
+  > 13 │ pairs.reduce(object => ({...object, default: value}), {});
+       │       ^^^^^^
+    14 │ pairs.reduce(object => ({...object, "string": value}), {});
+    15 │ pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    11 11 │   pairs.reduce(object => ({...object, 0: value}), {});
+    12 12 │   pairs.reduce(object => ({...object, true: value}), {});
+    13    │ - pairs.reduce(object·=>·({...object,·default:·value}),·{});
+       13 │ + Object.fromEntries(pairs.map(()·=>·["default",·value]));
+    14 14 │   pairs.reduce(object => ({...object, "string": value}), {});
+    15 15 │   pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    12 │ pairs.reduce(object => ({...object, true: value}), {});
+    13 │ pairs.reduce(object => ({...object, default: value}), {});
+  > 14 │ pairs.reduce(object => ({...object, "string": value}), {});
+       │       ^^^^^^
+    15 │ pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+    16 │ pairs.reduce(object => ({...object, [0]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    12 12 │   pairs.reduce(object => ({...object, true: value}), {});
+    13 13 │   pairs.reduce(object => ({...object, default: value}), {});
+    14    │ - pairs.reduce(object·=>·({...object,·"string":·value}),·{});
+       14 │ + Object.fromEntries(pairs.map(()·=>·["string",·value]));
+    15 15 │   pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+    16 16 │   pairs.reduce(object => ({...object, [0]: value}), {});
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    13 │ pairs.reduce(object => ({...object, default: value}), {});
+    14 │ pairs.reduce(object => ({...object, "string": value}), {});
+  > 15 │ pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+       │       ^^^^^^
+    16 │ pairs.reduce(object => ({...object, [0]: value}), {});
+    17 │ pairs.reduce(object => ({...object, 0n: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    13 13 │   pairs.reduce(object => ({...object, default: value}), {});
+    14 14 │   pairs.reduce(object => ({...object, "string": value}), {});
+    15    │ - pairs.reduce(object·=>·({...object,·["__proto__"]:·value}),·{});
+       15 │ + Object.fromEntries(pairs.map(()·=>·["__proto__",·value]));
+    16 16 │   pairs.reduce(object => ({...object, [0]: value}), {});
+    17 17 │   pairs.reduce(object => ({...object, 0n: value}), {});
+  
+
+```
+
+```
+invalid.js:16:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    14 │ pairs.reduce(object => ({...object, "string": value}), {});
+    15 │ pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+  > 16 │ pairs.reduce(object => ({...object, [0]: value}), {});
+       │       ^^^^^^
+    17 │ pairs.reduce(object => ({...object, 0n: value}), {});
+    18 │ pairs.reduce(object => Object.assign(object, {key}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    14 14 │   pairs.reduce(object => ({...object, "string": value}), {});
+    15 15 │   pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+    16    │ - pairs.reduce(object·=>·({...object,·[0]:·value}),·{});
+       16 │ + Object.fromEntries(pairs.map(()·=>·[0,·value]));
+    17 17 │   pairs.reduce(object => ({...object, 0n: value}), {});
+    18 18 │   pairs.reduce(object => Object.assign(object, {key}), {});
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    15 │ pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+    16 │ pairs.reduce(object => ({...object, [0]: value}), {});
+  > 17 │ pairs.reduce(object => ({...object, 0n: value}), {});
+       │       ^^^^^^
+    18 │ pairs.reduce(object => Object.assign(object, {key}), {});
+    19 │ pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    15 15 │   pairs.reduce(object => ({...object, ["__proto__"]: value}), {});
+    16 16 │   pairs.reduce(object => ({...object, [0]: value}), {});
+    17    │ - pairs.reduce(object·=>·({...object,·0n:·value}),·{});
+       17 │ + Object.fromEntries(pairs.map(()·=>·[0n,·value]));
+    18 18 │   pairs.reduce(object => Object.assign(object, {key}), {});
+    19 19 │   pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+  
+
+```
+
+```
+invalid.js:18:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    16 │ pairs.reduce(object => ({...object, [0]: value}), {});
+    17 │ pairs.reduce(object => ({...object, 0n: value}), {});
+  > 18 │ pairs.reduce(object => Object.assign(object, {key}), {});
+       │       ^^^^^^
+    19 │ pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+    20 │ pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    16 16 │   pairs.reduce(object => ({...object, [0]: value}), {});
+    17 17 │   pairs.reduce(object => ({...object, 0n: value}), {});
+    18    │ - pairs.reduce(object·=>·Object.assign(object,·{key}),·{});
+       18 │ + Object.fromEntries(pairs.map(()·=>·["key",·key]));
+    19 19 │   pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+    20 20 │   pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    17 │ pairs.reduce(object => ({...object, 0n: value}), {});
+    18 │ pairs.reduce(object => Object.assign(object, {key}), {});
+  > 19 │ pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+       │       ^^^^^^
+    20 │ pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+    21 │ pairs.reduce((object, element, index, array) => ({...object, key}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    17 17 │   pairs.reduce(object => ({...object, 0n: value}), {});
+    18 18 │   pairs.reduce(object => Object.assign(object, {key}), {});
+    19    │ - pairs.reduce(object·=>·Object.assign(object,·{[key]:·value,}),·{});
+       19 │ + Object.fromEntries(pairs.map(()·=>·[key,·value]));
+    20 20 │   pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+    21 21 │   pairs.reduce((object, element, index, array) => ({...object, key}), {});
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    18 │ pairs.reduce(object => Object.assign(object, {key}), {});
+    19 │ pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+  > 20 │ pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+       │       ^^^^^^
+    21 │ pairs.reduce((object, element, index, array) => ({...object, key}), {});
+    22 │ pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    18 18 │   pairs.reduce(object => Object.assign(object, {key}), {});
+    19 19 │   pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+    20    │ - pairs.reduce(object·=>·globalThis.Object.assign(object,·{[key]:·value}),·{});
+       20 │ + Object.fromEntries(pairs.map(()·=>·[key,·value]));
+    21 21 │   pairs.reduce((object, element, index, array) => ({...object, key}), {});
+    22 22 │   pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    19 │ pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+    20 │ pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+  > 21 │ pairs.reduce((object, element, index, array) => ({...object, key}), {});
+       │       ^^^^^^
+    22 │ pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+    23 │ pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    19 19 │   pairs.reduce(object => Object.assign(object, {[key]: value,}), {});
+    20 20 │   pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+    21    │ - pairs.reduce((object,·element,·index,·array)·=>·({...object,·key}),·{});
+       21 │ + Object.fromEntries(pairs.map((element,·index,·array)·=>·["key",·key]));
+    22 22 │   pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+    23 23 │   pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+  
+
+```
+
+```
+invalid.js:22:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    20 │ pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+    21 │ pairs.reduce((object, element, index, array) => ({...object, key}), {});
+  > 22 │ pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+       │       ^^^^^^
+    23 │ pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+    24 │ const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    20 20 │   pairs.reduce(object => globalThis.Object.assign(object, {[key]: value}), {});
+    21 21 │   pairs.reduce((object, element, index, array) => ({...object, key}), {});
+    22    │ - pairs.reduce((object,·[key,·value],·index,·array,)·=>·({...object,·[key]:·value·+·index·+·array.length}),·{});
+       22 │ + Object.fromEntries(pairs.map(([key,·value],·index,·array,)·=>·[key,·value·+·index·+·array.length]));
+    23 23 │   pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+    24 24 │   const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    21 │ pairs.reduce((object, element, index, array) => ({...object, key}), {});
+    22 │ pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+  > 23 │ pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+       │       ^^^^^^
+    24 │ const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+    25 │ pairs.reduce(object => ({...object, key}), /* keep */ {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    21 21 │   pairs.reduce((object, element, index, array) => ({...object, key}), {});
+    22 22 │   pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+    23    │ - pairs.reduce(object·=>·({...object,·key:·function·(object)·{·return·object;·}}),·{});
+       23 │ + Object.fromEntries(pairs.map(()·=>·["key",·function·(object)·{·return·object;·}]));
+    24 24 │   const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+    25 25 │   pairs.reduce(object => ({...object, key}), /* keep */ {});
+  
+
+```
+
+```
+invalid.js:24:23 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    22 │ pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+    23 │ pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+  > 24 │ const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+       │                       ^^^^^^
+    25 │ pairs.reduce(object => ({...object, key}), /* keep */ {});
+    26 │ [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    22 22 │   pairs.reduce((object, [key, value], index, array,) => ({...object, [key]: value + index + array.length}), {});
+    23 23 │   pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+    24    │ - const·object1·=·pairs.reduce((object,·[key,·value])·=>·({...object,·[key]:·value}),·{});
+       24 │ + const·object1·=·Object.fromEntries(pairs.map(([key,·value])·=>·[key,·value]));
+    25 25 │   pairs.reduce(object => ({...object, key}), /* keep */ {});
+    26 26 │   [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+  
+
+```
+
+```
+invalid.js:25:7 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    23 │ pairs.reduce(object => ({...object, key: function (object) { return object; }}), {});
+    24 │ const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+  > 25 │ pairs.reduce(object => ({...object, key}), /* keep */ {});
+       │       ^^^^^^
+    26 │ [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+    27 │ Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:8 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    24 │ const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+    25 │ pairs.reduce(object => ({...object, key}), /* keep */ {});
+  > 26 │ [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+       │        ^^^^^^
+    27 │ Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+    28 │ (
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    24 24 │   const object1 = pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+    25 25 │   pairs.reduce(object => ({...object, key}), /* keep */ {});
+    26    │ - [1,·2].reduce((object,·value)·=>·({...object,·[value]:·value}),·{});
+       26 │ + Object.fromEntries([1,·2].map((value)·=>·[value,·value]));
+    27 27 │   Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+    28 28 │   (
+  
+
+```
+
+```
+invalid.js:27:20 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    25 │ pairs.reduce(object => ({...object, key}), /* keep */ {});
+    26 │ [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+  > 27 │ Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+       │                    ^^^^^^
+    28 │ (
+    29 │ 	(pairs)
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    25 25 │   pairs.reduce(object => ({...object, key}), /* keep */ {});
+    26 26 │   [1, 2].reduce((object, value) => ({...object, [value]: value}), {});
+    27    │ - Array.from(values).reduce((object,·value)·=>·({...object,·[value]:·value}),·{});
+       27 │ + Object.fromEntries(Array.from(values).map((value)·=>·[value,·value]));
+    28 28 │   (
+    29 29 │   	(pairs)
+  
+
+```
+
+```
+invalid.js:30:4 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    28 │ (
+    29 │ 	(pairs)
+  > 30 │ 		.reduce(
+       │ 		 ^^^^^^
+    31 │ 			((object,) => ((
+    32 │ 				Object.assign(
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    27 27 │   Array.from(values).reduce((object, value) => ({...object, [value]: value}), {});
+    28 28 │   (
+    29    │ - → (pairs)
+    30    │ - → → .reduce(
+    31    │ - → → → ((object,)·=>·((
+    32    │ - → → → → Object.assign(
+    33    │ - → → → → → ((object)),
+    34    │ - → → → → → ({
+    35    │ - → → → → → → [((key))]:·((value)),
+    36    │ - → → → → → })
+    37    │ - → → → → )
+    38    │ - → → → ))),
+    39    │ - → → → ({})
+    40    │ - → → )
+       29 │ + → Object.fromEntries((pairs)
+       30 │ + → → .map(
+       31 │ + → → → (()·=>·[((key)),·((value))])
+       32 │ + → → ))
+    41 33 │   );
+    42 34 │   
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This call to _.fromPairs() builds an object from a list of key-value pairs.
+  
+    41 │ );
+    42 │ 
+  > 43 │ _.fromPairs(pairs);
+       │ ^^^^^^^^^^^
+    44 │ lodash.fromPairs(pairs);
+    45 │ (_.fromPairs)(pairs);
+  
+  i Object.fromEntries() does the same thing and is built into JavaScript, so no helper function is needed.
+  
+  i Call Object.fromEntries() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    41 41 │   );
+    42 42 │   
+    43    │ - _.fromPairs(pairs);
+       43 │ + Object.fromEntries(pairs);
+    44 44 │   lodash.fromPairs(pairs);
+    45 45 │   (_.fromPairs)(pairs);
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This call to lodash.fromPairs() builds an object from a list of key-value pairs.
+  
+    43 │ _.fromPairs(pairs);
+  > 44 │ lodash.fromPairs(pairs);
+       │ ^^^^^^^^^^^^^^^^
+    45 │ (_.fromPairs)(pairs);
+    46 │ 
+  
+  i Object.fromEntries() does the same thing and is built into JavaScript, so no helper function is needed.
+  
+  i Call Object.fromEntries() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    42 42 │   
+    43 43 │   _.fromPairs(pairs);
+    44    │ - lodash.fromPairs(pairs);
+       44 │ + Object.fromEntries(pairs);
+    45 45 │   (_.fromPairs)(pairs);
+    46 46 │   
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This call to _.fromPairs() builds an object from a list of key-value pairs.
+  
+    43 │ _.fromPairs(pairs);
+    44 │ lodash.fromPairs(pairs);
+  > 45 │ (_.fromPairs)(pairs);
+       │ ^^^^^^^^^^^^^
+    46 │ 
+    47 │ const object2 = {};
+  
+  i Object.fromEntries() does the same thing and is built into JavaScript, so no helper function is needed.
+  
+  i Call Object.fromEntries() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    43 43 │   _.fromPairs(pairs);
+    44 44 │   lodash.fromPairs(pairs);
+    45    │ - (_.fromPairs)(pairs);
+       45 │ + Object.fromEntries(pairs);
+    46 46 │   
+    47 47 │   const object2 = {};
+  
+
+```
+
+```
+invalid.js:48:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    47 │ const object2 = {};
+  > 48 │ for (const [key, value] of pairs) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 49 │ 	object2[key] = value;
+  > 50 │ }
+       │ ^
+    51 │ 
+    52 │ const object3 = ({});
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    45 45 │   (_.fromPairs)(pairs);
+    46 46 │   
+    47    │ - const·object2·=·{};
+    48    │ - for·(const·[key,·value]·of·pairs)·{
+    49    │ - → object2[key]·=·value;
+    50    │ - }
+       47 │ + const·object2·=·Object.fromEntries(pairs);
+    51 48 │   
+    52 49 │   const object3 = ({});
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    52 │ const object3 = ({});
+  > 53 │ for (let [key, value] of ((pairs))) object3[(key)] = (value);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ const object4 = {
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    50 50 │   }
+    51 51 │   
+    52    │ - const·object3·=·({});
+    53    │ - for·(let·[key,·value]·of·((pairs)))·object3[(key)]·=·(value);
+       52 │ + const·object3·=·Object.fromEntries(((pairs)));
+    54 53 │   
+    55 54 │   const object4 = {
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    56 │ 	// Comment
+    57 │ };
+  > 58 │ for (const [key, value] of pairs) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 59 │ 	object4[key] = value;
+  > 60 │ }
+       │ ^
+    61 │ 
+    62 │ const object5 = {};
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:1 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    62 │ const object5 = {};
+    63 │ // Comment
+  > 64 │ for (const [key, value] of pairs) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 65 │ 	object5[key] = value;
+  > 66 │ }
+       │ ^
+    67 │ 
+    68 │ const object6 = {};
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:1 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    68 │ const object6 = {};
+  > 69 │ for (const [key, value] of pairs) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 70 │ 	object6[key] = value;
+  > 71 │ } // Comment
+       │ ^
+    72 │ 
+    73 │ const object7 = {}
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:74:1 lint/nursery/useObjectFromEntries  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    73 │ const object7 = {}
+  > 74 │ for (const [key, value] of pairs) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 75 │ 	object7[key] = value;
+  > 76 │ }
+       │ ^
+    77 │ [1].forEach(foo);
+    78 │ 
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.fromEntries() instead.
+  
+    71 71 │   } // Comment
+    72 72 │   
+    73    │ - const·object7·=·{}
+    74    │ - for·(const·[key,·value]·of·pairs)·{
+    75    │ - → object7[key]·=·value;
+    76    │ - }
+       73 │ + const·object7·=·Object.fromEntries(pairs);
+    77 74 │   [1].forEach(foo);
+    78 75 │   
+  
+
+```
+
+```
+invalid.js:80:6 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    79 │ // The fix would move the optional chain inside `Object.fromEntries()`.
+  > 80 │ a?.b.reduce((object, [key, value]) => ({...object, [key]: value}), {});
+       │      ^^^^^^
+    81 │ 
+    82 │ // The fix would call the local `Object` variable.
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:2 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This for...of loop builds an object one property at a time.
+  
+    83 │ function shadowedObject(Object) {
+    84 │ 	const object = {};
+  > 85 │ 	for (const [key, value] of pairs) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 86 │ 		object[key] = value;
+  > 87 │ 	}
+       │ 	^
+    88 │ 	return [_.fromPairs(pairs), pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {})];
+    89 │ }
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Pass the list of pairs to Object.fromEntries() instead of looping over it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:10 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This call to _.fromPairs() builds an object from a list of key-value pairs.
+  
+    86 │ 		object[key] = value;
+    87 │ 	}
+  > 88 │ 	return [_.fromPairs(pairs), pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {})];
+       │ 	        ^^^^^^^^^^^
+    89 │ }
+    90 │ 
+  
+  i Object.fromEntries() does the same thing and is built into JavaScript, so no helper function is needed.
+  
+  i Call Object.fromEntries() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:36 lint/nursery/useObjectFromEntries ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This reduce() call builds an object one property at a time.
+  
+    86 │ 		object[key] = value;
+    87 │ 	}
+  > 88 │ 	return [_.fromPairs(pairs), pairs.reduce((object, [key, value]) => ({...object, [key]: value}), {})];
+       │ 	                                  ^^^^^^
+    89 │ }
+    90 │ 
+  
+  i Object.fromEntries() builds the same object from a list of [key, value] pairs in a single step, which is shorter and easier to read.
+  
+  i Turn each item into a [key, value] pair with map(), then pass the result to Object.fromEntries().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

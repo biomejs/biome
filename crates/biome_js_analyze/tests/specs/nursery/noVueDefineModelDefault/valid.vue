@@ -1,0 +1,9 @@
+<script setup>
+/* should not generate diagnostics */
+const model = defineModel()
+const count = defineModel('count')
+const typed = defineModel('typed', { type: String, required: true })
+const options = { default: '' }
+const fromVariable = defineModel('fromVariable', options)
+const spread = defineModel('spread', { ...options })
+</script>

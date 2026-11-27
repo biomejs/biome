@@ -1,0 +1,183 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMisc.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-if="(a)" />
+  <div v-else-if="a" />
+
+  <div v-if="a" />
+  <!-- a comment between branches -->
+  <div v-else-if="a" />
+
+  <template v-if="user.isAdmin">
+    <p>Admin</p>
+  </template>
+  <template v-else-if="user.isAdmin">
+    <p>Also admin</p>
+  </template>
+
+  <MyComponent v-if="a ?? b" />
+  <MyComponent v-else-if="a ?? b" />
+
+  <div v-if="a" />
+  <div v-else-if="(b && a)" />
+
+  <div v-if="(a || b) && (c || d)" />
+  <div v-else-if="(d || c) && (b || a)" />
+
+  <div v-if="a" />
+  <div v-else-if="b" />
+  <div v-else-if="a" />
+  <div v-else>fallback</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalidMisc.vue:4:19 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    2 │ <template>
+    3 │   <div v-if="(a)" />
+  > 4 │   <div v-else-if="a" />
+      │                   ^
+    5 │ 
+    6 │   <div v-if="a" />
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:8:19 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+     6 │   <div v-if="a" />
+     7 │   <!-- a comment between branches -->
+   > 8 │   <div v-else-if="a" />
+       │                   ^
+     9 │ 
+    10 │   <template v-if="user.isAdmin">
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:13:24 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    11 │     <p>Admin</p>
+    12 │   </template>
+  > 13 │   <template v-else-if="user.isAdmin">
+       │                        ^^^^^^^^^^^^
+    14 │     <p>Also admin</p>
+    15 │   </template>
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:18:27 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    17 │   <MyComponent v-if="a ?? b" />
+  > 18 │   <MyComponent v-else-if="a ?? b" />
+       │                           ^^^^^^
+    19 │ 
+    20 │   <div v-if="a" />
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:21:25 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    20 │   <div v-if="a" />
+  > 21 │   <div v-else-if="(b && a)" />
+       │                         ^
+    22 │ 
+    23 │   <div v-if="(a || b) && (c || d)" />
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:24:19 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    23 │   <div v-if="(a || b) && (c || d)" />
+  > 24 │   <div v-else-if="(d || c) && (b || a)" />
+       │                   ^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │   <div v-if="a" />
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMisc.vue:28:19 lint/nursery/noVueDuplicateVElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, earlier conditions in the v-if / v-else-if chain.
+  
+    26 │   <div v-if="a" />
+    27 │   <div v-else-if="b" />
+  > 28 │   <div v-else-if="a" />
+       │                   ^
+    29 │   <div v-else>fallback</div>
+    30 │ </template>
+  
+  i Whenever this condition is true, an earlier condition of the chain is true too, so this element is never rendered.
+  
+  i Remove this element, or change its condition to the one you meant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

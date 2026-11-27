@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCheckDynamicImports.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import("../" + name);
+import(`../${name}`);
+import(name);
+import(name());
+var foo = import(`foo${x}`);
+require(name);
+
+```
+
+# Diagnostics
+```
+invalidCheckDynamicImports.js:2:8 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to import() isn't a fixed string.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import("../" + name);
+      │        ^^^^^^^^^^^^
+    3 │ import(`../${name}`);
+    4 │ import(name);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCheckDynamicImports.js:3:8 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to import() isn't a fixed string.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import("../" + name);
+  > 3 │ import(`../${name}`);
+      │        ^^^^^^^^^^^^
+    4 │ import(name);
+    5 │ import(name());
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCheckDynamicImports.js:4:8 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to import() isn't a fixed string.
+  
+    2 │ import("../" + name);
+    3 │ import(`../${name}`);
+  > 4 │ import(name);
+      │        ^^^^
+    5 │ import(name());
+    6 │ var foo = import(`foo${x}`);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCheckDynamicImports.js:5:8 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to import() isn't a fixed string.
+  
+    3 │ import(`../${name}`);
+    4 │ import(name);
+  > 5 │ import(name());
+      │        ^^^^^^
+    6 │ var foo = import(`foo${x}`);
+    7 │ require(name);
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCheckDynamicImports.js:6:18 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to import() isn't a fixed string.
+  
+    4 │ import(name);
+    5 │ import(name());
+  > 6 │ var foo = import(`foo${x}`);
+      │                  ^^^^^^^^^
+    7 │ require(name);
+    8 │ 
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCheckDynamicImports.js:7:9 lint/nursery/noDynamicRequire ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module name passed to require() isn't a fixed string.
+  
+    5 │ import(name());
+    6 │ var foo = import(`foo${x}`);
+  > 7 │ require(name);
+      │         ^^^^
+    8 │ 
+  
+  i When the module name is built while the program runs, tools can't tell which file gets loaded, so they can't check that it exists or find where it's used.
+  
+  i Write the module name as a string, such as "./module".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

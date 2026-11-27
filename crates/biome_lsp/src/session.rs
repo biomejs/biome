@@ -20,10 +20,13 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
-use biome_service::workspace::{ClientId, FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
+    ClientId, CloseProjectParams, FileContent, FileFeaturesResult, GetFileContentParams,
+    OpenFileParams, ServiceNotification,
+};
+use biome_service::workspace::{
+    FeaturesBuilder, IgnoreKind, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
+    RetryingWorkspace, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
@@ -140,6 +143,19 @@ pub(crate) struct Session {
     /// Projects opened in this session, mapped from the project's root path to
     /// the associated project key.
     projects: HashMap<BiomePath, ProjectKey>,
+
+    /// VCS files that require exact filesystem watches, grouped by project.
+    ///
+    /// These paths cover cases where a Biome app lives inside a nested folder of a monorepo
+    /// ```text
+    /// app/
+    ///   .gitignore
+    ///   packages/frontend // Biome app with biome.json
+    /// ```
+    vcs_watch_paths: HashMap<ProjectKey, Vec<BiomePath>>,
+
+    /// Projects removed from the workspace folders but retained as context for open documents.
+    detached_projects: HashSet<ProjectKey>,
 
     /// Documents opened in this session.
     documents: HashMap<Uri, Document, FxBuildHasher>,
@@ -269,6 +285,17 @@ impl Drop for Session {
     /// refresh of its diagnostics. No request of the session can run anymore,
     /// because each of them holds the session.
     fn drop(&mut self) {
+        let mut project_keys: Vec<_> = self.projects.pin().values().copied().collect();
+        for project_key in self.detached_projects.pin().iter() {
+            if !project_keys.contains(project_key) {
+                project_keys.push(*project_key);
+            }
+        }
+        for project_key in project_keys {
+            let _ = self
+                .workspace()
+                .close_project(CloseProjectParams { project_key });
+        }
         self.workspace
             .forget_closed_client(ClientId::new(self.key.0));
         if let Some(task) = self.diagnostics_refresh.get() {
@@ -295,6 +322,8 @@ impl Session {
             db_state,
             configuration_status: Default::default(),
             projects: Default::default(),
+            vcs_watch_paths: Default::default(),
+            detached_projects: Default::default(),
             documents: Default::default(),
             diagnostics: Default::default(),
             extension_settings: config,
@@ -514,6 +543,31 @@ impl Session {
             .map(|(_project_path, project_key)| *project_key)
     }
 
+    /// Removes a project from path-based selection without closing its service state.
+    pub(crate) fn unregister_project(&self, project_key: ProjectKey) {
+        self.projects
+            .pin()
+            .retain(|_, registered_key| *registered_key != project_key);
+        self.vcs_watch_paths.pin().remove(&project_key);
+        if !self.has_documents_for_project(project_key) {
+            self.clear_project_configuration_status(project_key);
+        }
+    }
+
+    fn clear_project_configuration_status(&self, project_key: ProjectKey) {
+        self.configuration_status.pin().remove(&project_key);
+        self.notified_broken_configuration
+            .pin()
+            .remove(&project_key);
+    }
+
+    pub(crate) fn is_project_registered(&self, project_key: ProjectKey) -> bool {
+        self.projects
+            .pin()
+            .values()
+            .any(|registered_key| *registered_key == project_key)
+    }
+
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn insert_and_scan_project(
@@ -523,6 +577,7 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
+        self.detached_projects.pin().remove(&project_key);
         self.projects.pin().insert(path.clone(), project_key);
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
@@ -546,9 +601,121 @@ impl Session {
         self.documents.pin().insert(url, document);
     }
 
-    /// Remove the [`Document`] matching the provided [`Uri`]
-    pub(crate) fn remove_document(&self, url: &Uri) -> Option<ProjectKey> {
-        self.documents.pin().remove(url).map(|doc| doc.project_key)
+    /// Removes and returns the [`Document`] matching the provided [`Uri`].
+    pub(crate) fn remove_document(&self, url: &Uri) -> Option<Document> {
+        self.documents.pin().remove(url).cloned()
+    }
+
+    /// Returns whether an open document still uses `project_key` as processing context.
+    pub(crate) fn has_documents_for_project(&self, project_key: ProjectKey) -> bool {
+        self.documents
+            .pin()
+            .values()
+            .any(|document| document.project_key == project_key)
+    }
+
+    /// Rebinds virtual documents from a removed project to another open project.
+    pub(crate) fn rebind_virtual_documents(
+        &self,
+        previous_project_key: ProjectKey,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError> {
+        let documents = self.documents.pin();
+        let documents_to_rebind: Vec<_> = documents
+            .iter()
+            .filter(|(uri, document)| {
+                document.project_key == previous_project_key && Self::filesystem_path(uri).is_none()
+            })
+            .map(|(uri, document)| (uri.clone(), document.clone()))
+            .collect();
+        drop(documents);
+
+        for (uri, mut document) in documents_to_rebind {
+            let content = self.workspace().get_file_content(GetFileContentParams {
+                project_key: previous_project_key,
+                path: document.path.clone(),
+            })?;
+            self.workspace().open_file(OpenFileParams {
+                project_key,
+                path: document.path.clone(),
+                content: FileContent::FromClient {
+                    content,
+                    version: document.version,
+                },
+                document_file_source: Some(document.file_source),
+                persist_node_cache: true,
+                inline_config: self.inline_config(),
+                editor_features: Some(self.extension_settings.read().editor_features()),
+            })?;
+            document.project_key = project_key;
+            self.documents.pin().insert(uri, document);
+        }
+
+        Ok(())
+    }
+
+    /// Retains a removed project until its open documents can use another project or close.
+    pub(crate) fn detach_project(&self, project_key: ProjectKey) {
+        self.detached_projects.pin().insert(project_key);
+    }
+
+    /// Returns the projects retained only as context for open documents.
+    pub(crate) fn detached_project_keys(&self) -> Vec<ProjectKey> {
+        self.detached_projects.pin().iter().copied().collect()
+    }
+
+    /// Returns VCS files that require exact filesystem watches.
+    pub(crate) fn vcs_watch_paths(&self) -> Vec<Utf8PathBuf> {
+        self.vcs_watch_paths
+            .pin()
+            .values()
+            .flatten()
+            .map(BiomePath::to_path_buf)
+            .collect()
+    }
+
+    pub(crate) fn is_vcs_watch_path(&self, path: &Utf8Path) -> bool {
+        let path = self.workspace().fs().biome_path(path);
+        self.vcs_watch_paths
+            .pin()
+            .values()
+            .flatten()
+            .any(|registered_path| registered_path == &path)
+    }
+
+    /// Stops retaining a removed project after it has been closed.
+    pub(crate) fn forget_detached_project(&self, project_key: ProjectKey) {
+        self.detached_projects.pin().remove(&project_key);
+        self.clear_project_configuration_status(project_key);
+    }
+
+    /// Closes a removed project after its last document closes.
+    pub(crate) fn close_detached_project_if_unused(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<(), WorkspaceError> {
+        let detached_projects = self.detached_projects.pin();
+        if !detached_projects.contains(&project_key) {
+            return Ok(());
+        }
+        if self.is_project_registered(project_key) {
+            detached_projects.remove(&project_key);
+            return Ok(());
+        }
+        if self
+            .documents
+            .pin()
+            .values()
+            .any(|document| document.project_key == project_key)
+        {
+            return Ok(());
+        }
+
+        self.workspace()
+            .close_project(CloseProjectParams { project_key })?;
+        detached_projects.remove(&project_key);
+        self.clear_project_configuration_status(project_key);
+        Ok(())
     }
 
     fn diagnostics_entry(&self, url: Uri, version: i32) -> Arc<DiagnosticsEntry> {
@@ -639,18 +806,35 @@ impl Session {
         }
     }
 
-    pub(crate) fn file_path(&self, url: &Uri) -> Result<BiomePath> {
-        let path_to_file = match url.to_file_path() {
-            None => {
-                // If we can't create a path, it's probably because the file doesn't exist.
-                // It can be a newly created file that it's not on disk
-                Utf8PathBuf::from(url.path().to_string())
-            }
-            Some(path) => Utf8PathBuf::from_path_buf(path.as_ref().to_path_buf())
-                .expect("To to have a UTF-8 path"),
-        };
+    /// Converts a document URI to a UTF-8 filesystem path when the URI identifies a file.
+    ///
+    /// URI schemes such as VS Code's `untitled` scheme return `None` and remain virtual documents.
+    pub(crate) fn filesystem_path(url: &Uri) -> Option<Utf8PathBuf> {
+        let url = url::Url::parse(url.as_str()).ok()?;
+        let path = url.to_file_path().ok()?;
+        Utf8PathBuf::from_path_buf(path).ok()
+    }
 
-        Ok(BiomePath::new(path_to_file))
+    /// Returns the workspace path for a document URI.
+    pub(crate) fn document_path(&self, url: &Uri) -> BiomePath {
+        match Self::filesystem_path(url) {
+            Some(path) => self.workspace().fs().biome_path(&path),
+            None => BiomePath::new_virtual(url.as_str()),
+        }
+    }
+
+    /// Returns the extension encoded in a non-filesystem document URI.
+    pub(crate) fn virtual_document_extension(url: &Uri) -> Option<&str> {
+        debug_assert!(Self::filesystem_path(url).is_none());
+        Utf8Path::new(url.path().as_str()).extension()
+    }
+
+    /// Returns the open document URI associated with a workspace key.
+    pub(crate) fn document_uri(&self, path: &BiomePath) -> Option<Uri> {
+        self.documents
+            .pin()
+            .iter()
+            .find_map(|(uri, document)| (document.path == *path).then(|| uri.clone()))
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -691,7 +875,7 @@ impl Session {
         doc: Document,
         entry: Option<&DiagnosticsEntry>,
     ) -> Result<(), LspError> {
-        let biome_path = self.file_path(&url)?;
+        let document_path = doc.path.clone();
 
         let configuration_status = self.configuration_status(doc.project_key);
         if !self.notified_broken_configuration(doc.project_key) {
@@ -715,10 +899,11 @@ impl Session {
         } = self.workspace().file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
-            path: biome_path.clone(),
+            path: document_path.clone(),
             inline_config: self.inline_config(),
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -742,7 +927,7 @@ impl Session {
             }
             let result = self.workspace().pull_diagnostics(PullDiagnosticsParams {
                 project_key: doc.project_key,
-                path: biome_path.clone(),
+                path: document_path.clone(),
                 categories: categories.build(),
                 only: Vec::new(),
                 skip: Vec::new(),
@@ -757,7 +942,7 @@ impl Session {
             let offset = if file_features.supports_full_html_support() {
                 None
             } else {
-                let get_start: Option<fn(&str) -> Option<u32>> = match biome_path.extension() {
+                let get_start: Option<fn(&str) -> Option<u32>> = match doc.extension() {
                     Some("vue") => Some(VueFileHandler::start),
                     Some("astro") => Some(AstroFileHandler::start),
                     Some("svelte") => Some(SvelteFileHandler::start),
@@ -768,7 +953,7 @@ impl Session {
                         .workspace()
                         .get_file_content(GetFileContentParams {
                             project_key: doc.project_key,
-                            path: biome_path.clone(),
+                            path: document_path.clone(),
                         })
                         .ok()?;
                     f(content.as_str())
@@ -996,15 +1181,27 @@ impl Session {
         initialize_params.root_uri.clone()
     }
 
+    /// Returns a filesystem path that can provide project context for a virtual document.
+    ///
+    /// Workspace folders and the deprecated root URI take precedence over projects opened for
+    /// standalone files. When several standalone projects are open, the lexical first path is
+    /// used to keep selection deterministic.
+    pub(crate) fn primary_project_path(&self) -> Option<Utf8PathBuf> {
+        self.get_workspace_folders()
+            .unwrap_or_default()
+            .into_iter()
+            .find_map(|folder| Self::filesystem_path(&folder.uri))
+            .or_else(|| self.base_path())
+            .or_else(|| self.projects.pin().keys().min().map(BiomePath::to_path_buf))
+    }
+
     /// Returns the base path of the workspace on the filesystem if it has one
     pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
         let initialize_params = self.initialize_params.get()?;
 
         let root_uri = initialize_params.root_uri.as_ref()?;
-        match root_uri.to_file_path() {
-            Some(base_path) => Some(
-                Utf8PathBuf::from_path_buf(base_path.to_path_buf()).expect("To have a UTF-8 path"),
-            ),
+        match Self::filesystem_path(root_uri) {
+            Some(base_path) => Some(base_path),
             None => {
                 error!(
                     "The Workspace root URI {root_uri:?} could not be parsed as a filesystem path"
@@ -1158,10 +1355,14 @@ impl Session {
                 }
             }
         } else {
-            let base_path = match self.base_path() {
-                None => ConfigurationPathHint::default(),
-                Some(path) => ConfigurationPathHint::FromLsp(path),
-            };
+            let base_path = self.base_path();
+            if base_path.is_none() && self.root_uri().is_some() {
+                return;
+            }
+            let base_path = base_path.map_or_else(
+                ConfigurationPathHint::default,
+                ConfigurationPathHint::FromLsp,
+            );
             let config_file_path = base_path.to_path_buf();
             let status = self.load_biome_configuration_file(base_path, reload).await;
             self.record_configuration_status(config_file_path.as_deref(), status);
@@ -1417,7 +1618,7 @@ impl Session {
 
         let inline_configuration = self.inline_config();
         if let Some(inline_configuration) = inline_configuration {
-            configuration.merge_with(inline_configuration);
+            configuration.merge_with(*inline_configuration);
         }
 
         // If the configuration from the LSP or the workspace, the directory path is used as
@@ -1492,14 +1693,25 @@ impl Session {
 
         let result = self.workspace().update_settings(UpdateSettingsParams {
             project_key,
-            workspace_directory: configuration_path
-                .as_ref()
-                .map(Utf8PathBuf::as_path)
-                .map(BiomePath::from),
+            workspace_directory: configuration_path.as_ref().map(|path| fs.biome_path(path)),
             configuration,
             extended_configurations: Default::default(),
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
+        if result.is_ok() {
+            let project_vcs_watch_paths = self
+                .workspace
+                .with_client(&self.db_state, ClientId::new(self.key.0))
+                .project_vcs_watch_paths(project_key);
+            let paths = self.vcs_watch_paths.pin();
+            if project_vcs_watch_paths.is_empty() {
+                paths.remove(&project_key);
+            } else {
+                paths.insert(project_key, project_vcs_watch_paths);
+            }
+        } else {
+            self.vcs_watch_paths.pin().remove(&project_key);
+        }
 
         self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
             .await;
@@ -1672,7 +1884,7 @@ impl Session {
             .scan_kind_from_editor_features()
     }
 
-    pub(crate) fn inline_config(&self) -> Option<Configuration> {
+    pub(crate) fn inline_config(&self) -> Option<Box<Configuration>> {
         self.extension_settings.read().inline_config()
     }
 

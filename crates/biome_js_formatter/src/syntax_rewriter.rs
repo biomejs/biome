@@ -3,23 +3,32 @@ use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType,
     JsComputedMemberAssignment, JsLanguage, JsLogicalExpression, JsNewExpression,
-    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, JsTemplateExpression,
-    misc_ext::AnyJsParenthesized,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsSyntaxTrivia,
+    JsTemplateExpression, misc_ext::AnyJsParenthesized,
 };
 use biome_rowan::{
-    AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize, VisitNodeSignal,
-    chain_trivia_pieces,
+    AstNode, RewriteSignal, SyntaxKind, TextSize, chain_trivia_pieces, declare_node_union,
 };
 use std::collections::BTreeSet;
 use std::iter;
 
-pub(super) fn transform(root: JsSyntaxNode) -> (JsSyntaxNode, TransformSourceMap) {
-    let mut rewriter = JsFormatSyntaxRewriter::with_offset(root.text_range_with_trivia().start());
-    let transformed = rewriter.transform(root);
-    (transformed, rewriter.finish())
+/// Removes parentheses and re-balances logical expressions in the tree rooted at `root`.
+///
+/// Returns the rewritten tree with a source map from its positions to the positions in `root`, or
+/// `None` when the rewrite changes nothing. The formatter then formats `root` without a source
+/// map.
+pub(super) fn transform(root: &JsSyntaxNode) -> Option<(JsSyntaxNode, TransformSourceMap)> {
+    let mut rewriter = JsFormatSyntaxRewriter::new(root);
+    let transformed = rewriter.transform(root)?;
+    Some((transformed, rewriter.finish()))
 }
 
-#[derive(Default)]
+declare_node_union! {
+    /// The nodes that [JsFormatSyntaxRewriter] rewrites. The rewriter keeps nodes of other kinds
+    /// and continues with their descendants.
+    AnyJsRewrittenNode = AnyJsParenthesized | JsLogicalExpression
+}
+
 struct JsFormatSyntaxRewriter {
     source_map: TransformSourceMapBuilder,
 
@@ -45,10 +54,35 @@ struct JsFormatSyntaxRewriter {
 }
 
 impl JsFormatSyntaxRewriter {
-    pub fn with_offset(offset: TextSize) -> Self {
+    pub fn new(root: &JsSyntaxNode) -> Self {
         Self {
-            source_map: TransformSourceMapBuilder::with_offset(offset),
-            ..Default::default()
+            source_map: TransformSourceMapBuilder::new(root),
+            l_paren_source_position: BTreeSet::new(),
+        }
+    }
+
+    /// Rewrites the subtree rooted at `node`. Returns the rewritten subtree as a new tree without
+    /// a parent, or `None` when the rewrite changes nothing.
+    pub fn transform(&mut self, node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+        node.rewrite_of_kinds(AnyJsRewrittenNode::KIND_SET, |node| self.rewrite_node(node))
+    }
+
+    /// Rewrites `operand`, a descendant of the node being rewritten. Returns `operand` itself when
+    /// the rewrite changes nothing.
+    fn transform_operand(&mut self, operand: JsSyntaxNode) -> JsSyntaxNode {
+        self.transform(&operand).unwrap_or(operand)
+    }
+
+    fn rewrite_node(&mut self, node: JsSyntaxNode) -> RewriteSignal<JsLanguage> {
+        match AnyJsRewrittenNode::cast(node) {
+            Some(AnyJsRewrittenNode::AnyJsParenthesized(parenthesized)) => {
+                self.visit_parenthesized(parenthesized)
+            }
+            Some(AnyJsRewrittenNode::JsLogicalExpression(logical)) => {
+                self.visit_logical_expression(logical)
+            }
+            // `rewrite_of_kinds` offers only the kinds of `AnyJsRewrittenNode`.
+            None => RewriteSignal::Descend,
         }
     }
 }
@@ -133,7 +167,7 @@ impl JsFormatSyntaxRewriter {
     fn visit_parenthesized(
         &mut self,
         parenthesized: AnyJsParenthesized,
-    ) -> VisitNodeSignal<JsLanguage> {
+    ) -> RewriteSignal<JsLanguage> {
         let (l_paren, inner, r_paren) = match (
             parenthesized.l_paren_token(),
             parenthesized.inner(),
@@ -158,23 +192,21 @@ impl JsFormatSyntaxRewriter {
                     || r_paren.leading_trivia().has_skipped()
                     || optional_chain_needs_parens(&parenthesized, &inner)
                 {
-                    return VisitNodeSignal::Traverse(parenthesized.into_syntax());
+                    return RewriteSignal::Descend;
                 } else {
                     (l_paren, inner, r_paren)
                 }
             }
             _ => {
                 // At least one missing child, handle as a regular node
-                return VisitNodeSignal::Traverse(parenthesized.into_syntax());
+                return RewriteSignal::Descend;
             }
         };
-
-        self.source_map.push_source_text(l_paren.text());
 
         let inner_trimmed_range = inner.text_trimmed_range();
         // Store away the inner offset because the new returned inner might be a detached node
         let original_inner_offset = inner.text_range_with_trivia().start();
-        let inner = self.transform(inner);
+        let inner = self.transform_operand(inner);
         let inner_offset = original_inner_offset - inner.text_range_with_trivia().start();
 
         match inner.first_token() {
@@ -199,9 +231,7 @@ impl JsFormatSyntaxRewriter {
                     }
                 };
 
-                self.source_map.push_source_text(r_paren.text());
-
-                VisitNodeSignal::Replace(updated)
+                RewriteSignal::Replace(updated)
             }
 
             Some(first_token) => {
@@ -299,12 +329,10 @@ impl JsFormatSyntaxRewriter {
                 let new_last = last_token.append_trivia_pieces(r_paren_trivia);
 
                 self.source_map
-                    .add_deleted_range(r_paren.text_trimmed_range());
-
-                self.source_map.push_source_text(r_paren.text());
+                    .add_deleted_r_paren(r_paren.text_trimmed_range());
 
                 // SAFETY: Calling `unwrap` is safe because we know that `last_token` is part of the `updated` subtree.
-                VisitNodeSignal::Replace(
+                RewriteSignal::Replace(
                     updated
                         .replace_child(last_token.into(), new_last.into())
                         .unwrap(),
@@ -339,18 +367,23 @@ impl JsFormatSyntaxRewriter {
     fn visit_logical_expression(
         &mut self,
         logical: JsLogicalExpression,
-    ) -> VisitNodeSignal<JsLanguage> {
+    ) -> RewriteSignal<JsLanguage> {
         match (logical.left(), logical.operator_token(), logical.right()) {
             (Ok(left), Ok(operator), Ok(right)) => {
                 let left_key = left.syntax().key();
-                let operator_key = operator.key();
                 let right_key = right.syntax().key();
 
                 // SAFETY: Safe because the rewriter never rewrites an expression to a non expression.
-                let left = AnyJsExpression::unwrap_cast(self.transform(left.into_syntax()));
-                let operator = self.visit_token(operator);
+                let left = AnyJsExpression::unwrap_cast(self.transform_operand(left.into_syntax()));
                 // SAFETY: Safe because the rewriter never rewrites an expression to a non expression.
-                let right = AnyJsExpression::unwrap_cast(self.transform(right.into_syntax()));
+                let right =
+                    AnyJsExpression::unwrap_cast(self.transform_operand(right.into_syntax()));
+
+                // Rebuilding a node with unchanged children gives it a new identity, so
+                // `rewrite_of_kinds` would copy every ancestor up to the root. Comparing the
+                // operands is enough because the rewriter never changes the operator token.
+                let unchanged =
+                    left.syntax().key() == left_key && right.syntax().key() == right_key;
 
                 let updated = match right {
                     AnyJsExpression::JsLogicalExpression(right_logical) => {
@@ -364,7 +397,7 @@ impl JsFormatSyntaxRewriter {
                             {
                                 logical
                                     .with_left(
-                                        biome_js_factory::make::js_logical_expression(
+                                        make_left_recursive_logical_expression(
                                             left, operator, right_left,
                                         )
                                         .into(),
@@ -373,7 +406,9 @@ impl JsFormatSyntaxRewriter {
                                     .with_right(right_right)
                             }
 
-                            // Don't re-balance a logical expression that has syntax errors
+                            // Don't re-balance a right operand with a different operator or with
+                            // syntax errors
+                            _ if unchanged => logical,
                             _ => logical
                                 .with_left(left)
                                 .with_operator_token_token(operator)
@@ -381,33 +416,55 @@ impl JsFormatSyntaxRewriter {
                         }
                     }
 
-                    // Don't re-balance logical expressions with different operators
-                    // Avoid updating the node if none of the children have changed to avoid
-                    // re-spinning all parents.
-                    right => {
-                        if left.syntax().key() != left_key
-                            || operator.key() != operator_key
-                            || right.syntax().key() != right_key
-                        {
-                            logical
-                                .with_left(left)
-                                .with_operator_token_token(operator)
-                                .with_right(right)
-                        } else {
-                            logical
-                        }
-                    }
+                    _ if unchanged => logical,
+                    right => logical
+                        .with_left(left)
+                        .with_operator_token_token(operator)
+                        .with_right(right),
                 };
 
-                VisitNodeSignal::Replace(updated.into_syntax())
+                RewriteSignal::Replace(updated.into_syntax())
             }
-            _ => VisitNodeSignal::Traverse(logical.into_syntax()),
+            _ => RewriteSignal::Descend,
         }
     }
 
     pub(crate) fn finish(self) -> TransformSourceMap {
         self.source_map.finish()
     }
+}
+
+/// Creates the logical expression `left operator right`, keeping it left-recursive when `right` is
+/// itself a logical expression with the same operator.
+///
+/// This happens when re-balancing a right operand with more than two operands: for
+/// `a && (b && c && d)`, `right` is `b && c`, which must become `(a && b) && c` rather than
+/// `a && (b && c)`.
+fn make_left_recursive_logical_expression(
+    left: AnyJsExpression,
+    operator: JsSyntaxToken,
+    right: AnyJsExpression,
+) -> JsLogicalExpression {
+    // The operators and right operands along the left spine of `right`, from the outermost to the
+    // innermost expression.
+    let mut tail = Vec::new();
+    let mut innermost = right;
+
+    while let AnyJsExpression::JsLogicalExpression(logical) = &innermost
+        && let (Ok(logical_left), Ok(logical_operator), Ok(logical_right)) =
+            (logical.left(), logical.operator_token(), logical.right())
+        && logical_operator.kind() == operator.kind()
+    {
+        tail.push((logical_operator, logical_right));
+        innermost = logical_left;
+    }
+
+    let mut result = biome_js_factory::make::js_logical_expression(left, operator, innermost);
+    for (operator, right) in tail.into_iter().rev() {
+        result = biome_js_factory::make::js_logical_expression(result.into(), operator, right);
+    }
+
+    result
 }
 
 // TODO: This should be handled with a `NeedsParentheses` impl.
@@ -424,31 +481,6 @@ fn decorator_expression_needs_parens(inner: &JsSyntaxNode) -> bool {
         }
         Some(AnyJsExpression::JsIdentifierExpression(_)) => false,
         _ => true,
-    }
-}
-
-impl SyntaxRewriter for JsFormatSyntaxRewriter {
-    type Language = JsLanguage;
-
-    fn visit_node(&mut self, node: JsSyntaxNode) -> VisitNodeSignal<Self::Language> {
-        match node.kind() {
-            kind if AnyJsParenthesized::can_cast(kind) => {
-                let parenthesized = AnyJsParenthesized::unwrap_cast(node);
-
-                self.visit_parenthesized(parenthesized)
-            }
-            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
-                let logical = JsLogicalExpression::unwrap_cast(node);
-
-                self.visit_logical_expression(logical)
-            }
-            _ => VisitNodeSignal::Traverse(node),
-        }
-    }
-
-    fn visit_token(&mut self, token: SyntaxToken<Self::Language>) -> SyntaxToken<Self::Language> {
-        self.source_map.push_source_text(token.text());
-        token
     }
 }
 
@@ -548,13 +580,13 @@ mod tests {
         JsUnaryExpression, JsxTagExpression,
     };
     use biome_languages::JsFileSource;
-    use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
+    use biome_rowan::{AstNode, TextSize};
 
     #[test]
     fn rebalances_logical_expressions() {
         let root = parse_module("a && (b && c)", JsParserOptions::default()).syntax();
 
-        let transformed = JsFormatSyntaxRewriter::default().transform(root.clone());
+        let transformed = JsFormatSyntaxRewriter::new(&root).transform(&root).unwrap();
 
         // Changed the root tree
         assert_ne!(&transformed, &root);
@@ -582,7 +614,7 @@ mod tests {
     #[test]
     fn only_rebalances_logical_expressions_with_same_operator() {
         let root = parse_module("a && (b || c)", JsParserOptions::default()).syntax();
-        let transformed = JsFormatSyntaxRewriter::default().transform(root);
+        let transformed = JsFormatSyntaxRewriter::new(&root).transform(&root).unwrap();
 
         // Removes parentheses
         assert_eq!(&transformed.text_with_trivia().to_string(), "a && b || c");
@@ -601,6 +633,38 @@ mod tests {
         assert_eq!(top.right().unwrap().syntax(), right.syntax());
         assert_eq!(right.left().unwrap().to_trimmed_string(), "b");
         assert_eq!(right.right().unwrap().to_trimmed_string(), "c");
+    }
+
+    #[test]
+    fn keeps_unchanged_logical_expression_that_is_not_rebalanced() {
+        // Neither input re-balances the right operand of `||`. `b && c` has a different operator,
+        // and `b &&` has no right operand.
+        for input in ["a || b && c", "a || b &&"] {
+            let root = parse_module(input, JsParserOptions::default()).syntax();
+
+            let transformed = JsFormatSyntaxRewriter::new(&root).transform(&root);
+
+            assert_eq!(transformed, None, "{input}");
+        }
+    }
+
+    #[test]
+    fn rewrites_logical_expression_with_different_operator_when_an_operand_changes() {
+        for (input, expected) in [
+            ("(a) || b && c", "a || b && c"),
+            ("a || (b) && c", "a || b && c"),
+        ] {
+            let root = parse_module(input, JsParserOptions::default()).syntax();
+
+            let transformed = JsFormatSyntaxRewriter::new(&root).transform(&root).unwrap();
+
+            assert_ne!(&transformed, &root, "{input}");
+            assert_eq!(
+                &transformed.text_with_trivia().to_string(),
+                expected,
+                "{input}"
+            );
+        }
     }
 
     #[test]
@@ -910,8 +974,8 @@ mod tests {
     fn source_map_test(input: &str) -> (JsSyntaxNode, TransformSourceMap) {
         let tree = parse(input, JsFileSource::jsx(), JsParserOptions::default()).syntax();
 
-        let mut rewriter = JsFormatSyntaxRewriter::default();
-        let transformed = rewriter.transform(tree);
+        let mut rewriter = JsFormatSyntaxRewriter::new(&tree);
+        let transformed = rewriter.transform(&tree).unwrap_or(tree);
         let source_map = rewriter.finish();
 
         (transformed, source_map)

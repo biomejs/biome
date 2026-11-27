@@ -37,13 +37,12 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_parser::prelude::{CompletedMarker, Marker, ParseDiagnostic, TokenSet};
-use biome_parser::{Parser, token_set};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use biome_unicode_table::{
     Dispatch::{BTO, DIG, HAS, IDT, LSS, MIN, MOR, MUL, PLS, TLD, TPL, ZER},
     lookup_byte,
 };
 
-use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::OpenListItem;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
@@ -65,6 +64,7 @@ use crate::syntax::{
     parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 use biome_rowan::{TextRange, TextSize};
 use std::rc::Rc;
 
@@ -666,10 +666,7 @@ impl ParseNodeList for BulletList {
                 if next_is_bullet_at_indent {
                     // Per CommonMark §5.3, a change in bullet marker across
                     // a blank line starts a new list.
-                    if marker_changes_after_newline(p, marker_kind) {
-                        return Some(true);
-                    }
-                    Some(false)
+                    Some(marker_changes_after_newline(p, marker_kind))
                 } else {
                     // Check if bullet after blank lines is at correct indent
                     let has_item = p.lookahead(|p| {
@@ -2369,8 +2366,11 @@ fn parse_first_line_blocks(
         return LoopAction::Continue;
     }
 
-    // Indent code block (spaces_after_marker > INDENT_CODE_BLOCK_SPACES)
-    if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
+    // Indent code block (spaces_after_marker > INDENT_CODE_BLOCK_SPACES).
+    // MDX has no indented code.
+    if spaces_after_marker > INDENT_CODE_BLOCK_SPACES
+        && MarkdownSyntaxFeatures::Mdx.is_unsupported(p)
+    {
         parse_indent_code_block_in_list_first_line(p);
         state.record_first_line_block();
         return LoopAction::Continue;
@@ -3451,15 +3451,17 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Consumes one blank line after any container prefixes.
+///
+/// Each `MD_TEXTUAL_LITERAL` made only of spaces and tabs becomes whitespace
+/// trivia, and the following `NEWLINE` becomes an `MdNewline` node. At EOF only
+/// the whitespace is consumed. Any other token stops consumption without an
+/// error, so callers must classify the line as blank first; otherwise a caller
+/// loop can stop advancing.
 fn consume_blank_line(p: &mut MarkdownParser) {
     // Consume blank-line whitespace as whitespace trivia (structural, no skipped trivia).
-    while p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " || text == "\t" {
-            p.consume_as_whitespace_trivia();
-        } else {
-            break;
-        }
+    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        p.consume_as_whitespace_trivia();
     }
 
     if p.at(NEWLINE) {

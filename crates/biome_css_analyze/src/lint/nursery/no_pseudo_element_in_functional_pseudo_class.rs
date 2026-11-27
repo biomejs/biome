@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPseudoElementInFunctionalPseudoClass {
-        version: "next",
+        version: "2.6.5",
         name: "noPseudoElementInFunctionalPseudoClass",
         language: "css",
         recommended: false,

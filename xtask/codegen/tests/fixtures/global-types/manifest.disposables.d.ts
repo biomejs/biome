@@ -30,12 +30,17 @@ interface Disposable {
     [Symbol.dispose](): void;
 }
 
+interface PromiseLike<T> {}
+
 interface AsyncDisposable {
     [Symbol.asyncDispose](): PromiseLike<void>;
 }
 
+interface ArrayIterator<T> {}
+
 interface Array<T> {
     length: number;
+    entries(): ArrayIterator<[number, T]>;
     filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
     forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];

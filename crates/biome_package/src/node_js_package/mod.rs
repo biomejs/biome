@@ -106,16 +106,16 @@ impl Package for NodeJsPackage {
             .as_ref()
             .and_then(|manifest| manifest.license.as_ref())
         {
-            if !LICENSE_LIST.is_valid(license) {
-                diagnostics.push(
+            match LICENSE_LIST.find(license) {
+                None => diagnostics.push(
                     ProjectAnalyzeDiagnostic::new_invalid_license(license.to_string())
                         .with_range(range),
-                )
-            } else if LICENSE_LIST.is_deprecated(license) {
-                diagnostics.push(
+                ),
+                Some(found) if found.is_deprecated_license_id => diagnostics.push(
                     ProjectAnalyzeDiagnostic::new_deprecated_license(license.to_string())
                         .with_range(range),
-                )
+                ),
+                Some(_) => {}
             }
         }
 

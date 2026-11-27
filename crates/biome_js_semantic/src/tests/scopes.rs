@@ -1,4 +1,9 @@
-use crate::assert_semantics;
+use crate::{SemanticFlavor, SemanticModelOptions, assert_semantics, semantic_model};
+use biome_js_parser::JsParserOptions;
+use biome_js_syntax::JsSyntaxKind;
+use biome_languages::JsFileSource;
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
+use biome_rowan::AstNode;
 
 // Statements
 assert_semantics! {
@@ -71,4 +76,78 @@ assert_semantics! {
 // Others
 assert_semantics! {
     ok_scope_global, "/*START GLOBAL*//*END GLOBAL*/",
+}
+
+#[test]
+fn svelte_each_binding_root_declares_context_and_index() {
+    let source = JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+        file_kind: SvelteFileKind::Component,
+        embedding_kind: SvelteEmbeddingKind::EachBinding,
+        is_class_attribute: false,
+        is_module_script: false,
+    });
+    let parsed = biome_js_parser::parse(
+        "{ [property]: value = fallback }: Item, index (value + index + external)",
+        source,
+        JsParserOptions::default(),
+    );
+    assert!(!parsed.has_errors());
+
+    let model = semantic_model(&parsed.tree(), SemanticModelOptions::from(&source));
+    let scope = model.global_scope();
+    assert_eq!(
+        scope.syntax().kind(),
+        JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT
+    );
+    assert_eq!(scope.get_binding("value").unwrap().all_reads().count(), 1);
+    assert_eq!(scope.get_binding("index").unwrap().all_reads().count(), 1);
+    let mut unresolved: Vec<_> = model
+        .all_unresolved_references()
+        .map(|reference| reference.tree().syntax().text_trimmed().to_string())
+        .collect();
+    unresolved.sort();
+    assert_eq!(unresolved, ["Item", "external", "fallback", "property"]);
+}
+
+#[test]
+fn svelte_declaration_and_legacy_const_roots_have_scopes() {
+    for (embedding_kind, code, root_kind) in [
+        (
+            SvelteEmbeddingKind::Declaration,
+            "const value: number = (() => 1)()",
+            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+        ),
+        (
+            SvelteEmbeddingKind::LegacyConst,
+            "value: number = (() => 1)()",
+            JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
+        ),
+    ] {
+        let source = JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Svelte {
+            file_kind: SvelteFileKind::Component,
+            embedding_kind,
+            is_class_attribute: false,
+            is_module_script: false,
+        });
+        let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+        assert!(!parsed.has_errors());
+        assert_eq!(parsed.syntax().kind(), root_kind);
+
+        let model = semantic_model(
+            &parsed.tree(),
+            SemanticModelOptions {
+                flavor: SemanticFlavor::Svelte,
+                ..SemanticModelOptions::default()
+            },
+        );
+        let scope = model.global_scope();
+        assert_eq!(scope.syntax().kind(), root_kind);
+        assert!(scope.get_binding("value").is_some());
+        let closure = scope.children().next().unwrap();
+        assert_eq!(
+            closure.syntax().kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+        );
+        assert_eq!(closure.parent(), Some(scope));
+    }
 }

@@ -1,5 +1,5 @@
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName,
+    AnyJsAssignment, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName,
     AnyJsTemplateElement, JsNumberLiteralExpression,
     numbers::{canonicalize_js_bigint_literal, parse_js_number_with_single_rounding},
     unescape_js_string,
@@ -56,17 +56,8 @@ pub(crate) fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -
                 if is_optional_member(&left) != is_optional_member(&right) {
                     return Some(false);
                 }
-                match (member_key(&left)?, member_key(&right)?) {
-                    (MemberKey::Static(left_key), MemberKey::Static(right_key))
-                    | (MemberKey::Private(left_key), MemberKey::Private(right_key)) => {
-                        if left_key != right_key {
-                            return Some(false);
-                        }
-                    }
-                    (MemberKey::Computed(left_key), MemberKey::Computed(right_key)) => {
-                        expressions.push((left_key, right_key));
-                    }
-                    _ => return Some(false),
+                if !push_same_key(member_key(&left)?, member_key(&right)?, &mut expressions) {
+                    return Some(false);
                 }
                 expressions.push((left.object().ok()?, right.object().ok()?));
             }
@@ -74,6 +65,87 @@ pub(crate) fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -
     }
 
     Some(true)
+}
+
+/// Returns whether assigning to `target` writes the variable or property that `reference`
+/// reads, so `a.b = 1` matches the reference `a["b"]`.
+///
+/// `reference` is compared as in [`is_same_reference`]. Parentheses and TypeScript syntax
+/// around `target`, such as `(a as T)` or `a!`, are ignored. A reference that uses optional
+/// chaining (`?.`) at its last step never matches, since an assignment target can't use it.
+///
+/// Returns `None` if the syntax tree is incomplete.
+pub(crate) fn is_same_assignment_target(
+    target: AnyJsAssignment,
+    reference: AnyJsExpression,
+) -> Option<bool> {
+    let mut target = target;
+    let target = loop {
+        target = match target {
+            AnyJsAssignment::JsParenthesizedAssignment(target) => target.assignment().ok()?,
+            AnyJsAssignment::TsNonNullAssertionAssignment(target) => target.assignment().ok()?,
+            AnyJsAssignment::TsAsAssignment(target) => target.assignment().ok()?,
+            AnyJsAssignment::TsSatisfiesAssignment(target) => target.assignment().ok()?,
+            AnyJsAssignment::TsTypeAssertionAssignment(target) => target.assignment().ok()?,
+            target => break target,
+        };
+    };
+    let reference = reference.omit_type_wrappers()?;
+
+    let (target_object, target_key) = match target {
+        AnyJsAssignment::JsIdentifierAssignment(target) => {
+            let Some(reference) = reference.as_js_identifier_expression() else {
+                return Some(false);
+            };
+            return Some(
+                target.name_token().ok()?.text_trimmed()
+                    == reference.name().ok()?.value_token().ok()?.text_trimmed(),
+            );
+        }
+        AnyJsAssignment::JsStaticMemberAssignment(target) => {
+            (target.object().ok()?, name_key(target.member().ok()?)?)
+        }
+        AnyJsAssignment::JsComputedMemberAssignment(target) => {
+            (target.object().ok()?, computed_key(target.member().ok()?)?)
+        }
+        _ => return None,
+    };
+
+    let Some(reference) = AnyJsMemberExpression::cast(reference.into_syntax()) else {
+        return Some(false);
+    };
+    if is_optional_member(&reference) {
+        return Some(false);
+    }
+    let mut expressions = Vec::new();
+    if !push_same_key(target_key, member_key(&reference)?, &mut expressions) {
+        return Some(false);
+    }
+    expressions.push((target_object, reference.object().ok()?));
+    for (left, right) in expressions {
+        if !is_same_reference(left, right)? {
+            return Some(false);
+        }
+    }
+    Some(true)
+}
+
+/// Returns `false` if `left` and `right` are different properties. Otherwise returns `true`,
+/// and if both are computed, pushes them to `expressions` to be compared next.
+fn push_same_key(
+    left: MemberKey,
+    right: MemberKey,
+    expressions: &mut Vec<(AnyJsExpression, AnyJsExpression)>,
+) -> bool {
+    match (left, right) {
+        (MemberKey::Static(left), MemberKey::Static(right))
+        | (MemberKey::Private(left), MemberKey::Private(right)) => left == right,
+        (MemberKey::Computed(left), MemberKey::Computed(right)) => {
+            expressions.push((left, right));
+            true
+        }
+        _ => false,
+    }
 }
 
 /// The property that a member expression reads.
@@ -90,23 +162,37 @@ enum MemberKey {
 
 /// Returns `None` if the syntax tree is incomplete.
 fn member_key(member: &AnyJsMemberExpression) -> Option<MemberKey> {
-    Some(match member {
-        AnyJsMemberExpression::JsStaticMemberExpression(member) => match member.member().ok()? {
-            AnyJsName::JsName(name) => {
-                MemberKey::Static(name.value_token().ok()?.token_text_trimmed().into())
-            }
-            AnyJsName::JsPrivateName(name) => {
-                MemberKey::Private(name.value_token().ok()?.token_text_trimmed().into())
-            }
-            AnyJsName::JsMetavariable(_) => return None,
-        },
+    match member {
+        AnyJsMemberExpression::JsStaticMemberExpression(member) => name_key(member.member().ok()?),
         AnyJsMemberExpression::JsComputedMemberExpression(member) => {
-            let property = member.member().ok()?.omit_type_wrappers()?;
-            match static_property_name(&property) {
-                Some(name) => MemberKey::Static(name),
-                None => MemberKey::Computed(property),
-            }
+            computed_key(member.member().ok()?)
         }
+    }
+}
+
+/// Returns the key of the property `name` in `a.name`.
+///
+/// Returns `None` if the syntax tree is incomplete.
+fn name_key(name: AnyJsName) -> Option<MemberKey> {
+    Some(match name {
+        AnyJsName::JsName(name) => {
+            MemberKey::Static(name.value_token().ok()?.token_text_trimmed().into())
+        }
+        AnyJsName::JsPrivateName(name) => {
+            MemberKey::Private(name.value_token().ok()?.token_text_trimmed().into())
+        }
+        AnyJsName::JsMetavariable(_) => return None,
+    })
+}
+
+/// Returns the key of the property `property` in `a[property]`.
+///
+/// Returns `None` if the syntax tree is incomplete.
+fn computed_key(property: AnyJsExpression) -> Option<MemberKey> {
+    let property = property.omit_type_wrappers()?;
+    Some(match static_property_name(&property) {
+        Some(name) => MemberKey::Static(name),
+        None => MemberKey::Computed(property),
     })
 }
 
@@ -194,7 +280,7 @@ fn number_value(literal: &JsNumberLiteralExpression) -> Option<f64> {
 /// Returns `None` if `text` contains an escape sequence that [`unescape_js_string`] can't
 /// decode correctly: a legacy octal escape such as `\1` or `\01`, or an escape for half of a
 /// surrogate pair such as `\uD83D`.
-fn string_value(text: TokenText) -> Option<Text> {
+pub(crate) fn string_value(text: TokenText) -> Option<Text> {
     let mut chars = text.chars().peekable();
     while let Some(c) = chars.next() {
         if c != '\\' {

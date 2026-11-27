@@ -287,7 +287,7 @@ impl ServiceLanguage for JsLanguage {
                 .into(),
         };
 
-        overrides.apply_override_js_parser_options(path, &mut options);
+        overrides.apply_override_js_parser_options(path.as_path(), &mut options);
 
         options
     }
@@ -379,21 +379,19 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| match quote_style {
+            .map_or_default(|quote_style: QuoteStyle| match quote_style {
                 QuoteStyle::Single => PreferredQuote::Single,
                 QuoteStyle::Double => PreferredQuote::Double,
-            })
-            .unwrap_or_default();
+            });
         let preferred_jsx_quote = global
             .languages
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| match quote_style {
+            .map_or_default(|quote_style: QuoteStyle| match quote_style {
                 QuoteStyle::Single => PreferredQuote::Single,
                 QuoteStyle::Double => PreferredQuote::Double,
-            })
-            .unwrap_or_default();
+            });
         let preferred_indentation = {
             let indent_style = global
                 .languages
@@ -870,46 +868,12 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
 /// - `gql\`\`` / `graphql\`\`` → Identifier("gql") / Identifier("graphql")
 /// - `styled.div\`\`` → MemberExpression { object: "styled", property: "div" }
 /// - `styled(Comp)\`\`` → CallExpression { callee: "styled" }
+/// - `styled.div.attrs({})\`\`` / `styled(Comp).attrs({})\`\`` → same as `styled.div` / `styled(Comp)`
 /// - `graphql(\`\`)` → CallExpression { callee: "graphql" } (template as argument)
 #[cfg(feature = "js_embeds")]
 fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<TemplateTagKind> {
     if let Some(tag) = expr.tag() {
-        match tag {
-            // css``, gql``, graphql``
-            AnyJsExpression::JsIdentifierExpression(ident) => {
-                let name = ident.name().ok()?;
-                Some(TemplateTagKind::Identifier(
-                    name.value_token().ok()?.token_text_trimmed(),
-                ))
-            }
-            // styled.div``
-            AnyJsExpression::JsStaticMemberExpression(member) => {
-                let object = match member.object().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(ident) => {
-                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
-                    }
-                    _ => return None,
-                };
-                let property = member
-                    .member()
-                    .ok()?
-                    .value_token()
-                    .ok()?
-                    .token_text_trimmed();
-                Some(TemplateTagKind::MemberExpression { object, property })
-            }
-            // styled(Component)``
-            AnyJsExpression::JsCallExpression(call) => {
-                let callee = match call.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(ident) => {
-                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
-                    }
-                    _ => return None,
-                };
-                Some(TemplateTagKind::CallExpression { callee })
-            }
-            _ => None,
-        }
+        tag_expression_to_template_tag(tag)
     } else {
         // No tag — check if template is an argument to a call expression
         // e.g. graphql(`query { ... }`)
@@ -923,6 +887,63 @@ fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<Te
             _ => return None,
         };
         Some(TemplateTagKind::CallExpression { callee })
+    }
+}
+
+#[cfg(feature = "js_embeds")]
+fn tag_expression_to_template_tag(tag: AnyJsExpression) -> Option<TemplateTagKind> {
+    match tag {
+        // css``, gql``, graphql``
+        AnyJsExpression::JsIdentifierExpression(ident) => {
+            let name = ident.name().ok()?;
+            Some(TemplateTagKind::Identifier(
+                name.value_token().ok()?.token_text_trimmed(),
+            ))
+        }
+        // styled.div``
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object = match member.object().ok()? {
+                AnyJsExpression::JsIdentifierExpression(ident) => {
+                    ident.name().ok()?.value_token().ok()?.token_text_trimmed()
+                }
+                _ => return None,
+            };
+            let property = member
+                .member()
+                .ok()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
+            Some(TemplateTagKind::MemberExpression { object, property })
+        }
+        AnyJsExpression::JsCallExpression(call) => match call.callee().ok()? {
+            // styled.div.attrs({})``, styled(Component).attrs({})``
+            AnyJsExpression::JsStaticMemberExpression(member) => match member.object().ok()? {
+                object @ AnyJsExpression::JsStaticMemberExpression(_) => {
+                    tag_expression_to_template_tag(object)
+                }
+                AnyJsExpression::JsCallExpression(call) => call_expression_to_template_tag(&call),
+                _ => None,
+            }
+            .filter(|tag| match tag {
+                TemplateTagKind::MemberExpression { object: name, .. }
+                | TemplateTagKind::CallExpression { callee: name } => name.text() == "styled",
+                TemplateTagKind::Identifier(_) => false,
+            }),
+            // styled(Component)``
+            _ => call_expression_to_template_tag(&call),
+        },
+        _ => None,
+    }
+}
+
+#[cfg(feature = "js_embeds")]
+fn call_expression_to_template_tag(call: &JsCallExpression) -> Option<TemplateTagKind> {
+    match call.callee().ok()? {
+        AnyJsExpression::JsIdentifierExpression(ident) => Some(TemplateTagKind::CallExpression {
+            callee: ident.name().ok()?.value_token().ok()?.token_text_trimmed(),
+        }),
+        _ => None,
     }
 }
 
@@ -1040,8 +1061,7 @@ fn debug_control_flow(
                 std::cmp::Reverse(graph.node.ancestors().count()),
             )
         })
-        .map(|graph| graph.to_string())
-        .unwrap_or_default()
+        .map_or_default(|graph| graph.to_string())
 }
 
 fn debug_formatter_ir(
@@ -1249,6 +1269,7 @@ fn js_analyzer_services_for_fix(
     parsed_source: Option<&AnalyzedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
+    tree_is_edited: bool,
 ) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
@@ -1259,7 +1280,8 @@ fn js_analyzer_services_for_fix(
         params.project_layout.clone(),
         source_type,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_tree_edited(tree_is_edited);
     // The fixes change the analyzed tree but not its host document, so the
     // services keep reading the embedded content of the document.
     let services = match params.parsed_source.document() {
@@ -1328,7 +1350,7 @@ pub(super) fn lint_with_inspector(
                 &params.parsed_source,
                 params.language,
                 params.settings.as_ref(),
-                params.path,
+                params.path.as_path(),
                 &params.workspace_db,
             )
         {
@@ -1372,7 +1394,8 @@ pub(super) fn lint_with_inspector(
         params.project_layout.clone(),
         files_source,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_rule_execution(params.rule_execution);
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1552,6 +1575,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         super::ParsedOrigin::Workspace(source) => Some(source),
         super::ParsedOrigin::Interned { .. } => None,
     };
+    let mut tree_is_edited = false;
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1596,7 +1620,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+            let services = js_analyzer_services_for_fix(
+                &tree,
+                parsed_source,
+                &params,
+                file_source,
+                tree_is_edited,
+            );
 
             let mut pending_actions = Vec::new();
 
@@ -1621,6 +1651,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     None => return None,
                 };
                 parsed_source = None;
+                tree_is_edited = true;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -1642,7 +1673,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            tree_is_edited,
+        );
 
         let mut pending_actions = Vec::new();
 
@@ -1670,6 +1707,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 None => return None,
             };
             parsed_source = None;
+            tree_is_edited = true;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1687,6 +1725,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     let parse = biome_js_parser::parse(&new_text, file_source, options);
                     tree = parse.tree();
                     parsed_source = None;
+                    tree_is_edited = true;
                     continue;
                 }
             }
@@ -1697,7 +1736,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            tree_is_edited,
+        );
 
         let (_, _) = analyze(
             &tree,
@@ -1978,7 +2023,7 @@ impl EmbeddedSnippetFormatter<'_, '_> {
     fn format_interpolation(&self, range: TextRange) -> Option<Document> {
         let content = self.host_contents.get(&range)?;
         let mut document = Document::new(content.to_vec());
-        document.replace_embedded(&mut |range| self.format(range));
+        document.replace_embedded(&mut |range, _| self.format(range));
         Some(document)
     }
 }

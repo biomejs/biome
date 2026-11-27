@@ -37,7 +37,7 @@ use biome_tailwind_parser::{TailwindParse, TailwindParserOptions, parse_tailwind
 use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
 use rustc_hash::FxHashMap;
 
-use crate::use_tailwind_sorted_classes::TailwindDesignSystem;
+use crate::tailwind_v4::TailwindDesignSystem;
 
 #[derive(Clone, Debug)]
 pub struct SyntaxService<L> {
@@ -108,11 +108,15 @@ impl TailwindClassString {
     /// Whether `range`, relative to the start of `text`, touches part of a
     /// class.
     fn touches_partial_class(&self, range: TextRange) -> bool {
-        self.partial_classes
-            .iter()
-            .flatten()
-            .any(|partial| partial.intersect(range).is_some())
+        touches_any(&self.partial_classes, range)
     }
+}
+
+fn touches_any(ranges: &[Option<TextRange>; 2], range: TextRange) -> bool {
+    ranges
+        .iter()
+        .flatten()
+        .any(|other| other.intersect(range).is_some())
 }
 
 pub struct ParsedTailwindSyntax {
@@ -218,6 +222,8 @@ pub trait TailwindClassStringHost: AstNode {
 pub struct TailwindSyntax<N> {
     node: N,
     parse: Rc<TailwindParse>,
+    /// See [TailwindClassString::partial_classes].
+    partial_classes: [Option<TextRange>; 2],
 }
 
 pub struct TailwindSyntaxMatch<L: Language> {
@@ -246,6 +252,13 @@ impl<N> TailwindSyntax<N> {
 
     pub fn tailwind_has_errors(&self) -> bool {
         self.parse.has_errors()
+    }
+
+    /// Whether `range`, relative to the start of the class string, touches a
+    /// class that continues outside the string, such as `bar` in
+    /// `` `foo bar${suffix}` ``.
+    pub fn touches_partial_class(&self, range: TextRange) -> bool {
+        touches_any(&self.partial_classes, range)
     }
 }
 
@@ -310,21 +323,16 @@ where
         Self {
             node: ast_node,
             parse,
+            partial_classes: node.class_string.partial_classes,
         }
     }
 }
 
-pub struct TailwindSyntaxVisitor<N: AstNode> {
-    skip_subtree: Option<SyntaxNode<N::Language>>,
-    _node: PhantomData<N>,
-}
+pub struct TailwindSyntaxVisitor<N>(PhantomData<N>);
 
-impl<N: AstNode> Default for TailwindSyntaxVisitor<N> {
+impl<N> Default for TailwindSyntaxVisitor<N> {
     fn default() -> Self {
-        Self {
-            skip_subtree: None,
-            _node: PhantomData,
-        }
+        Self(PhantomData)
     }
 }
 
@@ -339,26 +347,15 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         mut ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
 
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
+        // A node overlaps the range only if all its ancestors do, so checking
+        // the node alone skips the same nodes as skipping whole subtrees.
         if let Some(range) = ctx.range
             && node.text_range_with_trivia().ordering(range).is_ne()
         {
-            self.skip_subtree = Some(node.clone());
             return;
         }
 
@@ -399,6 +396,13 @@ where
             node: node.clone(),
             class_string,
         });
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        Some(N::KIND_SET)
     }
 }
 
@@ -726,9 +730,16 @@ impl TailwindClassStringHost for JsLiteralMemberName {
         if !inspect_string_literal(self.syntax(), options, is_class_attribute).unwrap_or(false) {
             return None;
         }
+        let value = self.value().ok()?;
+        // Only string literal keys have an opening quote to skip.
+        let quote_len = if value.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+            TextSize::from(1)
+        } else {
+            TextSize::from(0)
+        };
         tailwind_class_string(
             self.name().ok()?,
-            self.value().ok()?.text_trimmed_range().start() + TextSize::from(1),
+            value.text_trimmed_range().start() + quote_len,
             ClassStringHostKind::JsLiteralMemberName,
         )
         .into()
@@ -816,5 +827,32 @@ impl TailwindClassStringHost for HtmlAttribute {
             ClassStringHostKind::HtmlString,
         )
         .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_parser::{JsParserOptions, parse};
+
+    /// Returns the source text at the `inner_range` of each object key that
+    /// holds a class string in `source`.
+    fn object_key_class_texts(source: &str) -> Vec<String> {
+        let parse = parse(source, JsFileSource::jsx(), JsParserOptions::default());
+        parse
+            .syntax()
+            .descendants()
+            .filter_map(JsLiteralMemberName::cast)
+            .filter_map(|name| name.tailwind_class_string(&TailwindOptions::default(), false))
+            .map(|class_string| source[class_string.inner_range].to_string())
+            .collect()
+    }
+
+    #[test]
+    fn object_key_inner_range() {
+        assert_eq!(
+            object_key_class_texts(r#"clsx({ flex: active, "p-2": active, 'm-2': active });"#),
+            ["flex", "p-2", "m-2"]
+        );
     }
 }

@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+a { font-weight: bold; }
+a { font-weight: BOLD; }
+a { font-weight: bolder; }
+a { font-weight: normal; }
+a { font-weight: lighter; }
+a { font-weight: 300; }
+a { font-weight: 401; }
+a { font-weight: var(--weight); }
+a { font-weight: inherit; }
+a { font: italic small-caps bold 16px/500 cursive; }
+a { font: italic small-caps 600 16px/3 cursive; }
+a { font: normal 16px/3 cursive; }
+a { font: normal normal normal 16px/3 cursive; }
+a { font: 16px/400 serif; }
+a { line-height: 400; }

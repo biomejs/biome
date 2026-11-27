@@ -1,0 +1,954 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComments.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo = "hi";
+
+/** @isolated */
+function declaration() {
+	return foo.slice();
+}
+
+/** @isolated */
+const arrow = () => foo.slice();
+
+/* @isolated */
+const blockComment = () => foo.slice();
+
+// @isolated
+const lineComment = () => foo.slice();
+
+/**
+ * @isolated
+ */
+const multilineJsdoc = () => foo.slice();
+
+// @isolated - runs in a worker
+const withExplanation = () => foo.slice();
+
+// @isolated -- runs in a worker
+const withDoubleDashExplanation = () => foo.slice();
+
+// @ISOLATED
+const uppercase = () => foo.slice();
+
+const inline = /* @isolated */ () => foo.slice();
+
+// @isolated
+export const exported = () => foo.slice();
+
+// @isolated
+export function exportedDeclaration() {
+	return foo.slice();
+}
+
+// @isolated
+export default () => foo.slice();
+
+const object = {
+	/** @isolated */
+	method() {
+		return foo.slice();
+	},
+	/** @isolated */
+	property: () => foo.slice(),
+	/** @isolated */
+	functionProperty: function () {
+		return foo.slice();
+	},
+	/** @isolated */
+	usesThis() {
+		return this.foo;
+	},
+	/** @isolated */
+	arrowUsesThis: () => this.foo,
+	/** @isolated */
+	get getter() {
+		return foo;
+	},
+	/** @isolated */
+	set setter(value) {
+		foo.slice(value);
+	},
+};
+
+class Example extends Base {
+	/** @isolated */
+	constructor() {
+		super();
+		console.log(foo);
+	}
+
+	/** @isolated */
+	get getter() {
+		return foo;
+	}
+
+	/** @isolated */
+	set setter(value) {
+		foo.slice(value);
+	}
+
+	/** @isolated */
+	method() {
+		return foo.slice();
+	}
+
+	/** @isolated */
+	usesThis() {
+		return this.foo;
+	}
+
+	/** @isolated */
+	usesSuper() {
+		return super.foo;
+	}
+
+	/** @isolated */
+	nestedArrow() {
+		const getValue = () => this.foo + super.foo;
+		return getValue;
+	}
+}
+
+wrapper(/* @isolated */ () => foo.slice());
+
+```
+
+# Diagnostics
+```
+invalidComments.js:6:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    4 │ /** @isolated */
+    5 │ function declaration() {
+  > 6 │ 	return foo.slice();
+      │ 	       ^^^
+    7 │ }
+    8 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:10:21 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+     9 │ /** @isolated */
+  > 10 │ const arrow = () => foo.slice();
+       │                     ^^^
+    11 │ 
+    12 │ /* @isolated */
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:13:28 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    12 │ /* @isolated */
+  > 13 │ const blockComment = () => foo.slice();
+       │                            ^^^
+    14 │ 
+    15 │ // @isolated
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:16:27 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    15 │ // @isolated
+  > 16 │ const lineComment = () => foo.slice();
+       │                           ^^^
+    17 │ 
+    18 │ /**
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:21:30 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    19 │  * @isolated
+    20 │  */
+  > 21 │ const multilineJsdoc = () => foo.slice();
+       │                              ^^^
+    22 │ 
+    23 │ // @isolated - runs in a worker
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:24:31 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    23 │ // @isolated - runs in a worker
+  > 24 │ const withExplanation = () => foo.slice();
+       │                               ^^^
+    25 │ 
+    26 │ // @isolated -- runs in a worker
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:27:41 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    26 │ // @isolated -- runs in a worker
+  > 27 │ const withDoubleDashExplanation = () => foo.slice();
+       │                                         ^^^
+    28 │ 
+    29 │ // @ISOLATED
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:30:25 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    29 │ // @ISOLATED
+  > 30 │ const uppercase = () => foo.slice();
+       │                         ^^^
+    31 │ 
+    32 │ const inline = /* @isolated */ () => foo.slice();
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:32:38 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    30 │ const uppercase = () => foo.slice();
+    31 │ 
+  > 32 │ const inline = /* @isolated */ () => foo.slice();
+       │                                      ^^^
+    33 │ 
+    34 │ // @isolated
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:35:31 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    34 │ // @isolated
+  > 35 │ export const exported = () => foo.slice();
+       │                               ^^^
+    36 │ 
+    37 │ // @isolated
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:39:9 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    37 │ // @isolated
+    38 │ export function exportedDeclaration() {
+  > 39 │ 	return foo.slice();
+       │ 	       ^^^
+    40 │ }
+    41 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:43:22 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    42 │ // @isolated
+  > 43 │ export default () => foo.slice();
+       │                      ^^^
+    44 │ 
+    45 │ const object = {
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:48:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    46 │ 	/** @isolated */
+    47 │ 	method() {
+  > 48 │ 		return foo.slice();
+       │ 		       ^^^
+    49 │ 	},
+    50 │ 	/** @isolated */
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:51:18 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    49 │ 	},
+    50 │ 	/** @isolated */
+  > 51 │ 	property: () => foo.slice(),
+       │ 	                ^^^
+    52 │ 	/** @isolated */
+    53 │ 	functionProperty: function () {
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:54:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    52 │ 	/** @isolated */
+    53 │ 	functionProperty: function () {
+  > 54 │ 		return foo.slice();
+       │ 		       ^^^
+    55 │ 	},
+    56 │ 	/** @isolated */
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:58:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    56 │ 	/** @isolated */
+    57 │ 	usesThis() {
+  > 58 │ 		return this.foo;
+       │ 		       ^^^^
+    59 │ 	},
+    60 │ 	/** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:61:23 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    59 │ 	},
+    60 │ 	/** @isolated */
+  > 61 │ 	arrowUsesThis: () => this.foo,
+       │ 	                     ^^^^
+    62 │ 	/** @isolated */
+    63 │ 	get getter() {
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:64:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    62 │ 	/** @isolated */
+    63 │ 	get getter() {
+  > 64 │ 		return foo;
+       │ 		       ^^^
+    65 │ 	},
+    66 │ 	/** @isolated */
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:68:3 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    66 │ 	/** @isolated */
+    67 │ 	set setter(value) {
+  > 68 │ 		foo.slice(value);
+       │ 		^^^
+    69 │ 	},
+    70 │ };
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:75:3 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × super is used inside an isolated function.
+  
+    73 │ 	/** @isolated */
+    74 │ 	constructor() {
+  > 75 │ 		super();
+       │ 		^^^^^
+    76 │ 		console.log(foo);
+    77 │ 	}
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, super doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:76:15 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    74 │ 	constructor() {
+    75 │ 		super();
+  > 76 │ 		console.log(foo);
+       │ 		            ^^^
+    77 │ 	}
+    78 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:81:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    79 │ 	/** @isolated */
+    80 │ 	get getter() {
+  > 81 │ 		return foo;
+       │ 		       ^^^
+    82 │ 	}
+    83 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:86:3 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    84 │ 	/** @isolated */
+    85 │ 	set setter(value) {
+  > 86 │ 		foo.slice(value);
+       │ 		^^^
+    87 │ 	}
+    88 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:91:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    89 │ 	/** @isolated */
+    90 │ 	method() {
+  > 91 │ 		return foo.slice();
+       │ 		       ^^^
+    92 │ 	}
+    93 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:96:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    94 │ 	/** @isolated */
+    95 │ 	usesThis() {
+  > 96 │ 		return this.foo;
+       │ 		       ^^^^
+    97 │ 	}
+    98 │ 
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:101:10 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × super is used inside an isolated function.
+  
+     99 │ 	/** @isolated */
+    100 │ 	usesSuper() {
+  > 101 │ 		return super.foo;
+        │ 		       ^^^^^
+    102 │ 	}
+    103 │ 
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, super doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:106:26 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used inside an isolated function.
+  
+    104 │ 	/** @isolated */
+    105 │ 	nestedArrow() {
+  > 106 │ 		const getValue = () => this.foo + super.foo;
+        │ 		                       ^^^^
+    107 │ 		return getValue;
+    108 │ 	}
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, this doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:106:37 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × super is used inside an isolated function.
+  
+    104 │ 	/** @isolated */
+    105 │ 	nestedArrow() {
+  > 106 │ 		const getValue = () => this.foo + super.foo;
+        │ 		                                  ^^^^^
+    107 │ 		return getValue;
+    108 │ 	}
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Where the function runs, super doesn't refer to the object or class around it.
+  
+  i Pass the values the function needs as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:111:31 lint/nursery/noOuterScopeInIsolatedFunctions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable foo is declared outside of this isolated function.
+  
+    109 │ }
+    110 │ 
+  > 111 │ wrapper(/* @isolated */ () => foo.slice());
+        │                               ^^^
+    112 │ 
+  
+  i The variable is declared here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo = "hi";
+      │       ^^^
+    3 │ 
+    4 │ /** @isolated */
+  
+  i The @isolated comment marks this function as one that runs apart from the code around it.
+  
+  i Variables declared outside of the function don't exist where it runs, so using one throws an error.
+  
+  i Declare the variable inside the function, or pass its value to the function as an argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -7,3 +7,9 @@ function test() {
 }
 
 if (hey) {}
+
+declare function maybeString(): string | undefined;
+function reassignedDefault(value: string | undefined = "a") {
+	value = maybeString();
+	return value ?? "b";
+}

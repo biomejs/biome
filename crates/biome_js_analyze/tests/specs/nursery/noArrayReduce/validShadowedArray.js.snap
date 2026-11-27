@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validShadowedArray.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const Array = { prototype: { reduce: { call() {} } } };
+Array.prototype.reduce.call(foo, fn);
+
+```

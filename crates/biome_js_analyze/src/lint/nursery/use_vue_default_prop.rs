@@ -96,7 +96,7 @@ declare_lint_rule! {
     /// - If you want to disallow required props that also have a default value, see [`noVueRequiredPropWithDefault`](https://biomejs.dev/linter/rules/no-vue-required-prop-with-default/).
     ///
     pub UseVueDefaultProp {
-        version: "next",
+        version: "2.6.5",
         name: "useVueDefaultProp",
         language: "js",
         recommended: true,

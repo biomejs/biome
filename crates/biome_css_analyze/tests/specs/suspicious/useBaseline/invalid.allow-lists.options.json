@@ -11,7 +11,7 @@
             "allowFunctions": ["color-mix"],
             "allowMediaConditions": ["scripting"],
             "allowPropertyValues": {
-              "clip-path": ["fill-box"]
+              "writing-mode": ["lr"]
             }
           }
         }

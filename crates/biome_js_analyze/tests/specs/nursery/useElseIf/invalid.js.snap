@@ -1,0 +1,1425 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (foo === 1) {}
+if (foo === 2) {}
+
+{
+	if (foo === null) {}
+	if (foo === 1) {}
+}
+
+{
+	if (this === null) {}
+	if (this === undefined) {}
+}
+
+{
+	if (a.b.c === 1) {}
+	if (a.b.c === 2) {}
+}
+
+switch (x) {
+	case "a":
+		if (foo === 1) {}
+		if (foo === 2) {}
+		if (foo === 3) {}
+}
+
+{
+	if (foo === 1) {
+		bar();
+	}
+
+	if (foo === 2) {}
+}
+
+{
+	if (1 === foo) {}
+	if (2 === foo) {}
+}
+
+{
+	if (foo.bar === 1) {}
+	if (foo["bar"] === 2) {}
+}
+
+{
+	if (foo[0] === 1) {}
+	if (foo["0"] === 2) {}
+}
+
+{
+	if (foo === 1 || foo === 2) {}
+	if (foo === 3 || foo === 4) {}
+}
+
+class Foo {
+	#state;
+
+	method() {
+		if (this.#state === 1) {}
+		if (this.#state === 2) {}
+	}
+
+	static {
+		if (foo === 1) {}
+		if (foo === 2) {}
+	}
+}
+
+{
+	const foo = true;
+
+	if (foo) {}
+	if (foo === false) {}
+}
+
+{
+	if (foo === 1) {}
+	else if (foo === 2) {}
+
+	if (foo === 3) {}
+	else if (foo === 4) {}
+
+	if (foo === 5) {}
+}
+
+{
+	if (foo === 1 || foo === 2) {}
+	else if (foo === 3) {}
+
+	if (foo === 4) {}
+	else if (foo === 5 || foo === 6) {}
+}
+
+function handleSignal(process, signal) {
+	if (signal === "SIGINT") {
+		process.exit(130);
+	}
+
+	if (signal === "SIGTERM" || signal === "SIGHUP") {
+		process.exit(1);
+	}
+}
+
+// Changes to other variables, and changes inside functions, don't matter.
+{
+	if (foo === 1) {
+		bar = 1;
+		bar++;
+		delete bar.baz;
+		foo.baz = 1;
+		var qux = 1;
+		for (bar of values) {}
+		[bar = 1, ...bar] = values;
+		({ bar } = values);
+		callback(() => {
+			foo = 2;
+		});
+		function inner() {
+			var foo = 2;
+		}
+	}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1n) {}
+	if (foo === 2n) {}
+}
+
+{
+	if (value === `a`) {}
+	if (value === `b`) {}
+}
+
+{
+	if (value === ``) {}
+	if (value === "a") {}
+}
+
+{
+	if (value === "a") {}
+	if (value === 1) {}
+}
+
+{
+	if (value === "1") {}
+	if (value === 1) {}
+}
+
+{
+	if (object[`state`] === "a") {}
+	if (object["state"] === `b`) {}
+}
+
+{
+	if (foo === 1) {} // first
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {}
+	// The second case.
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) if (bar) {} else {}
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) do if (bar) {} while (bar);
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) { if (bar) {} }
+	if (foo === 2) {}
+}
+
+{
+	if (foo === 1) {}
+	if (foo === 2) {}
+	bar();
+	if (foo === 3) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (foo === 1) {}
+  > 3 │ if (foo === 2) {}
+      │ ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ {
+  
+  i The previous condition is here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (foo === 1) {}
+      │     ^^^^^^^^^
+    3 │ if (foo === 2) {}
+    4 │ 
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+      1   1 │   /* should generate diagnostics */
+      2     │ - if·(foo·===·1)·{}
+      3     │ - if·(foo·===·2)·{}
+          2 │ + if·(foo·===·1)·{}·else·if·(foo·===·2)·{}
+      4   3 │   
+      5   4 │   {
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    5 │ {
+    6 │ 	if (foo === null) {}
+  > 7 │ 	if (foo === 1) {}
+      │ 	^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i The previous condition is here.
+  
+    5 │ {
+  > 6 │ 	if (foo === null) {}
+      │ 	    ^^^^^^^^^^^^
+    7 │ 	if (foo === 1) {}
+    8 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+      4   4 │   
+      5   5 │   {
+      6     │ - → if·(foo·===·null)·{}
+      7     │ - → if·(foo·===·1)·{}
+          6 │ + → if·(foo·===·null)·{}·else·if·(foo·===·1)·{}
+      8   7 │   }
+      9   8 │   
+  
+
+```
+
+```
+invalid.js:12:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    10 │ {
+    11 │ 	if (this === null) {}
+  > 12 │ 	if (this === undefined) {}
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i The previous condition is here.
+  
+    10 │ {
+  > 11 │ 	if (this === null) {}
+       │ 	    ^^^^^^^^^^^^^
+    12 │ 	if (this === undefined) {}
+    13 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+      9   9 │   
+     10  10 │   {
+     11     │ - → if·(this·===·null)·{}
+     12     │ - → if·(this·===·undefined)·{}
+         11 │ + → if·(this·===·null)·{}·else·if·(this·===·undefined)·{}
+     13  12 │   }
+     14  13 │   
+  
+
+```
+
+```
+invalid.js:17:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    15 │ {
+    16 │ 	if (a.b.c === 1) {}
+  > 17 │ 	if (a.b.c === 2) {}
+       │ 	^^^^^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i The previous condition is here.
+  
+    15 │ {
+  > 16 │ 	if (a.b.c === 1) {}
+       │ 	    ^^^^^^^^^^^
+    17 │ 	if (a.b.c === 2) {}
+    18 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     14  14 │   
+     15  15 │   {
+     16     │ - → if·(a.b.c·===·1)·{}
+     17     │ - → if·(a.b.c·===·2)·{}
+         16 │ + → if·(a.b.c·===·1)·{}·else·if·(a.b.c·===·2)·{}
+     18  17 │   }
+     19  18 │   
+  
+
+```
+
+```
+invalid.js:23:3 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    21 │ 	case "a":
+    22 │ 		if (foo === 1) {}
+  > 23 │ 		if (foo === 2) {}
+       │ 		^^^^^^^^^^^^^^
+    24 │ 		if (foo === 3) {}
+    25 │ }
+  
+  i The previous condition is here.
+  
+    20 │ switch (x) {
+    21 │ 	case "a":
+  > 22 │ 		if (foo === 1) {}
+       │ 		    ^^^^^^^^^
+    23 │ 		if (foo === 2) {}
+    24 │ 		if (foo === 3) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     20  20 │   switch (x) {
+     21  21 │     case "a":
+     22     │ - → → if·(foo·===·1)·{}
+     23     │ - → → if·(foo·===·2)·{}
+         22 │ + → → if·(foo·===·1)·{}·else·if·(foo·===·2)·{}
+     24  23 │       if (foo === 3) {}
+     25  24 │   }
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    22 │ 		if (foo === 1) {}
+    23 │ 		if (foo === 2) {}
+  > 24 │ 		if (foo === 3) {}
+       │ 		^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i The previous condition is here.
+  
+    21 │ 	case "a":
+    22 │ 		if (foo === 1) {}
+  > 23 │ 		if (foo === 2) {}
+       │ 		    ^^^^^^^^^
+    24 │ 		if (foo === 3) {}
+    25 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     21  21 │     case "a":
+     22  22 │       if (foo === 1) {}
+     23     │ - → → if·(foo·===·2)·{}
+     24     │ - → → if·(foo·===·3)·{}
+         23 │ + → → if·(foo·===·2)·{}·else·if·(foo·===·3)·{}
+     25  24 │   }
+     26  25 │   
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    30 │ 	}
+    31 │ 
+  > 32 │ 	if (foo === 2) {}
+       │ 	^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i The previous condition is here.
+  
+    27 │ {
+  > 28 │ 	if (foo === 1) {
+       │ 	    ^^^^^^^^^
+    29 │ 		bar();
+    30 │ 	}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     28  28 │     if (foo === 1) {
+     29  29 │       bar();
+     30     │ - → }
+     31     │ - 
+     32     │ - → if·(foo·===·2)·{}
+         30 │ + → }·else·if·(foo·===·2)·{}
+     33  31 │   }
+     34  32 │   
+  
+
+```
+
+```
+invalid.js:37:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    35 │ {
+    36 │ 	if (1 === foo) {}
+  > 37 │ 	if (2 === foo) {}
+       │ 	^^^^^^^^^^^^^^
+    38 │ }
+    39 │ 
+  
+  i The previous condition is here.
+  
+    35 │ {
+  > 36 │ 	if (1 === foo) {}
+       │ 	    ^^^^^^^^^
+    37 │ 	if (2 === foo) {}
+    38 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     34  34 │   
+     35  35 │   {
+     36     │ - → if·(1·===·foo)·{}
+     37     │ - → if·(2·===·foo)·{}
+         36 │ + → if·(1·===·foo)·{}·else·if·(2·===·foo)·{}
+     38  37 │   }
+     39  38 │   
+  
+
+```
+
+```
+invalid.js:42:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    40 │ {
+    41 │ 	if (foo.bar === 1) {}
+  > 42 │ 	if (foo["bar"] === 2) {}
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i The previous condition is here.
+  
+    40 │ {
+  > 41 │ 	if (foo.bar === 1) {}
+       │ 	    ^^^^^^^^^^^^^
+    42 │ 	if (foo["bar"] === 2) {}
+    43 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     39  39 │   
+     40  40 │   {
+     41     │ - → if·(foo.bar·===·1)·{}
+     42     │ - → if·(foo["bar"]·===·2)·{}
+         41 │ + → if·(foo.bar·===·1)·{}·else·if·(foo["bar"]·===·2)·{}
+     43  42 │   }
+     44  43 │   
+  
+
+```
+
+```
+invalid.js:47:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    45 │ {
+    46 │ 	if (foo[0] === 1) {}
+  > 47 │ 	if (foo["0"] === 2) {}
+       │ 	^^^^^^^^^^^^^^^^^^^
+    48 │ }
+    49 │ 
+  
+  i The previous condition is here.
+  
+    45 │ {
+  > 46 │ 	if (foo[0] === 1) {}
+       │ 	    ^^^^^^^^^^^^
+    47 │ 	if (foo["0"] === 2) {}
+    48 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     44  44 │   
+     45  45 │   {
+     46     │ - → if·(foo[0]·===·1)·{}
+     47     │ - → if·(foo["0"]·===·2)·{}
+         46 │ + → if·(foo[0]·===·1)·{}·else·if·(foo["0"]·===·2)·{}
+     48  47 │   }
+     49  48 │   
+  
+
+```
+
+```
+invalid.js:52:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    50 │ {
+    51 │ 	if (foo === 1 || foo === 2) {}
+  > 52 │ 	if (foo === 3 || foo === 4) {}
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ }
+    54 │ 
+  
+  i The previous condition is here.
+  
+    50 │ {
+  > 51 │ 	if (foo === 1 || foo === 2) {}
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 	if (foo === 3 || foo === 4) {}
+    53 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     49  49 │   
+     50  50 │   {
+     51     │ - → if·(foo·===·1·||·foo·===·2)·{}
+     52     │ - → if·(foo·===·3·||·foo·===·4)·{}
+         51 │ + → if·(foo·===·1·||·foo·===·2)·{}·else·if·(foo·===·3·||·foo·===·4)·{}
+     53  52 │   }
+     54  53 │   
+  
+
+```
+
+```
+invalid.js:60:3 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    58 │ 	method() {
+    59 │ 		if (this.#state === 1) {}
+  > 60 │ 		if (this.#state === 2) {}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 	}
+    62 │ 
+  
+  i The previous condition is here.
+  
+    58 │ 	method() {
+  > 59 │ 		if (this.#state === 1) {}
+       │ 		    ^^^^^^^^^^^^^^^^^
+    60 │ 		if (this.#state === 2) {}
+    61 │ 	}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     57  57 │   
+     58  58 │     method() {
+     59     │ - → → if·(this.#state·===·1)·{}
+     60     │ - → → if·(this.#state·===·2)·{}
+         59 │ + → → if·(this.#state·===·1)·{}·else·if·(this.#state·===·2)·{}
+     61  60 │     }
+     62  61 │   
+  
+
+```
+
+```
+invalid.js:65:3 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    63 │ 	static {
+    64 │ 		if (foo === 1) {}
+  > 65 │ 		if (foo === 2) {}
+       │ 		^^^^^^^^^^^^^^
+    66 │ 	}
+    67 │ }
+  
+  i The previous condition is here.
+  
+    63 │ 	static {
+  > 64 │ 		if (foo === 1) {}
+       │ 		    ^^^^^^^^^
+    65 │ 		if (foo === 2) {}
+    66 │ 	}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     62  62 │   
+     63  63 │     static {
+     64     │ - → → if·(foo·===·1)·{}
+     65     │ - → → if·(foo·===·2)·{}
+         64 │ + → → if·(foo·===·1)·{}·else·if·(foo·===·2)·{}
+     66  65 │     }
+     67  66 │   }
+  
+
+```
+
+```
+invalid.js:73:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    72 │ 	if (foo) {}
+  > 73 │ 	if (foo === false) {}
+       │ 	^^^^^^^^^^^^^^^^^^
+    74 │ }
+    75 │ 
+  
+  i The previous condition is here.
+  
+    70 │ 	const foo = true;
+    71 │ 
+  > 72 │ 	if (foo) {}
+       │ 	    ^^^
+    73 │ 	if (foo === false) {}
+    74 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     70  70 │     const foo = true;
+     71  71 │   
+     72     │ - → if·(foo)·{}
+     73     │ - → if·(foo·===·false)·{}
+         72 │ + → if·(foo)·{}·else·if·(foo·===·false)·{}
+     74  73 │   }
+     75  74 │   
+  
+
+```
+
+```
+invalid.js:80:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    78 │ 	else if (foo === 2) {}
+    79 │ 
+  > 80 │ 	if (foo === 3) {}
+       │ 	^^^^^^^^^^^^^^
+    81 │ 	else if (foo === 4) {}
+    82 │ 
+  
+  i The previous condition is here.
+  
+    76 │ {
+    77 │ 	if (foo === 1) {}
+  > 78 │ 	else if (foo === 2) {}
+       │ 	         ^^^^^^^^^
+    79 │ 
+    80 │ 	if (foo === 3) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     76  76 │   {
+     77  77 │     if (foo === 1) {}
+     78     │ - → else·if·(foo·===·2)·{}
+     79     │ - 
+     80     │ - → if·(foo·===·3)·{}
+     81     │ - → else·if·(foo·===·4)·{}
+         78 │ + → else·if·(foo·===·2)·{}·else·if·(foo·===·3)·{}
+         79 │ + → else·if·(foo·===·4)·{}
+     82  80 │   
+     83  81 │     if (foo === 5) {}
+  
+
+```
+
+```
+invalid.js:83:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    81 │ 	else if (foo === 4) {}
+    82 │ 
+  > 83 │ 	if (foo === 5) {}
+       │ 	^^^^^^^^^^^^^^
+    84 │ }
+    85 │ 
+  
+  i The previous condition is here.
+  
+    80 │ 	if (foo === 3) {}
+  > 81 │ 	else if (foo === 4) {}
+       │ 	         ^^^^^^^^^
+    82 │ 
+    83 │ 	if (foo === 5) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     79  79 │   
+     80  80 │     if (foo === 3) {}
+     81     │ - → else·if·(foo·===·4)·{}
+     82     │ - 
+     83     │ - → if·(foo·===·5)·{}
+         81 │ + → else·if·(foo·===·4)·{}·else·if·(foo·===·5)·{}
+     84  82 │   }
+     85  83 │   
+  
+
+```
+
+```
+invalid.js:90:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    88 │ 	else if (foo === 3) {}
+    89 │ 
+  > 90 │ 	if (foo === 4) {}
+       │ 	^^^^^^^^^^^^^^
+    91 │ 	else if (foo === 5 || foo === 6) {}
+    92 │ }
+  
+  i The previous condition is here.
+  
+    86 │ {
+    87 │ 	if (foo === 1 || foo === 2) {}
+  > 88 │ 	else if (foo === 3) {}
+       │ 	         ^^^^^^^^^
+    89 │ 
+    90 │ 	if (foo === 4) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     86  86 │   {
+     87  87 │     if (foo === 1 || foo === 2) {}
+     88     │ - → else·if·(foo·===·3)·{}
+     89     │ - 
+     90     │ - → if·(foo·===·4)·{}
+     91     │ - → else·if·(foo·===·5·||·foo·===·6)·{}
+         88 │ + → else·if·(foo·===·3)·{}·else·if·(foo·===·4)·{}
+         89 │ + → else·if·(foo·===·5·||·foo·===·6)·{}
+     92  90 │   }
+     93  91 │   
+  
+
+```
+
+```
+invalid.js:99:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+     97 │ 	}
+     98 │ 
+   > 99 │ 	if (signal === "SIGTERM" || signal === "SIGHUP") {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ 		process.exit(1);
+    101 │ 	}
+  
+  i The previous condition is here.
+  
+    94 │ function handleSignal(process, signal) {
+  > 95 │ 	if (signal === "SIGINT") {
+       │ 	    ^^^^^^^^^^^^^^^^^^^
+    96 │ 		process.exit(130);
+    97 │ 	}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     95  95 │     if (signal === "SIGINT") {
+     96  96 │       process.exit(130);
+     97     │ - → }
+     98     │ - 
+     99     │ - → if·(signal·===·"SIGTERM"·||·signal·===·"SIGHUP")·{
+    100     │ - → → process.exit(1);
+    101     │ - → }
+         97 │ + → }·else·if·(signal·===·"SIGTERM"·||·signal·===·"SIGHUP")·{
+         98 │ + → → process.exit(1);
+         99 │ + → }
+    102 100 │   }
+    103 101 │   
+  
+
+```
+
+```
+invalid.js:122:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    120 │ 		}
+    121 │ 	}
+  > 122 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    123 │ }
+    124 │ 
+  
+  i The previous condition is here.
+  
+    104 │ // Changes to other variables, and changes inside functions, don't matter.
+    105 │ {
+  > 106 │ 	if (foo === 1) {
+        │ 	    ^^^^^^^^^
+    107 │ 		bar = 1;
+    108 │ 		bar++;
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    119 119 │         var foo = 2;
+    120 120 │       }
+    121     │ - → }
+    122     │ - → if·(foo·===·2)·{}
+        121 │ + → }·else·if·(foo·===·2)·{}
+    123 122 │   }
+    124 123 │   
+  
+
+```
+
+```
+invalid.js:127:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    125 │ {
+    126 │ 	if (foo === 1n) {}
+  > 127 │ 	if (foo === 2n) {}
+        │ 	^^^^^^^^^^^^^^^
+    128 │ }
+    129 │ 
+  
+  i The previous condition is here.
+  
+    125 │ {
+  > 126 │ 	if (foo === 1n) {}
+        │ 	    ^^^^^^^^^^
+    127 │ 	if (foo === 2n) {}
+    128 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    124 124 │   
+    125 125 │   {
+    126     │ - → if·(foo·===·1n)·{}
+    127     │ - → if·(foo·===·2n)·{}
+        126 │ + → if·(foo·===·1n)·{}·else·if·(foo·===·2n)·{}
+    128 127 │   }
+    129 128 │   
+  
+
+```
+
+```
+invalid.js:132:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    130 │ {
+    131 │ 	if (value === `a`) {}
+  > 132 │ 	if (value === `b`) {}
+        │ 	^^^^^^^^^^^^^^^^^^
+    133 │ }
+    134 │ 
+  
+  i The previous condition is here.
+  
+    130 │ {
+  > 131 │ 	if (value === `a`) {}
+        │ 	    ^^^^^^^^^^^^^
+    132 │ 	if (value === `b`) {}
+    133 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    129 129 │   
+    130 130 │   {
+    131     │ - → if·(value·===·`a`)·{}
+    132     │ - → if·(value·===·`b`)·{}
+        131 │ + → if·(value·===·`a`)·{}·else·if·(value·===·`b`)·{}
+    133 132 │   }
+    134 133 │   
+  
+
+```
+
+```
+invalid.js:137:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    135 │ {
+    136 │ 	if (value === ``) {}
+  > 137 │ 	if (value === "a") {}
+        │ 	^^^^^^^^^^^^^^^^^^
+    138 │ }
+    139 │ 
+  
+  i The previous condition is here.
+  
+    135 │ {
+  > 136 │ 	if (value === ``) {}
+        │ 	    ^^^^^^^^^^^^
+    137 │ 	if (value === "a") {}
+    138 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    134 134 │   
+    135 135 │   {
+    136     │ - → if·(value·===·``)·{}
+    137     │ - → if·(value·===·"a")·{}
+        136 │ + → if·(value·===·``)·{}·else·if·(value·===·"a")·{}
+    138 137 │   }
+    139 138 │   
+  
+
+```
+
+```
+invalid.js:142:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    140 │ {
+    141 │ 	if (value === "a") {}
+  > 142 │ 	if (value === 1) {}
+        │ 	^^^^^^^^^^^^^^^^
+    143 │ }
+    144 │ 
+  
+  i The previous condition is here.
+  
+    140 │ {
+  > 141 │ 	if (value === "a") {}
+        │ 	    ^^^^^^^^^^^^^
+    142 │ 	if (value === 1) {}
+    143 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    139 139 │   
+    140 140 │   {
+    141     │ - → if·(value·===·"a")·{}
+    142     │ - → if·(value·===·1)·{}
+        141 │ + → if·(value·===·"a")·{}·else·if·(value·===·1)·{}
+    143 142 │   }
+    144 143 │   
+  
+
+```
+
+```
+invalid.js:147:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    145 │ {
+    146 │ 	if (value === "1") {}
+  > 147 │ 	if (value === 1) {}
+        │ 	^^^^^^^^^^^^^^^^
+    148 │ }
+    149 │ 
+  
+  i The previous condition is here.
+  
+    145 │ {
+  > 146 │ 	if (value === "1") {}
+        │ 	    ^^^^^^^^^^^^^
+    147 │ 	if (value === 1) {}
+    148 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    144 144 │   
+    145 145 │   {
+    146     │ - → if·(value·===·"1")·{}
+    147     │ - → if·(value·===·1)·{}
+        146 │ + → if·(value·===·"1")·{}·else·if·(value·===·1)·{}
+    148 147 │   }
+    149 148 │   
+  
+
+```
+
+```
+invalid.js:152:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    150 │ {
+    151 │ 	if (object[`state`] === "a") {}
+  > 152 │ 	if (object["state"] === `b`) {}
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    153 │ }
+    154 │ 
+  
+  i The previous condition is here.
+  
+    150 │ {
+  > 151 │ 	if (object[`state`] === "a") {}
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^
+    152 │ 	if (object["state"] === `b`) {}
+    153 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    149 149 │   
+    150 150 │   {
+    151     │ - → if·(object[`state`]·===·"a")·{}
+    152     │ - → if·(object["state"]·===·`b`)·{}
+        151 │ + → if·(object[`state`]·===·"a")·{}·else·if·(object["state"]·===·`b`)·{}
+    153 152 │   }
+    154 153 │   
+  
+
+```
+
+```
+invalid.js:157:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    155 │ {
+    156 │ 	if (foo === 1) {} // first
+  > 157 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    158 │ }
+    159 │ 
+  
+  i The previous condition is here.
+  
+    155 │ {
+  > 156 │ 	if (foo === 1) {} // first
+        │ 	    ^^^^^^^^^
+    157 │ 	if (foo === 2) {}
+    158 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    154 154 │   
+    155 155 │   {
+    156     │ - → if·(foo·===·1)·{}·//·first
+    157     │ - → if·(foo·===·2)·{}
+        156 │ + → if·(foo·===·1)·{}·//·first
+        157 │ + → else·if·(foo·===·2)·{}
+    158 158 │   }
+    159 159 │   
+  
+
+```
+
+```
+invalid.js:163:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    161 │ 	if (foo === 1) {}
+    162 │ 	// The second case.
+  > 163 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    164 │ }
+    165 │ 
+  
+  i The previous condition is here.
+  
+    160 │ {
+  > 161 │ 	if (foo === 1) {}
+        │ 	    ^^^^^^^^^
+    162 │ 	// The second case.
+    163 │ 	if (foo === 2) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    159 159 │   
+    160 160 │   {
+    161     │ - → if·(foo·===·1)·{}
+    162     │ - → //·The·second·case.
+    163     │ - → if·(foo·===·2)·{}
+        161 │ + → if·(foo·===·1)·{}
+        162 │ + → //·The·second·case.
+        163 │ + → else·if·(foo·===·2)·{}
+    164 164 │   }
+    165 165 │   
+  
+
+```
+
+```
+invalid.js:168:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    166 │ {
+    167 │ 	if (foo === 1) if (bar) {} else {}
+  > 168 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    169 │ }
+    170 │ 
+  
+  i The previous condition is here.
+  
+    166 │ {
+  > 167 │ 	if (foo === 1) if (bar) {} else {}
+        │ 	    ^^^^^^^^^
+    168 │ 	if (foo === 2) {}
+    169 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    165 165 │   
+    166 166 │   {
+    167     │ - → if·(foo·===·1)·if·(bar)·{}·else·{}
+    168     │ - → if·(foo·===·2)·{}
+        167 │ + → if·(foo·===·1)·if·(bar)·{}·else·{}·else·if·(foo·===·2)·{}
+    169 168 │   }
+    170 169 │   
+  
+
+```
+
+```
+invalid.js:173:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    171 │ {
+    172 │ 	if (foo === 1) do if (bar) {} while (bar);
+  > 173 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    174 │ }
+    175 │ 
+  
+  i The previous condition is here.
+  
+    171 │ {
+  > 172 │ 	if (foo === 1) do if (bar) {} while (bar);
+        │ 	    ^^^^^^^^^
+    173 │ 	if (foo === 2) {}
+    174 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    170 170 │   
+    171 171 │   {
+    172     │ - → if·(foo·===·1)·do·if·(bar)·{}·while·(bar);
+    173     │ - → if·(foo·===·2)·{}
+        172 │ + → if·(foo·===·1)·do·if·(bar)·{}·while·(bar);·else·if·(foo·===·2)·{}
+    174 173 │   }
+    175 174 │   
+  
+
+```
+
+```
+invalid.js:178:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    176 │ {
+    177 │ 	if (foo === 1) { if (bar) {} }
+  > 178 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    179 │ }
+    180 │ 
+  
+  i The previous condition is here.
+  
+    176 │ {
+  > 177 │ 	if (foo === 1) { if (bar) {} }
+        │ 	    ^^^^^^^^^
+    178 │ 	if (foo === 2) {}
+    179 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    175 175 │   
+    176 176 │   {
+    177     │ - → if·(foo·===·1)·{·if·(bar)·{}·}
+    178     │ - → if·(foo·===·2)·{}
+        177 │ + → if·(foo·===·1)·{·if·(bar)·{}·}·else·if·(foo·===·2)·{}
+    179 178 │   }
+    180 179 │   
+  
+
+```
+
+```
+invalid.js:183:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    181 │ {
+    182 │ 	if (foo === 1) {}
+  > 183 │ 	if (foo === 2) {}
+        │ 	^^^^^^^^^^^^^^
+    184 │ 	bar();
+    185 │ 	if (foo === 3) {}
+  
+  i The previous condition is here.
+  
+    181 │ {
+  > 182 │ 	if (foo === 1) {}
+        │ 	    ^^^^^^^^^
+    183 │ 	if (foo === 2) {}
+    184 │ 	bar();
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    180 180 │   
+    181 181 │   {
+    182     │ - → if·(foo·===·1)·{}
+    183     │ - → if·(foo·===·2)·{}
+        182 │ + → if·(foo·===·1)·{}·else·if·(foo·===·2)·{}
+    184 183 │     bar();
+    185 184 │     if (foo === 3) {}
+  
+
+```

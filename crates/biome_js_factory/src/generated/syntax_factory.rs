@@ -5048,9 +5048,141 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_SVELTE_DECLARATION_ROOT, children)
             }
-            JS_SVELTE_SNIPPET_ROOT => {
+            JS_SVELTE_EACH_BINDING_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsBindingPattern::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && TsTypeAnnotation::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && JsSvelteEachIndex::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && JsSvelteEachKey::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SVELTE_EACH_BINDING_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SVELTE_EACH_BINDING_ROOT, children)
+            }
+            JS_SVELTE_EACH_INDEX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [,]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyJsBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SVELTE_EACH_INDEX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SVELTE_EACH_INDEX, children)
+            }
+            JS_SVELTE_EACH_KEY => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyJsExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SVELTE_EACH_KEY.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SVELTE_EACH_KEY, children)
+            }
+            JS_SVELTE_LEGACY_CONST_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsSvelteLegacyConstDeclarator::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SVELTE_LEGACY_CONST_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SVELTE_LEGACY_CONST_ROOT, children)
+            }
+            JS_SVELTE_SNIPPET_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && AnyJsBinding::can_cast(element.kind())
@@ -5060,7 +5192,14 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && JsParameters::can_cast(element.kind())
+                    && TsTypeParameters::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyJsSvelteSnippetParameters::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6228,6 +6367,32 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(JSX_SHORTHAND_ATTRIBUTE, children)
+            }
+            JSX_SINGLE_TAG_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsxSingleTag::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JSX_SINGLE_TAG_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JSX_SINGLE_TAG_ROOT, children)
             }
             JSX_SPREAD_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();

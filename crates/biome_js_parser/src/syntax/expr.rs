@@ -1359,9 +1359,33 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
             p.bump_any();
 
             if p.eat(T![.]) {
-                if p.eat(T![defer]) || p.eat(T![source]) {
-                    // Parse the call arguments
-                    parse_import_call_expression(p, context, m)
+                if p.at(T![defer]) || p.at(T![source]) {
+                    let phase = p.cur_range();
+                    p.bump_any();
+                    if p.at(T!['(']) {
+                        // Parse the call arguments
+                        parse_import_call_expression(p, context, m)
+                    } else {
+                        let recovered = ParseRecoveryTokenSet::new(
+                            JS_BOGUS_EXPRESSION,
+                            STMT_RECOVERY_SET.union(EXPR_RECOVERY_SET).union(token_set![
+                                T![,],
+                                T!['}'],
+                                T![:]
+                            ]),
+                        )
+                        .enable_recovery_on_line_break()
+                        .recover(p);
+
+                        let range = if let Ok(marker) = &recovered {
+                            TextRange::new(phase.start(), marker.range(p).end())
+                        } else {
+                            phase
+                        };
+                        p.error(js_parse_error::expected_import_call(p, range, phase));
+
+                        m.complete(p, JS_BOGUS_EXPRESSION)
+                    }
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
                     p.bump_remap(META);
                     m.complete(p, JS_IMPORT_META_EXPRESSION)

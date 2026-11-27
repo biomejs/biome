@@ -1,0 +1,115 @@
+/* should not generate diagnostics */
+import * as React from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import {
+	useMutation,
+	useQueries,
+	useQuery,
+	useSuspenseQueries,
+} from "@tanstack/react-query";
+
+function Destructured() {
+	const { mutate } = useMutation({ mutationFn });
+	const { data, refetch } = useQuery({ queryKey: ["a"], queryFn });
+	const [{ data: nested }] = useQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+
+	useCallback(() => mutate("hello"), [mutate]);
+	useEffect(() => {}, [data, refetch, nested]);
+}
+
+function MemberDependencies() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+	const mutation = useMutation({ mutationFn });
+
+	useEffect(() => {}, [query.data, mutation.mutate, query?.isPending]);
+}
+
+function Combine() {
+	const queries = useQueries({
+		queries: [{ queryKey: ["a"], queryFn }],
+		combine: (results) => results.map((result) => result.data),
+	});
+	const suspenseQueries = useSuspenseQueries({
+		queries: [{ queryKey: ["a"], queryFn }],
+		combine,
+	});
+	const [first] = useQueries({
+		queries: [{ queryKey: ["a"], queryFn }],
+		combine(results) {
+			return results;
+		},
+	});
+
+	useEffect(() => {}, [queries, suspenseQueries, first]);
+}
+
+function NotADependencyList() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+
+	useEffect(() => {
+		console.log(query);
+	});
+	useEffect(() => {}, dependencies);
+	useEffect(() => {}, [...query]);
+	useState(query);
+	someFunction(() => {}, [query]);
+	React.useState(() => {}, [query]);
+}
+
+function OtherValues() {
+	const toString = () => "str";
+	const valueOf = 42;
+	const result = useCustomThing();
+
+	useEffect(() => {}, [toString, valueOf, result]);
+}
+
+function ReassignedVariable() {
+	let query;
+	query = useQuery({ queryKey: ["a"], queryFn });
+
+	useEffect(() => {}, [query]);
+}
+
+function useMultipleReturns(enabled) {
+	if (enabled) {
+		return useQuery({ queryKey: ["a"], queryFn });
+	}
+	return useQuery({ queryKey: ["b"], queryFn });
+}
+
+function notAHook() {
+	return useQuery({ queryKey: ["a"], queryFn });
+}
+
+function useReturnsDestructured() {
+	const { data } = useQuery({ queryKey: ["a"], queryFn });
+	return data;
+}
+
+function useNestedCustomHook() {
+	return useOtherCustomHook();
+}
+
+function useOtherCustomHook() {
+	return useQuery({ queryKey: ["a"], queryFn });
+}
+
+function CustomHooks() {
+	const multipleReturns = useMultipleReturns(true);
+	const fromNotAHook = notAHook();
+	const destructured = useReturnsDestructured();
+	const nested = useNestedCustomHook();
+
+	useEffect(() => {}, [multipleReturns, fromNotAHook, destructured, nested]);
+}
+
+function NestedArrayPattern() {
+	const [[first]] = useQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+
+	useEffect(() => {}, [first]);
+}
+
+function Parameter(query = useQuery({ queryKey: ["a"], queryFn })) {
+	useEffect(() => {}, [query]);
+}

@@ -5,9 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsMemberExpression, AnyJsRoot, JsComputedMemberAssignment,
+    AnyFunctionLike, AnyJsMemberExpression, JsComputedMemberAssignment,
     JsGetterClassMember, JsGetterObjectMember, JsLanguage, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticMemberAssignment, TextRange,
+    JsSetterObjectMember, JsStaticMemberAssignment, JsSyntaxNode, TextRange,
 };
 use biome_rowan::{AstNode, SyntaxKindSet};
 use biome_rule_options::no_vue_computed_properties_in_data::NoVueComputedPropertiesInDataOptions;
@@ -91,26 +91,27 @@ impl Rule for NoVueComputedPropertiesInData {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let component = ctx.query();
         let Some(data) = component
-            .data_function_range()
-            .and_then(|range| find_function(&ctx.root(), range))
+            .data_function_node()
+            .and_then(|data| ctx.vue_model().node(&data))
+            .and_then(AnyFunctionLike::cast)
         else {
             return Box::default();
         };
-        let data_range = data.syntax().text_trimmed_range();
-        let snippet = component.snippet().map(|snippet| snippet.id());
-
         let mut signals = Vec::new();
         for property in component.computed() {
             for reference in property.uses() {
-                let range = reference.range();
-                if reference.base() == RefBase::This
-                    && reference.snippet().map(|snippet| snippet.id()) == snippet
-                    && data_range.contains_range(range)
-                    && runs_with(&data, range)
-                {
+                if reference.base() != RefBase::This {
+                    continue;
+                }
+                // A use written in another tree than the component has no
+                // node here.
+                let Some(name) = ctx.vue_model().node(&reference) else {
+                    continue;
+                };
+                if runs_with(&data, &name) {
                     signals.push(RuleState {
                         computed: property.clone(),
-                        range: member_access_range(&data, range),
+                        range: member_access_range(&name),
                     });
                 }
             }
@@ -160,35 +161,28 @@ const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyFunctionLike::KIND_SET
     .union(JsGetterClassMember::KIND_SET)
     .union(JsSetterClassMember::KIND_SET);
 
-/// Returns the function in `root` whose range is exactly `range`.
-fn find_function(root: &AnyJsRoot, range: TextRange) -> Option<AnyFunctionLike> {
-    root.syntax()
-        .covering_element(range)
-        .ancestors()
-        .find_map(AnyFunctionLike::cast)
-        .filter(|function| function.syntax().text_trimmed_range() == range)
+/// Returns `true` when `node` is in `function` and runs as part of `function`
+/// itself, and not inside a function nested in it.
+fn runs_with(function: &AnyFunctionLike, node: &JsSyntaxNode) -> bool {
+    for ancestor in node.ancestors() {
+        if ancestor == *function.syntax() {
+            return true;
+        }
+        if FUNCTION_KINDS.matches(ancestor.kind()) {
+            return false;
+        }
+    }
+    false
 }
 
-/// Returns `true` when the code at `range` runs as part of `function` itself,
-/// and not inside a function nested in it.
-fn runs_with(function: &AnyFunctionLike, range: TextRange) -> bool {
-    function
-        .syntax()
-        .covering_element(range)
-        .ancestors()
-        .take_while(|node| node != function.syntax())
-        .all(|node| !FUNCTION_KINDS.matches(node.kind()))
-}
-
-/// Returns the range of the member access whose member name is at `name`,
-/// such as `this.name` for `name`.
-fn member_access_range(function: &AnyFunctionLike, name: TextRange) -> TextRange {
-    function
-        .syntax()
-        .covering_element(name)
-        .ancestors()
+/// Returns the range of the member access whose member name is `name`, such
+/// as `this.name` for `name`.
+fn member_access_range(name: &JsSyntaxNode) -> TextRange {
+    name.ancestors()
         .find(|node| MEMBER_KINDS.matches(node.kind()))
-        .map_or(name, |member| member.text_trimmed_range())
+        .map_or(name.text_trimmed_range(), |member| {
+            member.text_trimmed_range()
+        })
 }
 
 /// Nodes that read or assign a member of an object.

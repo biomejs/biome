@@ -27,6 +27,7 @@ serde               = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 biome_css_factory = { path = "../biome_css_factory" }
 biome_css_parser  = { path = "../biome_css_parser" }
+biome_languages   = { path = "../biome_languages" }
 insta             = { workspace = true }
 
 [features]

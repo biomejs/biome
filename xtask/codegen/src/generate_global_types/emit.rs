@@ -5,7 +5,7 @@ use biome_string_case::StrLikeExtension;
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
     LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
-    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
+    LoweredMemberKind, LoweredReturnKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
@@ -170,7 +170,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
         LoweredTypeData::Object(members) => format!(
-            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false }})",
+            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false, kind: crate::ObjectKind::Shape }})",
             render_members(members),
         ),
         LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),
@@ -231,6 +231,21 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {{ object: {}, index: {} }}))",
             render_type_reference(object),
             render_type_reference(index),
+        ),
+        LoweredTypeData::Extends {
+            check_type,
+            extends_type,
+            true_type,
+            false_type,
+            infer_types,
+            distributive,
+        } => format!(
+            "crate::TypeData::Extends(Box::new(crate::ExtendsType {{ check_type: {}, extends_type: {}, true_type: {}, false_type: {}, infer_types: {}, distributive: {distributive} }}))",
+            render_type_reference(check_type),
+            render_type_reference(extends_type),
+            render_type_reference(true_type),
+            render_type_reference(false_type),
+            render_type_references(infer_types),
         ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
@@ -351,13 +366,28 @@ fn render_function(function: &LoweredFunction) -> String {
             type_parameters: {type_parameters},
             name: {name},
             parameters: Box::new([{parameters}]),
-            return_type: crate::ReturnType::Type({return_type}),
+            return_type: {return_type},
         }}))",
         is_async = function.is_async(),
         type_parameters = render_type_references(function.type_parameters()),
         parameters = render_function_parameters(function.parameters()),
-        return_type = render_type_reference(function.return_type()),
+        return_type = render_return_type(function),
     )
+}
+
+/// Builds the `ReturnType` expression of a function.
+fn render_return_type(function: &LoweredFunction) -> String {
+    let ty = render_type_reference(function.return_type());
+    match function.return_kind() {
+        LoweredReturnKind::Type => format!("crate::ReturnType::Type({ty})"),
+        LoweredReturnKind::Predicate { parameter_name } => format!(
+            "crate::ReturnType::Predicate(Box::new(crate::PredicateReturnType {{
+                parameter_name: biome_rowan::Text::new_static({}),
+                ty: {ty},
+            }}))",
+            rust_string_literal(parameter_name.text())
+        ),
+    }
 }
 
 /// Builds the class member expression list.
@@ -445,7 +475,7 @@ fn render_function_parameters(parameters: &[LoweredFunctionParameter]) -> String
     rendered
 }
 
-/// Preserves named bindings and uses pattern parameters for synthetic callback slots.
+/// Preserves named bindings and uses pattern parameters for destructured ones.
 fn render_function_parameter(parameter: &LoweredFunctionParameter) -> String {
     match parameter.binding() {
         LoweredFunctionParameterBinding::Named(name) => {

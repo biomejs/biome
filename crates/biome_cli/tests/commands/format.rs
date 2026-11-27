@@ -293,10 +293,7 @@ fn write_only_files_in_correct_base() {
     let mut console = BufferConsole::default();
 
     let file_to_format = Utf8Path::new("src/format.js");
-    fs.insert(
-        file_to_format.into(),
-        <&str>::clone(&UNFORMATTED).as_bytes(),
-    );
+    fs.insert(file_to_format.into(), UNFORMATTED.as_bytes());
 
     let file_to_not_format = Utf8Path::new("scripts/format.js");
     fs.insert(file_to_not_format.into(), UNFORMATTED.as_bytes());

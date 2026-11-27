@@ -4,43 +4,41 @@ expression: ignoreMixedLogicalExpressionsDisabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreMixedLogicalExpressions: false
-// Mixed || + && expressions SHOULD generate diagnostics
+/* should generate diagnostics */
 
 declare const a: string | null;
 declare const b: string;
 declare const c: string;
 
-// || as child of &&
+// `||` as an operand of `&&`
 const r1 = (a || 'default') && b;
 
-// || with && child
+// `||` with a `&&` operand
 const r2 = a || (b && c);
 
-// || as left operand of &&
+// `||` as the left operand of `&&`
 const r3 = (a || b) && c;
 
-// Nested: || inside && inside another &&
+// `||` inside nested `&&`
 const r4 = (a || b) && c && b;
 
-// ||= mixed with &&
+// `||=` with a `&&` right-hand side
 declare let assignMixed: string | null;
 assignMixed ||= b && c;
 
-// Chained || with && sibling
+// Chained `||` with a `&&` operand
 declare const x: string | null;
 declare const y: string;
 declare const z: string;
 declare const w: string;
 const r5 = x || y || (z && w);
 
-// Nested ||= where the inner ||= contains && in its RHS.
-// With the option disabled, both ||= operations should be diagnosed.
+// Nested `||=` with a `&&` in the inner right-hand side
 declare let outerAssign: string | null;
 declare let innerAssign: string | null;
 outerAssign ||= innerAssign ||= b && c;
 
-// Same nested ||= shape with explicit parens around the inner assignment.
+// The same with parentheses around the inner `||=`
 declare let parenOuter: string | null;
 declare let parenInner: string | null;
 parenOuter ||= (parenInner ||= b && c);
@@ -49,15 +47,15 @@ parenOuter ||= (parenInner ||= b && c);
 
 # Diagnostics
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:9:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:8:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-     8 │ // || as child of &&
-   > 9 │ const r1 = (a || 'default') && b;
+     7 │ // `||` as an operand of `&&`
+   > 8 │ const r1 = (a || 'default') && b;
        │               ^^
-    10 │ 
-    11 │ // || with && child
+     9 │ 
+    10 │ // `||` with a `&&` operand
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -69,15 +67,15 @@ ignoreMixedLogicalExpressionsDisabled.ts:9:15 lint/nursery/useNullishCoalescing 
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:12:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:11:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    11 │ // || with && child
-  > 12 │ const r2 = a || (b && c);
+    10 │ // `||` with a `&&` operand
+  > 11 │ const r2 = a || (b && c);
        │              ^^
-    13 │ 
-    14 │ // || as left operand of &&
+    12 │ 
+    13 │ // `||` as the left operand of `&&`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -89,15 +87,15 @@ ignoreMixedLogicalExpressionsDisabled.ts:12:14 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:15:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:14:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    14 │ // || as left operand of &&
-  > 15 │ const r3 = (a || b) && c;
+    13 │ // `||` as the left operand of `&&`
+  > 14 │ const r3 = (a || b) && c;
        │               ^^
-    16 │ 
-    17 │ // Nested: || inside && inside another &&
+    15 │ 
+    16 │ // `||` inside nested `&&`
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -109,15 +107,15 @@ ignoreMixedLogicalExpressionsDisabled.ts:15:15 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:18:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:17:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    17 │ // Nested: || inside && inside another &&
-  > 18 │ const r4 = (a || b) && c && b;
+    16 │ // `||` inside nested `&&`
+  > 17 │ const r4 = (a || b) && c && b;
        │               ^^
-    19 │ 
-    20 │ // ||= mixed with &&
+    18 │ 
+    19 │ // `||=` with a `&&` right-hand side
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -129,16 +127,16 @@ ignoreMixedLogicalExpressionsDisabled.ts:18:15 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:22:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:21:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    20 │ // ||= mixed with &&
-    21 │ declare let assignMixed: string | null;
-  > 22 │ assignMixed ||= b && c;
+    19 │ // `||=` with a `&&` right-hand side
+    20 │ declare let assignMixed: string | null;
+  > 21 │ assignMixed ||= b && c;
        │             ^^^
-    23 │ 
-    24 │ // Chained || with && sibling
+    22 │ 
+    23 │ // Chained `||` with a `&&` operand
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -150,16 +148,16 @@ ignoreMixedLogicalExpressionsDisabled.ts:22:13 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:29:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:28:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    27 │ declare const z: string;
-    28 │ declare const w: string;
-  > 29 │ const r5 = x || y || (z && w);
+    26 │ declare const z: string;
+    27 │ declare const w: string;
+  > 28 │ const r5 = x || y || (z && w);
        │              ^^
-    30 │ 
-    31 │ // Nested ||= where the inner ||= contains && in its RHS.
+    29 │ 
+    30 │ // Nested `||=` with a `&&` in the inner right-hand side
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -171,16 +169,16 @@ ignoreMixedLogicalExpressionsDisabled.ts:29:14 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:35:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:33:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    33 │ declare let outerAssign: string | null;
-    34 │ declare let innerAssign: string | null;
-  > 35 │ outerAssign ||= innerAssign ||= b && c;
+    31 │ declare let outerAssign: string | null;
+    32 │ declare let innerAssign: string | null;
+  > 33 │ outerAssign ||= innerAssign ||= b && c;
        │             ^^^
-    36 │ 
-    37 │ // Same nested ||= shape with explicit parens around the inner assignment.
+    34 │ 
+    35 │ // The same with parentheses around the inner `||=`
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -192,16 +190,16 @@ ignoreMixedLogicalExpressionsDisabled.ts:35:13 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:35:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:33:29 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    33 │ declare let outerAssign: string | null;
-    34 │ declare let innerAssign: string | null;
-  > 35 │ outerAssign ||= innerAssign ||= b && c;
+    31 │ declare let outerAssign: string | null;
+    32 │ declare let innerAssign: string | null;
+  > 33 │ outerAssign ||= innerAssign ||= b && c;
        │                             ^^^
-    36 │ 
-    37 │ // Same nested ||= shape with explicit parens around the inner assignment.
+    34 │ 
+    35 │ // The same with parentheses around the inner `||=`
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -213,15 +211,15 @@ ignoreMixedLogicalExpressionsDisabled.ts:35:29 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:40:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:38:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    38 │ declare let parenOuter: string | null;
-    39 │ declare let parenInner: string | null;
-  > 40 │ parenOuter ||= (parenInner ||= b && c);
+    36 │ declare let parenOuter: string | null;
+    37 │ declare let parenInner: string | null;
+  > 38 │ parenOuter ||= (parenInner ||= b && c);
        │            ^^^
-    41 │ 
+    39 │ 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -233,15 +231,15 @@ ignoreMixedLogicalExpressionsDisabled.ts:40:12 lint/nursery/useNullishCoalescing
 ```
 
 ```
-ignoreMixedLogicalExpressionsDisabled.ts:40:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
+ignoreMixedLogicalExpressionsDisabled.ts:38:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    38 │ declare let parenOuter: string | null;
-    39 │ declare let parenInner: string | null;
-  > 40 │ parenOuter ||= (parenInner ||= b && c);
+    36 │ declare let parenOuter: string | null;
+    37 │ declare let parenInner: string | null;
+  > 38 │ parenOuter ||= (parenInner ||= b && c);
        │                            ^^^
-    41 │ 
+    39 │ 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   

@@ -1,0 +1,204 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_strings.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = 'a' + 'b\'c'
+const a = '\\' + 'n'
+const a = 'a' + '${}'
+const a = `a` + `${b}`
+const a = "a`b" + "c"
+const a = <div>{'a' + 'b'}</div>
+const a = '\\0' + '1'
+// The fix would change the escape sequence `\0` into `\01`
+const a = '\0' + '1'
+const a = foo + '\0' + '1'
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid_strings.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = 'a' + 'b\'c'
+      │           ^^^^^^^^^^^^
+    3 │ const a = '\\' + 'n'
+    4 │ const a = 'a' + '${}'
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·'a'·+·'b\'c'
+        2 │ + const·a·=·"ab\'c"
+     3  3 │   const a = '\\' + 'n'
+     4  4 │   const a = 'a' + '${}'
+  
+
+```
+
+```
+invalid_strings.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = 'a' + 'b\'c'
+  > 3 │ const a = '\\' + 'n'
+      │           ^^^^^^^^^^
+    4 │ const a = 'a' + '${}'
+    5 │ const a = `a` + `${b}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = 'a' + 'b\'c'
+     3    │ - const·a·=·'\\'·+·'n'
+        3 │ + const·a·=·"\\n"
+     4  4 │   const a = 'a' + '${}'
+     5  5 │   const a = `a` + `${b}`
+  
+
+```
+
+```
+invalid_strings.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    2 │ const a = 'a' + 'b\'c'
+    3 │ const a = '\\' + 'n'
+  > 4 │ const a = 'a' + '${}'
+      │           ^^^^^^^^^^^
+    5 │ const a = `a` + `${b}`
+    6 │ const a = "a`b" + "c"
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     2  2 │   const a = 'a' + 'b\'c'
+     3  3 │   const a = '\\' + 'n'
+     4    │ - const·a·=·'a'·+·'${}'
+        4 │ + const·a·=·"a${}"
+     5  5 │   const a = `a` + `${b}`
+     6  6 │   const a = "a`b" + "c"
+  
+
+```
+
+```
+invalid_strings.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    3 │ const a = '\\' + 'n'
+    4 │ const a = 'a' + '${}'
+  > 5 │ const a = `a` + `${b}`
+      │           ^^^^^^^^^^^^
+    6 │ const a = "a`b" + "c"
+    7 │ const a = <div>{'a' + 'b'}</div>
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    5 │ const·a·=·`a`·+·`${b}`
+      │             -----     
+
+```
+
+```
+invalid_strings.js:6:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    4 │ const a = 'a' + '${}'
+    5 │ const a = `a` + `${b}`
+  > 6 │ const a = "a`b" + "c"
+      │           ^^^^^^^^^^^
+    7 │ const a = <div>{'a' + 'b'}</div>
+    8 │ const a = '\\0' + '1'
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     4  4 │   const a = 'a' + '${}'
+     5  5 │   const a = `a` + `${b}`
+     6    │ - const·a·=·"a`b"·+·"c"
+        6 │ + const·a·=·"a`bc"
+     7  7 │   const a = <div>{'a' + 'b'}</div>
+     8  8 │   const a = '\\0' + '1'
+  
+
+```
+
+```
+invalid_strings.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     6 │ const a = "a`b" + "c"
+     7 │ const a = <div>{'a' + 'b'}</div>
+   > 8 │ const a = '\\0' + '1'
+       │           ^^^^^^^^^^^
+     9 │ // The fix would change the escape sequence `\0` into `\01`
+    10 │ const a = '\0' + '1'
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     6  6 │   const a = "a`b" + "c"
+     7  7 │   const a = <div>{'a' + 'b'}</div>
+     8    │ - const·a·=·'\\0'·+·'1'
+        8 │ + const·a·=·"\\01"
+     9  9 │   // The fix would change the escape sequence `\0` into `\01`
+    10 10 │   const a = '\0' + '1'
+  
+
+```
+
+```
+invalid_strings.js:10:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     8 │ const a = '\\0' + '1'
+     9 │ // The fix would change the escape sequence `\0` into `\01`
+  > 10 │ const a = '\0' + '1'
+       │           ^^^^^^^^^^
+    11 │ const a = foo + '\0' + '1'
+    12 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_strings.js:11:17 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     9 │ // The fix would change the escape sequence `\0` into `\01`
+    10 │ const a = '\0' + '1'
+  > 11 │ const a = foo + '\0' + '1'
+       │                 ^^^^^^^^^^
+    12 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```

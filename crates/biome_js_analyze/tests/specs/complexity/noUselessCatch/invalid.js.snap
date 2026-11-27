@@ -57,12 +57,11 @@ invalid.js:7:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━
      2  2 │     f();
      3    │ - → try·{
      4    │ - → → doSomethingThatMightThrowA();
-     5    │ - → → doSomethingThatMightThrowB();
+        3 │ + → → doSomethingThatMightThrowA();
+     5  4 │       doSomethingThatMightThrowB();
      6    │ - → }·catch·(e)·{
      7    │ - → → throw·e;
      8    │ - → }
-        3 │ + → → doSomethingThatMightThrowA();
-        4 │ + → → doSomethingThatMightThrowB();
      9  5 │     g();
     10  6 │   }
   

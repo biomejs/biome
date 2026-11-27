@@ -28,9 +28,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+broken_symlink fs/dereferencedSymlink ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink.
+    
+    Caused by:
+      <OS_ERROR>
   
   i Biome encountered a file system entry that is a broken symbolic link.
   

@@ -1,0 +1,971 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = new Set([1, 2]);
+const b = new Set([2, 3]);
+const c = new Set([3, 4]);
+
+// Union
+const union1 = new Set([...a, ...b]);
+const union2 = new Set([...a, ...b, ...c]);
+const union4 = new Set([...(cond ? a : b), ...c]);
+const union5 = new Set(([...a, ...b]));
+
+// Intersection and difference
+const intersection1 = [...a].filter((value) => b.has(value));
+const intersection2 = [...a].filter(value => b.has(value));
+const intersection3 = new Set([...a].filter((value) => b.has(value)));
+const difference1 = [...a].filter((value) => !b.has(value));
+const difference2 = new Set([...a].filter((value) => !b.has(value)));
+const difference3 = [...a].filter((value) => !(b.has(value)));
+const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+
+// Predicates
+const subset1 = [...a].every((value) => b.has(value));
+const overlaps1 = [...a].some((value) => b.has(value));
+const disjoint1 = [...a].every((value) => !b.has(value));
+const notSubset1 = [...a].some((value) => !b.has(value));
+if ([...a].some((value) => b.has(value))) {}
+const asString = [...a].some((value) => b.has(value)).toString();
+const power = [...a].some((value) => b.has(value)) ** 2;
+
+// Size comparisons
+const disjoint2 = a.intersection(b).size === 0;
+const disjoint3 = 0 === a.intersection(b).size;
+const overlaps2 = a.intersection(b).size !== 0;
+const overlaps3 = a.intersection(b).size > 0;
+const overlaps4 = 0 < a.intersection(b).size;
+const subset2 = a.difference(b).size === 0;
+const notSubset2 = a.difference(b).size !== 0;
+const subset3 = (a.difference(b)).size === 0;
+
+// Keyword directly before the reported code
+function keyword() {
+	return[...a].filter((value) => b.has(value));
+}
+
+// Comments are not removed by the fix
+const withComment = new Set([...a, /* comment */ ...b]);
+const operandComment = new Set([...a, .../* comment */ b]);
+
+// Receivers that need parentheses
+const newReceiver = new Set([...new Set(), ...b]);
+const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+
+// Unparenthesized `new` callee
+const constructed = new new Set([...a, ...b]).constructor();
+
+```
+
+# Diagnostics
+```
+invalid.js:7:16 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    6 │ // Union
+  > 7 │ const union1 = new Set([...a, ...b]);
+      │                ^^^^^^^^^^^^^^^^^^^^^
+    8 │ const union2 = new Set([...a, ...b, ...c]);
+    9 │ const union4 = new Set([...(cond ? a : b), ...c]);
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+     5  5 │   
+     6  6 │   // Union
+     7    │ - const·union1·=·new·Set([...a,·...b]);
+        7 │ + const·union1·=·a.union(b);
+     8  8 │   const union2 = new Set([...a, ...b, ...c]);
+     9  9 │   const union4 = new Set([...(cond ? a : b), ...c]);
+  
+
+```
+
+```
+invalid.js:8:16 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+     6 │ // Union
+     7 │ const union1 = new Set([...a, ...b]);
+   > 8 │ const union2 = new Set([...a, ...b, ...c]);
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ const union4 = new Set([...(cond ? a : b), ...c]);
+    10 │ const union5 = new Set(([...a, ...b]));
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+     6  6 │   // Union
+     7  7 │   const union1 = new Set([...a, ...b]);
+     8    │ - const·union2·=·new·Set([...a,·...b,·...c]);
+        8 │ + const·union2·=·a.union(b).union(c);
+     9  9 │   const union4 = new Set([...(cond ? a : b), ...c]);
+    10 10 │   const union5 = new Set(([...a, ...b]));
+  
+
+```
+
+```
+invalid.js:9:16 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+     7 │ const union1 = new Set([...a, ...b]);
+     8 │ const union2 = new Set([...a, ...b, ...c]);
+   > 9 │ const union4 = new Set([...(cond ? a : b), ...c]);
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const union5 = new Set(([...a, ...b]));
+    11 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+     7  7 │   const union1 = new Set([...a, ...b]);
+     8  8 │   const union2 = new Set([...a, ...b, ...c]);
+     9    │ - const·union4·=·new·Set([...(cond·?·a·:·b),·...c]);
+        9 │ + const·union4·=·(cond·?·a·:·b).union(c);
+    10 10 │   const union5 = new Set(([...a, ...b]));
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:10:16 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+     8 │ const union2 = new Set([...a, ...b, ...c]);
+     9 │ const union4 = new Set([...(cond ? a : b), ...c]);
+  > 10 │ const union5 = new Set(([...a, ...b]));
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Intersection and difference
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+     8  8 │   const union2 = new Set([...a, ...b, ...c]);
+     9  9 │   const union4 = new Set([...(cond ? a : b), ...c]);
+    10    │ - const·union5·=·new·Set(([...a,·...b]));
+       10 │ + const·union5·=·a.union(b);
+    11 11 │   
+    12 12 │   // Intersection and difference
+  
+
+```
+
+```
+invalid.js:13:23 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    12 │ // Intersection and difference
+  > 13 │ const intersection1 = [...a].filter((value) => b.has(value));
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ const intersection2 = [...a].filter(value => b.has(value));
+    15 │ const intersection3 = new Set([...a].filter((value) => b.has(value)));
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+    11 11 │   
+    12 12 │   // Intersection and difference
+    13    │ - const·intersection1·=·[...a].filter((value)·=>·b.has(value));
+       13 │ + const·intersection1·=·a.intersection(b);
+    14 14 │   const intersection2 = [...a].filter(value => b.has(value));
+    15 15 │   const intersection3 = new Set([...a].filter((value) => b.has(value)));
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    12 │ // Intersection and difference
+    13 │ const intersection1 = [...a].filter((value) => b.has(value));
+  > 14 │ const intersection2 = [...a].filter(value => b.has(value));
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ const intersection3 = new Set([...a].filter((value) => b.has(value)));
+    16 │ const difference1 = [...a].filter((value) => !b.has(value));
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+    12 12 │   // Intersection and difference
+    13 13 │   const intersection1 = [...a].filter((value) => b.has(value));
+    14    │ - const·intersection2·=·[...a].filter(value·=>·b.has(value));
+       14 │ + const·intersection2·=·a.intersection(b);
+    15 15 │   const intersection3 = new Set([...a].filter((value) => b.has(value)));
+    16 16 │   const difference1 = [...a].filter((value) => !b.has(value));
+  
+
+```
+
+```
+invalid.js:15:23 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    13 │ const intersection1 = [...a].filter((value) => b.has(value));
+    14 │ const intersection2 = [...a].filter(value => b.has(value));
+  > 15 │ const intersection3 = new Set([...a].filter((value) => b.has(value)));
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ const difference1 = [...a].filter((value) => !b.has(value));
+    17 │ const difference2 = new Set([...a].filter((value) => !b.has(value)));
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+    13 13 │   const intersection1 = [...a].filter((value) => b.has(value));
+    14 14 │   const intersection2 = [...a].filter(value => b.has(value));
+    15    │ - const·intersection3·=·new·Set([...a].filter((value)·=>·b.has(value)));
+       15 │ + const·intersection3·=·a.intersection(b);
+    16 16 │   const difference1 = [...a].filter((value) => !b.has(value));
+    17 17 │   const difference2 = new Set([...a].filter((value) => !b.has(value)));
+  
+
+```
+
+```
+invalid.js:16:21 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to remove the ones that another Set has.
+  
+    14 │ const intersection2 = [...a].filter(value => b.has(value));
+    15 │ const intersection3 = new Set([...a].filter((value) => b.has(value)));
+  > 16 │ const difference1 = [...a].filter((value) => !b.has(value));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ const difference2 = new Set([...a].filter((value) => !b.has(value)));
+    18 │ const difference3 = [...a].filter((value) => !(b.has(value)));
+  
+  i Use the difference() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use difference() instead.
+  
+    14 14 │   const intersection2 = [...a].filter(value => b.has(value));
+    15 15 │   const intersection3 = new Set([...a].filter((value) => b.has(value)));
+    16    │ - const·difference1·=·[...a].filter((value)·=>·!b.has(value));
+       16 │ + const·difference1·=·a.difference(b);
+    17 17 │   const difference2 = new Set([...a].filter((value) => !b.has(value)));
+    18 18 │   const difference3 = [...a].filter((value) => !(b.has(value)));
+  
+
+```
+
+```
+invalid.js:17:21 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to remove the ones that another Set has.
+  
+    15 │ const intersection3 = new Set([...a].filter((value) => b.has(value)));
+    16 │ const difference1 = [...a].filter((value) => !b.has(value));
+  > 17 │ const difference2 = new Set([...a].filter((value) => !b.has(value)));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ const difference3 = [...a].filter((value) => !(b.has(value)));
+    19 │ const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+  
+  i Use the difference() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use difference() instead.
+  
+    15 15 │   const intersection3 = new Set([...a].filter((value) => b.has(value)));
+    16 16 │   const difference1 = [...a].filter((value) => !b.has(value));
+    17    │ - const·difference2·=·new·Set([...a].filter((value)·=>·!b.has(value)));
+       17 │ + const·difference2·=·a.difference(b);
+    18 18 │   const difference3 = [...a].filter((value) => !(b.has(value)));
+    19 19 │   const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+  
+
+```
+
+```
+invalid.js:18:21 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to remove the ones that another Set has.
+  
+    16 │ const difference1 = [...a].filter((value) => !b.has(value));
+    17 │ const difference2 = new Set([...a].filter((value) => !b.has(value)));
+  > 18 │ const difference3 = [...a].filter((value) => !(b.has(value)));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+    20 │ 
+  
+  i Use the difference() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use difference() instead.
+  
+    16 16 │   const difference1 = [...a].filter((value) => !b.has(value));
+    17 17 │   const difference2 = new Set([...a].filter((value) => !b.has(value)));
+    18    │ - const·difference3·=·[...a].filter((value)·=>·!(b.has(value)));
+       18 │ + const·difference3·=·a.difference(b);
+    19 19 │   const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:23 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    17 │ const difference2 = new Set([...a].filter((value) => !b.has(value)));
+    18 │ const difference3 = [...a].filter((value) => !(b.has(value)));
+  > 19 │ const intersection4 = new Set([...a].filter((value) => b.has(value))).size;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Predicates
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+    17 17 │   const difference2 = new Set([...a].filter((value) => !b.has(value)));
+    18 18 │   const difference3 = [...a].filter((value) => !(b.has(value)));
+    19    │ - const·intersection4·=·new·Set([...a].filter((value)·=>·b.has(value))).size;
+       19 │ + const·intersection4·=·a.intersection(b).size;
+    20 20 │   
+    21 21 │   // Predicates
+  
+
+```
+
+```
+invalid.js:22:17 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    21 │ // Predicates
+  > 22 │ const subset1 = [...a].every((value) => b.has(value));
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ const overlaps1 = [...a].some((value) => b.has(value));
+    24 │ const disjoint1 = [...a].every((value) => !b.has(value));
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    20 20 │   
+    21 21 │   // Predicates
+    22    │ - const·subset1·=·[...a].every((value)·=>·b.has(value));
+       22 │ + const·subset1·=·a.isSubsetOf(b);
+    23 23 │   const overlaps1 = [...a].some((value) => b.has(value));
+    24 24 │   const disjoint1 = [...a].every((value) => !b.has(value));
+  
+
+```
+
+```
+invalid.js:23:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    21 │ // Predicates
+    22 │ const subset1 = [...a].every((value) => b.has(value));
+  > 23 │ const overlaps1 = [...a].some((value) => b.has(value));
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ const disjoint1 = [...a].every((value) => !b.has(value));
+    25 │ const notSubset1 = [...a].some((value) => !b.has(value));
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    21 21 │   // Predicates
+    22 22 │   const subset1 = [...a].every((value) => b.has(value));
+    23    │ - const·overlaps1·=·[...a].some((value)·=>·b.has(value));
+       23 │ + const·overlaps1·=·!a.isDisjointFrom(b);
+    24 24 │   const disjoint1 = [...a].every((value) => !b.has(value));
+    25 25 │   const notSubset1 = [...a].some((value) => !b.has(value));
+  
+
+```
+
+```
+invalid.js:24:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have no values in common.
+  
+    22 │ const subset1 = [...a].every((value) => b.has(value));
+    23 │ const overlaps1 = [...a].some((value) => b.has(value));
+  > 24 │ const disjoint1 = [...a].every((value) => !b.has(value));
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ const notSubset1 = [...a].some((value) => !b.has(value));
+    26 │ if ([...a].some((value) => b.has(value))) {}
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    22 22 │   const subset1 = [...a].every((value) => b.has(value));
+    23 23 │   const overlaps1 = [...a].some((value) => b.has(value));
+    24    │ - const·disjoint1·=·[...a].every((value)·=>·!b.has(value));
+       24 │ + const·disjoint1·=·a.isDisjointFrom(b);
+    25 25 │   const notSubset1 = [...a].some((value) => !b.has(value));
+    26 26 │   if ([...a].some((value) => b.has(value))) {}
+  
+
+```
+
+```
+invalid.js:25:20 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether a Set has a value that another Set doesn't have.
+  
+    23 │ const overlaps1 = [...a].some((value) => b.has(value));
+    24 │ const disjoint1 = [...a].every((value) => !b.has(value));
+  > 25 │ const notSubset1 = [...a].some((value) => !b.has(value));
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ if ([...a].some((value) => b.has(value))) {}
+    27 │ const asString = [...a].some((value) => b.has(value)).toString();
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    23 23 │   const overlaps1 = [...a].some((value) => b.has(value));
+    24 24 │   const disjoint1 = [...a].every((value) => !b.has(value));
+    25    │ - const·notSubset1·=·[...a].some((value)·=>·!b.has(value));
+       25 │ + const·notSubset1·=·!a.isSubsetOf(b);
+    26 26 │   if ([...a].some((value) => b.has(value))) {}
+    27 27 │   const asString = [...a].some((value) => b.has(value)).toString();
+  
+
+```
+
+```
+invalid.js:26:5 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    24 │ const disjoint1 = [...a].every((value) => !b.has(value));
+    25 │ const notSubset1 = [...a].some((value) => !b.has(value));
+  > 26 │ if ([...a].some((value) => b.has(value))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ const asString = [...a].some((value) => b.has(value)).toString();
+    28 │ const power = [...a].some((value) => b.has(value)) ** 2;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    24 24 │   const disjoint1 = [...a].every((value) => !b.has(value));
+    25 25 │   const notSubset1 = [...a].some((value) => !b.has(value));
+    26    │ - if·([...a].some((value)·=>·b.has(value)))·{}
+       26 │ + if·(!a.isDisjointFrom(b))·{}
+    27 27 │   const asString = [...a].some((value) => b.has(value)).toString();
+    28 28 │   const power = [...a].some((value) => b.has(value)) ** 2;
+  
+
+```
+
+```
+invalid.js:27:18 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    25 │ const notSubset1 = [...a].some((value) => !b.has(value));
+    26 │ if ([...a].some((value) => b.has(value))) {}
+  > 27 │ const asString = [...a].some((value) => b.has(value)).toString();
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ const power = [...a].some((value) => b.has(value)) ** 2;
+    29 │ 
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    25 25 │   const notSubset1 = [...a].some((value) => !b.has(value));
+    26 26 │   if ([...a].some((value) => b.has(value))) {}
+    27    │ - const·asString·=·[...a].some((value)·=>·b.has(value)).toString();
+       27 │ + const·asString·=·(!a.isDisjointFrom(b)).toString();
+    28 28 │   const power = [...a].some((value) => b.has(value)) ** 2;
+    29 29 │   
+  
+
+```
+
+```
+invalid.js:28:15 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    26 │ if ([...a].some((value) => b.has(value))) {}
+    27 │ const asString = [...a].some((value) => b.has(value)).toString();
+  > 28 │ const power = [...a].some((value) => b.has(value)) ** 2;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // Size comparisons
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    26 26 │   if ([...a].some((value) => b.has(value))) {}
+    27 27 │   const asString = [...a].some((value) => b.has(value)).toString();
+    28    │ - const·power·=·[...a].some((value)·=>·b.has(value))·**·2;
+       28 │ + const·power·=·(!a.isDisjointFrom(b))·**·2;
+    29 29 │   
+    30 30 │   // Size comparisons
+  
+
+```
+
+```
+invalid.js:31:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have no values in common.
+  
+    30 │ // Size comparisons
+  > 31 │ const disjoint2 = a.intersection(b).size === 0;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ const disjoint3 = 0 === a.intersection(b).size;
+    33 │ const overlaps2 = a.intersection(b).size !== 0;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    29 29 │   
+    30 30 │   // Size comparisons
+    31    │ - const·disjoint2·=·a.intersection(b).size·===·0;
+       31 │ + const·disjoint2·=·a.isDisjointFrom(b);
+    32 32 │   const disjoint3 = 0 === a.intersection(b).size;
+    33 33 │   const overlaps2 = a.intersection(b).size !== 0;
+  
+
+```
+
+```
+invalid.js:32:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have no values in common.
+  
+    30 │ // Size comparisons
+    31 │ const disjoint2 = a.intersection(b).size === 0;
+  > 32 │ const disjoint3 = 0 === a.intersection(b).size;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ const overlaps2 = a.intersection(b).size !== 0;
+    34 │ const overlaps3 = a.intersection(b).size > 0;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    30 30 │   // Size comparisons
+    31 31 │   const disjoint2 = a.intersection(b).size === 0;
+    32    │ - const·disjoint3·=·0·===·a.intersection(b).size;
+       32 │ + const·disjoint3·=·a.isDisjointFrom(b);
+    33 33 │   const overlaps2 = a.intersection(b).size !== 0;
+    34 34 │   const overlaps3 = a.intersection(b).size > 0;
+  
+
+```
+
+```
+invalid.js:33:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    31 │ const disjoint2 = a.intersection(b).size === 0;
+    32 │ const disjoint3 = 0 === a.intersection(b).size;
+  > 33 │ const overlaps2 = a.intersection(b).size !== 0;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ const overlaps3 = a.intersection(b).size > 0;
+    35 │ const overlaps4 = 0 < a.intersection(b).size;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    31 31 │   const disjoint2 = a.intersection(b).size === 0;
+    32 32 │   const disjoint3 = 0 === a.intersection(b).size;
+    33    │ - const·overlaps2·=·a.intersection(b).size·!==·0;
+       33 │ + const·overlaps2·=·!a.isDisjointFrom(b);
+    34 34 │   const overlaps3 = a.intersection(b).size > 0;
+    35 35 │   const overlaps4 = 0 < a.intersection(b).size;
+  
+
+```
+
+```
+invalid.js:34:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    32 │ const disjoint3 = 0 === a.intersection(b).size;
+    33 │ const overlaps2 = a.intersection(b).size !== 0;
+  > 34 │ const overlaps3 = a.intersection(b).size > 0;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ const overlaps4 = 0 < a.intersection(b).size;
+    36 │ const subset2 = a.difference(b).size === 0;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    32 32 │   const disjoint3 = 0 === a.intersection(b).size;
+    33 33 │   const overlaps2 = a.intersection(b).size !== 0;
+    34    │ - const·overlaps3·=·a.intersection(b).size·>·0;
+       34 │ + const·overlaps3·=·!a.isDisjointFrom(b);
+    35 35 │   const overlaps4 = 0 < a.intersection(b).size;
+    36 36 │   const subset2 = a.difference(b).size === 0;
+  
+
+```
+
+```
+invalid.js:35:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    33 │ const overlaps2 = a.intersection(b).size !== 0;
+    34 │ const overlaps3 = a.intersection(b).size > 0;
+  > 35 │ const overlaps4 = 0 < a.intersection(b).size;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ const subset2 = a.difference(b).size === 0;
+    37 │ const notSubset2 = a.difference(b).size !== 0;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    33 33 │   const overlaps2 = a.intersection(b).size !== 0;
+    34 34 │   const overlaps3 = a.intersection(b).size > 0;
+    35    │ - const·overlaps4·=·0·<·a.intersection(b).size;
+       35 │ + const·overlaps4·=·!a.isDisjointFrom(b);
+    36 36 │   const subset2 = a.difference(b).size === 0;
+    37 37 │   const notSubset2 = a.difference(b).size !== 0;
+  
+
+```
+
+```
+invalid.js:36:17 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    34 │ const overlaps3 = a.intersection(b).size > 0;
+    35 │ const overlaps4 = 0 < a.intersection(b).size;
+  > 36 │ const subset2 = a.difference(b).size === 0;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ const notSubset2 = a.difference(b).size !== 0;
+    38 │ const subset3 = (a.difference(b)).size === 0;
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    34 34 │   const overlaps3 = a.intersection(b).size > 0;
+    35 35 │   const overlaps4 = 0 < a.intersection(b).size;
+    36    │ - const·subset2·=·a.difference(b).size·===·0;
+       36 │ + const·subset2·=·a.isSubsetOf(b);
+    37 37 │   const notSubset2 = a.difference(b).size !== 0;
+    38 38 │   const subset3 = (a.difference(b)).size === 0;
+  
+
+```
+
+```
+invalid.js:37:20 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether a Set has a value that another Set doesn't have.
+  
+    35 │ const overlaps4 = 0 < a.intersection(b).size;
+    36 │ const subset2 = a.difference(b).size === 0;
+  > 37 │ const notSubset2 = a.difference(b).size !== 0;
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ const subset3 = (a.difference(b)).size === 0;
+    39 │ 
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    35 35 │   const overlaps4 = 0 < a.intersection(b).size;
+    36 36 │   const subset2 = a.difference(b).size === 0;
+    37    │ - const·notSubset2·=·a.difference(b).size·!==·0;
+       37 │ + const·notSubset2·=·!a.isSubsetOf(b);
+    38 38 │   const subset3 = (a.difference(b)).size === 0;
+    39 39 │   
+  
+
+```
+
+```
+invalid.js:38:17 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    36 │ const subset2 = a.difference(b).size === 0;
+    37 │ const notSubset2 = a.difference(b).size !== 0;
+  > 38 │ const subset3 = (a.difference(b)).size === 0;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ // Keyword directly before the reported code
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    36 36 │   const subset2 = a.difference(b).size === 0;
+    37 37 │   const notSubset2 = a.difference(b).size !== 0;
+    38    │ - const·subset3·=·(a.difference(b)).size·===·0;
+       38 │ + const·subset3·=·a.isSubsetOf(b);
+    39 39 │   
+    40 40 │   // Keyword directly before the reported code
+  
+
+```
+
+```
+invalid.js:42:8 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    40 │ // Keyword directly before the reported code
+    41 │ function keyword() {
+  > 42 │ 	return[...a].filter((value) => b.has(value));
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+    40 40 │   // Keyword directly before the reported code
+    41 41 │   function keyword() {
+    42    │ - → return[...a].filter((value)·=>·b.has(value));
+       42 │ + → return·a.intersection(b);
+    43 43 │   }
+    44 44 │   
+  
+
+```
+
+```
+invalid.js:46:21 lint/nursery/useSetMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    45 │ // Comments are not removed by the fix
+  > 46 │ const withComment = new Set([...a, /* comment */ ...b]);
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ const operandComment = new Set([...a, .../* comment */ b]);
+    48 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:24 lint/nursery/useSetMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    45 │ // Comments are not removed by the fix
+    46 │ const withComment = new Set([...a, /* comment */ ...b]);
+  > 47 │ const operandComment = new Set([...a, .../* comment */ b]);
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ // Receivers that need parentheses
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:21 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    49 │ // Receivers that need parentheses
+  > 50 │ const newReceiver = new Set([...new Set(), ...b]);
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+    52 │ const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+    48 48 │   
+    49 49 │   // Receivers that need parentheses
+    50    │ - const·newReceiver·=·new·Set([...new·Set(),·...b]);
+       50 │ + const·newReceiver·=·new·Set().union(b);
+    51 51 │   const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+    52 52 │   const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+  
+
+```
+
+```
+invalid.js:51:39 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    49 │ // Receivers that need parentheses
+    50 │ const newReceiver = new Set([...new Set(), ...b]);
+  > 51 │ const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+    53 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+    49 49 │   // Receivers that need parentheses
+    50 50 │   const newReceiver = new Set([...new Set(), ...b]);
+    51    │ - const·newReceiverWithoutParentheses·=·new·Set([...new·Set,·...b]);
+       51 │ + const·newReceiverWithoutParentheses·=·(new·Set).union(b);
+    52 52 │   const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+    53 53 │   
+  
+
+```
+
+```
+invalid.js:52:29 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    50 │ const newReceiver = new Set([...new Set(), ...b]);
+    51 │ const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+  > 52 │ const conditionalReceiver = [...(cond ? a : b)].every((value) => c.has(value));
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ // Unparenthesized `new` callee
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    50 50 │   const newReceiver = new Set([...new Set(), ...b]);
+    51 51 │   const newReceiverWithoutParentheses = new Set([...new Set, ...b]);
+    52    │ - const·conditionalReceiver·=·[...(cond·?·a·:·b)].every((value)·=>·c.has(value));
+       52 │ + const·conditionalReceiver·=·(cond·?·a·:·b).isSubsetOf(c);
+    53 53 │   
+    54 54 │   // Unparenthesized `new` callee
+  
+
+```
+
+```
+invalid.js:55:25 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    54 │ // Unparenthesized `new` callee
+  > 55 │ const constructed = new new Set([...a, ...b]).constructor();
+       │                         ^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+    53 53 │   
+    54 54 │   // Unparenthesized `new` callee
+    55    │ - const·constructed·=·new·new·Set([...a,·...b]).constructor();
+       55 │ + const·constructed·=·new·(a.union(b)).constructor();
+    56 56 │   
+  
+
+```

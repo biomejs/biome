@@ -1,0 +1,575 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test("arrow function", () => {
+	return expect(1).toBe(1);
+});
+
+it("function expression", function () {
+	return expect(1).toBe(1);
+});
+
+it.skip("skipped test", function () {
+	return expect(1).toBe(1);
+});
+
+test.concurrent.only("chained modifiers", () => {
+	return expect(1).toBe(1);
+});
+
+xit("disabled alias", () => {
+	return expect(1).toBe(1);
+});
+
+fit("focused alias", () => {
+	return expect(1).toBe(1);
+});
+
+Deno.test("deno test", () => {
+	return expect(1).toBe(1);
+});
+
+it.each``("tagged table", function () {
+	return expect(1).toBe(1);
+});
+
+it.each()("table", function () {
+	return expect(1).toBe(1);
+});
+
+it.only.each``("focused tagged table", function () {
+	return expect(1).toBe(1);
+});
+
+it.only.each()("focused table", function () {
+	return expect(1).toBe(1);
+});
+
+test("async function", async () => {
+	return page.goto("https://example.com");
+});
+
+test("promise chain", () => {
+	return fetchUser().then((user) => expect(user.name).toBe("Ada"));
+});
+
+test("return without a value", () => {
+	expect(1).toBe(1);
+	return;
+});
+
+test("return before the end", () => {
+	return;
+	expect(1).toBe(1);
+});
+
+test("options before the function", { retry: 2 }, () => {
+	return expect(1).toBe(1);
+});
+
+test("timeout after the function", () => {
+	return expect(1).toBe(1);
+}, 1000);
+
+test("parenthesized function", (() => {
+	return expect(1).toBe(1);
+}));
+
+it("function declaration", declaredTest);
+function declaredTest() {
+	return expect(1).toBe(1);
+}
+
+it("first use of a shared function", sharedTest);
+it("second use of a shared function", sharedTest);
+function sharedTest() {
+	return expect(1).toBe(1);
+}
+
+const arrowTest = () => {
+	return expect(1).toBe(1);
+};
+test("arrow function in a variable", arrowTest);
+
+const functionTest = function () {
+	return expect(1).toBe(1);
+};
+test("function expression in a variable", (functionTest));
+
+describe("suite", () => {
+	it("nested test", () => {
+		return expect(1).toBe(1);
+	});
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    1 │ /* should generate diagnostics */
+    2 │ test("arrow function", () => {
+  > 3 │ 	return expect(1).toBe(1);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    6 │ it("function expression", function () {
+  > 7 │ 	return expect(1).toBe(1);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ });
+    9 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    10 │ it.skip("skipped test", function () {
+  > 11 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ });
+    13 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    14 │ test.concurrent.only("chained modifiers", () => {
+  > 15 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ });
+    17 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    18 │ xit("disabled alias", () => {
+  > 19 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ });
+    21 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    22 │ fit("focused alias", () => {
+  > 23 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ });
+    25 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    26 │ Deno.test("deno test", () => {
+  > 27 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ });
+    29 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    30 │ it.each``("tagged table", function () {
+  > 31 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ });
+    33 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    34 │ it.each()("table", function () {
+  > 35 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ });
+    37 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    38 │ it.only.each``("focused tagged table", function () {
+  > 39 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ });
+    41 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    42 │ it.only.each()("focused table", function () {
+  > 43 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ });
+    45 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    46 │ test("async function", async () => {
+  > 47 │ 	return page.goto("https://example.com");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ });
+    49 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    50 │ test("promise chain", () => {
+  > 51 │ 	return fetchUser().then((user) => expect(user.name).toBe("Ada"));
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ });
+    53 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    54 │ test("return without a value", () => {
+    55 │ 	expect(1).toBe(1);
+  > 56 │ 	return;
+       │ 	^^^^^^^
+    57 │ });
+    58 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    59 │ test("return before the end", () => {
+  > 60 │ 	return;
+       │ 	^^^^^^^
+    61 │ 	expect(1).toBe(1);
+    62 │ });
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    64 │ test("options before the function", { retry: 2 }, () => {
+  > 65 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ });
+    67 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    68 │ test("timeout after the function", () => {
+  > 69 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ }, 1000);
+    71 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    72 │ test("parenthesized function", (() => {
+  > 73 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ }));
+    75 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    76 │ it("function declaration", declaredTest);
+    77 │ function declaredTest() {
+  > 78 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ }
+    80 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    82 │ it("second use of a shared function", sharedTest);
+    83 │ function sharedTest() {
+  > 84 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ }
+    86 │ 
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    87 │ const arrowTest = () => {
+  > 88 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ };
+    90 │ test("arrow function in a variable", arrowTest);
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:93:2 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+    92 │ const functionTest = function () {
+  > 93 │ 	return expect(1).toBe(1);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    94 │ };
+    95 │ test("function expression in a variable", (functionTest));
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:99:3 lint/nursery/noReturnInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected return statement in a test.
+  
+     97 │ describe("suite", () => {
+     98 │ 	it("nested test", () => {
+   > 99 │ 		return expect(1).toBe(1);
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ 	});
+    101 │ });
+  
+  i A test doesn't need to return a value. Test runners only make use of a returned promise, by waiting for it, and await makes that waiting easier to see.
+  
+  i Remove the return statement. If it returns a promise, mark the test function as async and use await on the promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

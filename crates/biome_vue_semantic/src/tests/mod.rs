@@ -123,8 +123,7 @@ pub(crate) fn sfc(code: &str) -> VueSemanticModel {
                 AnyVueDirective::VueDirective(directive) => {
                     let name = directive
                         .name_token()
-                        .map(|token| token.text_trimmed().to_string())
-                        .unwrap_or_default();
+                        .map_or_default(|token| token.text_trimmed().to_string());
                     (
                         directive.initializer(),
                         if name == "v-on" && directive.arg().is_some() {

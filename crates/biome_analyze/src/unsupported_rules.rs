@@ -240,6 +240,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSolid("prefer-classlist"), Deprecated),
     UnsupportedRule(EslintSvelte("comment-directive"), NotApplicable),
     UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
     UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),
@@ -426,8 +427,13 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintTypeScript("func-call-spacing"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("indent"), FormatterOption("indentWidth")),
     UnsupportedRule(EslintTypeScript("keyword-spacing"), FormatterCovers),
+    UnsupportedRule(
+        EslintTypeScript("no-confusing-non-null-assertion"),
+        Stylistic,
+    ),
     UnsupportedRule(EslintTypeScript("no-extra-parens"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("no-extra-semi"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("no-type-alias"), Deprecated),
     UnsupportedRule(EslintTypeScript("object-curly-spacing"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("prefer-ts-expect-error"), Deprecated),
     UnsupportedRule(EslintTypeScript("quotes"), FormatterOption("quoteStyle")),
@@ -548,6 +554,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintVueJs("valid-v-bind-sync"), Deprecated),
     UnsupportedRule(Stylelint("color-no-invalid-hex"), ParserCovers),
     UnsupportedRule(Stylelint("declaration-empty-line-before"), Stylistic),
+    UnsupportedRule(Stylelint("rule-empty-line-before"), Stylistic),
     UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),
@@ -575,12 +582,62 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintYml("flow-sequence-bracket-newline"), FormatterCovers),
     UnsupportedRule(EslintYml("flow-sequence-bracket-spacing"), FormatterCovers),
     UnsupportedRule(EslintYml("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(EslintYml("key-spacing"), FormatterCovers),
+    UnsupportedRule(EslintYml("no-multiple-empty-lines"), Stylistic),
     UnsupportedRule(EslintYml("no-tab-indent"), FormatterCovers),
     UnsupportedRule(EslintYml("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(EslintYml("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(EslintAstro("no-deprecated-astro-canonicalurl"), Legacy),
+    UnsupportedRule(EslintAstro("no-deprecated-astro-fetchcontent"), Legacy),
+    UnsupportedRule(EslintAstro("no-deprecated-astro-resolve"), Legacy),
+    UnsupportedRule(EslintAstro("no-deprecated-getentrybyslug"), Legacy),
     UnsupportedRule(EslintAstro("no-omitted-end-tags"), Deprecated),
     UnsupportedRule(EslintAstro("semi"), FormatterOption("semicolons")),
     UnsupportedRule(EslintAstro("valid-compile"), RequiresExternalTool),
+    UnsupportedRule(
+        StylelintScss("at-else-closing-brace-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-else-closing-brace-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(StylelintScss("at-else-empty-line-before"), FormatterCovers),
+    UnsupportedRule(
+        StylelintScss("at-else-if-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-function-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-if-closing-brace-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-if-closing-brace-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-mixin-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(StylelintScss("operator-no-newline-after"), FormatterCovers),
+    UnsupportedRule(StylelintScss("operator-no-newline-before"), FormatterCovers),
+    UnsupportedRule(StylelintScss("operator-no-unspaced"), FormatterCovers),
 ];
 
 #[cfg(test)]

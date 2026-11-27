@@ -15,10 +15,9 @@ use biome_string_case::StrLikeExtension;
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
-    compare::compare_lowered_globals,
     lower::{
-        LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
-        lower_global_types,
+        LoweredGlobal, LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData,
+        LoweredTypeReference, lower_global_types,
     },
     manifest::{GlobalDeclarationRole, GlobalManifest, build_global_manifest},
     source::{
@@ -676,6 +675,17 @@ fn lowered_from_fixture(dts_name: &str) -> Result<LoweredGlobalTypes> {
     lower_global_types(&manifest, &source_files)
 }
 
+/// Returns the entry of `global`'s local type table that `reference` points at.
+fn local_type<'a>(
+    global: &'a LoweredGlobal,
+    reference: &LoweredTypeReference,
+) -> &'a LoweredTypeData {
+    let LoweredTypeReference::Local(index) = reference else {
+        panic!("expected a local reference, got {reference:?}");
+    };
+    &global.local_types()[*index]
+}
+
 /// Asserts that every expected fragment appears somewhere in an error chain.
 #[cfg(unix)]
 fn expect_error_chain_contains_all<T>(result: Result<T>, expected: &[&str]) -> Result<()> {
@@ -1006,15 +1016,12 @@ mod tests {
             .context("generated module should contain the builder table")?;
         for name in [
             "ERROR",
-            "ERROR_CONSTRUCT",
-            "ERROR_CALL",
             "SYMBOL",
             "SYMBOL_DISPOSE",
             "SYMBOL_ASYNC_DISPOSE",
             "DISPOSABLE",
-            "DISPOSABLE_DISPOSE",
             "ASYNC_DISPOSABLE",
-            "ASYNC_DISPOSABLE_ASYNC_DISPOSE",
+            "PROMISE",
             "DATE",
             "MATH",
         ] {
@@ -1030,10 +1037,6 @@ mod tests {
         assert!(generated.contains("crate::TypeData::Function("));
         assert!(generated.contains("crate::TypeData::Symbol"));
         assert!(generated.contains("crate::TypeMemberKind::ComputedValue("));
-        // Pin the async flag at the rendered-source level: the `AsyncDisposable` helper must emit
-        // `is_async: true` and the synchronous helpers `is_async: false`, so a regression back to a
-        // hardcoded flag in `render_function` fails here, not only at the lowered-model layer.
-        assert!(generated.contains("is_async: true,"));
         assert!(generated.contains("is_async: false,"));
         assert!(generated.contains("crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into()"));
         assert!(generated.contains("crate::globals::GLOBAL_SYMBOL_ASYNC_DISPOSE_ID.into()"));
@@ -1145,9 +1148,7 @@ mod tests {
     #[test]
     fn lowerer_lowers_error_interface_members_to_generated_class() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.error.d.ts")?;
-        let error = lowered
-            .global("Error")
-            .expect("Error should be lowered as the first generated Error global");
+        let error = lowered.global("Error").expect("Error should be lowered");
 
         assert_eq!(error.id_constant(), "ERROR_ID_GLOBAL_TYPE_ID");
         let LoweredTypeData::Class(class) = error.data() else {
@@ -1185,40 +1186,113 @@ mod tests {
             .member("prototype")
             .expect("prototype member should be lowered");
         assert_eq!(prototype.kind(), &LoweredMemberKind::NamedStatic);
+        let error_instance = LoweredTypeData::InstanceOf {
+            ty: LoweredTypeReference::Global("GLOBAL_ERROR_ID".into()),
+            type_parameters: Box::default(),
+        };
         assert_eq!(
-            prototype.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_ERROR_ID")
+            local_type(error, prototype.type_reference()),
+            &error_instance
         );
         assert!(class.member("code").is_none());
+
+        let constructors = class
+            .members()
+            .iter()
+            .filter(|member| member.kind() == &LoweredMemberKind::Constructor)
+            .collect::<Vec<_>>();
+        let [constructor] = constructors.as_slice() else {
+            bail!("Error should have one construct signature");
+        };
+        let LoweredTypeData::Constructor(constructor) =
+            local_type(error, constructor.type_reference())
+        else {
+            bail!("Error construct signature should lower to constructor data");
+        };
+        let [message] = constructor.parameters() else {
+            bail!("Error construct signature should have one parameter");
+        };
+        assert!(message.is_optional());
         assert_eq!(
-            class
-                .members()
-                .iter()
-                .filter(|member| matches!(member.kind(), LoweredMemberKind::Constructor))
-                .count(),
-            1
+            message.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
         assert_eq!(
-            class
-                .members()
-                .iter()
-                .filter(|member| matches!(member.kind(), LoweredMemberKind::CallSignature))
-                .count(),
-            1
+            constructor.return_type().map(|ty| local_type(error, ty)),
+            Some(&error_instance)
         );
 
-        let constructor = lowered
-            .global("Error.constructor")
-            .expect("Error constructor helper should be lowered");
-        assert_eq!(
-            constructor.id_constant(),
-            "ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID"
-        );
+        let calls = class
+            .members()
+            .iter()
+            .filter(|member| member.kind() == &LoweredMemberKind::CallSignature)
+            .collect::<Vec<_>>();
+        let [call] = calls.as_slice() else {
+            bail!("Error should have one call signature");
+        };
+        let LoweredTypeData::Function(call) = local_type(error, call.type_reference()) else {
+            bail!("Error call signature should lower to function data");
+        };
+        assert_eq!(local_type(error, call.return_type()), &error_instance);
 
-        let call = lowered
-            .global("Error.call")
-            .expect("Error call helper should be lowered");
-        assert_eq!(call.id_constant(), "ERROR_CALL_ID_GLOBAL_TYPE_ID");
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_every_array_member_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let array = lowered.global("Array").expect("Array should be lowered");
+        assert_eq!(array.id_constant(), "ARRAY_ID_GLOBAL_TYPE_ID");
+        // Without `declare var Array`, the declaration only names a type.
+        let LoweredTypeData::Interface(interface) = array.data() else {
+            bail!("Array should lower to interface data");
+        };
+        assert_eq!(
+            interface
+                .members()
+                .iter()
+                .map(|member| member.name())
+                .collect::<Vec<_>>(),
+            ["length", "entries", "filter", "forEach", "map"]
+        );
+        let [element] = interface.type_parameters() else {
+            bail!("Array should declare one type parameter");
+        };
+
+        let entries = interface
+            .member("entries")
+            .expect("Array.entries should be lowered");
+        let LoweredTypeData::Function(entries) = local_type(array, entries.type_reference()) else {
+            bail!("Array.entries should lower to function data");
+        };
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = local_type(array, entries.return_type())
+        else {
+            bail!("Array.entries should return an ArrayIterator instance");
+        };
+        assert_eq!(
+            ty,
+            &LoweredTypeReference::Global("GLOBAL_ARRAY_ITERATOR_ID".into())
+        );
+        let [entry] = type_parameters.as_ref() else {
+            bail!("ArrayIterator should receive one type argument");
+        };
+        let LoweredTypeData::Tuple(entry) = local_type(array, entry) else {
+            bail!("Array.entries should iterate tuples");
+        };
+        assert_eq!(
+            entry
+                .iter()
+                .map(|element| element.ty().clone())
+                .collect::<Vec<_>>(),
+            [
+                LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID"),
+                element.clone()
+            ]
+        );
 
         Ok(())
     }
@@ -1240,12 +1314,19 @@ mod tests {
         assert_eq!(
             dispose.kind(),
             &LoweredMemberKind::ComputedValue {
-                key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID")
+                key_reference: LoweredTypeReference::Global("GLOBAL_SYMBOL_DISPOSE_ID".into())
             }
         );
+        let LoweredTypeData::Function(dispose_function) =
+            local_type(disposable, dispose.type_reference())
+        else {
+            bail!("Disposable computed member should lower to function data");
+        };
+        assert!(!dispose_function.is_async());
+        assert!(dispose_function.parameters().is_empty());
         assert_eq!(
-            dispose.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_DISPOSABLE_DISPOSE_ID")
+            dispose_function.return_type(),
+            &LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
         );
 
         let async_disposable = lowered
@@ -1264,44 +1345,23 @@ mod tests {
         assert_eq!(
             async_dispose.kind(),
             &LoweredMemberKind::ComputedValue {
-                key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
+                key_reference: LoweredTypeReference::Global(
+                    "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID".into()
+                )
             }
         );
-        assert_eq!(
-            async_dispose.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID")
-        );
-
-        let dispose_helper = lowered
-            .global("Disposable[Symbol.dispose]")
-            .expect("Disposable dispose helper should be lowered");
-        assert_eq!(
-            dispose_helper.id_constant(),
-            "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"
-        );
-        let LoweredTypeData::Function(dispose_function) = dispose_helper.data() else {
-            bail!("Disposable dispose helper should lower to function data");
+        let LoweredTypeData::Function(async_dispose_function) =
+            local_type(async_disposable, async_dispose.type_reference())
+        else {
+            bail!("AsyncDisposable computed member should lower to function data");
         };
-        assert!(!dispose_function.is_async());
+        assert!(async_dispose_function.parameters().is_empty());
         assert_eq!(
-            dispose_function.return_type(),
-            &LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
-        );
-
-        let async_dispose_helper = lowered
-            .global("AsyncDisposable[Symbol.asyncDispose]")
-            .expect("AsyncDisposable dispose helper should be lowered");
-        assert_eq!(
-            async_dispose_helper.id_constant(),
-            "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"
-        );
-        let LoweredTypeData::Function(async_dispose_function) = async_dispose_helper.data() else {
-            bail!("AsyncDisposable dispose helper should lower to function data");
-        };
-        assert!(async_dispose_function.is_async());
-        assert_eq!(
-            async_dispose_function.return_type(),
-            &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_PROMISE_ID")
+            local_type(async_disposable, async_dispose_function.return_type()),
+            &LoweredTypeData::InstanceOf {
+                ty: LoweredTypeReference::Global("GLOBAL_PROMISE_LIKE_ID".into()),
+                type_parameters: Box::new([LoweredTypeReference::Predefined("GLOBAL_VOID_ID")]),
+            }
         );
 
         Ok(())
@@ -1411,77 +1471,6 @@ mod tests {
         assert!(lowered.gaps().iter().any(|gap| gap.owner == "WeakMap"
             && gap.detail == "merged declarations have different type parameter counts"));
         Ok(())
-    }
-
-    #[test]
-    fn lowerer_rejects_missing_symbol_member() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.symbol-missing-async-dispose.d.ts"),
-            "AsyncDisposable requires Symbol.asyncDispose to be declared as a unique symbol",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_non_unique_symbol_member() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.symbol-wrong-type.d.ts"),
-            "Disposable requires Symbol.dispose to be declared as a unique symbol",
-        )
-    }
-
-    #[test]
-    fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
-            "Disposable requires Symbol.dispose to be declared as a unique symbol",
-        )
-    }
-
-    #[test]
-    fn comparator_accepts_generated_global_shapes() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
-
-        compare_lowered_globals(&lowered)?;
-
-        Ok(())
-    }
-
-    #[test]
-    fn comparator_rejects_missing_symbol_global() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.error.d.ts")?;
-
-        expect_error_contains(
-            compare_lowered_globals(&lowered),
-            "generated globals are missing the Symbol global",
-        )
-    }
-
-    #[test]
-    fn comparator_rejects_missing_error_members() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.error-missing-message.d.ts")?;
-
-        expect_error_contains(
-            compare_lowered_globals(&lowered),
-            "missing required Error member message",
-        )
-    }
-
-    #[test]
-    fn comparator_rejects_wrong_error_constructor_return() -> Result<()> {
-        let lowered = lowered_from_fixture("manifest.error-wrong-constructor-return.d.ts")?;
-
-        expect_error_contains(
-            compare_lowered_globals(&lowered),
-            "generated Error constructor has unexpected return type",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_unresolved_error_member_references() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-named-reference.d.ts"),
-            "unresolved type reference ErrorOptions in Error global",
-        )
     }
 
     #[test]

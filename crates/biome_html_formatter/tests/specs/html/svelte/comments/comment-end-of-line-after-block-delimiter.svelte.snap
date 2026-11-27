@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/comment-end-of-line-after-block-delimiter.svelte
+---
+
+# Input
+
+```svelte
+{#if a}<!-- after if -->
+	<i>x</i>
+{:else}<!-- after else -->
+	<i>y</i>
+{/if}
+{#each items as item}<!-- after each -->
+	<i>{item}</i>
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#if a}
+	<!-- after if -->
+	<i>x</i>
+{:else}
+	<!-- after else -->
+	<i>y</i>
+{/if}
+{#each items as item}
+	<!-- after each -->
+	<i>{item}</i>
+{/each}
+
+```

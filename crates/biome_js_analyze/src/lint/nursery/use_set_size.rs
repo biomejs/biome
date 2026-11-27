@@ -1,4 +1,8 @@
-use crate::{JsRuleAction, ast_utils::starts_unterminated_statement, services::semantic::Semantic};
+use crate::{
+    JsRuleAction,
+    ast_utils::{keyword_directly_before, starts_unterminated_statement},
+    services::semantic::Semantic,
+};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,7 +13,7 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyTsName, AnyTsType,
     AnyTsVariableAnnotation, JsCallExpression, JsStaticMemberExpression,
-    JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, T, binding_ext::AnyJsBindingDeclaration,
+    JsUnaryExpression, JsUnaryOperator, T, binding_ext::AnyJsBindingDeclaration,
     global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Direction, TriviaPieceKind};
@@ -76,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSetSize {
-        version: "next",
+        version: "2.6.5",
         name: "useSetSize",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-set-size").same()],
@@ -176,7 +180,7 @@ impl Rule for UseSetSize {
         // In `return[...set].length`, the keyword is directly followed by `[`. The replacement
         // starts with a name such as `set`, which must not be joined to the keyword.
         if !starts_with_parenthesis
-            && let Some(keyword) = keyword_directly_before(node)
+            && let Some(keyword) = keyword_directly_before(&AnyJsExpression::from(node.clone()))
         {
             mutation.replace_token_discard_trivia(
                 keyword.clone(),
@@ -362,14 +366,4 @@ fn needs_parentheses(object: &AnyJsExpression) -> bool {
         AnyJsExpression::JsNewExpression(new) => new.arguments().is_none(),
         _ => true,
     }
-}
-
-/// Returns the keyword right before `node` when no whitespace separates them, as in
-/// `return[...set].length`.
-fn keyword_directly_before(node: &JsStaticMemberExpression) -> Option<JsSyntaxToken> {
-    let first_token = node.syntax().first_token()?;
-    let previous = first_token.prev_token()?;
-    (previous.kind().is_keyword()
-        && previous.text_trimmed_range().end() == first_token.text_trimmed_range().start())
-    .then_some(previous)
 }

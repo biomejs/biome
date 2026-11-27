@@ -1,0 +1,459 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const array1 = [foo()];
+array1.unshift(1);
+
+const array2 = [1];
+// comment
+array2.push(2);
+
+const array3 = [1 /* comment */];
+array3.push(2);
+
+const object1 = { get foo() { return 1; } };
+object1.bar = 2;
+
+const object2 = {};
+object2.__proto__ = proto;
+
+const object3 = {};
+object3["__proto__"] = proto;
+
+const object4 = {};
+Object.assign(object4, { __proto__: proto });
+
+const object5 = {};
+Object.assign(object5, { get foo() { return 1; } });
+
+const object6 = {};
+Object.assign(object6, foo, bar);
+
+const array4 = [1]
+array4.push(2);[3].forEach(log)
+
+let foo2;
+foo2 = /* comment */ 1;
+
+let i = 0;
+const array5 = [i];
+array5.unshift(++i);
+
+const array6 = [...values];
+array6.unshift(1);
+
+const object7 = { __proto__: proto };
+object7.foo = 1;
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:3:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const array1 = [foo()];
+  > 3 │ array1.unshift(1);
+      │ ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const array2 = [1];
+  
+  i The array is created here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const array1 = [foo()];
+      │                ^^^^^^^
+    3 │ array1.unshift(1);
+    4 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:7:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    5 │ const array2 = [1];
+    6 │ // comment
+  > 7 │ array2.push(2);
+      │ ^^^^^^^^^^^
+    8 │ 
+    9 │ const array3 = [1 /* comment */];
+  
+  i The array is created here.
+  
+    3 │ array1.unshift(1);
+    4 │ 
+  > 5 │ const array2 = [1];
+      │                ^^^
+    6 │ // comment
+    7 │ array2.push(2);
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:10:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+     9 │ const array3 = [1 /* comment */];
+  > 10 │ array3.push(2);
+       │ ^^^^^^^^^^^
+    11 │ 
+    12 │ const object1 = { get foo() { return 1; } };
+  
+  i The array is created here.
+  
+     7 │ array2.push(2);
+     8 │ 
+   > 9 │ const array3 = [1 /* comment */];
+       │                ^^^^^^^^^^^^^^^^^
+    10 │ array3.push(2);
+    11 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:13:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    12 │ const object1 = { get foo() { return 1; } };
+  > 13 │ object1.bar = 2;
+       │ ^^^^^^^^^^^^^
+    14 │ 
+    15 │ const object2 = {};
+  
+  i The object is created here.
+  
+    10 │ array3.push(2);
+    11 │ 
+  > 12 │ const object1 = { get foo() { return 1; } };
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ object1.bar = 2;
+    14 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:16:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    15 │ const object2 = {};
+  > 16 │ object2.__proto__ = proto;
+       │ ^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ const object3 = {};
+  
+  i The object is created here.
+  
+    13 │ object1.bar = 2;
+    14 │ 
+  > 15 │ const object2 = {};
+       │                 ^^
+    16 │ object2.__proto__ = proto;
+    17 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:19:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    18 │ const object3 = {};
+  > 19 │ object3["__proto__"] = proto;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ const object4 = {};
+  
+  i The object is created here.
+  
+    16 │ object2.__proto__ = proto;
+    17 │ 
+  > 18 │ const object3 = {};
+       │                 ^^
+    19 │ object3["__proto__"] = proto;
+    20 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:22:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    21 │ const object4 = {};
+  > 22 │ Object.assign(object4, { __proto__: proto });
+       │ ^^^^^^^^^^^^^
+    23 │ 
+    24 │ const object5 = {};
+  
+  i The object is created here.
+  
+    19 │ object3["__proto__"] = proto;
+    20 │ 
+  > 21 │ const object4 = {};
+       │                 ^^
+    22 │ Object.assign(object4, { __proto__: proto });
+    23 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:25:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    24 │ const object5 = {};
+  > 25 │ Object.assign(object5, { get foo() { return 1; } });
+       │ ^^^^^^^^^^^^^
+    26 │ 
+    27 │ const object6 = {};
+  
+  i The object is created here.
+  
+    22 │ Object.assign(object4, { __proto__: proto });
+    23 │ 
+  > 24 │ const object5 = {};
+       │                 ^^
+    25 │ Object.assign(object5, { get foo() { return 1; } });
+    26 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:28:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    27 │ const object6 = {};
+  > 28 │ Object.assign(object6, foo, bar);
+       │ ^^^^^^^^^^^^^
+    29 │ 
+    30 │ const array4 = [1]
+  
+  i The object is created here.
+  
+    25 │ Object.assign(object5, { get foo() { return 1; } });
+    26 │ 
+  > 27 │ const object6 = {};
+       │                 ^^
+    28 │ Object.assign(object6, foo, bar);
+    29 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:31:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    30 │ const array4 = [1]
+  > 31 │ array4.push(2);[3].forEach(log)
+       │ ^^^^^^^^^^^
+    32 │ 
+    33 │ let foo2;
+  
+  i The array is created here.
+  
+    28 │ Object.assign(object6, foo, bar);
+    29 │ 
+  > 30 │ const array4 = [1]
+       │                ^^^
+    31 │ array4.push(2);[3].forEach(log)
+    32 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:34:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable is assigned right after it is declared.
+  
+    33 │ let foo2;
+  > 34 │ foo2 = /* comment */ 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ let i = 0;
+  
+  i The declaration is here.
+  
+    31 │ array4.push(2);[3].forEach(log)
+    32 │ 
+  > 33 │ let foo2;
+       │ ^^^^^^^^^
+    34 │ foo2 = /* comment */ 1;
+    35 │ 
+  
+  i Declaring a variable and assigning its first value in two statements makes the code longer and harder to follow.
+  
+  i Assign the value in the declaration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:38:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    36 │ let i = 0;
+    37 │ const array5 = [i];
+  > 38 │ array5.unshift(++i);
+       │ ^^^^^^^^^^^^^^
+    39 │ 
+    40 │ const array6 = [...values];
+  
+  i The array is created here.
+  
+    36 │ let i = 0;
+  > 37 │ const array5 = [i];
+       │                ^^^
+    38 │ array5.unshift(++i);
+    39 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:41:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array is changed right after it is created.
+  
+    40 │ const array6 = [...values];
+  > 41 │ array6.unshift(1);
+       │ ^^^^^^^^^^^^^^
+    42 │ 
+    43 │ const object7 = { __proto__: proto };
+  
+  i The array is created here.
+  
+    38 │ array5.unshift(++i);
+    39 │ 
+  > 40 │ const array6 = [...values];
+       │                ^^^^^^^^^^^
+    41 │ array6.unshift(1);
+    42 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:44:1 lint/nursery/noImmediateMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object is changed right after it is created.
+  
+    43 │ const object7 = { __proto__: proto };
+  > 44 │ object7.foo = 1;
+       │ ^^^^^^^^^^^^^
+    45 │ 
+  
+  i The object is created here.
+  
+    41 │ array6.unshift(1);
+    42 │ 
+  > 43 │ const object7 = { __proto__: proto };
+       │                 ^^^^^^^^^^^^^^^^^^^^
+    44 │ object7.foo = 1;
+    45 │ 
+  
+  i Creating a value and changing it in the next statement splits its initial contents across two statements, which makes them harder to read.
+  
+  i Include the change in the initial value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -112,8 +112,7 @@ impl ReporterVisitor for JunitReporterVisitor {
                         "org.biome.{}",
                         diagnostic
                             .category()
-                            .map(|c| c.name())
-                            .unwrap_or_default()
+                            .map_or_default(|c| c.name())
                             .replace('/', ".")
                     ),
                     status,

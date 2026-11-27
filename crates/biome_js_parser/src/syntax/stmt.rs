@@ -1239,6 +1239,16 @@ fn eat_variable_declaration(
     Some((list, variable_declarator_list.remaining_declarator_range))
 }
 
+pub(super) fn parse_svelte_legacy_const_declarator(p: &mut JsParser) -> ParsedSyntax {
+    let context = VariableDeclaratorContext {
+        kind_name: Some("const"),
+        ..VariableDeclaratorContext::new(VariableDeclarationParent::VariableStatement)
+    };
+    let declarator = parse_variable_declarator(p, &context);
+    p.state_mut().name_map.clear();
+    declarator
+}
+
 struct VariableDeclaratorList {
     declarator_context: VariableDeclaratorContext,
     // Range of the declarators succeeding the first declarator

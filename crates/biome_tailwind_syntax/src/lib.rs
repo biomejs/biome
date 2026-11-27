@@ -13,7 +13,8 @@ pub use syntax_node::*;
 pub use util::*;
 
 use crate::TailwindSyntaxKind::{
-    TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VALUE, TW_BOGUS_VARIANT,
+    CSS_BOGUS_PROPERTY_VALUE, TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VALUE,
+    TW_BOGUS_VARIANT, TW_BOGUS_VARIANT_SEGMENT,
 };
 use biome_rowan::{AstNode, RawSyntaxKind};
 
@@ -37,7 +38,13 @@ impl biome_rowan::SyntaxKind for TailwindSyntaxKind {
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            TW_BOGUS | TW_BOGUS_CANDIDATE | TW_BOGUS_MODIFIER | TW_BOGUS_VARIANT
+            TW_BOGUS
+                | TW_BOGUS_CANDIDATE
+                | TW_BOGUS_VARIANT
+                | TW_BOGUS_VARIANT_SEGMENT
+                | TW_BOGUS_MODIFIER
+                | TW_BOGUS_VALUE
+                | CSS_BOGUS_PROPERTY_VALUE
         )
     }
 

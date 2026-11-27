@@ -1,11 +1,14 @@
 use std::any::type_name;
 use std::fmt::Display;
+use std::path::{Path, PathBuf};
 use std::slice;
 use std::str::FromStr;
 
 use crate::WorkspaceSettings;
 pub(crate) use crate::server::{LSPServer, ServerFactory};
 use anyhow::{Context, Error, Result, bail};
+use biome_fs::BiomePath;
+use camino::Utf8PathBuf;
 use futures::channel::mpsc::Sender;
 use futures::{Sink, SinkExt, Stream, StreamExt};
 use serde::Serialize;
@@ -24,6 +27,20 @@ use tower_lsp_server::ls_types::{
     TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Uri,
     VersionedTextDocumentIdentifier, WorkspaceFolder,
 };
+
+/// Adds platform-path construction for LSP tests.
+pub(crate) trait BiomePathTestExt {
+    /// Converts a platform test path to UTF-8 and anchors it at the empty path.
+    fn from_platform_path(path: impl AsRef<Path>) -> Result<Self, PathBuf>
+    where
+        Self: Sized;
+}
+
+impl BiomePathTestExt for BiomePath {
+    fn from_platform_path(path: impl AsRef<Path>) -> Result<Self, PathBuf> {
+        Utf8PathBuf::from_path_buf(path.as_ref().to_path_buf()).map(Self::new)
+    }
+}
 
 /// Statically build an [Uri] instance that points to the file at `$path`
 /// within the workspace.

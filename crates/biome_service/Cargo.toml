@@ -113,7 +113,7 @@ web-time                 = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 biome_service       = { path = ".", features = ["testing"] }
-divan               = { package = "codspeed-divan-compat", version = "=5.0.1" }
+divan               = { workspace = true }
 insta               = { workspace = true }
 static_assertions   = { workspace = true }
 
@@ -185,6 +185,9 @@ lang_md        = [
   "dep:biome_markdown_parser",
   "dep:biome_markdown_syntax"
 ]
+# MDX is still in development: it isn't part of `stable`, and the feature is
+# removed once MDX ships.
+lang_mdx       = ["biome_languages/lang_mdx", "biome_markdown_parser/lang_mdx", "md_embeds"]
 lang_scss      = ["biome_css_syntax/scss"]
 lang_yaml      = [
   "biome_configuration/lang_yaml",

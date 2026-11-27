@@ -129,19 +129,28 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // content from being incorrectly lexed as a FENCE token.
     p.set_after_frontmatter(true);
 
-    parse_processing_instruction(p).ok();
-    parse_doc_type(p).ok();
     // Only a real `.vue` document has single-file-component blocks. Plain HTML
     // parsed with the Vue extensions turned on keeps ordinary element nesting,
     // where an unknown top-level tag is a custom element rather than a block.
-    ElementList {
+    RootItemList {
         vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
-        in_math: false,
-        at_root: true,
+        can_parse_html_doctype: true,
     }
     .parse_list(p);
 
     m.complete(p, HTML_ROOT);
+}
+
+fn is_at_doc_type(p: &mut HtmlParser) -> bool {
+    if !(p.at(T![<]) && p.nth_at(1, T![!])) {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump_with_context(T![<], inside_tag_context(p));
+        p.bump_with_context(T![!], HtmlLexContext::Doctype);
+        p.at(T![doctype])
+    })
 }
 
 fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
@@ -258,7 +267,7 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
         }
         Present(name)
     } else if p.cur().is_html_tag_name() {
-        // A known HTML/SVG tag, or the unknown-tag fallback.
+        // A known HTML/SVG/MathML tag, or the unknown-tag fallback.
         let m = p.start();
         p.bump_with_context(p.cur(), inside_tag_context(p));
         Present(m.complete(p, HTML_TAG_NAME))
@@ -493,7 +502,6 @@ fn parse_element_allowing_sfc_blocks(
     // these checks are now `O(1)` on the token kind.
     let name_kind = p.cur();
     let name_range = p.cur_range();
-    let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS.contains(name_kind);
     // In Svelte files, the preformatted elements must be parsed as regular
     // elements so that Svelte expressions inside them ({@html expr}, {expr})
@@ -506,9 +514,7 @@ fn parse_element_allowing_sfc_blocks(
             && (Svelte.is_supported(p) || Astro.is_supported(p)));
 
     // MathML is foreign content with no expressions; `<Math>` is a component.
-    let is_astro_math = Astro.is_supported(p)
-        && name_kind != HTML_COMPONENT_LITERAL
-        && opening_tag_name.eq_ignore_ascii_case("math");
+    let is_astro_math = Astro.is_supported(p) && name_kind == T![math];
 
     let opening_name = parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -522,9 +528,12 @@ fn parse_element_allowing_sfc_blocks(
         _ => {}
     }
 
-    // Only a top-level block of a single-file component asks about `lang`, so
-    // the list looks for it there and nowhere else.
-    let mut attributes = AttributeList::new(sfc_blocks);
+    // Only a top-level block of a Vue single-file component asks about `lang`.
+    // Svelte script attributes also distinguish `generics` from templates.
+    let mut attributes = AttributeList::new(
+        sfc_blocks,
+        Svelte.is_supported(p) && name_kind == T![script],
+    );
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
@@ -603,7 +612,6 @@ fn parse_element_allowing_sfc_blocks(
                 ElementList {
                     vue_sfc_top_level: false,
                     in_math: in_math || is_astro_math,
-                    at_root: false,
                 }
                 .parse_list(p);
                 let Some(ClosingTag {
@@ -650,7 +658,6 @@ fn parse_astro_fragment(
     ElementList {
         vue_sfc_top_level: false,
         in_math,
-        at_root: false,
     }
     .parse_list(p);
 
@@ -809,35 +816,20 @@ pub(crate) fn parse_html_element(
     }
 }
 
-#[derive(Default)]
-struct ElementList {
+struct RootItemList {
     /// Whether this list holds the top-level blocks of a Vue single-file
-    /// component. Only the outermost list, so that a `<docs>` nested inside a
-    /// `<template>` stays ordinary markup.
+    /// component. A `<docs>` nested inside a `<template>` remains ordinary markup.
     vue_sfc_top_level: bool,
-    /// Whether this list sits inside an Astro `<math>`, where a `{` is text.
-    in_math: bool,
-    /// Whether this is the list of the document root. It has no parent to be
-    /// closed, so it runs to the end of the file, and whatever it can't parse
-    /// becomes bogus. Otherwise the tree sink would put the rest of the source
-    /// into the EOF token, which the formatter drops.
-    at_root: bool,
+    /// Standard HTML accepts one doctype after an optional processing instruction.
+    /// Astro accepts doctypes anywhere in the root list.
+    can_parse_html_doctype: bool,
 }
 
-impl ElementList {
-    /// Parses a closing tag in the document root as a bogus element, reporting
-    /// that it has no opening tag. Void closing tags such as `</br>` get the
-    /// diagnostic from [parse_closing_tag] instead.
-    ///
-    /// Only the root list can hold a stray closing tag. Every other list ends
-    /// at a closing tag, which the enclosing element then matches against its
-    /// own opening tag. Returns `Absent` when this list isn't the root or the
-    /// parser isn't at `</`.
+impl RootItemList {
+    /// Parses a closing tag in the document root as a bogus item. Nested lists
+    /// stop at a closing tag so their enclosing element can match it.
     #[cold]
     fn parse_stray_closing_tag(&self, p: &mut HtmlParser) -> ParsedSyntax {
-        if !self.at_root {
-            return Absent;
-        }
         let Some(ClosingTag {
             marker: mut closing,
             ..
@@ -854,20 +846,31 @@ impl ElementList {
     }
 }
 
-impl ParseNodeList for ElementList {
+impl ParseNodeList for RootItemList {
     type Kind = HtmlSyntaxKind;
     type Parser<'source> = HtmlParser<'source>;
-    const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
+    const LIST_KIND: Self::Kind = HTML_ROOT_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![<]) && p.nth_at(1, T![/]) {
+            self.can_parse_html_doctype = false;
             return self.parse_stray_closing_tag(p);
         }
-        parse_html_element(p, self.vue_sfc_top_level, self.in_math)
+        if self.can_parse_html_doctype && p.at(T![<]) && p.nth_at(1, T![!]) {
+            self.can_parse_html_doctype = false;
+            return parse_doc_type(p);
+        }
+        if Astro.is_supported(p) && is_at_doc_type(p) {
+            return parse_doc_type(p);
+        }
+        if !p.at(T![<?]) {
+            self.can_parse_html_doctype = false;
+        }
+        parse_html_element(p, self.vue_sfc_top_level, false)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(EOF) || !self.at_root && p.at(T![<]) && p.nth_at(1, T![/])
+        p.at(EOF)
     }
 
     fn recover(
@@ -880,10 +883,9 @@ impl ParseNodeList for ElementList {
             &ParseRecoveryTokenSet::new(HTML_BOGUS_ELEMENT, token_set![T![<], T![>]]),
             expected_child,
         );
-        if recovered.is_err() && self.at_root && !p.at(EOF) {
-            // Recovery stops at a token it can't skip, which would end the
-            // list. The root must reach the end of the file, so take the token
-            // as bogus and keep going. The diagnostic has already been added.
+        if recovered.is_err() && !p.at(EOF) {
+            // The root list must reach EOF. Consume a token that recovery
+            // cannot skip so the tree sink does not attach it to the EOF token.
             let m = p.start();
             p.bump_any();
             return Ok(m.complete(p, HTML_BOGUS_ELEMENT));
@@ -892,10 +894,49 @@ impl ParseNodeList for ElementList {
     }
 }
 
+#[derive(Default)]
+struct ElementList {
+    /// Whether this list holds the top-level blocks of a Vue single-file
+    /// component. Only the outermost list, so that a `<docs>` nested inside a
+    /// `<template>` stays ordinary markup.
+    vue_sfc_top_level: bool,
+    /// Whether this list sits inside an Astro `<math>`, where a `{` is text.
+    in_math: bool,
+}
+
+impl ParseNodeList for ElementList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_html_element(p, self.vue_sfc_top_level, self.in_math)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(EOF) || p.at(T![<]) && p.nth_at(1, T![/])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(HTML_BOGUS_ELEMENT, token_set![T![<], T![>]]),
+            expected_child,
+        )
+    }
+}
+
 struct AttributeList {
     /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
     /// that ordinary attribute parsing doesn't pay for the lookahead.
     track_lang: bool,
+    /// Whether the list belongs to a Svelte `<script>` element, whose `generics`
+    /// value is TypeScript rather than an interpolated attribute template.
+    is_svelte_script: bool,
     /// Whether the list held a `lang` attribute naming a language. Always false
     /// without [`Self::track_lang`].
     names_a_language: bool,
@@ -904,9 +945,10 @@ struct AttributeList {
 }
 
 impl AttributeList {
-    fn new(track_lang: bool) -> Self {
+    fn new(track_lang: bool, is_svelte_script: bool) -> Self {
         Self {
             track_lang,
+            is_svelte_script,
             names_a_language: false,
             is_raw: false,
         }
@@ -924,7 +966,7 @@ impl ParseNodeList for AttributeList {
         }
         self.is_raw |= is_at_astro_raw_directive(p);
 
-        parse_attribute(p)
+        parse_attribute(p, self.is_svelte_script)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -969,7 +1011,7 @@ fn is_at_lang_naming_a_language(p: &mut HtmlParser) -> bool {
     })
 }
 
-fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute(p: &mut HtmlParser, is_svelte_script: bool) -> ParsedSyntax {
     if !is_at_attribute_start(p) {
         return Absent;
     }
@@ -986,6 +1028,10 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         T!["{{"] if SingleTextExpressions.is_supported(p) => {
             p.re_lex(HtmlReLexContext::SingleCurly);
             parse_single_text_expression(p, inside_tag_context(p))
+        }
+        T!["{/"] if Svelte.is_supported(p) => {
+            p.re_lex(HtmlReLexContext::SingleCurly);
+            parse_svelte_spread_or_expression(p)
         }
         T!["{{"] => {
             let m = p.start();
@@ -1058,6 +1104,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
                 disabled_svelte(p, m.range(p))
             }),
         _ => {
+            let is_svelte_generics = is_svelte_script
+                && p.at(HTML_LITERAL)
+                && p.cur_text().eq_ignore_ascii_case("generics");
             let m = p.start();
             // we've already determined that this isn't a valid astro directive, so if it looks like one, we should remap it as a literal.
             if Astro.is_supported(p) && is_at_astro_directive_keyword(p) {
@@ -1069,7 +1118,12 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
+                let context = if is_svelte_generics {
+                    AttrInitializerContext::SvelteGenerics
+                } else {
+                    AttrInitializerContext::Regular
+                };
+                parse_attribute_initializer(p, context).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
@@ -1251,11 +1305,12 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    let attr_value_context = if Svelte.is_supported(p) {
-        HtmlLexContext::SvelteAttributeValue
-    } else {
-        HtmlLexContext::AttributeValue
-    };
+    let attr_value_context =
+        if Svelte.is_supported(p) && context != AttrInitializerContext::SvelteGenerics {
+            HtmlLexContext::SvelteAttributeValue
+        } else {
+            HtmlLexContext::AttributeValue
+        };
     p.bump_with_context(T![=], attr_value_context);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
@@ -1296,7 +1351,10 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
-    } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
+    } else if Svelte.is_supported(p)
+        && context != AttrInitializerContext::SvelteGenerics
+        && matches!(p.cur(), T!['"'] | T!["'"])
+    {
         // Speculatively parse as a template. If no interpolation is found the
         // value is a plain string, so rewind and re-lex it as a single
         // `HTML_STRING_LITERAL` to parse it as a normal `HtmlString`.
@@ -1317,6 +1375,7 @@ pub(crate) enum AttrInitializerContext {
     #[default]
     Regular,
     VueVFor,
+    SvelteGenerics,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {

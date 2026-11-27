@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/nested_configuration_excluding_its_parent_folder_ignores_its_files'
+```
+
+## `biome.json`
+
+```json
+{}
+```
+
+## `generated/app/biome.json`
+
+```json
+{ "root": false, "files": { "includes": ["**", "!**/generated"] } }
+```
+
+## `generated/app/src/a.js`
+
+```js
+  statement(  )  
+```
+
+## `src/b.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

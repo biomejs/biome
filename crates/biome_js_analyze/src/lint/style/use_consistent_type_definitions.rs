@@ -177,11 +177,7 @@ impl Rule for UseConsistentTypeDefinitions {
 
 fn can_convert_interface_to_type(interface_decl: &TsInterfaceDeclaration) -> bool {
     // Interfaces with extends clause cannot be easily converted
-    if interface_decl.extends_clause().is_some() {
-        return false;
-    }
-
-    true
+    interface_decl.extends_clause().is_none()
 }
 
 fn can_convert_type_to_interface(type_alias: &TsTypeAliasDeclaration) -> bool {
@@ -192,11 +188,7 @@ fn can_convert_type_to_interface(type_alias: &TsTypeAliasDeclaration) -> bool {
     };
 
     // Converting empty types into interfaces will conflict with the `noEmptyInterface` rule
-    if ty.members().is_empty() {
-        return false;
-    }
-
-    true
+    !ty.members().is_empty()
 }
 
 fn convert_interface_to_type_alias(

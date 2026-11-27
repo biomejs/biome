@@ -1,4 +1,4 @@
-use std::{fmt, ops::Deref};
+use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum NodeOrToken<N, T> {
@@ -32,15 +32,6 @@ impl<N, T> NodeOrToken<N, T> {
         match self {
             Self::Node(_) => None,
             Self::Token(token) => Some(token),
-        }
-    }
-}
-
-impl<N: Deref, T: Deref> NodeOrToken<N, T> {
-    pub(crate) fn as_deref(&self) -> NodeOrToken<&N::Target, &T::Target> {
-        match self {
-            Self::Node(node) => NodeOrToken::Node(&**node),
-            Self::Token(token) => NodeOrToken::Token(&**token),
         }
     }
 }

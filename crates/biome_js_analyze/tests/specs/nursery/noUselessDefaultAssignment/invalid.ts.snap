@@ -1,0 +1,716 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+function parameterShorthand({ foo = "" }: { foo: string }) {
+	return foo;
+}
+
+function parameterRenamed({ foo: bar = "" }: { foo: string }) {
+	return bar;
+}
+
+const arrowParameter = ({ foo = 0 }: { foo: number }) => foo;
+
+const functionExpressionParameter = function ({ foo = 0 }: { foo: number }) {
+	return foo;
+};
+
+export default function exportedParameter({ foo = 0 }: { foo: number }) {
+	return foo;
+}
+
+declare const nestedTuple: [[string], { value: string }];
+const [[inner] = [""], { value: fromObject } = { value: "" }] = nestedTuple;
+
+const { literal = "" } = { literal: "bar" };
+
+const { a: renamed = "" } = { a: "bar" };
+
+declare const declared: { value: number };
+const { value = 1 } = declared;
+
+declare const pair: [string, number];
+const [label = "", count = 0] = pair;
+
+declare const withHole: [string, number];
+const [, second = 0] = withHole;
+
+declare function takesCallback(callback: (value: string) => void): void;
+takesCallback((value = "") => {});
+takesCallback(function (value = "") {});
+takesCallback(((value = "") => {}));
+takesCallback((value: string = "") => {});
+
+declare function takesSecond(callback: (first: string, second: number) => void): void;
+takesSecond((first, second = 0) => {});
+
+declare class Listener {
+	constructor(callback: (value: string) => void);
+}
+new Listener((value = "") => {});
+
+function parameterWithComment({ foo /* keep */ = "" }: { foo: string }) {
+	return foo;
+}
+
+declare function takesObject(callback: (value: { name: string }) => void): void;
+takesObject(({ name } = { name: "" }) => {});
+
+function multiline({
+	foo = "",
+	bar = 0, // trailing comment
+}: { foo: string; bar: number }) {
+	return foo + bar;
+}
+
+declare const mixed: { known: string; [key: string]: string };
+const { known = "" } = mixed;
+
+const { "quoted": fromQuoted = 0 } = { quoted: 1 };
+
+declare const commented: { primary: string; secondary: string };
+const {
+	primary // primary value
+		= "",
+	secondary,
+} = commented;
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:37 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ function parameterShorthand({ foo = "" }: { foo: string }) {
+      │                                     ^^
+    4 │ 	return foo;
+    5 │ }
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    3 │ function·parameterShorthand({·foo·=·""·}:·{·foo:·string·})·{
+      │                                   -----                     
+
+```
+
+```
+invalid.ts:7:40 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    5 │ }
+    6 │ 
+  > 7 │ function parameterRenamed({ foo: bar = "" }: { foo: string }) {
+      │                                        ^^
+    8 │ 	return bar;
+    9 │ }
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    7 │ function·parameterRenamed({·foo:·bar·=·""·}:·{·foo:·string·})·{
+      │                                      -----                     
+
+```
+
+```
+invalid.ts:11:33 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+     9 │ }
+    10 │ 
+  > 11 │ const arrowParameter = ({ foo = 0 }: { foo: number }) => foo;
+       │                                 ^
+    12 │ 
+    13 │ const functionExpressionParameter = function ({ foo = 0 }: { foo: number }) {
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    11 │ const·arrowParameter·=·({·foo·=·0·}:·{·foo:·number·})·=>·foo;
+       │                               ----                           
+
+```
+
+```
+invalid.ts:13:55 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    11 │ const arrowParameter = ({ foo = 0 }: { foo: number }) => foo;
+    12 │ 
+  > 13 │ const functionExpressionParameter = function ({ foo = 0 }: { foo: number }) {
+       │                                                       ^
+    14 │ 	return foo;
+    15 │ };
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    13 │ const·functionExpressionParameter·=·function·({·foo·=·0·}:·{·foo:·number·})·{
+       │                                                     ----                     
+
+```
+
+```
+invalid.ts:17:51 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    15 │ };
+    16 │ 
+  > 17 │ export default function exportedParameter({ foo = 0 }: { foo: number }) {
+       │                                                   ^
+    18 │ 	return foo;
+    19 │ }
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    17 │ export·default·function·exportedParameter({·foo·=·0·}:·{·foo:·number·})·{
+       │                                                 ----                     
+
+```
+
+```
+invalid.ts:22:18 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    21 │ declare const nestedTuple: [[string], { value: string }];
+  > 22 │ const [[inner] = [""], { value: fromObject } = { value: "" }] = nestedTuple;
+       │                  ^^^^
+    23 │ 
+    24 │ const { literal = "" } = { literal: "bar" };
+  
+  i A default value only applies when the value is undefined, but the type of this array element doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    22 │ const·[[inner]·=·[""],·{·value:·fromObject·}·=·{·value:·""·}]·=·nestedTuple;
+       │               -------                                                       
+
+```
+
+```
+invalid.ts:22:48 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    21 │ declare const nestedTuple: [[string], { value: string }];
+  > 22 │ const [[inner] = [""], { value: fromObject } = { value: "" }] = nestedTuple;
+       │                                                ^^^^^^^^^^^^^
+    23 │ 
+    24 │ const { literal = "" } = { literal: "bar" };
+  
+  i A default value only applies when the value is undefined, but the type of this array element doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    22 │ const·[[inner]·=·[""],·{·value:·fromObject·}·=·{·value:·""·}]·=·nestedTuple;
+       │                                             ----------------                
+
+```
+
+```
+invalid.ts:24:19 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    22 │ const [[inner] = [""], { value: fromObject } = { value: "" }] = nestedTuple;
+    23 │ 
+  > 24 │ const { literal = "" } = { literal: "bar" };
+       │                   ^^
+    25 │ 
+    26 │ const { a: renamed = "" } = { a: "bar" };
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    24 │ const·{·literal·=·""·}·=·{·literal:·"bar"·};
+       │                 -----                       
+
+```
+
+```
+invalid.ts:26:22 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    24 │ const { literal = "" } = { literal: "bar" };
+    25 │ 
+  > 26 │ const { a: renamed = "" } = { a: "bar" };
+       │                      ^^
+    27 │ 
+    28 │ declare const declared: { value: number };
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    26 │ const·{·a:·renamed·=·""·}·=·{·a:·"bar"·};
+       │                    -----                 
+
+```
+
+```
+invalid.ts:29:17 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    28 │ declare const declared: { value: number };
+  > 29 │ const { value = 1 } = declared;
+       │                 ^
+    30 │ 
+    31 │ declare const pair: [string, number];
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    29 │ const·{·value·=·1·}·=·declared;
+       │               ----             
+
+```
+
+```
+invalid.ts:32:16 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    31 │ declare const pair: [string, number];
+  > 32 │ const [label = "", count = 0] = pair;
+       │                ^^
+    33 │ 
+    34 │ declare const withHole: [string, number];
+  
+  i A default value only applies when the value is undefined, but the type of this array element doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    32 │ const·[label·=·"",·count·=·0]·=·pair;
+       │             -----                    
+
+```
+
+```
+invalid.ts:32:28 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    31 │ declare const pair: [string, number];
+  > 32 │ const [label = "", count = 0] = pair;
+       │                            ^
+    33 │ 
+    34 │ declare const withHole: [string, number];
+  
+  i A default value only applies when the value is undefined, but the type of this array element doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    32 │ const·[label·=·"",·count·=·0]·=·pair;
+       │                         ----         
+
+```
+
+```
+invalid.ts:35:19 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    34 │ declare const withHole: [string, number];
+  > 35 │ const [, second = 0] = withHole;
+       │                   ^
+    36 │ 
+    37 │ declare function takesCallback(callback: (value: string) => void): void;
+  
+  i A default value only applies when the value is undefined, but the type of this array element doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    35 │ const·[,·second·=·0]·=·withHole;
+       │                ----             
+
+```
+
+```
+invalid.ts:38:24 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    37 │ declare function takesCallback(callback: (value: string) => void): void;
+  > 38 │ takesCallback((value = "") => {});
+       │                        ^^
+    39 │ takesCallback(function (value = "") {});
+    40 │ takesCallback(((value = "") => {}));
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    38 │ takesCallback((value·=·"")·=>·{});
+       │                     -----         
+
+```
+
+```
+invalid.ts:39:33 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    37 │ declare function takesCallback(callback: (value: string) => void): void;
+    38 │ takesCallback((value = "") => {});
+  > 39 │ takesCallback(function (value = "") {});
+       │                                 ^^
+    40 │ takesCallback(((value = "") => {}));
+    41 │ takesCallback((value: string = "") => {});
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    39 │ takesCallback(function·(value·=·"")·{});
+       │                              -----      
+
+```
+
+```
+invalid.ts:40:25 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    38 │ takesCallback((value = "") => {});
+    39 │ takesCallback(function (value = "") {});
+  > 40 │ takesCallback(((value = "") => {}));
+       │                         ^^
+    41 │ takesCallback((value: string = "") => {});
+    42 │ 
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    40 │ takesCallback(((value·=·"")·=>·{}));
+       │                      -----          
+
+```
+
+```
+invalid.ts:41:32 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    39 │ takesCallback(function (value = "") {});
+    40 │ takesCallback(((value = "") => {}));
+  > 41 │ takesCallback((value: string = "") => {});
+       │                                ^^
+    42 │ 
+    43 │ declare function takesSecond(callback: (first: string, second: number) => void): void;
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    41 │ takesCallback((value:·string·=·"")·=>·{});
+       │                             -----         
+
+```
+
+```
+invalid.ts:44:30 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    43 │ declare function takesSecond(callback: (first: string, second: number) => void): void;
+  > 44 │ takesSecond((first, second = 0) => {});
+       │                              ^
+    45 │ 
+    46 │ declare class Listener {
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    44 │ takesSecond((first,·second·=·0)·=>·{});
+       │                           ----         
+
+```
+
+```
+invalid.ts:49:23 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    47 │ 	constructor(callback: (value: string) => void);
+    48 │ }
+  > 49 │ new Listener((value = "") => {});
+       │                       ^^
+    50 │ 
+    51 │ function parameterWithComment({ foo /* keep */ = "" }: { foo: string }) {
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    49 │ new·Listener((value·=·"")·=>·{});
+       │                    -----         
+
+```
+
+```
+invalid.ts:51:50 lint/nursery/noUselessDefaultAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    49 │ new Listener((value = "") => {});
+    50 │ 
+  > 51 │ function parameterWithComment({ foo /* keep */ = "" }: { foo: string }) {
+       │                                                  ^^
+    52 │ 	return foo;
+    53 │ }
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:56:25 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    55 │ declare function takesObject(callback: (value: { name: string }) => void): void;
+  > 56 │ takesObject(({ name } = { name: "" }) => {});
+       │                         ^^^^^^^^^^^^
+    57 │ 
+    58 │ function multiline({
+  
+  i A default value only applies when the value is undefined, but the type of this parameter doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    56 │ takesObject(({·name·}·=·{·name:·""·})·=>·{});
+       │                      ---------------         
+
+```
+
+```
+invalid.ts:59:8 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    58 │ function multiline({
+  > 59 │ 	foo = "",
+       │ 	      ^^
+    60 │ 	bar = 0, // trailing comment
+    61 │ }: { foo: string; bar: number }) {
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    59 │ → foo·=·"",
+       │      ----- 
+
+```
+
+```
+invalid.ts:60:8 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    58 │ function multiline({
+    59 │ 	foo = "",
+  > 60 │ 	bar = 0, // trailing comment
+       │ 	      ^
+    61 │ }: { foo: string; bar: number }) {
+    62 │ 	return foo + bar;
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    60 │ → bar·=·0,·//·trailing·comment
+       │      ----                     
+
+```
+
+```
+invalid.ts:66:17 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    65 │ declare const mixed: { known: string; [key: string]: string };
+  > 66 │ const { known = "" } = mixed;
+       │                 ^^
+    67 │ 
+    68 │ const { "quoted": fromQuoted = 0 } = { quoted: 1 };
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    66 │ const·{·known·=·""·}·=·mixed;
+       │               -----          
+
+```
+
+```
+invalid.ts:68:32 lint/nursery/noUselessDefaultAssignment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    66 │ const { known = "" } = mixed;
+    67 │ 
+  > 68 │ const { "quoted": fromQuoted = 0 } = { quoted: 1 };
+       │                                ^
+    69 │ 
+    70 │ declare const commented: { primary: string; secondary: string };
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the default value.
+  
+    68 │ const·{·"quoted":·fromQuoted·=·0·}·=·{·quoted:·1·};
+       │                              ----                  
+
+```
+
+```
+invalid.ts:73:5 lint/nursery/noUselessDefaultAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This default value is never used.
+  
+    71 │ const {
+    72 │ 	primary // primary value
+  > 73 │ 		= "",
+       │ 		  ^^
+    74 │ 	secondary,
+    75 │ } = commented;
+  
+  i A default value only applies when the value is undefined, but the type of this property doesn't include undefined.
+  
+  i Remove the default value, or add undefined to the type if the value can be missing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

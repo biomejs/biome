@@ -2,8 +2,8 @@ use proc_macro_error3::*;
 use proc_macro2::{Ident, TokenStream};
 use quote::{ToTokens, quote};
 use syn::{
-    Attribute, DataEnum, DataStruct, Generics, Token, Variant,
-    parse::{Error, Parse, ParseStream, Parser, Result, discouraged::Speculative},
+    Attribute, DataEnum, DataStruct, Generics, MacroDelimiter, Meta, Token, Variant,
+    parse::{Error, Parse, ParseStream, Result, discouraged::Speculative},
     punctuated::Punctuated,
     spanned::Spanned,
     token::Paren,
@@ -82,9 +82,8 @@ impl DeriveStructInput {
         };
 
         for attr in attrs {
-            if attr.path.is_ident("diagnostic") {
-                let tokens = attr.tokens.into();
-                let attrs = match DiagnosticAttrs::parse.parse(tokens) {
+            if attr.path().is_ident("diagnostic") {
+                let attrs = match parse_parenthesized_args::<DiagnosticAttrs>(&attr) {
                     Ok(attrs) => attrs,
                     Err(err) => abort!(
                         err.span(),
@@ -143,21 +142,20 @@ impl DeriveStructInput {
             };
 
             for attr in field.attrs {
-                if attr.path.is_ident("category") {
+                if attr.path().is_ident("category") {
                     result.category = Some(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("severity") {
+                } else if attr.path().is_ident("severity") {
                     result.severity = Some(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("description") {
+                } else if attr.path().is_ident("description") {
                     result.description = Some(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("message") {
+                } else if attr.path().is_ident("message") {
                     result.message = Some(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("advice") {
+                } else if attr.path().is_ident("advice") {
                     result.advices.push(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("verbose_advice") {
+                } else if attr.path().is_ident("verbose_advice") {
                     result.verbose_advices.push(ident.clone());
-                } else if attr.path.is_ident("location") {
-                    let tokens = attr.tokens.into();
-                    let attr = match LocationAttr::parse.parse(tokens) {
+                } else if attr.path().is_ident("location") {
+                    let attr = match parse_parenthesized_args::<LocationAttr>(&attr) {
                         Ok(attr) => attr,
                         Err(err) => abort!(
                             err.span(),
@@ -167,9 +165,9 @@ impl DeriveStructInput {
                     };
 
                     result.location.push((ident.clone(), attr.field));
-                } else if attr.path.is_ident("tags") {
+                } else if attr.path().is_ident("tags") {
                     result.tags = Some(StaticOrDynamic::Dynamic(ident.clone()));
-                } else if attr.path.is_ident("source") {
+                } else if attr.path().is_ident("source") {
                     result.source = Some(ident.clone());
                 }
             }
@@ -187,7 +185,7 @@ impl DeriveEnumInput {
         data: DataEnum,
     ) -> Self {
         for attr in attrs {
-            if attr.path.is_ident("diagnostic") {
+            if attr.path().is_ident("diagnostic") {
                 abort!(
                     attr.span(),
                     "\"diagnostic\" attributes are not supported on enums"
@@ -202,6 +200,22 @@ impl DeriveEnumInput {
             variants: data.variants.into_iter().collect(),
         }
     }
+}
+
+/// Parses the arguments of `#[name(...)]`.
+///
+/// Unlike [`Attribute::parse_args`], this rejects arguments delimited by
+/// brackets or braces, such as `#[name[...]]`.
+fn parse_parenthesized_args<T: Parse>(attr: &Attribute) -> Result<T> {
+    if let Meta::List(list) = &attr.meta
+        && !matches!(list.delimiter, MacroDelimiter::Paren(_))
+    {
+        return Err(Error::new(
+            list.delimiter.span().open(),
+            "expected parentheses",
+        ));
+    }
+    attr.parse_args()
 }
 
 pub(crate) enum StaticOrDynamic<S> {
@@ -228,16 +242,13 @@ impl From<TokenStream> for StringOrMarkup {
 }
 
 struct DiagnosticAttrs {
-    _paren_token: Paren,
     attrs: Punctuated<DiagnosticAttr, Token![,]>,
 }
 
 impl Parse for DiagnosticAttrs {
     fn parse(input: ParseStream) -> Result<Self> {
-        let content;
         Ok(Self {
-            _paren_token: syn::parenthesized!(content in input),
-            attrs: content.parse_terminated(DiagnosticAttr::parse)?,
+            attrs: input.parse_terminated(DiagnosticAttr::parse, Token![,])?,
         })
     }
 }
@@ -353,7 +364,7 @@ impl Parse for SplitMessageAttrs {
         let content;
         Ok(Self {
             _paren_token: syn::parenthesized!(content in input),
-            attrs: content.parse_terminated(SplitMessageAttr::parse)?,
+            attrs: content.parse_terminated(SplitMessageAttr::parse, Token![,])?,
         })
     }
 }
@@ -416,13 +427,12 @@ impl Parse for TagsAttr {
         let content;
         Ok(Self {
             _paren_token: syn::parenthesized!(content in input),
-            tags: content.parse_terminated(Ident::parse)?,
+            tags: content.parse_terminated(Ident::parse, Token![|])?,
         })
     }
 }
 
 struct LocationAttr {
-    _paren_token: Paren,
     field: LocationField,
 }
 
@@ -434,9 +444,7 @@ pub(crate) enum LocationField {
 
 impl Parse for LocationAttr {
     fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        let _paren_token = syn::parenthesized!(content in input);
-        let ident: Ident = content.parse()?;
+        let ident: Ident = input.parse()?;
 
         let field = if ident == "resource" {
             LocationField::Resource(ident)
@@ -448,10 +456,7 @@ impl Parse for LocationAttr {
             return Err(Error::new_spanned(ident, "unknown location field"));
         };
 
-        Ok(Self {
-            _paren_token,
-            field,
-        })
+        Ok(Self { field })
     }
 }
 

@@ -7,11 +7,7 @@ expression: content
 ## `/plugin.js`
 
 ```js
-import {
-	defineRule,
-	semantic,
-	registerDiagnostic,
-} from "@biomejs/runtime/plugin";
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
 function describe(scope) {
 	if (!scope) return null;
 	const names = [];
@@ -21,7 +17,7 @@ function describe(scope) {
 	return [scope.syntax().kind, names];
 }
 export const scopes = defineRule({
-	query: semantic("JS_MODULE"),
+	query: ast("JS_MODULE", { semantic: true }),
 	run(root, { model }) {
 		const scopes = model.scopes();
 		const global = model.globalScope();

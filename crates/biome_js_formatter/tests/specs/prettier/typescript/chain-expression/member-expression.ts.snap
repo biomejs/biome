@@ -89,8 +89,8 @@ _[a?.b!]
 -(a?.b)!.foo;
 +(a?.b!).foo;
  (a!?.b).foo;
- (a.b?.c)!.foo;
 -(a.b?.c)!.foo;
+ (a.b?.c)!.foo;
 +(a.b?.c!).foo;
  (a.b!?.c).foo;
  (a!.b?.c).foo;
@@ -109,11 +109,12 @@ _[a?.b!]
  (a!?.b).c.foo;
  a[b?.()]!.foo;
  a[b?.()]!.foo;
-@@ -26,38 +26,38 @@
+@@ -25,39 +25,39 @@
+ a![b?.()].foo;
  (a?.b).c!.foo;
  (a?.b).c!.foo;
- (a?.b)!.c.foo;
 -(a?.b)!.c.foo;
+ (a?.b)!.c.foo;
 +(a?.b!).c.foo;
  (a!?.b).c.foo;
  (a?.()).b!.foo;
@@ -132,8 +133,8 @@ _[a?.b!]
 -(a.b.c?.())!.foo;
 +(a.b.c?.()!).foo;
  (a.b.c!?.()).foo;
- (a.b?.c())!.foo;
 -(a.b?.c())!.foo;
+ (a.b?.c())!.foo;
 +(a.b?.c()!).foo;
  (a.b!?.c()).foo;
  (a?.b.c())!.foo;

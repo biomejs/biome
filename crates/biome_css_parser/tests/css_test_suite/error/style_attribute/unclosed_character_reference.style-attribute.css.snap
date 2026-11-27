@@ -1,0 +1,115 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+font-family: &quot;Rotis Sans;
+color: red
+
+```
+
+
+## AST
+
+```
+CssDeclarationSnippetRoot {
+    declarations: CssDeclarationList [
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssBogusProperty {
+                    items: [
+                        CssIdentifier {
+                            value_token: IDENT@0..11 "font-family" [] [],
+                        },
+                        COLON@11..13 ":" [] [Whitespace(" ")],
+                        CssBogus {
+                            items: [
+                                CssBogusPropertyValue {
+                                    items: [
+                                        ERROR_TOKEN@13..30 "&quot;Rotis Sans;" [] [],
+                                    ],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@30..36 "color" [Newline("\n")] [],
+                                },
+                                CssBogusPropertyValue {
+                                    items: [
+                                        COLON@36..38 ":" [] [Whitespace(" ")],
+                                        IDENT@38..41 "red" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_DECLARATION_SNIPPET_ROOT@0..42
+  0: CSS_DECLARATION_LIST@0..41
+    0: CSS_DECLARATION_WITH_SEMICOLON@0..41
+      0: CSS_DECLARATION@0..41
+        0: CSS_BOGUS_PROPERTY@0..41
+          0: CSS_IDENTIFIER@0..11
+            0: IDENT@0..11 "font-family" [] []
+          1: COLON@11..13 ":" [] [Whitespace(" ")]
+          2: CSS_BOGUS@13..41
+            0: CSS_BOGUS_PROPERTY_VALUE@13..30
+              0: ERROR_TOKEN@13..30 "&quot;Rotis Sans;" [] []
+            1: CSS_IDENTIFIER@30..36
+              0: IDENT@30..36 "color" [Newline("\n")] []
+            2: CSS_BOGUS_PROPERTY_VALUE@36..41
+              0: COLON@36..38 ":" [] [Whitespace(" ")]
+              1: IDENT@38..41 "red" [] []
+        1: (empty)
+      1: (empty)
+  1: EOF@41..42 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_character_reference.style-attribute.css:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ font-family: &quot;Rotis Sans;
+      │              ^^^^^^^^^^^^^^^^^
+    2 │ color: red
+    3 │ 
+  
+  i The closing quote must be on the same line.
+  
+unclosed_character_reference.style-attribute.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ font-family: &quot;Rotis Sans;
+  > 2 │ color: red
+      │      ^^^^^
+    3 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

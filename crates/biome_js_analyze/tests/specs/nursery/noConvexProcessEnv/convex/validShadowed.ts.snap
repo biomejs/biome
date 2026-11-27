@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validShadowed.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+const process = { env: { GIPHY_KEY: "value" } };
+
+const apiKey = process.env.GIPHY_KEY;
+
+```

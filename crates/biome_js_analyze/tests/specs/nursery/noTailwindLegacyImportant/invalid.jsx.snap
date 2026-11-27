@@ -1,0 +1,448 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className="!flex" />;
+<div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+<div className="!-m-4 ![color:red] !bg-(--brand)" />;
+<div className={'!grid'} />;
+<div className={active ? "!block" : "!hidden"} />;
+<div className={clsx("!flex", { "!underline": active })} />;
+<div className={`p-4 ${extra} !flex`} />;
+<div className={`!flex${suffix}`} />;
+<div className={"!flex" + suffix} />;
+<div className={prefix + "!flex"} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="!flex" />;
+      │                 ^^^^^
+    3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - <div·className="!flex"·/>;
+        2 │ + <div·className="flex!"·/>;
+     3  3 │   <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+  
+
+```
+
+```
+invalid.jsx:3:21 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class hover:!bg-red-500/50 puts the important modifier ! before the utility name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="!flex" />;
+  > 3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+      │                     ^^^^^^^^^^^^^^^^^^^^
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+    5 │ <div className={'!grid'} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use hover:bg-red-500/50! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="!flex" />;
+     3    │ - <div·className="p-4·hover:!bg-red-500/50·md:focus:!text-lg"·/>;
+        3 │ + <div·className="p-4·hover:bg-red-500/50!·md:focus:!text-lg"·/>;
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+     5  5 │   <div className={'!grid'} />;
+  
+
+```
+
+```
+invalid.jsx:3:42 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class md:focus:!text-lg puts the important modifier ! before the utility name.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className="!flex" />;
+  > 3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+      │                                          ^^^^^^^^^^^^^^^^^
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+    5 │ <div className={'!grid'} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use md:focus:text-lg! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     1  1 │   // should generate diagnostics
+     2  2 │   <div className="!flex" />;
+     3    │ - <div·className="p-4·hover:!bg-red-500/50·md:focus:!text-lg"·/>;
+        3 │ + <div·className="p-4·hover:!bg-red-500/50·md:focus:text-lg!"·/>;
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+     5  5 │   <div className={'!grid'} />;
+  
+
+```
+
+```
+invalid.jsx:4:17 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !-m-4 puts the important modifier ! before the utility name.
+  
+    2 │ <div className="!flex" />;
+    3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+  > 4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+      │                 ^^^^^
+    5 │ <div className={'!grid'} />;
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use -m-4! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     2  2 │   <div className="!flex" />;
+     3  3 │   <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+     4    │ - <div·className="!-m-4·![color:red]·!bg-(--brand)"·/>;
+        4 │ + <div·className="-m-4!·![color:red]·!bg-(--brand)"·/>;
+     5  5 │   <div className={'!grid'} />;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+  
+
+```
+
+```
+invalid.jsx:4:23 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class ![color:red] puts the important modifier ! before the utility name.
+  
+    2 │ <div className="!flex" />;
+    3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+  > 4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+      │                       ^^^^^^^^^^^^
+    5 │ <div className={'!grid'} />;
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use [color:red]! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     2  2 │   <div className="!flex" />;
+     3  3 │   <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+     4    │ - <div·className="!-m-4·![color:red]·!bg-(--brand)"·/>;
+        4 │ + <div·className="!-m-4·[color:red]!·!bg-(--brand)"·/>;
+     5  5 │   <div className={'!grid'} />;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+  
+
+```
+
+```
+invalid.jsx:4:36 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !bg-(--brand) puts the important modifier ! before the utility name.
+  
+    2 │ <div className="!flex" />;
+    3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+  > 4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+      │                                    ^^^^^^^^^^^^^
+    5 │ <div className={'!grid'} />;
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use bg-(--brand)! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     2  2 │   <div className="!flex" />;
+     3  3 │   <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+     4    │ - <div·className="!-m-4·![color:red]·!bg-(--brand)"·/>;
+        4 │ + <div·className="!-m-4·![color:red]·bg-(--brand)!"·/>;
+     5  5 │   <div className={'!grid'} />;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+  
+
+```
+
+```
+invalid.jsx:5:18 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !grid puts the important modifier ! before the utility name.
+  
+    3 │ <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+  > 5 │ <div className={'!grid'} />;
+      │                  ^^^^^
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+    7 │ <div className={clsx("!flex", { "!underline": active })} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use grid! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     3  3 │   <div className="p-4 hover:!bg-red-500/50 md:focus:!text-lg" />;
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+     5    │ - <div·className={'!grid'}·/>;
+        5 │ + <div·className={'grid!'}·/>;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+     7  7 │   <div className={clsx("!flex", { "!underline": active })} />;
+  
+
+```
+
+```
+invalid.jsx:6:27 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !block puts the important modifier ! before the utility name.
+  
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+    5 │ <div className={'!grid'} />;
+  > 6 │ <div className={active ? "!block" : "!hidden"} />;
+      │                           ^^^^^^
+    7 │ <div className={clsx("!flex", { "!underline": active })} />;
+    8 │ <div className={`p-4 ${extra} !flex`} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use block! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+     5  5 │   <div className={'!grid'} />;
+     6    │ - <div·className={active·?·"!block"·:·"!hidden"}·/>;
+        6 │ + <div·className={active·?·"block!"·:·"!hidden"}·/>;
+     7  7 │   <div className={clsx("!flex", { "!underline": active })} />;
+     8  8 │   <div className={`p-4 ${extra} !flex`} />;
+  
+
+```
+
+```
+invalid.jsx:6:38 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !hidden puts the important modifier ! before the utility name.
+  
+    4 │ <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+    5 │ <div className={'!grid'} />;
+  > 6 │ <div className={active ? "!block" : "!hidden"} />;
+      │                                      ^^^^^^^
+    7 │ <div className={clsx("!flex", { "!underline": active })} />;
+    8 │ <div className={`p-4 ${extra} !flex`} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use hidden! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     4  4 │   <div className="!-m-4 ![color:red] !bg-(--brand)" />;
+     5  5 │   <div className={'!grid'} />;
+     6    │ - <div·className={active·?·"!block"·:·"!hidden"}·/>;
+        6 │ + <div·className={active·?·"!block"·:·"hidden!"}·/>;
+     7  7 │   <div className={clsx("!flex", { "!underline": active })} />;
+     8  8 │   <div className={`p-4 ${extra} !flex`} />;
+  
+
+```
+
+```
+invalid.jsx:7:23 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+    5 │ <div className={'!grid'} />;
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+  > 7 │ <div className={clsx("!flex", { "!underline": active })} />;
+      │                       ^^^^^
+    8 │ <div className={`p-4 ${extra} !flex`} />;
+    9 │ <div className={`!flex${suffix}`} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     5  5 │   <div className={'!grid'} />;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+     7    │ - <div·className={clsx("!flex",·{·"!underline":·active·})}·/>;
+        7 │ + <div·className={clsx("flex!",·{·"!underline":·active·})}·/>;
+     8  8 │   <div className={`p-4 ${extra} !flex`} />;
+     9  9 │   <div className={`!flex${suffix}`} />;
+  
+
+```
+
+```
+invalid.jsx:7:34 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !underline puts the important modifier ! before the utility name.
+  
+    5 │ <div className={'!grid'} />;
+    6 │ <div className={active ? "!block" : "!hidden"} />;
+  > 7 │ <div className={clsx("!flex", { "!underline": active })} />;
+      │                                  ^^^^^^^^^^
+    8 │ <div className={`p-4 ${extra} !flex`} />;
+    9 │ <div className={`!flex${suffix}`} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use underline! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     5  5 │   <div className={'!grid'} />;
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+     7    │ - <div·className={clsx("!flex",·{·"!underline":·active·})}·/>;
+        7 │ + <div·className={clsx("!flex",·{·"underline!":·active·})}·/>;
+     8  8 │   <div className={`p-4 ${extra} !flex`} />;
+     9  9 │   <div className={`!flex${suffix}`} />;
+  
+
+```
+
+```
+invalid.jsx:8:31 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+     6 │ <div className={active ? "!block" : "!hidden"} />;
+     7 │ <div className={clsx("!flex", { "!underline": active })} />;
+   > 8 │ <div className={`p-4 ${extra} !flex`} />;
+       │                               ^^^^^
+     9 │ <div className={`!flex${suffix}`} />;
+    10 │ <div className={"!flex" + suffix} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     6  6 │   <div className={active ? "!block" : "!hidden"} />;
+     7  7 │   <div className={clsx("!flex", { "!underline": active })} />;
+     8    │ - <div·className={`p-4·${extra}·!flex`}·/>;
+        8 │ + <div·className={`p-4·${extra}·flex!`}·/>;
+     9  9 │   <div className={`!flex${suffix}`} />;
+    10 10 │   <div className={"!flex" + suffix} />;
+  
+
+```
+
+```
+invalid.jsx:9:18 lint/nursery/noTailwindLegacyImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+     7 │ <div className={clsx("!flex", { "!underline": active })} />;
+     8 │ <div className={`p-4 ${extra} !flex`} />;
+   > 9 │ <div className={`!flex${suffix}`} />;
+       │                  ^^^^^
+    10 │ <div className={"!flex" + suffix} />;
+    11 │ <div className={prefix + "!flex"} />;
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:18 lint/nursery/noTailwindLegacyImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+     8 │ <div className={`p-4 ${extra} !flex`} />;
+     9 │ <div className={`!flex${suffix}`} />;
+  > 10 │ <div className={"!flex" + suffix} />;
+       │                  ^^^^^
+    11 │ <div className={prefix + "!flex"} />;
+    12 │ 
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:27 lint/nursery/noTailwindLegacyImportant  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class !flex puts the important modifier ! before the utility name.
+  
+     9 │ <div className={`!flex${suffix}`} />;
+    10 │ <div className={"!flex" + suffix} />;
+  > 11 │ <div className={prefix + "!flex"} />;
+       │                           ^^^^^
+    12 │ 
+  
+  i Tailwind CSS v4 expects the ! at the end of the class name, and only accepts it before the utility name for backward compatibility.
+  
+  i Use flex! instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the ! to the end of the class name.
+  
+     9  9 │   <div className={`!flex${suffix}`} />;
+    10 10 │   <div className={"!flex" + suffix} />;
+    11    │ - <div·className={prefix·+·"!flex"}·/>;
+       11 │ + <div·className={prefix·+·"flex!"}·/>;
+    12 12 │   
+  
+
+```

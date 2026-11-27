@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+a[b.reduce]();
+a(b.reduce);
+a.reduce();
+a?.reduce();
+a.reduce?.();
+a.reduce(1, 2, 3);
+a.reduce(b, c, d);
+foo.reduce(...argumentsArray);
+new foo.reduce(fn);
+reduce(fn);
+foo["reduce"](fn);
+foo[reduce](fn);
+foo.notListed(fn);
+array.reducex(foo);
+array.xreduce(foo);
+array.reduce?.((str, item) => str += item, "");
+
+// The first argument is not a function.
+foo.reduce([]);
+foo.reduce([element]);
+foo.reduce(1 + fn);
+foo.reduce("length" in fn);
+foo.reduce(fn instanceof Function);
+foo.reduce(class ClassCantUseAsFunction {});
+foo.reduce(0);
+foo.reduce("string");
+foo.reduce(/regex/);
+foo.reduce(null);
+foo.reduce(0n);
+foo.reduce(true);
+foo.reduce({});
+foo.reduce(`templateLiteral`);
+foo.reduce(undefined);
+foo.reduce(-fn);
+foo.reduce(typeof fn);
+foo.reduce(void fn);
+foo.reduce(delete foo.fn);
+foo.reduce(++fn);
+foo.reduce(fn--);
+foo.reduce(a = fn);
+foo.reduce(fn());
+foo.reduce(new ClassReturnsFunction());
+foo.reduce(fn``);
+foo.reduce(this);
+async function f() {
+	foo.reduce(await fn);
+}
+
+// Borrowed methods that are not `reduce()` or `reduceRight()` of an array.
+[][reduce].call();
+[1, 2].reduce.call(() => {}, 34);
+new [].reduce.call(foo, fn);
+call(foo, fn);
+reduce.call(foo, fn);
+[].reduce["call"](foo, fn);
+[]["reduce"].call(foo, fn);
+[].reduce[call](foo, fn);
+[][reduce].call(foo, fn);
+[].reduce.notListed(foo, fn);
+[].notListed.call(foo, fn);
+[1].reduce.call(foo, fn);
+"".reduce.call(foo, fn);
+new Array.prototype.reduce.call(foo, fn);
+Array.prototype.reduce["call"](foo, fn);
+Array.prototype["reduce"].call(foo, fn);
+Array["prototype"].reduce.call(foo, fn);
+"Array".prototype.reduce.call(foo, fn);
+Array.prototype.reduce[call](foo, fn);
+Array.prototype[reduce].call(foo, fn);
+Array[prototype].reduce.call(foo, fn);
+Array.prototype.reduce.notListed(foo, fn);
+Array.prototype.notListed.call(foo, fn);
+Array.notListed.reduce.call(foo, fn);
+NotArray.prototype.reduce.call(foo, fn);
+[].reducex.call(array, foo);
+[].xreduce.call(array, foo);
+Array.prototype.reducex.call(array, foo);
+Array.prototype.xreduce.call(array, foo);
+Array.prototype.reduce.call(foo, 0);
+Array.prototype.reduce.call(foo, {});
+Array.prototype.reduce.call(foo, undefined);
+[].reduce?.call(foo, fn);
+[].reduce.call?.(foo, fn);
+Array.prototype?.reduce.call(foo, fn);
+
+// Simple operations
+array.reduce((total, item) => total + item);
+array.reduce((total, item) => { return total - item });
+array.reduce(function (total, item) { return total * item });
+array.reduce((total, item) => total + item, 0);
+array.reduce((total, item) => { return total - item }, 0);
+array.reduce(function (total, item) { return total * item }, 0);
+array.reduce((total, item) => {
+	return (total / item) * 100;
+}, 0);
+array.reduce((total, item) => (total + item), 0);
+array.reduceRight((total, item) => total + item);
+array.reduceRight(function (total, item) { return total * item }, 0);
+
+// The value is known not to be an array.
+const map = new Map();
+map.reduce(callback);
+const set = new Set();
+set.reduce(callback);
+array.reduce((object, key) => key in object);
+array.reduce(function (a, b) { return a instanceof b; });
+array.reduce((a, b) => a < b);
+array.reduce((a, b) => a | b);
+
+```

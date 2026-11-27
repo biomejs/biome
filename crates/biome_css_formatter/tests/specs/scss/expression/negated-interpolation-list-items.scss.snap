@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/negated-interpolation-list-items.scss
+---
+
+# Input
+
+```scss
+$s: 8px;
+
+.a {
+  margin: -#{$s} -#{$s} -#{$s} auto;
+  padding: 1px -#{$s};
+  width: $a - #{$s};
+  height: 1 -$s;
+  inset: -#{$s}
+    -#{$s};
+}
+
+```
+
+
+# Formatted
+
+```scss
+$s: 8px;
+
+.a {
+	margin: -#{$s} -#{$s} -#{$s} auto;
+	padding: 1px -#{$s};
+	width: $a - #{$s};
+	height: 1 - $s;
+	inset: -#{$s} -#{$s};
+}
+
+```

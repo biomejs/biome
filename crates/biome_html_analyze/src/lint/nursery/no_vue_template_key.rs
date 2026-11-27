@@ -49,7 +49,7 @@ declare_lint_rule! {
     ///
     /// - [Vue `key` attribute](https://vuejs.org/api/built-in-special-attributes.html#key)
     pub NoVueTemplateKey {
-        version: "next",
+        version: "2.6.5",
         name: "noVueTemplateKey",
         language: "html",
         recommended: true,

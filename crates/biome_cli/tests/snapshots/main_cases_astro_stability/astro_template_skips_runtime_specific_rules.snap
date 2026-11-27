@@ -1,0 +1,61 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint runtime-rules.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": { "enabled": true }
+  },
+  "linter": {
+    "domains": {
+      "next": "recommended",
+      "react": "recommended",
+      "reactNative": "recommended"
+    }
+  },
+  "formatter": { "enabled": false },
+  "assist": { "enabled": false }
+}
+```
+
+## `runtime-rules.astro`
+
+```astro
+---
+import Component from "./Component.astro";
+import Script from "next/script";
+const content = "child";
+const html = "<strong>safe</strong>";
+const image = "/hero.png";
+const items = ["a", "b"];
+---
+{true && <head><title>Astro</title></head>}
+{true && <img src={image} alt="Hero" />}
+{true && <Component children={content} />}
+{items.map((item, index) => <div key={index} ref="node">{item}</div>)}
+{[<span>one</span>, <span>two</span>]}
+{true && <svg:path />}
+{true && <div>raw text</div>}
+{true && <div dangerouslySetInnerHTML={{ __html: html }} />}
+{true && <div dangerouslySetInnerHTML={{ __html: html }}>fallback</div>}
+{true && <script src="https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries" />}
+{true && <Script src="https://polyfill.io/v3/polyfill.min.js?features=Array.from" />}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

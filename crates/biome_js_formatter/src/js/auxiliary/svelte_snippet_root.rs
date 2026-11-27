@@ -7,14 +7,19 @@ impl FormatNodeRule<JsSvelteSnippetRoot> for FormatJsSvelteSnippetRoot {
     fn fmt_fields(&self, node: &JsSvelteSnippetRoot, f: &mut JsFormatter) -> FormatResult<()> {
         let JsSvelteSnippetRootFields {
             name,
-            eof_token,
+            type_parameters,
             parameters,
+            eof_token,
         } = node.as_fields();
 
         write!(
             f,
             [
-                group(&format_args![name.format(), parameters.format()]),
+                group(&format_args![
+                    name.format(),
+                    type_parameters.format(),
+                    parameters.format()
+                ]),
                 eof_token.format()
             ]
         )

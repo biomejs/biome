@@ -23,7 +23,6 @@ info: svelte/debug.svelte
 
 {@debug foo}
 
-{@debug foo, bar}
-{@debug foo, bar, baz}
+{@debug foo, bar}{@debug foo, bar, baz}
 
 ```

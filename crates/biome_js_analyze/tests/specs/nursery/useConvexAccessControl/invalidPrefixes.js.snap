@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidPrefixes.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { query } from "./_generated/server";
+
+// The option replaces the default prefixes.
+export const defaultPrefix = query({
+	args: {},
+	handler: async (ctx) => {
+		await requireUser(ctx);
+	},
+});
+
+// A prefix must be followed by an uppercase letter or `_`.
+export const notAWord = query({
+	args: {},
+	handler: async (ctx) => {
+		await authorized(ctx);
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalidPrefixes.js:5:30 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex query doesn't call an access control function.
+  
+    4 │ // The option replaces the default prefixes.
+  > 5 │ export const defaultPrefix = query({
+      │                              ^^^^^
+    6 │ 	args: {},
+    7 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call one of your access control functions at the top level of the handler. If this function shouldn't be callable from outside, use internalQuery instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPrefixes.js:13:25 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex query doesn't call an access control function.
+  
+    12 │ // A prefix must be followed by an uppercase letter or `_`.
+  > 13 │ export const notAWord = query({
+       │                         ^^^^^
+    14 │ 	args: {},
+    15 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call one of your access control functions at the top level of the handler. If this function shouldn't be callable from outside, use internalQuery instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

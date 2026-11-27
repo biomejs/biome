@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidDefaultExpression.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo = 1;
+export { foo as default };
+export default foo;
+
+```
+
+# Diagnostics
+```
+invalidDefaultExpression.js:4:8 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × There is more than one default export.
+  
+    2 │ const foo = 1;
+    3 │ export { foo as default };
+  > 4 │ export default foo;
+      │        ^^^^^^^
+    5 │ 
+  
+  i The default export is first defined here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = 1;
+  > 3 │ export { foo as default };
+      │                 ^^^^^^^
+    4 │ export default foo;
+    5 │ 
+  
+  i Each exported name must be unique. JavaScript refuses to load a module that exports the same name twice, and TypeScript reports an error.
+  
+  i Remove one of the exports, or give one of them a different name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

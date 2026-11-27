@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const view = <div>{selected.union(new Set(other))}</div>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:141 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set copy isn't needed to use union().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const selected = new Set([1, 2]); const other = new Set([2, 3]); const records = new Map([[2, "value"]]); const view = <div>{selected.union(new Set(other))}</div>
+      │                                                                                                                                             ^^^^^^^^^^^^^^
+    3 │ 
+  
+  i The method reads a Set, or the keys of a Map, directly and doesn't change them. Creating another Set only takes extra time and memory.
+  
+  i Pass the original Set or Map to the method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unnecessary copy.
+  
+    2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·const·view·=·<div>{selected.union(new·Set(other))}</div>
+      │                                                                                                                                             --------     -        
+
+```

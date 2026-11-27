@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_overloaded.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export default function foo(value: string): string;
+export default function foo(value: unknown) {
+	return value;
+}
+
+```

@@ -12,8 +12,8 @@ biome check --reporter=junit --reporter-file=file.xml main.ts index.ts
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="24" failures="24" errors="16" time="<TIME>">
-    <testsuite name="index.ts" tests="12" disabled="0" errors="0" failures="12" package="org.biome">
+<testsuites name="Biome" tests="24" skipped="0" failures="24" errors="16" time="<TIME>">
+    <testsuite name="index.ts" tests="12" skipped="0" errors="0" failures="12" package="org.biome">
         <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
             <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
         </testcase>
@@ -51,7 +51,7 @@ biome check --reporter=junit --reporter-file=file.xml main.ts index.ts
             <failure message="Formatter would have printed the following content:">line 1, col 1, Formatter would have printed the following content:</failure>
         </testcase>
     </testsuite>
-    <testsuite name="main.ts" tests="12" disabled="0" errors="0" failures="12" package="org.biome">
+    <testsuite name="main.ts" tests="12" skipped="0" errors="0" failures="12" package="org.biome">
         <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
             <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
         </testcase>

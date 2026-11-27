@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/opaque-embeds.astro
+---
+
+# Input
+
+```astro
+---
+const title = "Opaque";
+---
+<div><span>before</span></div>
+
+<style lang="less">
+  .mixin(@color) { color: @color; }
+</style>
+
+<style type="text/less">
+@width: 10px;
+.card { width: @width; }
+</style>
+
+<script lang="coffee">
+  square = (value) -> value * value
+</script>
+
+<script type="text/x-template">
+  <section>{{ title }}</section>
+</script>
+
+<div><span>after</span></div>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const title = "Opaque";
+---
+
+<div><span>before</span></div>
+
+<style lang="less">
+  .mixin(@color) { color: @color; }
+</style>
+
+<style type="text/less">
+@width: 10px;
+.card { width: @width; }
+</style>
+
+<script lang="coffee">
+  square = (value) -> value * value
+</script>
+
+<script type="text/x-template">
+  <section>{{ title }}</section>
+</script>
+
+<div><span>after</span></div>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n  <section>{{ title }}</section>\n" => 306..340

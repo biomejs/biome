@@ -151,8 +151,21 @@ impl<L: Language> SyntaxToken<L> {
         self.raw.parent().map(SyntaxNode::from)
     }
 
+    /// Returns this token's ancestor nodes, starting with its parent.
     pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
+        self.parent_ancestors()
+    }
+
+    /// Returns this token's ancestor nodes, starting with its parent.
+    pub fn parent_ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.ancestors().map(SyntaxNode::from)
+    }
+
+    /// Returns the topmost node of the tree containing this token.
+    ///
+    /// Returns `None` if this token is detached.
+    pub fn tree_top(&self) -> Option<SyntaxNode<L>> {
+        self.raw.tree_top().map(SyntaxNode::from)
     }
 
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
@@ -171,13 +184,37 @@ impl<L: Language> SyntaxToken<L> {
             .map(SyntaxElement::from)
     }
 
-    /// Next token in the tree (i.e, not necessary a sibling).
+    /// Returns the next token in the tree, regardless of its parent.
     pub fn next_token(&self) -> Option<Self> {
         self.raw.next_token().map(Self::from)
     }
-    /// Previous token in the tree (i.e, not necessary a sibling).
+
+    /// Returns the previous token in the tree, regardless of its parent.
     pub fn prev_token(&self) -> Option<Self> {
         self.raw.prev_token().map(Self::from)
+    }
+
+    /// Returns the previous token's trailing trivia followed by this token's leading trivia.
+    pub fn trivia_before(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        self.prev_token()
+            .map(|token| token.trailing_trivia().pieces())
+            .into_iter()
+            .flatten()
+            .chain(self.leading_trivia().pieces())
+    }
+
+    /// Returns this token's trailing trivia followed by the next token's leading trivia.
+    pub fn trivia_after(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
+        let next = self
+            .next_token()
+            .map(|token| token.leading_trivia().pieces());
+        self.trailing_trivia()
+            .pieces()
+            .chain(next.into_iter().flatten())
     }
 
     /// Return a new version of this token detached from its parent node
@@ -185,6 +222,45 @@ impl<L: Language> SyntaxToken<L> {
     pub fn detach(self) -> Self {
         Self {
             raw: self.raw.detach(),
+            _p: PhantomData,
+        }
+    }
+
+    /// Returns a detached token with both its leading and trailing trivia replaced.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn with_trivia_pieces<Leading, Trailing>(
+        &self,
+        leading: Leading,
+        trailing: Trailing,
+    ) -> Self
+    where
+        Leading: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Leading::IntoIter: ExactSizeIterator,
+        Trailing: IntoIterator<Item = SyntaxTriviaPiece<L>>,
+        Trailing::IntoIter: ExactSizeIterator,
+    {
+        let mut token_text = String::new();
+        let leading = leading.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let leading = GreenTrivia::new(leading);
+
+        token_text.push_str(self.text_trimmed());
+
+        let trailing = trailing.into_iter().map(|piece| {
+            token_text.push_str(piece.text());
+            piece.into_raw_piece()
+        });
+        let trailing = GreenTrivia::new(trailing);
+
+        Self {
+            raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
+                self.kind().to_raw(),
+                &token_text,
+                leading,
+                trailing,
+            )),
             _p: PhantomData,
         }
     }
@@ -213,7 +289,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -243,7 +319,7 @@ impl<L: Language> SyntaxToken<L> {
                 self.kind().to_raw(),
                 &token_text,
                 leading,
-                self.green_token().trailing_trivia().clone(),
+                self.raw.green().trailing_trivia().clone(),
             )),
             _p: PhantomData,
         }
@@ -259,7 +335,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|(kind, text)| {
@@ -273,7 +349,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,
@@ -290,7 +366,7 @@ impl<L: Language> SyntaxToken<L> {
         let mut token_text = String::new();
 
         // copy over leading trivia and token text
-        let trailing_len = self.green_token().trailing_trivia().text_len();
+        let trailing_len = self.raw.green().trailing_trivia().text_len();
         token_text.push_str(&self.text()[..usize::from(self.text().text_len() - trailing_len)]);
 
         let trivia = trivia.into_iter().map(|piece| {
@@ -304,7 +380,7 @@ impl<L: Language> SyntaxToken<L> {
             raw: cursor::SyntaxToken::new_detached(GreenToken::with_trivia(
                 self.kind().to_raw(),
                 &token_text,
-                self.green_token().leading_trivia().clone(),
+                self.raw.green().leading_trivia().clone(),
                 trailing,
             )),
             _p: PhantomData,

@@ -1,0 +1,168 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+import a from "a"
+const b = 1
+export const c = b
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                phase_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@7..9 "a" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@9..14 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@14..17 "\"a\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@17..24 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@24..26 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@26..28 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@28..29 "1" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@29..37 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsVariableDeclarationClause {
+                declaration: JsVariableDeclaration {
+                    await_token: missing (optional),
+                    kind: CONST_KW@37..43 "const" [] [Whitespace(" ")],
+                    declarators: JsVariableDeclaratorList [
+                        JsVariableDeclarator {
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@43..45 "c" [] [Whitespace(" ")],
+                            },
+                            variable_annotation: missing (optional),
+                            initializer: JsInitializerClause {
+                                eq_token: EQ@45..47 "=" [] [Whitespace(" ")],
+                                expression: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@47..48 "b" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@48..49 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..49
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..48
+    0: JS_IMPORT@0..17
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@7..17
+        0: (empty)
+        1: (empty)
+        2: JS_DEFAULT_IMPORT_SPECIFIER@7..9
+          0: JS_IDENTIFIER_BINDING@7..9
+            0: IDENT@7..9 "a" [] [Whitespace(" ")]
+        3: FROM_KW@9..14 "from" [] [Whitespace(" ")]
+        4: JS_MODULE_SOURCE@14..17
+          0: JS_STRING_LITERAL@14..17 "\"a\"" [] []
+        5: (empty)
+      2: (empty)
+    1: JS_VARIABLE_STATEMENT@17..29
+      0: JS_VARIABLE_DECLARATION@17..29
+        0: (empty)
+        1: CONST_KW@17..24 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@24..29
+          0: JS_VARIABLE_DECLARATOR@24..29
+            0: JS_IDENTIFIER_BINDING@24..26
+              0: IDENT@24..26 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@26..29
+              0: EQ@26..28 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@28..29
+                0: JS_NUMBER_LITERAL@28..29 "1" [] []
+      1: (empty)
+    2: JS_EXPORT@29..48
+      0: JS_DECORATOR_LIST@29..29
+      1: EXPORT_KW@29..37 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATION_CLAUSE@37..48
+        0: JS_VARIABLE_DECLARATION@37..48
+          0: (empty)
+          1: CONST_KW@37..43 "const" [] [Whitespace(" ")]
+          2: JS_VARIABLE_DECLARATOR_LIST@43..48
+            0: JS_VARIABLE_DECLARATOR@43..48
+              0: JS_IDENTIFIER_BINDING@43..45
+                0: IDENT@43..45 "c" [] [Whitespace(" ")]
+              1: (empty)
+              2: JS_INITIALIZER_CLAUSE@45..48
+                0: EQ@45..47 "=" [] [Whitespace(" ")]
+                1: JS_IDENTIFIER_EXPRESSION@47..48
+                  0: JS_REFERENCE_IDENTIFIER@47..48
+                    0: IDENT@47..48 "b" [] []
+        1: (empty)
+  4: EOF@48..49 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+mdx_esm_statement.mdx_esm.jsx:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected statement in an MDX ESM block, only `import` and `export` statements are allowed.
+  
+    1 │ import a from "a"
+  > 2 │ const b = 1
+      │ ^^^^^^^^^^^
+    3 │ export const c = b
+    4 │ 
+  
+  i To compute a value, export it, as in `export const value = compute()`.
+  
+```

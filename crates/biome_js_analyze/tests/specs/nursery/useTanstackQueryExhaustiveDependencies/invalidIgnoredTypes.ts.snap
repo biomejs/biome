@@ -1,0 +1,106 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoredTypes.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+interface MyService {
+	baseUrl: string;
+}
+
+function useData(service: MyService) {
+	return useQuery({
+		queryKey: ["data"],
+		queryFn: () => service.baseUrl,
+	});
+}
+
+interface OtherService {
+	baseUrl: string;
+}
+
+function useShadowed() {
+	const svc: Svc = { baseUrl: "allowed" };
+	if (true) {
+		const svc: OtherService = { baseUrl: "other" };
+		return useQuery({
+			queryKey: ["thing"],
+			queryFn: () => svc.baseUrl,
+		});
+	}
+	return null;
+}
+
+```
+
+# Diagnostics
+```
+invalidIgnoredTypes.ts:10:3 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+     8 │ function useData(service: MyService) {
+     9 │ 	return useQuery({
+  > 10 │ 		queryKey: ["data"],
+       │ 		^^^^^^^^^^^^^^^^^^
+    11 │ 		queryFn: () => service.baseUrl,
+    12 │ 	});
+  
+  i The query function uses service.baseUrl here, but the query key doesn't include it.
+  
+     9 │ 	return useQuery({
+    10 │ 		queryKey: ["data"],
+  > 11 │ 		queryFn: () => service.baseUrl,
+       │ 		               ^^^^^^^^^^^^^^^
+    12 │ 	});
+    13 │ }
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    10 │ → → queryKey:·["data",·service.baseUrl],
+       │                      +++++++++++++++++  
+
+```
+
+```
+invalidIgnoredTypes.ts:24:4 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    22 │ 		const svc: OtherService = { baseUrl: "other" };
+    23 │ 		return useQuery({
+  > 24 │ 			queryKey: ["thing"],
+       │ 			^^^^^^^^^^^^^^^^^^^
+    25 │ 			queryFn: () => svc.baseUrl,
+    26 │ 		});
+  
+  i The query function uses svc.baseUrl here, but the query key doesn't include it.
+  
+    23 │ 		return useQuery({
+    24 │ 			queryKey: ["thing"],
+  > 25 │ 			queryFn: () => svc.baseUrl,
+       │ 			               ^^^^^^^^^^^
+    26 │ 		});
+    27 │ 	}
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    24 │ → → → queryKey:·["thing",·svc.baseUrl],
+       │                         +++++++++++++  
+
+```

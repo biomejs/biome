@@ -1,0 +1,195 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<script>console.log("ready");</script>
+<!foo>
+<div></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    items: HtmlRootItemList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@1..7 "script" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@7..8 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@8..29 "console.log(\"ready\");" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@29..30 "<" [] [],
+                slash_token: SLASH@30..31 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@31..37 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@37..38 ">" [] [],
+            },
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlBogus {
+                    items: [
+                        L_ANGLE@38..40 "<" [Newline("\n")] [],
+                        HtmlBogus {
+                            items: [
+                                HtmlBogusElement {
+                                    items: [
+                                        BANG@40..41 "!" [] [],
+                                        HTML_LITERAL@41..45 "foo>" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@45..47 "<" [Newline("\n")] [],
+                            name: HtmlTagName {
+                                value_token: DIV_KW@47..50 "div" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@50..51 ">" [] [],
+                        },
+                        children: HtmlElementList [],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@51..52 "<" [] [],
+                            slash_token: SLASH@52..53 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: DIV_KW@53..56 "div" [] [],
+                            },
+                            r_angle_token: R_ANGLE@56..57 ">" [] [],
+                        },
+                    },
+                ],
+            ],
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..58
+  0: (empty)
+  1: (empty)
+  2: HTML_ROOT_ITEM_LIST@0..57
+    0: HTML_ELEMENT@0..38
+      0: HTML_OPENING_ELEMENT@0..8
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..7
+          0: SCRIPT_KW@1..7 "script" [] []
+        2: HTML_ATTRIBUTE_LIST@7..7
+        3: R_ANGLE@7..8 ">" [] []
+      1: HTML_ELEMENT_LIST@8..29
+        0: HTML_EMBEDDED_CONTENT@8..29
+          0: HTML_LITERAL@8..29 "console.log(\"ready\");" [] []
+      2: HTML_CLOSING_ELEMENT@29..38
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_TAG_NAME@31..37
+          0: SCRIPT_KW@31..37 "script" [] []
+        3: R_ANGLE@37..38 ">" [] []
+    1: HTML_BOGUS_ELEMENT@38..57
+      0: HTML_BOGUS@38..45
+        0: L_ANGLE@38..40 "<" [Newline("\n")] []
+        1: HTML_BOGUS@40..45
+          0: HTML_BOGUS_ELEMENT@40..45
+            0: BANG@40..41 "!" [] []
+            1: HTML_LITERAL@41..45 "foo>" [] []
+      1: HTML_ELEMENT_LIST@45..57
+        0: HTML_ELEMENT@45..57
+          0: HTML_OPENING_ELEMENT@45..51
+            0: L_ANGLE@45..47 "<" [Newline("\n")] []
+            1: HTML_TAG_NAME@47..50
+              0: DIV_KW@47..50 "div" [] []
+            2: HTML_ATTRIBUTE_LIST@50..50
+            3: R_ANGLE@50..51 ">" [] []
+          1: HTML_ELEMENT_LIST@51..51
+          2: HTML_CLOSING_ELEMENT@51..57
+            0: L_ANGLE@51..52 "<" [] []
+            1: SLASH@52..53 "/" [] []
+            2: HTML_TAG_NAME@53..56
+              0: DIV_KW@53..56 "div" [] []
+            3: R_ANGLE@56..57 ">" [] []
+  3: EOF@57..58 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+declaration_after_script.astro:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    1 │ <script>console.log("ready");</script>
+  > 2 │ <!foo>
+      │  ^
+    3 │ <div></div>
+    4 │ 
+  
+  i Expected an element name here.
+  
+    1 │ <script>console.log("ready");</script>
+  > 2 │ <!foo>
+      │  ^
+    3 │ <div></div>
+    4 │ 
+  
+declaration_after_script.astro:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    1 │ <script>console.log("ready");</script>
+    2 │ <!foo>
+  > 3 │ <div></div>
+      │ ^
+    4 │ 
+  
+  i Expected an attribute here.
+  
+    1 │ <script>console.log("ready");</script>
+    2 │ <!foo>
+  > 3 │ <div></div>
+      │ ^
+    4 │ 
+  
+declaration_after_script.astro:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    2 │ <!foo>
+    3 │ <div></div>
+  > 4 │ 
+      │ 
+  
+  i Expected a closing tag here.
+  
+    2 │ <!foo>
+    3 │ <div></div>
+  > 4 │ 
+      │ 
+  
+```

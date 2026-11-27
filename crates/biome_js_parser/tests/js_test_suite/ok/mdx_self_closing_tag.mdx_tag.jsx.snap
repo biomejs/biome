@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+<Chart data={[1, 2]} icon={<Icon />} />
+```
+
+
+## AST
+
+```
+JsxSingleTagRoot {
+    tag: JsxSelfClosingElement {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        name: JsxReferenceIdentifier {
+            value_token: JSX_IDENT@1..7 "Chart" [] [Whitespace(" ")],
+        },
+        type_arguments: missing (optional),
+        attributes: JsxAttributeList [
+            JsxAttribute {
+                name: JsxName {
+                    value_token: JSX_IDENT@7..11 "data" [] [],
+                },
+                initializer: JsxAttributeInitializerClause {
+                    eq_token: EQ@11..12 "=" [] [],
+                    value: JsxExpressionAttributeValue {
+                        l_curly_token: L_CURLY@12..13 "{" [] [],
+                        expression: JsArrayExpression {
+                            l_brack_token: L_BRACK@13..14 "[" [] [],
+                            elements: JsArrayElementList [
+                                JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@14..15 "1" [] [],
+                                },
+                                COMMA@15..17 "," [] [Whitespace(" ")],
+                                JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@17..18 "2" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACK@18..19 "]" [] [],
+                        },
+                        r_curly_token: R_CURLY@19..21 "}" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            JsxAttribute {
+                name: JsxName {
+                    value_token: JSX_IDENT@21..25 "icon" [] [],
+                },
+                initializer: JsxAttributeInitializerClause {
+                    eq_token: EQ@25..26 "=" [] [],
+                    value: JsxExpressionAttributeValue {
+                        l_curly_token: L_CURLY@26..27 "{" [] [],
+                        expression: JsxTagExpression {
+                            tag: JsxSelfClosingElement {
+                                l_angle_token: L_ANGLE@27..28 "<" [] [],
+                                name: JsxReferenceIdentifier {
+                                    value_token: JSX_IDENT@28..33 "Icon" [] [Whitespace(" ")],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                slash_token: SLASH@33..34 "/" [] [],
+                                r_angle_token: R_ANGLE@34..35 ">" [] [],
+                            },
+                        },
+                        r_curly_token: R_CURLY@35..37 "}" [] [Whitespace(" ")],
+                    },
+                },
+            },
+        ],
+        slash_token: SLASH@37..38 "/" [] [],
+        r_angle_token: R_ANGLE@38..39 ">" [] [],
+    },
+    eof_token: EOF@39..39 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSX_SINGLE_TAG_ROOT@0..39
+  0: JSX_SELF_CLOSING_ELEMENT@0..39
+    0: L_ANGLE@0..1 "<" [] []
+    1: JSX_REFERENCE_IDENTIFIER@1..7
+      0: JSX_IDENT@1..7 "Chart" [] [Whitespace(" ")]
+    2: (empty)
+    3: JSX_ATTRIBUTE_LIST@7..37
+      0: JSX_ATTRIBUTE@7..21
+        0: JSX_NAME@7..11
+          0: JSX_IDENT@7..11 "data" [] []
+        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@11..21
+          0: EQ@11..12 "=" [] []
+          1: JSX_EXPRESSION_ATTRIBUTE_VALUE@12..21
+            0: L_CURLY@12..13 "{" [] []
+            1: JS_ARRAY_EXPRESSION@13..19
+              0: L_BRACK@13..14 "[" [] []
+              1: JS_ARRAY_ELEMENT_LIST@14..18
+                0: JS_NUMBER_LITERAL_EXPRESSION@14..15
+                  0: JS_NUMBER_LITERAL@14..15 "1" [] []
+                1: COMMA@15..17 "," [] [Whitespace(" ")]
+                2: JS_NUMBER_LITERAL_EXPRESSION@17..18
+                  0: JS_NUMBER_LITERAL@17..18 "2" [] []
+              2: R_BRACK@18..19 "]" [] []
+            2: R_CURLY@19..21 "}" [] [Whitespace(" ")]
+      1: JSX_ATTRIBUTE@21..37
+        0: JSX_NAME@21..25
+          0: JSX_IDENT@21..25 "icon" [] []
+        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@25..37
+          0: EQ@25..26 "=" [] []
+          1: JSX_EXPRESSION_ATTRIBUTE_VALUE@26..37
+            0: L_CURLY@26..27 "{" [] []
+            1: JSX_TAG_EXPRESSION@27..35
+              0: JSX_SELF_CLOSING_ELEMENT@27..35
+                0: L_ANGLE@27..28 "<" [] []
+                1: JSX_REFERENCE_IDENTIFIER@28..33
+                  0: JSX_IDENT@28..33 "Icon" [] [Whitespace(" ")]
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@33..33
+                4: SLASH@33..34 "/" [] []
+                5: R_ANGLE@34..35 ">" [] []
+            2: R_CURLY@35..37 "}" [] [Whitespace(" ")]
+    4: SLASH@37..38 "/" [] []
+    5: R_ANGLE@38..39 ">" [] []
+  1: EOF@39..39 "" [] []
+
+```

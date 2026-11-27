@@ -240,6 +240,17 @@ impl DelimitedInline {
     }
 }
 
+impl ProseAtom {
+    const fn is_mdx_construct(&self) -> bool {
+        matches!(
+            self,
+            Self::InlineElement(
+                AnyMdInline::MdxInlineExpression(_) | AnyMdInline::MdxJsxInlineTag(_)
+            )
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 enum WordGroupEscape {
     /// Print the word group normally.
@@ -424,6 +435,12 @@ impl WordGroup {
         self.atoms.push(atom);
     }
 
+    /// Returns whether the group holds only inline MDX expressions and tags,
+    /// as `{count}` or `<A />` do.
+    pub(crate) fn is_mdx_construct_only(&self) -> bool {
+        self.atoms.iter().all(ProseAtom::is_mdx_construct)
+    }
+
     fn is_empty(&self) -> bool {
         self.atoms.is_empty()
     }
@@ -432,18 +449,8 @@ impl WordGroup {
         let Some(ProseAtom::Word(word)) = self.atoms.first() else {
             return false;
         };
-        let text = word.text.text();
 
-        if text.starts_with('>')
-            || matches!(text, "*" | "+" | "-")
-            || matches!(text, "#" | "##" | "###" | "####" | "#####" | "######")
-        {
-            return true;
-        }
-
-        text.strip_suffix(['.', ')']).is_some_and(|number| {
-            !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
-        })
+        is_block_marker_word(word.text.text())
     }
 
     fn first_significant_character(&self) -> Option<char> {
@@ -500,6 +507,21 @@ impl WordGroup {
             || is_cjk_punctuation(before)
             || is_cjk_punctuation(after)
     }
+}
+
+/// Whether `word` would start a blockquote, a list item, or a heading at the
+/// start of a line.
+pub(crate) fn is_block_marker_word(word: &str) -> bool {
+    if word.starts_with('>')
+        || matches!(word, "*" | "+" | "-")
+        || matches!(word, "#" | "##" | "###" | "####" | "#####" | "######")
+    {
+        return true;
+    }
+
+    word.strip_suffix(['.', ')']).is_some_and(|number| {
+        !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
+    })
 }
 
 /// An item in a flattened prose list.
@@ -803,7 +825,9 @@ impl ProseItemCollector {
                 | AnyMdInline::MdInlineHtml(_)
                 | AnyMdInline::MdEntityReference(_)
                 | AnyMdInline::GfmStrikethrough(_)
-                | AnyMdInline::GfmTaskListItem(_) => {
+                | AnyMdInline::GfmTaskListItem(_)
+                | AnyMdInline::MdxInlineExpression(_)
+                | AnyMdInline::MdxJsxInlineTag(_) => {
                     self.current_word_group.push(ProseAtom::InlineElement(item));
                 }
 

@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.mdx
+```
+
+## `file.mdx`
+
+```mdx
+import { Chart } from "./chart.js";
+export const meta = { title: "Hello" };
+
+# Hello, {props.name}
+
+<Note type="tip">
+
+Some _text_ with a <Badge color="green">badge</Badge>.
+
+</Note>
+
+<Chart data={[1, 2, 3]} title="x" />
+
+{1 + 1}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

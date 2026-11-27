@@ -4,15 +4,67 @@ pub mod model;
 pub mod specificity;
 
 use biome_css_syntax::AnyCssRoot;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text, TextRange};
 use builder::SemanticModelBuilder;
 use model::SemanticModel;
 
 use crate::events::SemanticEventExtractor;
 
+/// A custom-property declaration supplied by an embedding host.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SyntheticCustomProperty {
+    name: Text,
+    host_range: Option<TextRange>,
+}
+
+impl SyntheticCustomProperty {
+    /// Creates a host-provided custom property from its name without the
+    /// leading `--`: the name `theme` declares `--theme`.
+    pub fn new(name: Text) -> Self {
+        Self {
+            name,
+            host_range: None,
+        }
+    }
+
+    /// Associates the declaration with its range in the embedding document.
+    pub fn with_host_range(mut self, range: TextRange) -> Self {
+        self.host_range = Some(range);
+        self
+    }
+
+    /// Returns the custom-property name without the leading `--`.
+    pub fn name(&self) -> &Text {
+        &self.name
+    }
+
+    /// Returns the declaration range in the embedding document, if available.
+    pub fn host_range(&self) -> Option<TextRange> {
+        self.host_range
+    }
+}
+
+/// Additional behavior selected for CSS semantic construction.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct SemanticModelOptions {
+    /// Custom properties supplied by the embedding host.
+    pub synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    /// Whether the host may supply additional custom properties.
+    pub custom_properties_open: bool,
+}
+
 pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
+    semantic_model_with_options(root, SemanticModelOptions::default())
+}
+
+/// Builds a CSS semantic model with the supplied options.
+pub fn semantic_model_with_options(
+    root: &AnyCssRoot,
+    options: SemanticModelOptions,
+) -> SemanticModel {
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
+    builder.set_options(options);
 
     let root = root.syntax();
     for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {
@@ -62,7 +114,7 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
-        assert_eq!(rule.child_ids.len(), 0);
+        assert_eq!(rule.child_ids().len(), 0);
         assert_eq!(rule.parent_id, None);
     }
 
@@ -106,14 +158,14 @@ mod tests {
         let rule = rules.first().unwrap();
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
 
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -136,13 +188,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -165,13 +217,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 0);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -517,6 +569,42 @@ or>";
                 .map(|declaration| declaration.name().text().to_string())
                 .collect::<Vec<_>>(),
             ["--inline"]
+        );
+    }
+
+    #[test]
+    fn test_root_declarations_in_styled_snippet() {
+        let source =
+            "color: red; --size: 1px; &:hover { color: blue; } @font-face { font-family: x; }";
+        let parse = parse_css(
+            source,
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
+            CssParserOptions::default(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        let names = |declarations: Vec<super::model::CssModelDeclaration>| {
+            declarations
+                .iter()
+                .map(|declaration| declaration.name().text().to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            names(model.root_declarations().collect()),
+            ["color", "--size"]
+        );
+
+        let top_level = TextRange::at(TextSize::from(0), TextSize::from(10));
+        assert_eq!(
+            names(model.get_declarations_by_range(top_level)),
+            ["color", "--size"]
+        );
+
+        let hover_start = source.find("color: blue").unwrap() as u32;
+        let hover = TextRange::at(TextSize::from(hover_start), TextSize::from(11));
+        assert_eq!(names(model.get_declarations_by_range(hover)), ["color"]);
+        assert_eq!(
+            names(model.get_ancestor_declarations_by_range(hover).collect()),
+            ["color", "color", "--size"]
         );
     }
 

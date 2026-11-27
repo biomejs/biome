@@ -8,11 +8,10 @@ import type A from "" with { type: "json" };
 import type * as B from "" with { type: "json" };
 import type { C } from "" with { type: "json" };
 import { type D } from "" with { type: "json" };
-import { E, type F } from "" with { type: "json" };
 
 export type { A } from "" with { type: "json" };
 export type * as B from "" with { type: "json" };
-export { E, type F } from "" with { type: "json" };
+export { type F } from "" with { type: "json" };
 ```
 
 # Diagnostics
@@ -68,7 +67,7 @@ invalid.ts:3:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━
   > 3 │ import type { C } from "" with { type: "json" };
       │                           ^^^^^^^^^^^^^^^^^^^^^
     4 │ import { type D } from "" with { type: "json" };
-    5 │ import { E, type F } from "" with { type: "json" };
+    5 │ 
   
   i The type-only import is defined here.
   
@@ -77,7 +76,7 @@ invalid.ts:3:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━
   > 3 │ import type { C } from "" with { type: "json" };
       │        ^^^^
     4 │ import { type D } from "" with { type: "json" };
-    5 │ import { E, type F } from "" with { type: "json" };
+    5 │ 
   
 
 ```
@@ -91,8 +90,8 @@ invalid.ts:4:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━
     3 │ import type { C } from "" with { type: "json" };
   > 4 │ import { type D } from "" with { type: "json" };
       │                           ^^^^^^^^^^^^^^^^^^^^^
-    5 │ import { E, type F } from "" with { type: "json" };
-    6 │ 
+    5 │ 
+    6 │ export type { A } from "" with { type: "json" };
   
   i The type-only import is defined here.
   
@@ -100,96 +99,72 @@ invalid.ts:4:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━
     3 │ import type { C } from "" with { type: "json" };
   > 4 │ import { type D } from "" with { type: "json" };
       │          ^^^^
-    5 │ import { E, type F } from "" with { type: "json" };
-    6 │ 
+    5 │ 
+    6 │ export type { A } from "" with { type: "json" };
   
 
 ```
 
 ```
-invalid.ts:5:30 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Import attributes cannot be used with a type-only import.
-  
-    3 │ import type { C } from "" with { type: "json" };
-    4 │ import { type D } from "" with { type: "json" };
-  > 5 │ import { E, type F } from "" with { type: "json" };
-      │                              ^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ export type { A } from "" with { type: "json" };
-  
-  i The type-only import is defined here.
-  
-    3 │ import type { C } from "" with { type: "json" };
-    4 │ import { type D } from "" with { type: "json" };
-  > 5 │ import { E, type F } from "" with { type: "json" };
-      │             ^^^^
-    6 │ 
-    7 │ export type { A } from "" with { type: "json" };
-  
-
-```
-
-```
-invalid.ts:7:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Import attributes cannot be used with a type-only export.
   
-    5 │ import { E, type F } from "" with { type: "json" };
-    6 │ 
-  > 7 │ export type { A } from "" with { type: "json" };
+    4 │ import { type D } from "" with { type: "json" };
+    5 │ 
+  > 6 │ export type { A } from "" with { type: "json" };
       │                           ^^^^^^^^^^^^^^^^^^^^^
-    8 │ export type * as B from "" with { type: "json" };
-    9 │ export { E, type F } from "" with { type: "json" };
+    7 │ export type * as B from "" with { type: "json" };
+    8 │ export { type F } from "" with { type: "json" };
   
   i The type-only export is defined here.
   
-    5 │ import { E, type F } from "" with { type: "json" };
-    6 │ 
-  > 7 │ export type { A } from "" with { type: "json" };
+    4 │ import { type D } from "" with { type: "json" };
+    5 │ 
+  > 6 │ export type { A } from "" with { type: "json" };
       │        ^^^^
-    8 │ export type * as B from "" with { type: "json" };
-    9 │ export { E, type F } from "" with { type: "json" };
+    7 │ export type * as B from "" with { type: "json" };
+    8 │ export { type F } from "" with { type: "json" };
   
 
 ```
 
 ```
-invalid.ts:8:28 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:28 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Import attributes cannot be used with a type-only export.
   
-    7 │ export type { A } from "" with { type: "json" };
-  > 8 │ export type * as B from "" with { type: "json" };
+    6 │ export type { A } from "" with { type: "json" };
+  > 7 │ export type * as B from "" with { type: "json" };
       │                            ^^^^^^^^^^^^^^^^^^^^^
-    9 │ export { E, type F } from "" with { type: "json" };
+    8 │ export { type F } from "" with { type: "json" };
   
   i The type-only export is defined here.
   
-    7 │ export type { A } from "" with { type: "json" };
-  > 8 │ export type * as B from "" with { type: "json" };
+    6 │ export type { A } from "" with { type: "json" };
+  > 7 │ export type * as B from "" with { type: "json" };
       │        ^^^^
-    9 │ export { E, type F } from "" with { type: "json" };
+    8 │ export { type F } from "" with { type: "json" };
   
 
 ```
 
 ```
-invalid.ts:9:30 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:8:27 syntax/correctness/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Import attributes cannot be used with a type-only export.
   
-    7 │ export type { A } from "" with { type: "json" };
-    8 │ export type * as B from "" with { type: "json" };
-  > 9 │ export { E, type F } from "" with { type: "json" };
-      │                              ^^^^^^^^^^^^^^^^^^^^^
+    6 │ export type { A } from "" with { type: "json" };
+    7 │ export type * as B from "" with { type: "json" };
+  > 8 │ export { type F } from "" with { type: "json" };
+      │                           ^^^^^^^^^^^^^^^^^^^^^
   
   i The type-only export is defined here.
   
-    7 │ export type { A } from "" with { type: "json" };
-    8 │ export type * as B from "" with { type: "json" };
-  > 9 │ export { E, type F } from "" with { type: "json" };
-      │             ^^^^
+    6 │ export type { A } from "" with { type: "json" };
+    7 │ export type * as B from "" with { type: "json" };
+  > 8 │ export { type F } from "" with { type: "json" };
+      │          ^^^^
   
 
 ```

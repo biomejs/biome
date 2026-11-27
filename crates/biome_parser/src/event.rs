@@ -64,6 +64,11 @@ pub fn process<K: SyntaxKind + PartialEq>(
                     continue;
                 }
 
+                if forward_parent.is_none() {
+                    sink.start_node(*kind);
+                    continue;
+                }
+
                 // For events[A, B, C], B is A's forward_parent, C is B's forward_parent,
                 // in the normal control flow, the parent-child relation: `A -> B -> C`,
                 // while with the magic forward_parent, it writes: `C <- B <- A`.
@@ -91,14 +96,93 @@ pub fn process<K: SyntaxKind + PartialEq>(
                     // append `B`'s forward_parent `C` in the next stage.
                 }
 
-                for kind in forward_parents.drain(..).rev() {
-                    sink.start_node(kind);
+                for kind in forward_parents.iter().rev() {
+                    sink.start_node(*kind);
                 }
+                forward_parents.clear();
             }
             Event::Finish => sink.finish_node(),
             Event::Token { kind, end } => {
                 sink.token(*kind, *end);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Event, process};
+    use crate::diagnostic::ParseDiagnostic;
+    use crate::tree_sink::TreeSink;
+    use biome_rowan::TextSize;
+    use biome_rowan::raw_language::RawLanguageKind::{self, *};
+    use std::num::NonZeroU32;
+
+    #[derive(Default)]
+    struct RecordingSink(Vec<String>);
+
+    impl TreeSink for RecordingSink {
+        type Kind = RawLanguageKind;
+
+        fn token(&mut self, kind: RawLanguageKind, end: TextSize) {
+            self.0.push(format!("token {kind:?} {end:?}"));
+        }
+
+        fn start_node(&mut self, kind: RawLanguageKind) {
+            self.0.push(format!("start {kind:?}"));
+        }
+
+        fn finish_node(&mut self) {
+            self.0.push("finish".to_string());
+        }
+
+        fn errors(&mut self, _errors: Vec<ParseDiagnostic>) {}
+    }
+
+    fn start(kind: RawLanguageKind, forward_parent: u32) -> Event<RawLanguageKind> {
+        Event::Start {
+            kind,
+            forward_parent: NonZeroU32::new(forward_parent),
+        }
+    }
+
+    fn token(kind: RawLanguageKind, end: u32) -> Event<RawLanguageKind> {
+        Event::Token {
+            kind,
+            end: TextSize::from(end),
+        }
+    }
+
+    #[test]
+    fn starts_forward_parents_before_the_node_that_points_to_them() {
+        let events = vec![
+            start(ROOT, 0),
+            // Preceded twice: by an abandoned marker, which was then preceded by a list.
+            start(LITERAL_EXPRESSION, 3),
+            token(STRING_TOKEN, 1),
+            Event::Finish,
+            start(TOMBSTONE, 1),
+            start(SEPARATED_EXPRESSION_LIST, 0),
+            token(COMMA_TOKEN, 2),
+            Event::Finish,
+            Event::Finish,
+        ];
+
+        let mut sink = RecordingSink::default();
+        process(&mut sink, events, Vec::new());
+
+        assert_eq!(
+            sink.0,
+            [
+                "start ROOT",
+                "start SEPARATED_EXPRESSION_LIST",
+                "start LITERAL_EXPRESSION",
+                "token STRING_TOKEN 1",
+                "finish",
+                "token COMMA_TOKEN 2",
+                "finish",
+                "finish",
+            ]
+        );
     }
 }

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validShadowed.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { define } from "custom-elements";
+const require = createRequire();
+define(["a"], function (a) {});
+require(["a"], function (a) {});
+
+```

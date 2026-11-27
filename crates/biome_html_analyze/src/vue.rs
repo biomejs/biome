@@ -8,12 +8,8 @@ use biome_parser::{TokenSet, token_set};
 ///
 /// Names such as `<MyComponent>`, `<my-element>`, and `<component>` are not native.
 pub(crate) fn is_native_element_name(name: &AnyHtmlTagName) -> bool {
-    match name.tag_name_kind() {
-        Some(kind) if !COMPONENT_TAG_NAMES.contains(kind) => true,
-        _ => name
-            .token_text_trimmed()
-            .is_some_and(|name| MATHML_ELEMENTS.binary_search(&name.text()).is_ok()),
-    }
+    name.tag_name_kind()
+        .is_some_and(|kind| !COMPONENT_TAG_NAMES.contains(kind))
 }
 
 /// Tag names that Vue renders as components even though the lexer gives them a plain tag name.
@@ -21,56 +17,6 @@ const COMPONENT_TAG_NAMES: TokenSet<HtmlSyntaxKind> = token_set!(
     HtmlSyntaxKind::COMPONENT_KW,
     HtmlSyntaxKind::HTML_UNKNOWN_TAG
 );
-
-/// MathML element names that Vue renders as native elements. They have no tag-name keyword,
-/// so they lex as `HTML_UNKNOWN_TAG` (or as a component name, for `annotation-xml`).
-const MATHML_ELEMENTS: &[&str] = &[
-    "annotation",
-    "annotation-xml",
-    "maction",
-    "maligngroup",
-    "malignmark",
-    "math",
-    "menclose",
-    "merror",
-    "mfenced",
-    "mfrac",
-    "mfraction",
-    "mglyph",
-    "mi",
-    "mlabeledtr",
-    "mlongdiv",
-    "mmultiscripts",
-    "mn",
-    "mo",
-    "mover",
-    "mpadded",
-    "mphantom",
-    "mprescripts",
-    "mroot",
-    "mrow",
-    "ms",
-    "mscarries",
-    "mscarry",
-    "msgroup",
-    "msline",
-    "mspace",
-    "msqrt",
-    "msrow",
-    "mstack",
-    "mstyle",
-    "msub",
-    "msubsup",
-    "msup",
-    "mtable",
-    "mtd",
-    "mtext",
-    "mtr",
-    "munder",
-    "munderover",
-    "none",
-    "semantics",
-];
 
 /// Returns `true` if Vue renders `element` as a component instead of a native element.
 ///
@@ -96,21 +42,4 @@ fn has_vue_is_attribute(element: &AnyHtmlTagElement) -> bool {
                 .as_static_value()
         })
         .is_some_and(|value| value.text().starts_with("vue:"))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::MATHML_ELEMENTS;
-
-    #[test]
-    fn mathml_elements_are_sorted() {
-        for pair in MATHML_ELEMENTS.windows(2) {
-            assert!(
-                pair[0] < pair[1],
-                "`{}` should come after `{}`",
-                pair[0],
-                pair[1]
-            );
-        }
-    }
 }

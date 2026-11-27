@@ -1,0 +1,309 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { writable, readable, derived } from "svelte/store";
+import { writable as createWritable } from "svelte/store";
+import * as store from "svelte/store";
+
+export const w = writable();
+export const r = readable();
+export const d = derived([a, b], () => {});
+
+// Too few arguments for `derived()`
+const d2 = derived(a);
+const d3 = derived();
+
+// Aliased and namespace imports
+const aliased = createWritable();
+const ns1 = store.writable();
+const ns2 = store.readable();
+const ns3 = store.derived(a, ($a) => $a * 2);
+
+const parenthesized = (writable)();
+const optionalCall = writable?.();
+
+const multiline = derived(
+	[a, b],
+	([$a, $b], set) => {
+		set($a + $b);
+	},
+);
+
+function createStore() {
+	return writable();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:6:18 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    4 │ import * as store from "svelte/store";
+    5 │ 
+  > 6 │ export const w = writable();
+      │                  ^^^^^^^^
+    7 │ export const r = readable();
+    8 │ export const d = derived([a, b], () => {});
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:18 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This readable() store is created without an initial value.
+  
+    6 │ export const w = writable();
+  > 7 │ export const r = readable();
+      │                  ^^^^^^^^
+    8 │ export const d = derived([a, b], () => {});
+    9 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+     6 │ export const w = writable();
+     7 │ export const r = readable();
+   > 8 │ export const d = derived([a, b], () => {});
+       │                  ^^^^^^^
+     9 │ 
+    10 │ // Too few arguments for `derived()`
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:12 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    10 │ // Too few arguments for `derived()`
+  > 11 │ const d2 = derived(a);
+       │            ^^^^^^^
+    12 │ const d3 = derived();
+    13 │ 
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    10 │ // Too few arguments for `derived()`
+    11 │ const d2 = derived(a);
+  > 12 │ const d3 = derived();
+       │            ^^^^^^^
+    13 │ 
+    14 │ // Aliased and namespace imports
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:17 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    14 │ // Aliased and namespace imports
+  > 15 │ const aliased = createWritable();
+       │                 ^^^^^^^^^^^^^^
+    16 │ const ns1 = store.writable();
+    17 │ const ns2 = store.readable();
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:13 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    14 │ // Aliased and namespace imports
+    15 │ const aliased = createWritable();
+  > 16 │ const ns1 = store.writable();
+       │             ^^^^^^^^^^^^^^
+    17 │ const ns2 = store.readable();
+    18 │ const ns3 = store.derived(a, ($a) => $a * 2);
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:13 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This readable() store is created without an initial value.
+  
+    15 │ const aliased = createWritable();
+    16 │ const ns1 = store.writable();
+  > 17 │ const ns2 = store.readable();
+       │             ^^^^^^^^^^^^^^
+    18 │ const ns3 = store.derived(a, ($a) => $a * 2);
+    19 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:13 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    16 │ const ns1 = store.writable();
+    17 │ const ns2 = store.readable();
+  > 18 │ const ns3 = store.derived(a, ($a) => $a * 2);
+       │             ^^^^^^^^^^^^^
+    19 │ 
+    20 │ const parenthesized = (writable)();
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:24 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    18 │ const ns3 = store.derived(a, ($a) => $a * 2);
+    19 │ 
+  > 20 │ const parenthesized = (writable)();
+       │                        ^^^^^^^^
+    21 │ const optionalCall = writable?.();
+    22 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:22 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    20 │ const parenthesized = (writable)();
+  > 21 │ const optionalCall = writable?.();
+       │                      ^^^^^^^^
+    22 │ 
+    23 │ const multiline = derived(
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:19 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    21 │ const optionalCall = writable?.();
+    22 │ 
+  > 23 │ const multiline = derived(
+       │                   ^^^^^^^
+    24 │ 	[a, b],
+    25 │ 	([$a, $b], set) => {
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:9 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    30 │ function createStore() {
+  > 31 │ 	return writable();
+       │ 	       ^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

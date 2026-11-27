@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function empty() {}
+function rest(...args) { return args.reduce((prev, cur) => prev + cur, 0); }
+function otherProperty() { arguments.foo; }
+function notCalled() { arguments.map; }
+function dynamicMember(method) { arguments[method](); }
+function stringNotCalled() { arguments["map"]; }
+function templateNotCalled() { arguments[`map`]; }
+function otherObject() { arg["map"](() => {}); }
+function nestedArguments() { foo.arguments.map(() => {}); }
+function templateWithSubstitution() { arguments[`map${""}`](() => {}); }
+function templateWithOnlySubstitution() { arguments[`${"map"}`](() => {}); }
+function objectMethods() { arguments.toLocaleString(); arguments.toString(); }
+function converted() { Array.prototype.slice.call(arguments); Array.from(arguments).map(() => {}); }
+function asComputedKey() { object[arguments](); object[(arguments)](); }
+function optionalCall() { arguments.map?.(() => {}); }
+function argumentOfCall() { foo(arguments.map); }
+function lengthAndIndex() { return arguments.length + arguments[0]; }
+
+```

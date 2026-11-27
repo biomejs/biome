@@ -1,0 +1,259 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function union(a: Set<string>, b: ReadonlySet<string>) {
+	return new Set([...a, ...b]);
+}
+
+function intersection(a: Set<string>, b: Set<string>) {
+	return [...a].filter((value: string) => b.has(value));
+}
+
+function difference(a: Set<string>, b: Set<string>) {
+	return new Set([...a].filter((value) => !b.has(value)) as string[]);
+}
+
+function subset(a: Set<string>, b: Set<string> | ReadonlySet<string>) {
+	return [...a].every((value) => b.has(value));
+}
+
+function asserted(a: unknown, b: unknown) {
+	return [...(a as Set<string>)].some((value) => (b as Set<string>).has(value));
+}
+
+function sizes(a: Set<number>, b: Set<number>) {
+	const disjoint = a.intersection(b).size === 0;
+	const overlaps = a.intersection(b).size !== 0;
+	return disjoint || overlaps;
+}
+
+function nonNull(a: Set<string>, b: Set<string>) {
+	return [...a].some((value) => b.has(value))!;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function union(a: Set<string>, b: ReadonlySet<string>) {
+  > 3 │ 	return new Set([...a, ...b]);
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use union() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   function union(a: Set<string>, b: ReadonlySet<string>) {
+     3    │ - → return·new·Set([...a,·...b]);
+        3 │ + → return·a.union(b);
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.ts:7:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to keep the ones that another Set has.
+  
+    6 │ function intersection(a: Set<string>, b: Set<string>) {
+  > 7 │ 	return [...a].filter((value: string) => b.has(value));
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Use the intersection() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i Unlike filter(), this method returns a Set instead of an array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use intersection() instead.
+  
+     5  5 │   
+     6  6 │   function intersection(a: Set<string>, b: Set<string>) {
+     7    │ - → return·[...a].filter((value:·string)·=>·b.has(value));
+        7 │ + → return·a.intersection(b);
+     8  8 │   }
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:11:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code filters the values of a Set to remove the ones that another Set has.
+  
+    10 │ function difference(a: Set<string>, b: Set<string>) {
+  > 11 │ 	return new Set([...a].filter((value) => !b.has(value)) as string[]);
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Use the difference() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use difference() instead.
+  
+     9  9 │   
+    10 10 │   function difference(a: Set<string>, b: Set<string>) {
+    11    │ - → return·new·Set([...a].filter((value)·=>·!b.has(value))·as·string[]);
+       11 │ + → return·a.difference(b);
+    12 12 │   }
+    13 13 │   
+  
+
+```
+
+```
+invalid.ts:15:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    14 │ function subset(a: Set<string>, b: Set<string> | ReadonlySet<string>) {
+  > 15 │ 	return [...a].every((value) => b.has(value));
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    13 13 │   
+    14 14 │   function subset(a: Set<string>, b: Set<string> | ReadonlySet<string>) {
+    15    │ - → return·[...a].every((value)·=>·b.has(value));
+       15 │ + → return·a.isSubsetOf(b);
+    16 16 │   }
+    17 17 │   
+  
+
+```
+
+```
+invalid.ts:19:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    18 │ function asserted(a: unknown, b: unknown) {
+  > 19 │ 	return [...(a as Set<string>)].some((value) => (b as Set<string>).has(value));
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    17 17 │   
+    18 18 │   function asserted(a: unknown, b: unknown) {
+    19    │ - → return·[...(a·as·Set<string>)].some((value)·=>·(b·as·Set<string>).has(value));
+       19 │ + → return·!(a·as·Set<string>).isDisjointFrom((b·as·Set<string>));
+    20 20 │   }
+    21 21 │   
+  
+
+```
+
+```
+invalid.ts:23:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have no values in common.
+  
+    22 │ function sizes(a: Set<number>, b: Set<number>) {
+  > 23 │ 	const disjoint = a.intersection(b).size === 0;
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 	const overlaps = a.intersection(b).size !== 0;
+    25 │ 	return disjoint || overlaps;
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    21 21 │   
+    22 22 │   function sizes(a: Set<number>, b: Set<number>) {
+    23    │ - → const·disjoint·=·a.intersection(b).size·===·0;
+       23 │ + → const·disjoint·=·a.isDisjointFrom(b);
+    24 24 │     const overlaps = a.intersection(b).size !== 0;
+    25 25 │     return disjoint || overlaps;
+  
+
+```
+
+```
+invalid.ts:24:19 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    22 │ function sizes(a: Set<number>, b: Set<number>) {
+    23 │ 	const disjoint = a.intersection(b).size === 0;
+  > 24 │ 	const overlaps = a.intersection(b).size !== 0;
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 	return disjoint || overlaps;
+    26 │ }
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    22 22 │   function sizes(a: Set<number>, b: Set<number>) {
+    23 23 │     const disjoint = a.intersection(b).size === 0;
+    24    │ - → const·overlaps·=·a.intersection(b).size·!==·0;
+       24 │ + → const·overlaps·=·!a.isDisjointFrom(b);
+    25 25 │     return disjoint || overlaps;
+    26 26 │   }
+  
+
+```
+
+```
+invalid.ts:29:9 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether two Sets have a value in common.
+  
+    28 │ function nonNull(a: Set<string>, b: Set<string>) {
+  > 29 │ 	return [...a].some((value) => b.has(value))!;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i Use the isDisjointFrom() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isDisjointFrom() instead.
+  
+    27 27 │   
+    28 28 │   function nonNull(a: Set<string>, b: Set<string>) {
+    29    │ - → return·[...a].some((value)·=>·b.has(value))!;
+       29 │ + → return·(!a.isDisjointFrom(b))!;
+    30 30 │   }
+    31 31 │   
+  
+
+```

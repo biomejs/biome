@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint MyDoc.mdx
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useFilenamingConvention": "error"
+      }
+    }
+  }
+}
+```
+
+## `MyDoc.mdx`
+
+```mdx
+# {title}
+
+export const MyDoc = 1
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

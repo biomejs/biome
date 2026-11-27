@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoSemicolons.ts
+---
+# Input
+```ts
+// should generate diagnostics
+declare const arr: number[]
+declare function getValue(): unknown
+
+// No fix is offered, because the statement would continue the previous line.
+getValue()
+delete (arr)[0]
+getValue()
+delete (arr as number[])[0]
+
+// The fix is offered, because the previous statement ends here.
+{
+	delete (arr)[0]
+}
+
+```
+
+# Diagnostics
+```
+invalidNoSemicolons.ts:7:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    5 │ // No fix is offered, because the statement would continue the previous line.
+    6 │ getValue()
+  > 7 │ delete (arr)[0]
+      │ ^^^^^^^^^^^^^^^
+    8 │ getValue()
+    9 │ delete (arr as number[])[0]
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoSemicolons.ts:9:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+     7 │ delete (arr)[0]
+     8 │ getValue()
+   > 9 │ delete (arr as number[])[0]
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // The fix is offered, because the previous statement ends here.
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoSemicolons.ts:13:2 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    11 │ // The fix is offered, because the previous statement ends here.
+    12 │ {
+  > 13 │ 	delete (arr)[0]
+       │ 	^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    11 11 │   // The fix is offered, because the previous statement ends here.
+    12 12 │   {
+    13    │ - → delete·(arr)[0]
+       13 │ + → (arr).splice(0,·1)
+    14 14 │   }
+    15 15 │   
+  
+
+```

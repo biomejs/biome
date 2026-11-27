@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+for (const item of items) {
+	if (item.isActive) {
+		process(item);
+		save(item);
+		log(item);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/useEarlyContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement wraps the rest of the loop body.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (const item of items) {
+  > 3 │ 	if (item.isActive) {
+      │ 	^^^^^^^^^^^^^^^^^^
+    4 │ 		process(item);
+    5 │ 		save(item);
+  
+  i The main code of the loop is nested one level deeper than it needs to be, which makes it harder to follow.
+  
+  i Skip the iteration early with continue when the condition isn't met, then write the rest of the code after it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an early continue instead.
+  
+    1  1 │   /* should generate diagnostics */
+    2  2 │   for (const item of items) {
+    3    │ - → if·(item.isActive)·{
+    4    │ - → → process(item);
+       3 │ + → if·(!item.isActive)·{
+       4 │ + → → continue;
+       5 │ + → }
+       6 │ + → → process(item);
+    5  7 │       save(item);
+    6  8 │       log(item);
+    7    │ - → }
+    8  9 │   }
+    9 10 │   
+  
+
+```

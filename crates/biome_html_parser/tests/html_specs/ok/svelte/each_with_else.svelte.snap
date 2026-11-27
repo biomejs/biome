@@ -21,9 +21,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteEachBlock {
             opening_block: SvelteEachOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -31,13 +29,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@16..20 "item" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@16..20 "item" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@20..21 "}" [] [],
             },
@@ -117,21 +113,17 @@ HtmlRoot {
 0: HTML_ROOT@0..86
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..85
+  2: HTML_ROOT_ITEM_LIST@0..85
     0: SVELTE_EACH_BLOCK@0..85
       0: SVELTE_EACH_OPENING_BLOCK@0..21
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@13..20
+        3: SVELTE_EACH_BINDING_CLAUSE@13..20
           0: AS_KW@13..16 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@16..20
-            0: IDENT@16..20 "item" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@16..20
+            0: HTML_LITERAL@16..20 "item" [] []
         4: R_CURLY@20..21 "}" [] []
       1: HTML_ELEMENT_LIST@21..41
         0: HTML_ELEMENT@21..41
@@ -178,6 +170,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@77..80 "{/" [Newline("\n")] []
         1: EACH_KW@80..84 "each" [] []
         2: R_CURLY@84..85 "}" [] []
-  5: EOF@85..86 "" [Newline("\n")] []
+  3: EOF@85..86 "" [Newline("\n")] []
 
 ```

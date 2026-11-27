@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-object.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+defineProps({
+  greeting_text: String,
+  'greeting-text': {
+    type: String,
+    required: true,
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props-object.vue:4:3 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ defineProps({
+  > 4 │   greeting_text: String,
+      │   ^^^^^^^^^^^^^
+    5 │   'greeting-text': {
+    6 │     type: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-props-object.vue:5:3 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting-text isn't in camelCase.
+  
+    3 │ defineProps({
+    4 │   greeting_text: String,
+  > 5 │   'greeting-text': {
+      │   ^^^^^^^^^^^^^^^
+    6 │     type: String,
+    7 │     required: true,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDeprecatedModelDefinition {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedModelDefinition",
         language: "js",
         recommended: true,

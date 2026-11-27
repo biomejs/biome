@@ -1,0 +1,131 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+	...foo,
+	data() {
+		return {
+			promise: Promise.resolve(),
+		};
+	},
+	methods: {
+		async load() {
+			await fetchData();
+			setTimeout(() => {}, 0);
+			return Promise.all([]);
+		},
+	},
+	watch: {
+		async userId() {
+			await this.load();
+		},
+	},
+	computed: {
+		...mapGetters({
+			test: "getTest",
+		}),
+		empty: function () {
+			return;
+		},
+		tryCatchFinally: function () {
+			let bar = 0;
+			try {
+				bar = bar / 0;
+			} catch (e) {
+				return e;
+			} finally {
+				return bar;
+			}
+		},
+		setterOnly: {
+			set() {
+				new Promise((resolve, reject) => {});
+			},
+		},
+		asyncSetter: {
+			get() {
+				return 1;
+			},
+			async set(value) {
+				await save(value);
+			},
+		},
+		spreadGetters: {
+			...mapGetters({ get: "getBaz" }),
+			...mapActions({ set: "setBaz" }),
+		},
+		returnsObjectWithAsyncMethod() {
+			return {
+				async bar() {
+					const data = await baz(this.a);
+					return data;
+				},
+			};
+		},
+		returnsArrayWithAsyncArrow() {
+			const a = "test";
+			return [
+				async () => {
+					const baz = await bar(a);
+					return baz;
+				},
+				"b",
+				{},
+			];
+		},
+		returnsNestedFunction() {
+			return function () {
+				return async () => await bar();
+			};
+		},
+		newPromiseMember() {
+			return new Promise.resolve();
+		},
+		asyncArrowArgument() {
+			return new Bar(async () => await baz());
+		},
+		asyncMethodArgument() {
+			return someFunc.doSomething({
+				async bar() {
+					return await baz();
+				},
+			});
+		},
+		conditionalObject() {
+			return this.bar
+				? {
+						baz: () => Promise.resolve(1),
+					}
+				: {};
+		},
+		conditionalArrow() {
+			return this.bar ? () => Promise.resolve(1) : null;
+		},
+		conditionalAsyncArrow() {
+			return this.bar ? async () => 1 : null;
+		},
+		classInside() {
+			return class {
+				async load() {
+					await fetchData();
+				}
+			};
+		},
+		timersWithoutArguments() {
+			setTimeout();
+			return 1;
+		},
+		otherMethods() {
+			return this.items.map((item) => item.name).filter(Boolean);
+		},
+		promiseNonAsyncMember() {
+			return Promise.name;
+		},
+		promiseOtherMethod() {
+			return Promise.prototype;
+		},
+		otherNextTick() {
+			return this.nextTick(() => {});
+		},
+	},
+};
+</script>

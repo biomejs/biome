@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// - [Comparison of composables with mixins](https://vuejs.org/guide/reusability/composables.html#vs-mixins)
     ///
     pub NoVueMixin {
-        version: "next",
+        version: "2.6.5",
         name: "noVueMixin",
         language: "js",
         recommended: true,

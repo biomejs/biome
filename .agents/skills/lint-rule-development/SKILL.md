@@ -88,7 +88,7 @@ Use existing rules with the same mutation shape as API examples.
 
 Add options only for a real semantic mode or established conflicting preference. Do not add speculative flexibility.
 
-Use the rule's generated or existing file under `crates/biome_rule_options/src/` as the source of truth. Follow the analyzer guide sections **Rule Options**, **Merge**, and **Documenting Options** for current derives, merge behavior, configuration examples, and rustdoc requirements.
+Use the rule's generated or existing file under `crates/biome_rule_options/src/` as the source of truth. A rule without options declares its options as an alias of `crate::EmptyRuleOptions`; replace the alias with a struct of the same name when adding options. Follow the analyzer guide sections **Rule Options**, **Merge**, and **Documenting Options** for current derives, merge behavior, configuration examples, and rustdoc requirements.
 
 Check these integration points:
 
@@ -111,6 +111,8 @@ Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user websi
 - Mark examples according to the current rules-check syntax.
 - For every option, state the default, show configuration, and show an applied example.
 - Do not use `ignore` merely to avoid validation.
+- Do not treat rule documentation as a comprehensive implementation specification. Explaining every functional detail is not a priority.
+- Most rules only warrant a paragraph or 2 for documentation.
 
 Inspect neighboring rule documentation and the analyzer guide before writing examples.
 

@@ -1257,6 +1257,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::TypeofExpression(_),
                 _,
             )
@@ -1271,6 +1272,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MappedType(_)
+                | InferredTypeData::Extends(_)
                 | InferredTypeData::TypeofExpression(_),
             )
             | (
@@ -2122,7 +2124,7 @@ impl<'db> ResolvedParameter<'db> {
 struct ResolvedParameters<'db>(Vec<ResolvedParameter<'db>>);
 
 impl<'db> ResolvedParameters<'db> {
-    /// Returns parameters for a constructor or function signature.
+    /// Returns parameters for a constructor signature.
     fn from_constructor_signature(
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
@@ -2131,7 +2133,6 @@ impl<'db> ResolvedParameters<'db> {
             InferredTypeData::Constructor(constructor) => {
                 Some(Self::from_constructor(db, constructor))
             }
-            InferredTypeData::Function(function) => Some(Self::from_function(db, function)),
             _ => None,
         }
     }

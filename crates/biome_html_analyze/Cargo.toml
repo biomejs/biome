@@ -57,13 +57,10 @@ biome_db          = { path = "../biome_db" }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion         = { workspace = true }
 insta             = { workspace = true, features = ["glob"] }
 salsa             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
-
-[build-dependencies]
-filetime = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

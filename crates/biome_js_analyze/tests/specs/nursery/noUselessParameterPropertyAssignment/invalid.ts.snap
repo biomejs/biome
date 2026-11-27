@@ -1,0 +1,875 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+class Basic {
+	constructor(public foo: string) {
+		this.foo = foo;
+	}
+}
+
+class NonNull {
+	constructor(public foo?: string) {
+		this.foo = foo!;
+	}
+}
+
+class AsExpression {
+	constructor(public foo?: string) {
+		this.foo = foo as any;
+	}
+}
+
+class TypeAssertion {
+	constructor(public foo: string) {
+		this.foo = <string>foo;
+	}
+}
+
+class Satisfies {
+	constructor(public foo: string) {
+		this.foo = (foo satisfies string);
+	}
+}
+
+class DefaultValue {
+	constructor(public foo = "") {
+		this.foo = foo;
+	}
+}
+
+class ChangedAfter {
+	constructor(public foo = "") {
+		this.foo = foo;
+		this.foo += "foo";
+	}
+}
+
+class LogicalOr {
+	constructor(public foo: string) {
+		this.foo ||= foo;
+	}
+}
+
+class Nullish {
+	constructor(public foo: string) {
+		this.foo ??= foo;
+	}
+}
+
+class LogicalAnd {
+	constructor(public foo: string) {
+		this.foo &&= foo;
+	}
+}
+
+class StringKey {
+	constructor(private foo: string) {
+		this["foo"] = foo;
+	}
+}
+
+class TemplateKey {
+	constructor(private foo: string) {
+		this[`foo`] = foo;
+	}
+}
+
+class OtherModifiers {
+	constructor(protected readonly foo: string) {
+		this.foo = foo;
+	}
+}
+
+class NestedFunctionBefore {
+	constructor(private foo: string) {
+		function bar() {
+			this.foo = foo;
+		}
+		this.foo = foo;
+	}
+}
+
+class NestedArrowBefore {
+	constructor(private foo: string) {
+		this.bar = () => {
+			this.foo = foo;
+		};
+		this.foo = foo;
+	}
+}
+
+class NestedClassBefore {
+	constructor(private foo: string) {
+		class Bar {
+			constructor(private baz: string) {}
+		}
+		this.foo = foo;
+	}
+}
+
+class FieldWritesInFunction {
+	constructor(private foo: string) {
+		this.foo = foo;
+	}
+	bar = () => {
+		this.foo = "foo";
+	};
+}
+
+class StaticFieldWrite {
+	constructor(private foo: string) {
+		this.foo = foo;
+	}
+	static init = (this.foo = "foo");
+}
+
+class Block {
+	constructor(private foo: string) {
+		{
+			this.foo = foo;
+		}
+	}
+}
+
+class Conditional {
+	constructor(private foo: string, flag: boolean) {
+		if (flag) {
+			this.foo = foo;
+		}
+	}
+}
+
+class ArrowIife {
+	constructor(private foo: string) {
+		(() => {
+			this.foo = foo;
+		})();
+	}
+}
+
+class ParameterChangedAfter {
+	constructor(public name: string) {
+		this.name = name;
+		name = name.trim();
+	}
+}
+
+class OtherParameterChanged {
+	constructor(
+		public name: string,
+		public age: number,
+	) {
+		name = name.trim();
+		this.name = name;
+		this.age = age;
+	}
+}
+
+class LocalVariableChanged {
+	constructor(public name: string) {
+		let local = name;
+		local = local.trim();
+		this.name = name;
+	}
+}
+
+// Both assignments are reported.
+class Repeated {
+	constructor(public foo: string) {
+		this.foo = foo;
+		this.foo = foo;
+	}
+}
+
+class InLoop {
+	constructor(public foo: string, items: string[]) {
+		for (const item of items) {
+			this.foo = foo;
+		}
+	}
+}
+
+class ParameterChangedInLaterLoop {
+	constructor(public foo: string) {
+		this.foo = foo;
+		for (let i = 0; i < 2; i++) {
+			foo = foo.trim();
+		}
+	}
+}
+
+class OtherPropertyDeleted {
+	constructor(public foo?: number, public bar?: number) {
+		delete this.bar;
+		this.foo = foo;
+	}
+}
+
+// Both assignments are reported.
+class BothBranches {
+	constructor(public foo: string, flag: boolean) {
+		if (flag) {
+			this.foo = foo;
+		} else {
+			this.foo = foo;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    2 │ class Basic {
+    3 │ 	constructor(public foo: string) {
+  > 4 │ 		this.foo = foo;
+      │ 		^^^^^^^^^^^^^^
+    5 │ 	}
+    6 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+     8 │ class NonNull {
+     9 │ 	constructor(public foo?: string) {
+  > 10 │ 		this.foo = foo!;
+       │ 		^^^^^^^^^^^^^^^
+    11 │ 	}
+    12 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    14 │ class AsExpression {
+    15 │ 	constructor(public foo?: string) {
+  > 16 │ 		this.foo = foo as any;
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	}
+    18 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    20 │ class TypeAssertion {
+    21 │ 	constructor(public foo: string) {
+  > 22 │ 		this.foo = <string>foo;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 	}
+    24 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    26 │ class Satisfies {
+    27 │ 	constructor(public foo: string) {
+  > 28 │ 		this.foo = (foo satisfies string);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 	}
+    30 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:34:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    32 │ class DefaultValue {
+    33 │ 	constructor(public foo = "") {
+  > 34 │ 		this.foo = foo;
+       │ 		^^^^^^^^^^^^^^
+    35 │ 	}
+    36 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    38 │ class ChangedAfter {
+    39 │ 	constructor(public foo = "") {
+  > 40 │ 		this.foo = foo;
+       │ 		^^^^^^^^^^^^^^
+    41 │ 		this.foo += "foo";
+    42 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:47:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    45 │ class LogicalOr {
+    46 │ 	constructor(public foo: string) {
+  > 47 │ 		this.foo ||= foo;
+       │ 		^^^^^^^^^^^^^^^^
+    48 │ 	}
+    49 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:53:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    51 │ class Nullish {
+    52 │ 	constructor(public foo: string) {
+  > 53 │ 		this.foo ??= foo;
+       │ 		^^^^^^^^^^^^^^^^
+    54 │ 	}
+    55 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:59:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    57 │ class LogicalAnd {
+    58 │ 	constructor(public foo: string) {
+  > 59 │ 		this.foo &&= foo;
+       │ 		^^^^^^^^^^^^^^^^
+    60 │ 	}
+    61 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:65:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    63 │ class StringKey {
+    64 │ 	constructor(private foo: string) {
+  > 65 │ 		this["foo"] = foo;
+       │ 		^^^^^^^^^^^^^^^^^
+    66 │ 	}
+    67 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:71:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    69 │ class TemplateKey {
+    70 │ 	constructor(private foo: string) {
+  > 71 │ 		this[`foo`] = foo;
+       │ 		^^^^^^^^^^^^^^^^^
+    72 │ 	}
+    73 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:77:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    75 │ class OtherModifiers {
+    76 │ 	constructor(protected readonly foo: string) {
+  > 77 │ 		this.foo = foo;
+       │ 		^^^^^^^^^^^^^^
+    78 │ 	}
+    79 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:86:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    84 │ 			this.foo = foo;
+    85 │ 		}
+  > 86 │ 		this.foo = foo;
+       │ 		^^^^^^^^^^^^^^
+    87 │ 	}
+    88 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:95:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    93 │ 			this.foo = foo;
+    94 │ 		};
+  > 95 │ 		this.foo = foo;
+       │ 		^^^^^^^^^^^^^^
+    96 │ 	}
+    97 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:104:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    102 │ 			constructor(private baz: string) {}
+    103 │ 		}
+  > 104 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    105 │ 	}
+    106 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:110:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    108 │ class FieldWritesInFunction {
+    109 │ 	constructor(private foo: string) {
+  > 110 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    111 │ 	}
+    112 │ 	bar = () => {
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:119:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    117 │ class StaticFieldWrite {
+    118 │ 	constructor(private foo: string) {
+  > 119 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    120 │ 	}
+    121 │ 	static init = (this.foo = "foo");
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:127:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    125 │ 	constructor(private foo: string) {
+    126 │ 		{
+  > 127 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    128 │ 		}
+    129 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:135:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    133 │ 	constructor(private foo: string, flag: boolean) {
+    134 │ 		if (flag) {
+  > 135 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    136 │ 		}
+    137 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:143:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    141 │ 	constructor(private foo: string) {
+    142 │ 		(() => {
+  > 143 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    144 │ 		})();
+    145 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:150:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    148 │ class ParameterChangedAfter {
+    149 │ 	constructor(public name: string) {
+  > 150 │ 		this.name = name;
+        │ 		^^^^^^^^^^^^^^^^
+    151 │ 		name = name.trim();
+    152 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:162:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    160 │ 		name = name.trim();
+    161 │ 		this.name = name;
+  > 162 │ 		this.age = age;
+        │ 		^^^^^^^^^^^^^^
+    163 │ 	}
+    164 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:170:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    168 │ 		let local = name;
+    169 │ 		local = local.trim();
+  > 170 │ 		this.name = name;
+        │ 		^^^^^^^^^^^^^^^^
+    171 │ 	}
+    172 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:177:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    175 │ class Repeated {
+    176 │ 	constructor(public foo: string) {
+  > 177 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    178 │ 		this.foo = foo;
+    179 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:178:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    176 │ 	constructor(public foo: string) {
+    177 │ 		this.foo = foo;
+  > 178 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    179 │ 	}
+    180 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:185:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    183 │ 	constructor(public foo: string, items: string[]) {
+    184 │ 		for (const item of items) {
+  > 185 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    186 │ 		}
+    187 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:192:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    190 │ class ParameterChangedInLaterLoop {
+    191 │ 	constructor(public foo: string) {
+  > 192 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    193 │ 		for (let i = 0; i < 2; i++) {
+    194 │ 			foo = foo.trim();
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:202:3 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    200 │ 	constructor(public foo?: number, public bar?: number) {
+    201 │ 		delete this.bar;
+  > 202 │ 		this.foo = foo;
+        │ 		^^^^^^^^^^^^^^
+    203 │ 	}
+    204 │ }
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:210:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    208 │ 	constructor(public foo: string, flag: boolean) {
+    209 │ 		if (flag) {
+  > 210 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    211 │ 		} else {
+    212 │ 			this.foo = foo;
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:212:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    210 │ 			this.foo = foo;
+    211 │ 		} else {
+  > 212 │ 			this.foo = foo;
+        │ 			^^^^^^^^^^^^^^
+    213 │ 		}
+    214 │ 	}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

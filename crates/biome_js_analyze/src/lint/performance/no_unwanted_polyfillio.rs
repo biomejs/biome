@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unwanted_polyfillio::NoUnwantedPolyfillioOptions;
 use regex::Regex;
@@ -71,6 +72,14 @@ impl Rule for NoUnwantedPolyfillio {
     type Options = NoUnwantedPolyfillioOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
+            return None;
+        }
+
         let jsx_element = ctx.query();
         let element_name = jsx_element.name().ok()?;
         let element_name = element_name.name_value_token().ok()?;

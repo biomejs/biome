@@ -36,7 +36,7 @@ info: elements/bracket-same-line/element.html
 <div
 	id="hello"
 	class="world really-long-class-name another-really-long-class-name"
-	style="color: red"
+	style="color: red;"
 	data-foo="bar"
 	data-bar="foo">
 	hello world

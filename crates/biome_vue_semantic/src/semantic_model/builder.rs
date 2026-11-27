@@ -1,7 +1,10 @@
 //! Shared state for the passes that build a [`VueSemanticModel`].
 
 use super::model::*;
-use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
+use super::nodes::{HtmlNodeId, JsNodeId};
+use biome_html_syntax::HtmlSyntaxNode;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
+use biome_rowan::{RawSyntaxKind, SyntaxNodePtr, TextRange, TextSize, TokenText};
 use rustc_hash::FxHashMap;
 
 /// What a script-level JavaScript binding stands for in a component.
@@ -29,6 +32,8 @@ pub(crate) struct ModelBuilder {
     /// Names written as strings in component options. They are resolved by
     /// the reference pass, once every declaration is known.
     pub(crate) option_names: Vec<OptionName>,
+    /// The id given to each node already in [`SemanticModelData::js_nodes`].
+    js_node_ids: FxHashMap<(Option<SnippetId>, SyntaxNodePtr<JsLanguage>), JsNodeId>,
 }
 
 /// A name of the component instance written as a string in an option, as in
@@ -37,6 +42,8 @@ pub(crate) struct OptionName {
     pub(crate) component: ComponentId,
     /// The host range of the string.
     pub(crate) range: TextRange,
+    /// The node `range` covers.
+    pub(crate) node: JsNodeId,
     pub(crate) name: TokenText,
     /// The members a dotted watch key reads after the name.
     pub(crate) path: Box<[TokenText]>,
@@ -53,6 +60,8 @@ pub(crate) struct NewSymbol {
     pub(crate) namespace: Namespace,
     pub(crate) kind: SymbolKind,
     pub(crate) component: Option<ComponentId>,
+    pub(crate) node: Option<JsNodeId>,
+    pub(crate) name_node: Option<JsNodeId>,
 }
 
 impl ModelBuilder {
@@ -89,6 +98,8 @@ impl ModelBuilder {
             component: symbol.component,
             detail: Detail::None,
             type_only: false,
+            node: symbol.node,
+            name_node: symbol.name_node,
         });
         self.data.uses.push(Vec::new());
         id
@@ -98,17 +109,51 @@ impl ModelBuilder {
         &mut self.data.symbols[id.index()]
     }
 
+    /// Returns the id of `node`, a node of the tree of `snippet`.
+    pub(crate) fn add_js_node(
+        &mut self,
+        snippet: Option<SnippetId>,
+        node: &JsSyntaxNode,
+    ) -> JsNodeId {
+        let ptr = SyntaxNodePtr::new(node);
+        *self.js_node_ids.entry((snippet, ptr)).or_insert_with(|| {
+            let id = JsNodeId::new(self.data.js_nodes.len());
+            self.data.js_nodes.push(JsNodeData {
+                snippet,
+                ptr,
+                reference: None,
+            });
+            id
+        })
+    }
+
+    /// Returns the id of `node`, the node of the host document that `row`
+    /// stands for.
+    pub(crate) fn add_html_node(&mut self, node: &HtmlSyntaxNode, row: HtmlRow) -> HtmlNodeId {
+        let id = HtmlNodeId::new(self.data.html_nodes.len());
+        self.data.html_nodes.push(HtmlNodeData {
+            ptr: SyntaxNodePtr::new(node),
+            row,
+        });
+        id
+    }
+
+    /// Adds a component defined by `definition`, a node of the tree of
+    /// `snippet` that starts at `offset` in the host document.
     pub(crate) fn add_component(
         &mut self,
         kind: ComponentKind,
-        definition: TextRange,
+        definition: &JsSyntaxNode,
         snippet: Option<SnippetId>,
+        offset: TextSize,
     ) -> ComponentId {
         let id = ComponentId::new(self.data.components.len());
         let instance = self.add_scope(ScopeKind::Instance(id), None);
+        let node = self.add_js_node(snippet, definition);
         self.data.components.push(ComponentData {
             kind,
-            definition,
+            definition: to_host(definition.text_trimmed_range(), offset),
+            node,
             snippet,
             has_template: false,
             instance,
@@ -120,7 +165,11 @@ impl ModelBuilder {
             uses_open: [false; Namespace::COUNT],
             macro_options: MacroOptions::empty(),
             data_function: None,
+            setup_function: None,
+            options_object: None,
             mixins: None,
+            is_defined_in_place: false,
+            is_default_export: false,
             merged: None,
             merged_into: None,
             symbols: Vec::new(),
@@ -239,6 +288,9 @@ impl ModelBuilder {
         let id = ReferenceId::new(self.data.references.len());
         if let Resolution::Symbol(symbol) = reference.resolution {
             self.data.uses[symbol.index()].push(id);
+        }
+        if let Some(node) = reference.node {
+            self.data.js_nodes[node.index()].reference.get_or_insert(id);
         }
         let slot = reference.snippet.map_or(0, |snippet| snippet.index() + 1);
         if self.data.references_by_snippet.len() <= slot {

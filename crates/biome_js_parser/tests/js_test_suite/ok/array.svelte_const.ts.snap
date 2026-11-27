@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+[first, ...rest]: number[] = source
+
+```
+
+
+## AST
+
+```
+JsSvelteLegacyConstRoot {
+    declarator: JsVariableDeclarator {
+        id: JsArrayBindingPattern {
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            elements: JsArrayBindingPatternElementList [
+                JsArrayBindingPatternElement {
+                    pattern: JsIdentifierBinding {
+                        name_token: IDENT@1..6 "first" [] [],
+                    },
+                    init: missing (optional),
+                },
+                COMMA@6..8 "," [] [Whitespace(" ")],
+                JsArrayBindingPatternRestElement {
+                    dotdotdot_token: DOT3@8..11 "..." [] [],
+                    pattern: JsIdentifierBinding {
+                        name_token: IDENT@11..15 "rest" [] [],
+                    },
+                },
+            ],
+            r_brack_token: R_BRACK@15..16 "]" [] [],
+        },
+        variable_annotation: TsTypeAnnotation {
+            colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+            ty: TsArrayType {
+                element_type: TsNumberType {
+                    number_token: NUMBER_KW@18..24 "number" [] [],
+                },
+                l_brack_token: L_BRACK@24..25 "[" [] [],
+                r_brack_token: R_BRACK@25..27 "]" [] [Whitespace(" ")],
+            },
+        },
+        initializer: JsInitializerClause {
+            eq_token: EQ@27..29 "=" [] [Whitespace(" ")],
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@29..35 "source" [] [],
+                },
+            },
+        },
+    },
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_LEGACY_CONST_ROOT@0..36
+  0: JS_VARIABLE_DECLARATOR@0..35
+    0: JS_ARRAY_BINDING_PATTERN@0..16
+      0: L_BRACK@0..1 "[" [] []
+      1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@1..15
+        0: JS_ARRAY_BINDING_PATTERN_ELEMENT@1..6
+          0: JS_IDENTIFIER_BINDING@1..6
+            0: IDENT@1..6 "first" [] []
+          1: (empty)
+        1: COMMA@6..8 "," [] [Whitespace(" ")]
+        2: JS_ARRAY_BINDING_PATTERN_REST_ELEMENT@8..15
+          0: DOT3@8..11 "..." [] []
+          1: JS_IDENTIFIER_BINDING@11..15
+            0: IDENT@11..15 "rest" [] []
+      2: R_BRACK@15..16 "]" [] []
+    1: TS_TYPE_ANNOTATION@16..27
+      0: COLON@16..18 ":" [] [Whitespace(" ")]
+      1: TS_ARRAY_TYPE@18..27
+        0: TS_NUMBER_TYPE@18..24
+          0: NUMBER_KW@18..24 "number" [] []
+        1: L_BRACK@24..25 "[" [] []
+        2: R_BRACK@25..27 "]" [] [Whitespace(" ")]
+    2: JS_INITIALIZER_CLAUSE@27..35
+      0: EQ@27..29 "=" [] [Whitespace(" ")]
+      1: JS_IDENTIFIER_EXPRESSION@29..35
+        0: JS_REFERENCE_IDENTIFIER@29..35
+          0: IDENT@29..35 "source" [] []
+  1: EOF@35..36 "" [Newline("\n")] []
+
+```

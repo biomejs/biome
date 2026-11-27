@@ -302,18 +302,12 @@ keyframes.css:70:6 assist/source/useSortedProperties  FIXABLE  ━━━━━�
   
   i Safe fix: Sort these properties
   
-    69 69 │   @keyframes duplicates {
-    70 70 │     to {
-    71    │ - ····color:·red;
-    72    │ - ····color:·blue;
-    73    │ - ····;
+    72 72 │       color: blue;
+    73 73 │       ;
     74    │ - ····display:·block;
     75    │ - ····--alpha:·1;
-       71 │ + ····--alpha:·1;
-       72 │ + ····display:·block;
-       73 │ + ····color:·red;
-       74 │ + ····color:·blue;
-       75 │ + ····;
+       74 │ + ····--alpha:·1;
+       75 │ + ····display:·block;
     76 76 │     }
     77 77 │   }
   

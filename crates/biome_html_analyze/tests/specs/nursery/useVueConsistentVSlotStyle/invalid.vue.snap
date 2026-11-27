@@ -1,0 +1,275 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComponent #default="data">{{ data }}</MyComponent>
+  <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+  <MyComponent #default="data" />
+  <MyComponent>
+    <template v-slot>content</template>
+    <template v-slot:default>content</template>
+    <template v-slot:foo>content</template>
+    <template v-slot:[foo]>content</template>
+    <template v-slot:header="{ title }">{{ title }}</template>
+    <template v-slot:foo.bar>content</template>
+  </MyComponent>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:16 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as v-slot.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComponent #default="data">{{ data }}</MyComponent>
+      │                ^^^^^^^^
+    4 │   <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+    5 │   <MyComponent #default="data" />
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as v-slot.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<MyComponent·#default="data">{{·data·}}</MyComponent>
+        3 │ + ··<MyComponent·v-slot="data">{{·data·}}</MyComponent>
+     4  4 │     <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+     5  5 │     <MyComponent #default="data" />
+  
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as v-slot.
+  
+    2 │ <template>
+    3 │   <MyComponent #default="data">{{ data }}</MyComponent>
+  > 4 │   <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+      │                ^^^^^^^^^^^^^^
+    5 │   <MyComponent #default="data" />
+    6 │   <MyComponent>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as v-slot.
+  
+     2  2 │   <template>
+     3  3 │     <MyComponent #default="data">{{ data }}</MyComponent>
+     4    │ - ··<MyComponent·v-slot:default="data">{{·data·}}</MyComponent>
+        4 │ + ··<MyComponent·v-slot="data">{{·data·}}</MyComponent>
+     5  5 │     <MyComponent #default="data" />
+     6  6 │     <MyComponent>
+  
+
+```
+
+```
+invalid.vue:5:16 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as v-slot.
+  
+    3 │   <MyComponent #default="data">{{ data }}</MyComponent>
+    4 │   <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+  > 5 │   <MyComponent #default="data" />
+      │                ^^^^^^^^
+    6 │   <MyComponent>
+    7 │     <template v-slot>content</template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as v-slot.
+  
+     3  3 │     <MyComponent #default="data">{{ data }}</MyComponent>
+     4  4 │     <MyComponent v-slot:default="data">{{ data }}</MyComponent>
+     5    │ - ··<MyComponent·#default="data"·/>
+        5 │ + ··<MyComponent·v-slot="data"·/>
+     6  6 │     <MyComponent>
+     7  7 │       <template v-slot>content</template>
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #default.
+  
+    5 │   <MyComponent #default="data" />
+    6 │   <MyComponent>
+  > 7 │     <template v-slot>content</template>
+      │               ^^^^^^
+    8 │     <template v-slot:default>content</template>
+    9 │     <template v-slot:foo>content</template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #default.
+  
+     5  5 │     <MyComponent #default="data" />
+     6  6 │     <MyComponent>
+     7    │ - ····<template·v-slot>content</template>
+        7 │ + ····<template·#default>content</template>
+     8  8 │       <template v-slot:default>content</template>
+     9  9 │       <template v-slot:foo>content</template>
+  
+
+```
+
+```
+invalid.vue:8:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #default.
+  
+     6 │   <MyComponent>
+     7 │     <template v-slot>content</template>
+   > 8 │     <template v-slot:default>content</template>
+       │               ^^^^^^^^^^^^^^
+     9 │     <template v-slot:foo>content</template>
+    10 │     <template v-slot:[foo]>content</template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #default.
+  
+     6  6 │     <MyComponent>
+     7  7 │       <template v-slot>content</template>
+     8    │ - ····<template·v-slot:default>content</template>
+        8 │ + ····<template·#default>content</template>
+     9  9 │       <template v-slot:foo>content</template>
+    10 10 │       <template v-slot:[foo]>content</template>
+  
+
+```
+
+```
+invalid.vue:9:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #foo.
+  
+     7 │     <template v-slot>content</template>
+     8 │     <template v-slot:default>content</template>
+   > 9 │     <template v-slot:foo>content</template>
+       │               ^^^^^^^^^^
+    10 │     <template v-slot:[foo]>content</template>
+    11 │     <template v-slot:header="{ title }">{{ title }}</template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #foo.
+  
+     7  7 │       <template v-slot>content</template>
+     8  8 │       <template v-slot:default>content</template>
+     9    │ - ····<template·v-slot:foo>content</template>
+        9 │ + ····<template·#foo>content</template>
+    10 10 │       <template v-slot:[foo]>content</template>
+    11 11 │       <template v-slot:header="{ title }">{{ title }}</template>
+  
+
+```
+
+```
+invalid.vue:10:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #[foo].
+  
+     8 │     <template v-slot:default>content</template>
+     9 │     <template v-slot:foo>content</template>
+  > 10 │     <template v-slot:[foo]>content</template>
+       │               ^^^^^^^^^^^^
+    11 │     <template v-slot:header="{ title }">{{ title }}</template>
+    12 │     <template v-slot:foo.bar>content</template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #[foo].
+  
+     8  8 │       <template v-slot:default>content</template>
+     9  9 │       <template v-slot:foo>content</template>
+    10    │ - ····<template·v-slot:[foo]>content</template>
+       10 │ + ····<template·#[foo]>content</template>
+    11 11 │       <template v-slot:header="{ title }">{{ title }}</template>
+    12 12 │       <template v-slot:foo.bar>content</template>
+  
+
+```
+
+```
+invalid.vue:11:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #header.
+  
+     9 │     <template v-slot:foo>content</template>
+    10 │     <template v-slot:[foo]>content</template>
+  > 11 │     <template v-slot:header="{ title }">{{ title }}</template>
+       │               ^^^^^^^^^^^^^
+    12 │     <template v-slot:foo.bar>content</template>
+    13 │   </MyComponent>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #header.
+  
+     9  9 │       <template v-slot:foo>content</template>
+    10 10 │       <template v-slot:[foo]>content</template>
+    11    │ - ····<template·v-slot:header="{·title·}">{{·title·}}</template>
+       11 │ + ····<template·#header="{·title·}">{{·title·}}</template>
+    12 12 │       <template v-slot:foo.bar>content</template>
+    13 13 │     </MyComponent>
+  
+
+```
+
+```
+invalid.vue:12:15 lint/nursery/useVueConsistentVSlotStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This slot should be written as #foo.
+  
+    10 │     <template v-slot:[foo]>content</template>
+    11 │     <template v-slot:header="{ title }">{{ title }}</template>
+  > 12 │     <template v-slot:foo.bar>content</template>
+       │               ^^^^^^^^^^
+    13 │   </MyComponent>
+    14 │ </template>
+  
+  i This project writes every slot the same way, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Write it as #foo.
+  
+    10 10 │       <template v-slot:[foo]>content</template>
+    11 11 │       <template v-slot:header="{ title }">{{ title }}</template>
+    12    │ - ····<template·v-slot:foo.bar>content</template>
+       12 │ + ····<template·#foo.bar>content</template>
+    13 13 │     </MyComponent>
+    14 14 │   </template>
+  
+
+```

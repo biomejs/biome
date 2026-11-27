@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export declare let a: number;
+type B = {};
+export type { B };
+let c = 1;
+export type { c as C };
+declare module "foo" {
+	export let d: number;
+}
+declare namespace M {
+	export let e: number;
+}
+declare let f: number;
+export { f };
+
+```

@@ -1,0 +1,250 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-methods.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  methods: {
+    noParams() {},
+    oneParam(a) {},
+    rest(...a) {},
+    withDefault(a = 42) {},
+    arrowTwo: (a, b) => {},
+    shorthand,
+  },
+};
+</script>
+<template>
+  <button @click="noParams()" />
+  <button @click="oneParam()" />
+  <button @click="rest()" />
+  <button @click="withDefault()" />
+  <button @click="(a, b) => arrowTwo(a, b)" />
+  <button @click="(a) => oneParam(a)" />
+  <button @click="(a) => arrowTwo(a)" />
+  <button @click="(a) => rest(a)" />
+  <button @click="(a, b) => shorthand(a, b)" />
+  <button @click="shorthand()" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-methods.vue:15:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    13 │ </script>
+    14 │ <template>
+  > 15 │   <button @click="noParams()" />
+       │                   ^^^^^^^^^^
+    16 │   <button @click="oneParam()" />
+    17 │   <button @click="rest()" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use noParams as the handler.
+  
+    1 │ noParams()
+      │         --
+
+```
+
+```
+invalid-methods.vue:16:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    14 │ <template>
+    15 │   <button @click="noParams()" />
+  > 16 │   <button @click="oneParam()" />
+       │                   ^^^^^^^^^^
+    17 │   <button @click="rest()" />
+    18 │   <button @click="withDefault()" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:17:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    15 │   <button @click="noParams()" />
+    16 │   <button @click="oneParam()" />
+  > 17 │   <button @click="rest()" />
+       │                   ^^^^^^
+    18 │   <button @click="withDefault()" />
+    19 │   <button @click="(a, b) => arrowTwo(a, b)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:18:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    16 │   <button @click="oneParam()" />
+    17 │   <button @click="rest()" />
+  > 18 │   <button @click="withDefault()" />
+       │                   ^^^^^^^^^^^^^
+    19 │   <button @click="(a, b) => arrowTwo(a, b)" />
+    20 │   <button @click="(a) => oneParam(a)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:19:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    17 │   <button @click="rest()" />
+    18 │   <button @click="withDefault()" />
+  > 19 │   <button @click="(a, b) => arrowTwo(a, b)" />
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │   <button @click="(a) => oneParam(a)" />
+    21 │   <button @click="(a) => arrowTwo(a)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use arrowTwo as the handler.
+  
+    1 │ (a,·b)·=>·arrowTwo(a,·b)
+      │ ----------        ------
+
+```
+
+```
+invalid-methods.vue:20:19 lint/nursery/useVueConsistentVOnHandlerStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    18 │   <button @click="withDefault()" />
+    19 │   <button @click="(a, b) => arrowTwo(a, b)" />
+  > 20 │   <button @click="(a) => oneParam(a)" />
+       │                   ^^^^^^^^^^^^^^^^^^
+    21 │   <button @click="(a) => arrowTwo(a)" />
+    22 │   <button @click="(a) => rest(a)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use oneParam as the handler.
+  
+    1 │ (a)·=>·oneParam(a)
+      │ -------        ---
+
+```
+
+```
+invalid-methods.vue:21:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    19 │   <button @click="(a, b) => arrowTwo(a, b)" />
+    20 │   <button @click="(a) => oneParam(a)" />
+  > 21 │   <button @click="(a) => arrowTwo(a)" />
+       │                   ^^^^^^^^^^^^^^^^^^
+    22 │   <button @click="(a) => rest(a)" />
+    23 │   <button @click="(a, b) => shorthand(a, b)" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:22:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    20 │   <button @click="(a) => oneParam(a)" />
+    21 │   <button @click="(a) => arrowTwo(a)" />
+  > 22 │   <button @click="(a) => rest(a)" />
+       │                   ^^^^^^^^^^^^^^
+    23 │   <button @click="(a, b) => shorthand(a, b)" />
+    24 │   <button @click="shorthand()" />
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:23:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    21 │   <button @click="(a) => arrowTwo(a)" />
+    22 │   <button @click="(a) => rest(a)" />
+  > 23 │   <button @click="(a, b) => shorthand(a, b)" />
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │   <button @click="shorthand()" />
+    25 │ </template>
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-methods.vue:24:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    22 │   <button @click="(a) => rest(a)" />
+    23 │   <button @click="(a, b) => shorthand(a, b)" />
+  > 24 │   <button @click="shorthand()" />
+       │                   ^^^^^^^^^^^
+    25 │ </template>
+    26 │ 
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

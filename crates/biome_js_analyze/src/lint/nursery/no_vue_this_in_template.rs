@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// </template>
     /// ```
     pub NoVueThisInTemplate {
-        version: "next",
+        version: "2.6.5",
         name: "noVueThisInTemplate",
         language: "js",
         sources: &[RuleSource::EslintVueJs("this-in-template").inspired()],

@@ -1,40 +1,42 @@
-// Strict !== null
+/* should generate diagnostics */
+
+// `!== null`
 declare const a: string | null;
 const r1 = a !== null ? a : 'default';
 
-// Strict !== undefined
+// `!== undefined`
 declare const b: string | undefined;
 const r2 = b !== undefined ? b : 'fallback';
 
-// Loose != null
+// `!= null`
 declare const c: string | null;
 const r3 = c != null ? c : 'default';
 
-// Inverted === null
+// `=== null`
 declare const d: string | null;
 const r4 = d === null ? 'default' : d;
 
-// Inverted === undefined
+// `=== undefined`
 declare const e: string | undefined;
 const r5 = e === undefined ? 'fallback' : e;
 
-// Inverted == null
+// `== null`
 declare const f: string | null;
 const r6 = f == null ? 'default' : f;
 
-// Compound !== null && !== undefined
+// `!== null && !== undefined`
 declare const g: string | null | undefined;
 const r7 = g !== null && g !== undefined ? g : 'default';
 
-// Compound === null || === undefined
+// `=== null || === undefined`
 declare const h: string | null | undefined;
 const r8 = h === null || h === undefined ? 'default' : h;
 
-// Null on left side
+// `null` on the left
 declare const i: string | null;
 const r9 = null !== i ? i : 'default';
 
-// Undefined on left side
+// `undefined` on the left
 declare const j: string | undefined;
 const r10 = undefined !== j ? j : 'fallback';
 
@@ -42,108 +44,80 @@ const r10 = undefined !== j ? j : 'fallback';
 declare const obj: { prop: string | null };
 const r11 = obj.prop !== null ? obj.prop : 'default';
 
-// Loose != undefined
+// `!= undefined`
 declare const l: string | undefined;
 const r12 = l != undefined ? l : 'default';
 
-// Inverted, null on left
+// `=== null` with `null` on the left
 declare const n: string | null;
 const r13 = null === n ? 'default' : n;
 
-// Strict single with null | undefined (diagnostic only, no fix)
-declare const nu: string | null | undefined;
-const r17 = nu !== null ? nu : 'default';
-
-// Fallback is conditional (needs parens)
+// Conditional fallback is parenthesized
 declare const p: string | null;
 const r14 = p !== null ? p : p ? 'a' : 'b';
 
-// Fallback is logical OR (needs parens, ?? cannot mix with ||)
+// `||` fallback is parenthesized
 declare const q: string | null;
 const r15 = q !== null ? q : q || 'default';
 
-// Fallback is logical AND (needs parens, ?? cannot mix with &&)
+// `&&` fallback is parenthesized
 declare const s: string | null;
 const r16 = s !== null ? s : s && 'value';
 
-// Call expression in subject (diagnostic only, no fix: side-effect safety)
+// Call in the subject: no fix
 declare function foo(): string | null;
-const r18 = foo() !== null ? foo() : 'default';
+const r17 = foo() !== null ? foo() : 'default';
 
-// New expression in subject (diagnostic only, no fix: side-effect safety)
+// `new` in the subject: no fix
 declare class Bar { value: string | null }
-const r25 = new Bar().value !== null ? new Bar().value : 'default';
+const r18 = new Bar().value !== null ? new Bar().value : 'default';
 
-// Undefined literal type
+// `undefined` type
 const undef: undefined = undefined;
 const r19 = undef !== undefined ? undef : 'fallback';
 
-// Number | undefined (non-string union)
+// `number | undefined`
 declare const maybeNum: number | undefined;
 const r20 = maybeNum !== undefined ? maybeNum : 42;
 
-// Loose != null with triple union (covers both null and undefined)
+// `!= null` on a union with both `null` and `undefined`
 declare const tripleUnion: string | null | undefined;
 const r21 = tripleUnion != null ? tripleUnion : 'default';
 
-// Optional property (a?: string creates string | undefined)
+// Optional property
 interface Config { timeout?: number; }
 declare const config: Config;
 const r22 = config.timeout !== undefined ? config.timeout : 3000;
 
-// Array element access
+// Array element
 declare const arr: (number | null)[];
 const r23 = arr[0] !== null ? arr[0] : 0;
 
-// Function return context
+// Function return
 function getVal(x: string | null): string {
   return x !== null ? x : 'default';
 }
 
-// Nested in parentheses
+// Parenthesized ternary
 declare const paren: string | null;
 const r24 = (paren !== null ? paren : 'default').toUpperCase();
 
-// --- StrictSingle fixability: opposite nullish variant in type ---
+// Strict check of the only nullish variant
 
-// Checks !== null but type has undefined (not null): no fix
-declare const ss1: string | undefined;
-const r26 = ss1 !== null ? ss1 : 'default';
-
-// Checks !== undefined but type has null (not undefined): no fix
-declare const ss2: string | null;
-const r27 = ss2 !== undefined ? ss2 : 'default';
-
-// Inverted: checks === null but type has undefined: no fix
-declare const ss3: string | undefined;
-const r28 = ss3 === null ? 'default' : ss3;
-
-// Inverted: checks === undefined but type has null: no fix
-declare const ss4: string | null;
-const r29 = ss4 === undefined ? 'default' : ss4;
-
-// Checks !== null, type has only null: fix IS safe
+// `!== null` on a union with `null`
 declare const ss5: string | null;
-const r30 = ss5 !== null ? ss5 : 'default';
+const r25 = ss5 !== null ? ss5 : 'default';
 
-// Checks !== undefined, type has only undefined: fix IS safe
+// `!== undefined` on a union with `undefined`
 declare const ss6: string | undefined;
-const r31 = ss6 !== undefined ? ss6 : 'default';
+const r26 = ss6 !== undefined ? ss6 : 'default';
 
-// Checks !== null, type has void (acts as undefined): no fix
-declare const ss7: string | void;
-const r32 = ss7 !== null ? ss7 : 'default';
+// Compound check of both nullish variants
 
-// --- Compound fixability: duplicate vs complementary literals ---
-
-// Both sides check null (not complementary): no fix
-declare const cp1: string | null | undefined;
-const r33 = cp1 !== null && cp1 !== null ? cp1 : 'default';
-
-// Complementary: one null, one undefined: fix IS safe
+// `null` then `undefined`
 declare const cp2: string | null | undefined;
-const r34 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
+const r27 = cp2 !== null && cp2 !== undefined ? cp2 : 'default';
 
-// Complementary reversed order: fix IS safe
+// `undefined` then `null`
 declare const cp3: string | null | undefined;
-const r35 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';
+const r28 = cp3 !== undefined && cp3 !== null ? cp3 : 'default';

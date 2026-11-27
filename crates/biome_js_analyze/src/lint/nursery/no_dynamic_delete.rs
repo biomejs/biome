@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// - If you want to disallow the `delete` operator on fixed property names, see [`noDelete`](https://biomejs.dev/linter/rules/no-delete/).
     ///
     pub NoDynamicDelete {
-        version: "next",
+        version: "2.6.5",
         name: "noDynamicDelete",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-dynamic-delete").same()],

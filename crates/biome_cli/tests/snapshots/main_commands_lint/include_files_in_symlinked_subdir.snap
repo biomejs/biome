@@ -22,7 +22,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-symlinked/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+subroot/symlink/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This let declares a variable that is only assigned once.
   
@@ -51,7 +51,7 @@ symlinked/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━�
 ```
 
 ```block
-symlinked/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+subroot/symlink/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
   

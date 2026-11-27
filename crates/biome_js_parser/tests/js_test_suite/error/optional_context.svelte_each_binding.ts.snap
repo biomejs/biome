@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+item?: Item
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsBogusBinding {
+        items: [
+            IDENT@0..4 "item" [] [],
+            QUESTION@4..5 "?" [] [],
+            COLON@5..7 ":" [] [Whitespace(" ")],
+            IDENT@7..11 "Item" [] [],
+        ],
+    },
+    type_annotation: missing (optional),
+    index: missing (optional),
+    key: missing (optional),
+    eof_token: EOF@11..12 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..12
+  0: JS_BOGUS_BINDING@0..11
+    0: IDENT@0..4 "item" [] []
+    1: QUESTION@4..5 "?" [] []
+    2: COLON@5..7 ":" [] [Whitespace(" ")]
+    3: IDENT@7..11 "Item" [] []
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: EOF@11..12 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+optional_context.svelte_each_binding.ts:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ item?: Item
+      │     ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

@@ -1,0 +1,301 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+for (const item of items) {
+	while (item.children.pop()) {
+		continue;
+	}
+}
+
+for (const item of items) {
+	switch (item.type) {
+		case "child":
+			continue;
+	}
+}
+
+for (const item of items) {
+	for (const child of item.children) {
+		switch (child.type) {
+			case "child":
+				continue;
+		}
+	}
+}
+
+for (const item of items) {
+	switch (item.type) {
+		case "child":
+			while (item.pending) {
+				continue;
+			}
+	}
+}
+
+for (const key in items) {
+	do {
+		continue;
+	} while (items[key].pending);
+}
+
+// `break` statements are still reported.
+for (const item of items) {
+	for (const child of item.children) {
+		break;
+	}
+}
+
+for (const group of groups) {
+	const processGroup = () => {
+		for (const item of group.items) {
+			switch (item.type) {
+				case "hidden":
+					continue;
+			}
+		}
+	};
+	processGroup();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement applies to a loop that is inside an outer loop.
+  
+    2 │ for (const item of items) {
+    3 │ 	while (item.children.pop()) {
+  > 4 │ 		continue;
+      │ 		^^^^^^^^^
+    5 │ 	}
+    6 │ }
+  
+  i The continue statement applies to this loop.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (const item of items) {
+  > 3 │ 	while (item.children.pop()) {
+      │ 	^^^^^
+    4 │ 		continue;
+    5 │ 	}
+  
+  i This is the outer loop.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (const item of items) {
+      │ ^^^
+    3 │ 	while (item.children.pop()) {
+    4 │ 		continue;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a continue statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:4 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement is inside a switch statement, but it skips to the next iteration of the loop instead of moving to the next case.
+  
+     9 │ 	switch (item.type) {
+    10 │ 		case "child":
+  > 11 │ 			continue;
+       │ 			^^^^^^^^^
+    12 │ 	}
+    13 │ }
+  
+  i The continue statement applies to this loop.
+  
+     6 │ }
+     7 │ 
+   > 8 │ for (const item of items) {
+       │ ^^^
+     9 │ 	switch (item.type) {
+    10 │ 		case "child":
+  
+  i Add a label to the loop and use it in the continue statement, as in continue label;, to make it clear which loop it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:5 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement is inside a switch statement, but it skips to the next iteration of the loop instead of moving to the next case.
+  
+    17 │ 		switch (child.type) {
+    18 │ 			case "child":
+  > 19 │ 				continue;
+       │ 				^^^^^^^^^
+    20 │ 		}
+    21 │ 	}
+  
+  i The continue statement applies to this loop.
+  
+    15 │ for (const item of items) {
+  > 16 │ 	for (const child of item.children) {
+       │ 	^^^
+    17 │ 		switch (child.type) {
+    18 │ 			case "child":
+  
+  i Add a label to the loop and use it in the continue statement, as in continue label;, to make it clear which loop it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement applies to a loop that is inside an outer loop.
+  
+    26 │ 		case "child":
+    27 │ 			while (item.pending) {
+  > 28 │ 				continue;
+       │ 				^^^^^^^^^
+    29 │ 			}
+    30 │ 	}
+  
+  i The continue statement applies to this loop.
+  
+    25 │ 	switch (item.type) {
+    26 │ 		case "child":
+  > 27 │ 			while (item.pending) {
+       │ 			^^^^^
+    28 │ 				continue;
+    29 │ 			}
+  
+  i This is the outer loop.
+  
+    22 │ }
+    23 │ 
+  > 24 │ for (const item of items) {
+       │ ^^^
+    25 │ 	switch (item.type) {
+    26 │ 		case "child":
+  
+  i When loops and switch statements are nested, it's easy to misread which one a continue statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement applies to a loop that is inside an outer loop.
+  
+    33 │ for (const key in items) {
+    34 │ 	do {
+  > 35 │ 		continue;
+       │ 		^^^^^^^^^
+    36 │ 	} while (items[key].pending);
+    37 │ }
+  
+  i The continue statement applies to this loop.
+  
+    33 │ for (const key in items) {
+  > 34 │ 	do {
+       │ 	^^
+    35 │ 		continue;
+    36 │ 	} while (items[key].pending);
+  
+  i This is the outer loop.
+  
+    31 │ }
+    32 │ 
+  > 33 │ for (const key in items) {
+       │ ^^^
+    34 │ 	do {
+    35 │ 		continue;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a continue statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    40 │ for (const item of items) {
+    41 │ 	for (const child of item.children) {
+  > 42 │ 		break;
+       │ 		^^^^^^
+    43 │ 	}
+    44 │ }
+  
+  i The break statement applies to this loop.
+  
+    39 │ // `break` statements are still reported.
+    40 │ for (const item of items) {
+  > 41 │ 	for (const child of item.children) {
+       │ 	^^^
+    42 │ 		break;
+    43 │ 	}
+  
+  i This is the outer loop.
+  
+    39 │ // `break` statements are still reported.
+  > 40 │ for (const item of items) {
+       │ ^^^
+    41 │ 	for (const child of item.children) {
+    42 │ 		break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:6 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This continue statement is inside a switch statement, but it skips to the next iteration of the loop instead of moving to the next case.
+  
+    49 │ 			switch (item.type) {
+    50 │ 				case "hidden":
+  > 51 │ 					continue;
+       │ 					^^^^^^^^^
+    52 │ 			}
+    53 │ 		}
+  
+  i The continue statement applies to this loop.
+  
+    46 │ for (const group of groups) {
+    47 │ 	const processGroup = () => {
+  > 48 │ 		for (const item of group.items) {
+       │ 		^^^
+    49 │ 			switch (item.type) {
+    50 │ 				case "hidden":
+  
+  i Add a label to the loop and use it in the continue statement, as in continue label;, to make it clear which loop it applies to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

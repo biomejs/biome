@@ -176,14 +176,14 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       '@types/node':
-        specifier: 24.13.6
-        version: 24.13.6
+        specifier: 24.19.2
+        version: 24.19.2
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
       tombi:
-        specifier: 1.5.5
-        version: 1.5.5
+        specifier: 1.11.3
+        version: 1.11.3
 
   crates/biome_formatter_test/src/prettier:
     dependencies:
@@ -200,68 +200,68 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 7.3.6
-        version: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+        specifier: 7.3.7
+        version: 7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-android-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-android-arm64
       '@biomejs/cli-android-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-android-x64
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.6.4
+        specifier: 2.6.9
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-android-arm64: {}
@@ -299,11 +299,11 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 7.3.6
-        version: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+        specifier: 7.3.7
+        version: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.19.2)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/@biomejs/runtime:
     dependencies:
@@ -324,8 +324,8 @@ importers:
   packages/aria-data:
     dependencies:
       happy-dom:
-        specifier: ^20.14.5
-        version: 20.14.5
+        specifier: ^21.0.0
+        version: 21.0.4
 
   packages/prettier-compare:
     dependencies:
@@ -991,60 +991,60 @@ packages:
     peerDependencies:
       acorn: ^8.9.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.5':
-    resolution: {integrity: sha512-pIlEbOYN3RPF5usGwMisDJbEln+etzbTTc5BRZfbCgOU1ZA2Zn3ZY88cGwHXayc8be3USdlEu24l45af5XO9+A==}
+  '@tombi-toml/cli-darwin-arm64@1.11.3':
+    resolution: {integrity: sha512-ZPqwslc99taQzp0Dr7o/9EpeCeG/FjNLwnxMK+RSQBjaTAlQEsN+6c/Zn1NdDUrw2IoE8hKeYd//wKWM6rKB9w==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@1.5.5':
-    resolution: {integrity: sha512-bDMZrYAltRtn1V1cNxgFIUdp9MX+Z+9zhRFsDrKFQQoflhPEr3Bqbru52LHdFhTCb2zCvf8ir1VnHnu2gE8BrA==}
+  '@tombi-toml/cli-darwin-x64@1.11.3':
+    resolution: {integrity: sha512-C1vHZM2JzIP2PJi2qfSjEsdpegDw7i7Kk0Zr2Z0lMxqXykRWZnTmO9xE2eJTHlDTUOSlDO5+chJ20+ln4U+axA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
-    resolution: {integrity: sha512-Y8WPHVFHv6Zf9DisrP+bQUH+Vzs6UgxJxAYDG8zCTtpnxJFqVmHgrRPebv+X/TkCJYgznDxU41Q0cMNJ68jRnw==}
+  '@tombi-toml/cli-linux-arm64-musl@1.11.3':
+    resolution: {integrity: sha512-gVf0S5f+2AirSDWypvcYXy3+SOQL2RvqbR/Tl9kCkdMrTEbzumwCL1a3G3HSTPqqRKp4CNY5/icUZSqV9imQXg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@1.5.5':
-    resolution: {integrity: sha512-yixZSwfMIizfOfljU+HO4G1Jt+prHz1Rud3UbOEnw1hF2rAej/CfPIZN2xoT62MFvj9F5RlHOHMjXBdZRx4cGQ==}
+  '@tombi-toml/cli-linux-arm64@1.11.3':
+    resolution: {integrity: sha512-jPxpb71cCvcspRw9SAWBMzn/pg8jr8GeR3SGvReSk/lb0SjMfNHcwNt9bpsiBO7OA5Kd8muzLWDRbwLr8/xo4g==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.5':
-    resolution: {integrity: sha512-c9sGm5LZWxVT2IQUjwRI5Ql8d5pE6ahtwA+6brmVikXvWsfu7SsmnhxrN0VtHZf50/bHirXyuArIxCc3L6Wy9w==}
+  '@tombi-toml/cli-linux-x64-musl@1.11.3':
+    resolution: {integrity: sha512-CS7SLNDkhdv4LCT/uBJuZY0eJUvJie5oBarYsKxNyw7tdZWfW8hmT0CaKpTvWpmw2/5tRiwYqxV0+IHdLPtRaA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@1.5.5':
-    resolution: {integrity: sha512-3AWdWuGQ+Y6vJyCrEaKS8BOOtJW7ZX5aiv8JKJocB/+YZ/oMAi9PBPnJA9VXiuRyX3z8pAN7q5Rf0KytcuISBA==}
+  '@tombi-toml/cli-linux-x64@1.11.3':
+    resolution: {integrity: sha512-aX5XRpbOrH/7OYCVhns+/3h9K9e50dt3SCNbVLRhPGWdu9f4KNaE14ys8hL7T33V4UXcb/DyUAS49Yi3LmEeHg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-sunos-x64@1.5.5':
-    resolution: {integrity: sha512-SKKzvklVj9749rXih7GLyT5Qrz7OGN60/6Jf44DnlE9M45pEeA8y2YXy86OdQ84yaioyFTYNigbjdZrAYSC2RA==}
+  '@tombi-toml/cli-sunos-x64@1.11.3':
+    resolution: {integrity: sha512-/7/Jaz6ll03cIkj31jLFMW+fLSFsAsV7iTTreXK0n/s5ADGf+Z4LPti3+fv9tXu39UP+Da7epz2qEPxYcFQiBg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [sunos]
 
-  '@tombi-toml/cli-win32-arm64@1.5.5':
-    resolution: {integrity: sha512-LZKN5jtJrzpx7Ad3Nw26vn3dsv2RjwKxDzhdFmu2UODeBpTb2vkqUqPeuJQ0BHeqJ4Ou1Iy6N2iT7F2/SwnJbQ==}
+  '@tombi-toml/cli-win32-arm64@1.11.3':
+    resolution: {integrity: sha512-BwWVbwhKaQ++0w5WvsGA7yf0ag/hJ+P50ecZeKWPa6NG8WpkxZ571n5zp7KpR+gGk2pNXqqMAeAA2sXJGwYM8g==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@1.5.5':
-    resolution: {integrity: sha512-CbWaV2yZhtxr+IWnA8CWdQKuegwRRnohSTUv8kPiJFPMppA7fxzXUpgEnqO/nYohQGlqSz5L0xXsi/6asib1cw==}
+  '@tombi-toml/cli-win32-x64@1.11.3':
+    resolution: {integrity: sha512-HiqYn7zf2B7YCCrCJiONWtOBSwV14mCOk11SUA95WduYz4i57rMTDt2lRR6ruKgCJ31copXDmcLCKQsE2vJIZw==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -1063,6 +1063,9 @@ packages:
 
   '@types/node@24.13.6':
     resolution: {integrity: sha512-SGrw/h3KPFshy3OE6ZL53LMBG5vGQQ8/gIpiqz/kRZhPJ7HgwCEs8LBuNtWLa8dvGZVpSF7+Bf+c11HUrCb/yg==}
+
+  '@types/node@24.19.2':
+    resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1358,12 +1361,12 @@ packages:
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
 
-  happy-dom@20.14.5:
-    resolution: {integrity: sha512-x/RzkpWO40bTjIoT30iQtt64FLLmH/iRcUCN2X//bLx7H3ifkdfPXyqsro/OYtqzIAhiLMMA7mmiOR9C3NOKjQ==}
-    engines: {node: '>=20.0.0'}
-
   happy-dom@20.9.0:
     resolution: {integrity: sha512-GZZ9mKe8r646NUAf/zemnGbjYh4Bt8/MqASJY+pSm5ZDtc3YQox+4gsLI7yi1hba6o+eCsGxpHn5+iEVn31/FQ==}
+    engines: {node: '>=20.0.0'}
+
+  happy-dom@21.0.4:
+    resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
     engines: {node: '>=20.0.0'}
 
   hosted-git-info@9.0.2:
@@ -1596,8 +1599,8 @@ packages:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
-  tombi@1.5.5:
-    resolution: {integrity: sha512-tY+XwsZmMCj4BHbX1iot1H5djjvAmANKf8bIJJWPvDvc+JIwE8/7Od3ryIfnqGzZepLk249O2GOyeaTSO+8F+w==}
+  tombi@1.11.3:
+    resolution: {integrity: sha512-VsOgz3PuGg/1TpxM8SUVOEQXcUN8Rbx8IiIb9VgAFkSna5cbgLUjFKfxIA+d/dLWqVlmrjQgGwcTiVTi6gEWLA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -1635,6 +1638,9 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
+
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
     engines: {node: '>=18'}
@@ -1642,8 +1648,8 @@ packages:
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
-  vite@7.3.6:
-    resolution: {integrity: sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==}
+  vite@7.3.7:
+    resolution: {integrity: sha512-AHEzTORMbi7/7aXp7w7KZ5+DCUdSeLsJz0grY8xHpc9DHdYb0vQu6DqJfm2tOw3gDExNgPgnJTXxM6syYFHaCA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2225,31 +2231,31 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.5':
+  '@tombi-toml/cli-darwin-arm64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@1.5.5':
+  '@tombi-toml/cli-darwin-x64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
+  '@tombi-toml/cli-linux-arm64-musl@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@1.5.5':
+  '@tombi-toml/cli-linux-arm64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.5':
+  '@tombi-toml/cli-linux-x64-musl@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@1.5.5':
+  '@tombi-toml/cli-linux-x64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-sunos-x64@1.5.5':
+  '@tombi-toml/cli-sunos-x64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@1.5.5':
+  '@tombi-toml/cli-win32-arm64@1.11.3':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@1.5.5':
+  '@tombi-toml/cli-win32-x64@1.11.3':
     optional: true
 
   '@types/chai@5.2.2':
@@ -2267,6 +2273,10 @@ snapshots:
   '@types/node@24.13.6':
     dependencies:
       undici-types: 7.18.2
+
+  '@types/node@24.19.2':
+    dependencies:
+      undici-types: 7.24.6
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -2351,13 +2361,21 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.11(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.11(vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+
+  '@vitest/mocker@4.1.11(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.11
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -2457,6 +2475,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
+    optional: true
 
   esbuild@0.28.2:
     optionalDependencies:
@@ -2514,6 +2533,10 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.4
 
+  fdir@6.5.0(picomatch@4.0.7):
+    optionalDependencies:
+      picomatch: 4.0.7
+
   find-up-simple@1.0.1: {}
 
   fsevents@2.3.3:
@@ -2526,7 +2549,20 @@ snapshots:
       resolve-pkg-maps: 1.0.0
     optional: true
 
-  happy-dom@20.14.5:
+  happy-dom@20.9.0:
+    dependencies:
+      '@types/node': 24.19.2
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.1
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.21.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+    optional: true
+
+  happy-dom@21.0.4:
     dependencies:
       '@types/node': 24.13.6
       '@types/whatwg-mimetype': 3.0.2
@@ -2538,19 +2574,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  happy-dom@20.9.0:
-    dependencies:
-      '@types/node': 24.13.6
-      '@types/whatwg-mimetype': 3.0.2
-      '@types/ws': 8.18.1
-      entities: 7.0.1
-      whatwg-mimetype: 3.0.0
-      ws: 8.21.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    optional: true
 
   hosted-git-info@9.0.2:
     dependencies:
@@ -2783,17 +2806,17 @@ snapshots:
 
   tinyrainbow@3.1.0: {}
 
-  tombi@1.5.5:
+  tombi@1.11.3:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 1.5.5
-      '@tombi-toml/cli-darwin-x64': 1.5.5
-      '@tombi-toml/cli-linux-arm64': 1.5.5
-      '@tombi-toml/cli-linux-arm64-musl': 1.5.5
-      '@tombi-toml/cli-linux-x64': 1.5.5
-      '@tombi-toml/cli-linux-x64-musl': 1.5.5
-      '@tombi-toml/cli-sunos-x64': 1.5.5
-      '@tombi-toml/cli-win32-arm64': 1.5.5
-      '@tombi-toml/cli-win32-x64': 1.5.5
+      '@tombi-toml/cli-darwin-arm64': 1.11.3
+      '@tombi-toml/cli-darwin-x64': 1.11.3
+      '@tombi-toml/cli-linux-arm64': 1.11.3
+      '@tombi-toml/cli-linux-arm64-musl': 1.11.3
+      '@tombi-toml/cli-linux-x64': 1.11.3
+      '@tombi-toml/cli-linux-x64-musl': 1.11.3
+      '@tombi-toml/cli-sunos-x64': 1.11.3
+      '@tombi-toml/cli-win32-arm64': 1.11.3
+      '@tombi-toml/cli-win32-x64': 1.11.3
 
   tsx@4.21.0:
     dependencies:
@@ -2844,6 +2867,8 @@ snapshots:
 
   undici-types@7.18.2: {}
 
+  undici-types@7.24.6: {}
+
   unicorn-magic@0.3.0: {}
 
   validate-npm-package-license@3.0.4:
@@ -2851,11 +2876,11 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0):
+  vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0):
     dependencies:
-      esbuild: 0.27.2
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      esbuild: 0.28.2
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
       postcss: 8.5.6
       rollup: 4.46.2
       tinyglobby: 0.2.15
@@ -2865,10 +2890,24 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.9.0
 
-  vitest@4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)):
+  vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0):
+    dependencies:
+      esbuild: 0.28.2
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
+      postcss: 8.5.6
+      rollup: 4.46.2
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 24.19.2
+      fsevents: 2.3.3
+      tsx: 4.21.0
+      yaml: 2.9.0
+
+  vitest@4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.11(vite@7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -2885,10 +2924,38 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.7(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.6
+      happy-dom: 20.9.0
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.11(@types/node@24.19.2)(happy-dom@20.9.0)(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.11
+      '@vitest/mocker': 4.1.11(vite@7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.11
+      '@vitest/runner': 4.1.11
+      '@vitest/snapshot': 4.1.11
+      '@vitest/spy': 4.1.11
+      '@vitest/utils': 4.1.11
+      es-module-lexer: 2.0.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.1
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.0.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.0
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.1.0
+      vite: 7.3.7(@types/node@24.19.2)(tsx@4.21.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 24.19.2
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw

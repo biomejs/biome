@@ -85,24 +85,27 @@ impl<'a> SpdxExpression<'a> {
                     return Ok(());
                 }
 
-                // Must be a valid SPDX identifier
-                let valid_spdx = LICENSE_LIST.is_valid(id);
-                if !valid_spdx {
+                // Must be a valid SPDX identifier (optionally with a trailing `+` "or later" operator)
+                let Some(license) = LICENSE_LIST.find(id).or_else(|| {
+                    id.strip_suffix('+')
+                        .filter(|base| !base.ends_with('+'))
+                        .and_then(|base| LICENSE_LIST.find(base))
+                }) else {
                     return Err(RejectReason::Untrusted);
-                }
+                };
 
                 // Deprecated check (reject when ignore_deprecated is false)
-                if !config.ignore_deprecated && LICENSE_LIST.is_deprecated(id) {
+                if !config.ignore_deprecated && license.is_deprecated_license_id {
                     return Err(RejectReason::Deprecated);
                 }
 
                 // OSI check
-                if config.require_osi_approved && !LICENSE_LIST.is_osi_approved(id) {
+                if config.require_osi_approved && !license.is_osi_approved {
                     return Err(RejectReason::NotOsiApproved);
                 }
 
                 // FSF check
-                if config.require_fsf_libre && !LICENSE_LIST.is_fsf_libre(id) {
+                if config.require_fsf_libre && !license.is_fsf_libre {
                     return Err(RejectReason::NotFsfLibre);
                 }
 
@@ -550,5 +553,72 @@ mod tests {
             ..TrustConfig::default()
         };
         assert_eq!(expr.check_trust(&config), Err(RejectReason::NotOsiApproved));
+    }
+
+    #[test]
+    fn check_trust_spdx_or_later_plus_operator() {
+        let default_config = TrustConfig::default();
+
+        // Valid non-deprecated SPDX IDs with trailing `+` ("or later")
+        for expr_str in [
+            "Apache-2.0+",
+            "MPL-2.0+",
+            "Apache-2.0+ OR MPL-2.0+",
+            "Apache-2.0+ WITH LLVM-exception",
+        ] {
+            let expr = SpdxExpression::parse(expr_str).unwrap();
+            assert!(
+                expr.check_trust(&default_config).is_ok(),
+                "expected {expr_str} to be trusted"
+            );
+        }
+
+        // OSI check applies to the base license
+        let osi_config = TrustConfig {
+            require_osi_approved: true,
+            ..TrustConfig::default()
+        };
+        assert!(
+            SpdxExpression::parse("Apache-2.0+")
+                .unwrap()
+                .check_trust(&osi_config)
+                .is_ok()
+        );
+        assert_eq!(
+            SpdxExpression::parse("Abstyles+")
+                .unwrap()
+                .check_trust(&osi_config),
+            Err(RejectReason::NotOsiApproved)
+        );
+
+        // Deprecated SPDX IDs remain deprecated even with `+`
+        assert_eq!(
+            SpdxExpression::parse("GPL-2.0+")
+                .unwrap()
+                .check_trust(&default_config),
+            Err(RejectReason::Deprecated)
+        );
+        assert_eq!(
+            SpdxExpression::parse("AGPL-1.0+")
+                .unwrap()
+                .check_trust(&default_config),
+            Err(RejectReason::Deprecated)
+        );
+
+        // Invalid `+` forms remain untrusted (including repeated `+` on a
+        // deprecated SPDX ID that already ends with `+`, even when ignoring deprecated)
+        let ignore_deprecated_config = TrustConfig {
+            ignore_deprecated: true,
+            ..TrustConfig::default()
+        };
+        for invalid in ["MIT++", "GPL-2.0++", "+", "foo+"] {
+            assert_eq!(
+                SpdxExpression::parse(invalid)
+                    .unwrap()
+                    .check_trust(&ignore_deprecated_config),
+                Err(RejectReason::Untrusted),
+                "expected {invalid} to be untrusted"
+            );
+        }
     }
 }

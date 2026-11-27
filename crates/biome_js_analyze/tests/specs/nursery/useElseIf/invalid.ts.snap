@@ -1,0 +1,504 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+{
+	if ((foo as string) === "one") {}
+	if (foo === "two") {}
+}
+
+{
+	if (foo! === "one") {}
+	if (foo === "two") {}
+}
+
+{
+	if ((foo satisfies string) === "one") {}
+	if (foo === "two") {}
+}
+
+function boolean1(foo: boolean) {
+	if (foo) {}
+	if (foo === false) {}
+}
+
+function boolean2(foo: boolean) {
+	if (!foo) {}
+	if (foo === true) {}
+}
+
+function boolean3(foo: boolean) {
+	if (Boolean(foo)) {}
+	if (foo === false) {}
+}
+
+function boolean4(foo: boolean) {
+	if (foo === false) {}
+	if (Boolean(foo)) {}
+}
+
+function boolean5(foo: true | false) {
+	if (!!foo) {}
+	if (!foo) {}
+}
+
+function boolean6(foo: boolean) {
+	if (foo === false) {}
+
+	if (foo === true) {}
+	else if (Boolean(foo)) {}
+}
+
+class Options {
+	constructor(private enabled: boolean) {
+		if (enabled) {}
+		if (enabled === false) {}
+	}
+}
+
+{
+	let flag: boolean = read();
+	if (flag) {}
+	if (!flag) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    2 │ {
+    3 │ 	if ((foo as string) === "one") {}
+  > 4 │ 	if (foo === "two") {}
+      │ 	^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i The previous condition is here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ {
+  > 3 │ 	if ((foo as string) === "one") {}
+      │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	if (foo === "two") {}
+    5 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   {
+     3    │ - → if·((foo·as·string)·===·"one")·{}
+     4    │ - → if·(foo·===·"two")·{}
+        3 │ + → if·((foo·as·string)·===·"one")·{}·else·if·(foo·===·"two")·{}
+     5  4 │   }
+     6  5 │   
+  
+
+```
+
+```
+invalid.ts:9:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+     7 │ {
+     8 │ 	if (foo! === "one") {}
+   > 9 │ 	if (foo === "two") {}
+       │ 	^^^^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i The previous condition is here.
+  
+     7 │ {
+   > 8 │ 	if (foo! === "one") {}
+       │ 	    ^^^^^^^^^^^^^^
+     9 │ 	if (foo === "two") {}
+    10 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+     6  6 │   
+     7  7 │   {
+     8    │ - → if·(foo!·===·"one")·{}
+     9    │ - → if·(foo·===·"two")·{}
+        8 │ + → if·(foo!·===·"one")·{}·else·if·(foo·===·"two")·{}
+    10  9 │   }
+    11 10 │   
+  
+
+```
+
+```
+invalid.ts:14:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    12 │ {
+    13 │ 	if ((foo satisfies string) === "one") {}
+  > 14 │ 	if (foo === "two") {}
+       │ 	^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i The previous condition is here.
+  
+    12 │ {
+  > 13 │ 	if ((foo satisfies string) === "one") {}
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	if (foo === "two") {}
+    15 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    11 11 │   
+    12 12 │   {
+    13    │ - → if·((foo·satisfies·string)·===·"one")·{}
+    14    │ - → if·(foo·===·"two")·{}
+       13 │ + → if·((foo·satisfies·string)·===·"one")·{}·else·if·(foo·===·"two")·{}
+    15 14 │   }
+    16 15 │   
+  
+
+```
+
+```
+invalid.ts:19:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    17 │ function boolean1(foo: boolean) {
+    18 │ 	if (foo) {}
+  > 19 │ 	if (foo === false) {}
+       │ 	^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i The previous condition is here.
+  
+    17 │ function boolean1(foo: boolean) {
+  > 18 │ 	if (foo) {}
+       │ 	    ^^^
+    19 │ 	if (foo === false) {}
+    20 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    16 16 │   
+    17 17 │   function boolean1(foo: boolean) {
+    18    │ - → if·(foo)·{}
+    19    │ - → if·(foo·===·false)·{}
+       18 │ + → if·(foo)·{}·else·if·(foo·===·false)·{}
+    20 19 │   }
+    21 20 │   
+  
+
+```
+
+```
+invalid.ts:24:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    22 │ function boolean2(foo: boolean) {
+    23 │ 	if (!foo) {}
+  > 24 │ 	if (foo === true) {}
+       │ 	^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i The previous condition is here.
+  
+    22 │ function boolean2(foo: boolean) {
+  > 23 │ 	if (!foo) {}
+       │ 	    ^^^^
+    24 │ 	if (foo === true) {}
+    25 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    21 21 │   
+    22 22 │   function boolean2(foo: boolean) {
+    23    │ - → if·(!foo)·{}
+    24    │ - → if·(foo·===·true)·{}
+       23 │ + → if·(!foo)·{}·else·if·(foo·===·true)·{}
+    25 24 │   }
+    26 25 │   
+  
+
+```
+
+```
+invalid.ts:29:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    27 │ function boolean3(foo: boolean) {
+    28 │ 	if (Boolean(foo)) {}
+  > 29 │ 	if (foo === false) {}
+       │ 	^^^^^^^^^^^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i The previous condition is here.
+  
+    27 │ function boolean3(foo: boolean) {
+  > 28 │ 	if (Boolean(foo)) {}
+       │ 	    ^^^^^^^^^^^^
+    29 │ 	if (foo === false) {}
+    30 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    26 26 │   
+    27 27 │   function boolean3(foo: boolean) {
+    28    │ - → if·(Boolean(foo))·{}
+    29    │ - → if·(foo·===·false)·{}
+       28 │ + → if·(Boolean(foo))·{}·else·if·(foo·===·false)·{}
+    30 29 │   }
+    31 30 │   
+  
+
+```
+
+```
+invalid.ts:34:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    32 │ function boolean4(foo: boolean) {
+    33 │ 	if (foo === false) {}
+  > 34 │ 	if (Boolean(foo)) {}
+       │ 	^^^^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i The previous condition is here.
+  
+    32 │ function boolean4(foo: boolean) {
+  > 33 │ 	if (foo === false) {}
+       │ 	    ^^^^^^^^^^^^^
+    34 │ 	if (Boolean(foo)) {}
+    35 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    31 31 │   
+    32 32 │   function boolean4(foo: boolean) {
+    33    │ - → if·(foo·===·false)·{}
+    34    │ - → if·(Boolean(foo))·{}
+       33 │ + → if·(foo·===·false)·{}·else·if·(Boolean(foo))·{}
+    35 34 │   }
+    36 35 │   
+  
+
+```
+
+```
+invalid.ts:39:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    37 │ function boolean5(foo: true | false) {
+    38 │ 	if (!!foo) {}
+  > 39 │ 	if (!foo) {}
+       │ 	^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i The previous condition is here.
+  
+    37 │ function boolean5(foo: true | false) {
+  > 38 │ 	if (!!foo) {}
+       │ 	    ^^^^^
+    39 │ 	if (!foo) {}
+    40 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    36 36 │   
+    37 37 │   function boolean5(foo: true | false) {
+    38    │ - → if·(!!foo)·{}
+    39    │ - → if·(!foo)·{}
+       38 │ + → if·(!!foo)·{}·else·if·(!foo)·{}
+    40 39 │   }
+    41 40 │   
+  
+
+```
+
+```
+invalid.ts:45:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    43 │ 	if (foo === false) {}
+    44 │ 
+  > 45 │ 	if (foo === true) {}
+       │ 	^^^^^^^^^^^^^^^^^
+    46 │ 	else if (Boolean(foo)) {}
+    47 │ }
+  
+  i The previous condition is here.
+  
+    42 │ function boolean6(foo: boolean) {
+  > 43 │ 	if (foo === false) {}
+       │ 	    ^^^^^^^^^^^^^
+    44 │ 
+    45 │ 	if (foo === true) {}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    41 41 │   
+    42 42 │   function boolean6(foo: boolean) {
+    43    │ - → if·(foo·===·false)·{}
+    44    │ - 
+    45    │ - → if·(foo·===·true)·{}
+    46    │ - → else·if·(Boolean(foo))·{}
+       43 │ + → if·(foo·===·false)·{}·else·if·(foo·===·true)·{}
+       44 │ + → else·if·(Boolean(foo))·{}
+    47 45 │   }
+    48 46 │   
+  
+
+```
+
+```
+invalid.ts:52:3 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    50 │ 	constructor(private enabled: boolean) {
+    51 │ 		if (enabled) {}
+  > 52 │ 		if (enabled === false) {}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 	}
+    54 │ }
+  
+  i The previous condition is here.
+  
+    49 │ class Options {
+    50 │ 	constructor(private enabled: boolean) {
+  > 51 │ 		if (enabled) {}
+       │ 		    ^^^^^^^
+    52 │ 		if (enabled === false) {}
+    53 │ 	}
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    49 49 │   class Options {
+    50 50 │     constructor(private enabled: boolean) {
+    51    │ - → → if·(enabled)·{}
+    52    │ - → → if·(enabled·===·false)·{}
+       51 │ + → → if·(enabled)·{}·else·if·(enabled·===·false)·{}
+    53 52 │     }
+    54 53 │   }
+  
+
+```
+
+```
+invalid.ts:59:2 lint/nursery/useElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement compares the same value as the previous one, but against a different value.
+  
+    57 │ 	let flag: boolean = read();
+    58 │ 	if (flag) {}
+  > 59 │ 	if (!flag) {}
+       │ 	^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i The previous condition is here.
+  
+    56 │ {
+    57 │ 	let flag: boolean = read();
+  > 58 │ 	if (flag) {}
+       │ 	    ^^^^
+    59 │ 	if (!flag) {}
+    60 │ }
+  
+  i Only one of these conditions can be true, but separate if statements hide this, and the second condition is still checked when the first one matched.
+  
+  i Add else before this if statement to join it to the previous one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add else before this if statement.
+  
+    56 56 │   {
+    57 57 │     let flag: boolean = read();
+    58    │ - → if·(flag)·{}
+    59    │ - → if·(!flag)·{}
+       58 │ + → if·(flag)·{}·else·if·(!flag)·{}
+    60 59 │   }
+    61 60 │   
+  
+
+```

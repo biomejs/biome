@@ -3,7 +3,10 @@ use crate::{
     Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
     MacroOption, Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
-use biome_rowan::{TextRange, TextSize};
+use biome_html_parser::{HtmlParserOptions, parse_html};
+use biome_html_syntax::{HtmlRoot, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
+use biome_rowan::{AstNode, TextRange};
 
 const LIST: &str = r#"<script setup lang="ts">
 import Card from './Card.vue'
@@ -495,6 +498,22 @@ fn external_script_makes_missing_names_unknowable() {
 }
 
 #[test]
+fn known_hyphenated_tags_are_native() {
+    let model = sfc(r#"<template>
+  <math><annotation-xml encoding="text/html" /></math>
+  <svg><font-face /></svg>
+  <my-card />
+</template>
+"#);
+    let components: Vec<_> = model
+        .elements()
+        .filter(|element| element.is_component())
+        .map(|element| element.tag().to_string())
+        .collect();
+    assert_eq!(components, ["my-card"]);
+}
+
+#[test]
 fn components_and_directives() {
     let model = sfc(r#"<script setup lang="ts">
 import MyCard from './MyCard.vue'
@@ -553,8 +572,28 @@ fn conditional_chains_and_operands() {
         .collect();
     assert_eq!(groups, [0, 1, 1]);
     let second = chains[0].branches().nth(1).unwrap().condition.unwrap();
-    assert_eq!(second.root(), &RootShape::Not);
+    assert_eq!(
+        second.root(),
+        &RootShape::Not {
+            operator: TextRange::new(59.into(), 60.into())
+        }
+    );
     assert_eq!(model.roots().count(), 4);
+}
+
+#[test]
+fn double_negation_is_not_a_negation() {
+    let model = sfc(r#"<template>
+  <p v-if="!!a">1</p>
+  <p v-if="!(!b)">2</p>
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .chains()
+        .filter_map(|chain| chain.branches().next()?.condition)
+        .map(|condition| condition.root().clone())
+        .collect();
+    assert_eq!(shapes, [RootShape::DoubleNot, RootShape::DoubleNot]);
 }
 
 #[test]
@@ -996,17 +1035,132 @@ fn string_values_and_comments() {
 }
 
 #[test]
-fn attr_at_finds_the_attribute_with_the_exact_range() {
-    let code = "<template>\n  <div id=\"x\" :title=\"'y'\" />\n</template>\n";
-    let model = sfc(code);
-    let start = code.find(":title").unwrap();
-    let end = start + ":title=\"'y'\"".len();
-    let range = TextRange::new(TextSize::from(start as u32), TextSize::from(end as u32));
-    let attr = model.attr_at(range).unwrap();
-    assert_eq!(attr.static_arg(), Some("title"));
-    assert!(
-        model
-            .attr_at(TextRange::at(range.start(), 1.into()))
-            .is_none()
+fn setup_bindings_record_the_macro_or_composable_they_store() {
+    let model = sfc(r#"<script setup>
+import { useAttrs, useSlots } from 'vue'
+const props = withDefaults(defineProps(['a']), { a: 1 })
+const emit = defineEmits(['change'])
+const typedSlots = defineSlots()
+const slots = useSlots()
+const attrs = useAttrs()
+</script>
+"#);
+    let origins: Vec<_> = model
+        .symbols()
+        .filter(|symbol| symbol.kind() == SymbolKind::Local)
+        .map(|symbol| (symbol.name().to_string(), symbol.origin()))
+        .collect();
+    assert_eq!(
+        origins,
+        [
+            ("props".into(), Origin::DefineProps),
+            ("emit".into(), Origin::DefineEmits),
+            ("typedSlots".into(), Origin::DefineSlots),
+            ("slots".into(), Origin::UseSlots),
+            ("attrs".into(), Origin::UseAttrs),
+        ]
     );
+}
+
+#[test]
+fn script_blocks_with_only_comments_declare_nothing() {
+    let model = sfc("<script>\n// plain\n</script>\n<script setup>\n/* setup */\n</script>\n");
+    assert_eq!(model.blocks().count(), 2);
+    assert!(model.symbols().all(|symbol| symbol.snippet().is_none()));
+}
+
+#[test]
+fn elements_and_attributes_point_to_their_nodes() {
+    let model = sfc(LIST);
+    let options = HtmlParserOptions::from(&HtmlFileSource::vue());
+    let host: HtmlRoot = parse_html(LIST, options).tree();
+    let nodes = model.resolve_html_nodes(&host);
+
+    let card = model
+        .elements()
+        .find(|element| element.tag() == "Card")
+        .expect("an element");
+    let node = nodes.get(card.html_node()).expect("a resolved node");
+    assert_eq!(node.kind(), HtmlSyntaxKind::HTML_ELEMENT);
+    assert_eq!(node.text_trimmed_range(), card.range());
+    assert_eq!(nodes.id(node), Some(card.html_node()));
+
+    let attrs: Vec<_> = card
+        .attrs()
+        .map(|attr| {
+            let node = nodes.get(attr.html_node()).expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), attr.range());
+            assert_eq!(nodes.id(node), Some(attr.html_node()));
+            node.text_trimmed().to_string()
+        })
+        .collect();
+    assert_eq!(
+        attrs,
+        [
+            r#"v-for="item in items""#,
+            r#":key="item.id""#,
+            r#"@click="emit('select', item.id)""#,
+        ]
+    );
+
+    // No row stands for the root of the document.
+    assert_eq!(nodes.id(host.syntax()), None);
+}
+
+#[test]
+fn only_references_written_in_javascript_have_a_node() {
+    let model = sfc(r#"<script setup>
+import Card from './Card.vue'
+const title = 'a'
+</script>
+
+<template>
+  <Card v-focus :title="title">{{ title }}</Card>
+  <slot name="footer" />
+</template>
+"#);
+    let nodes: Vec<_> = model
+        .references()
+        .map(|reference| {
+            (
+                reference.name().to_string(),
+                reference.site(),
+                reference.js_node().is_some(),
+            )
+        })
+        .collect();
+    let card = model
+        .elements()
+        .find(|element| element.tag() == "Card")
+        .expect("an element");
+    let focus = card.attrs().next().expect("a directive");
+    let slot = model
+        .elements()
+        .find(|element| element.tag() == "slot")
+        .expect("an element");
+    assert_eq!(
+        nodes,
+        [
+            ("title".into(), RefSite::Identifier, true),
+            ("title".into(), RefSite::Identifier, true),
+            ("Card".into(), RefSite::TagName(card.id()), false),
+            ("v-focus".into(), RefSite::DirectiveName(focus.id()), false),
+            ("footer".into(), RefSite::SlotName(slot.id()), false),
+        ]
+    );
+}
+
+#[test]
+fn slot_parameters_point_to_the_node_of_their_name() {
+    let model = sfc(r#"<template>
+  <List v-slot="{ row }">{{ row }}</List>
+</template>
+"#);
+    let row = model
+        .symbols()
+        .find(|symbol| symbol.kind() == SymbolKind::SlotParam)
+        .expect("a slot parameter");
+    // The binding of a slot parameter is its whole declaration.
+    assert!(row.name_node().is_some());
+    assert_eq!(row.name_node(), row.js_node());
 }

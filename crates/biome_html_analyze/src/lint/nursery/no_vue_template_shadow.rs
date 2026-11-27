@@ -91,7 +91,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueTemplateShadow {
-        version: "next",
+        version: "2.6.5",
         name: "noVueTemplateShadow",
         language: "html",
         recommended: true,

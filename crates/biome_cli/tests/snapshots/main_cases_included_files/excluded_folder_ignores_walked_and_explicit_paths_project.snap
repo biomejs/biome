@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/excluded_folder_ignores_walked_and_explicit_paths_project/.'
+```
+
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**", "!**/generated"] } }
+```
+
+## `src/generated/deep/more.js`
+
+```js
+  statement(  )  
+```
+
+## `src/generated/out.js`
+
+```js
+  statement(  )  
+```
+
+## `src/index.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

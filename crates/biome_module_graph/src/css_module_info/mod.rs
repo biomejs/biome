@@ -204,18 +204,21 @@ pub struct CssImport {
 
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
+
+    /// The rules that resolve the specifier: [ResolutionMode::Sass] for the
+    /// URLs of the Sass `@use`, `@forward` and `@import` rules, and
+    /// [ResolutionMode::Css] for the others.
+    pub mode: ResolutionMode,
 }
 
 impl CssImport {
-    /// Resolves this `@import` of the CSS `module`.
-    ///
-    /// See [ResolutionMode::Css] for the resolution rules.
+    /// Resolves this import of the stylesheet `module`.
     pub fn resolve_css<'db>(
         &self,
         db: &'db dyn ModuleDb,
         module: ModuleInfo,
     ) -> &'db ResolvedSpecifier {
-        resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
+        resolve_module_import(db, module, &self.specifier, self.mode)
     }
 }
 

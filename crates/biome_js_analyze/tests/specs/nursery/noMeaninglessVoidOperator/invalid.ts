@@ -23,3 +23,7 @@ const callResult = void log();
 type Empty = void | undefined;
 declare function alias(): Empty;
 void alias();
+
+function withDefault(count: number = 0) {
+	void count;
+}

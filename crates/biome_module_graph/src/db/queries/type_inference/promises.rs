@@ -3,9 +3,10 @@
 //! These queries traverse only the type shapes needed to distinguish promises,
 //! arrays of promises, and promise-returning functions. When the available type
 //! information is insufficient for a conclusive result, they return
-//! `Indeterminate` rather than `NoMatch`.
+//! `Indeterminate` rather than `NoMatch`. Flow-adjusted types replace raw types
+//! at the requested runtime occurrence, even when unknown.
 
-use super::ExpressionTypeInput;
+use super::{ExpressionTypeInput, infer_flow_expression_type};
 use crate::ModuleDb;
 use crate::db::type_inference::{
     PromiseClassification, classify_expression_array_promise, classify_expression_function_return,
@@ -49,6 +50,9 @@ pub fn infer_expression_is_promise<'db>(
             let Some(reference) = js_info.raw_expressions.get(&expression) else {
                 return TypeInferenceClassification::Indeterminate;
             };
+            if let Some(ty) = infer_flow_expression_type(db, input) {
+                return classify_inferred_promise_result(is_promise_type(db, ty));
+            }
             classify_promise_result(classify_expression_promise(db, module, reference.clone()))
         },
     )
@@ -92,6 +96,9 @@ pub fn infer_expression_is_array_of_promises<'db>(
             let Some(reference) = js_info.raw_expressions.get(&expression) else {
                 return TypeInferenceClassification::Indeterminate;
             };
+            if let Some(ty) = infer_flow_expression_type(db, input) {
+                return classify_inferred_promise_result(is_array_of_promise_type(db, ty));
+            }
             classify_promise_result(classify_expression_array_promise(
                 db,
                 module,
@@ -137,6 +144,31 @@ pub fn infer_expression_function_returns_promise<'db>(
             let Some(reference) = js_info.raw_expressions.get(&expression) else {
                 return TypeInferenceClassification::Indeterminate;
             };
+            if let Some(ty) = infer_flow_expression_type(db, input) {
+                let classification = function_returns_promise(db, ty);
+                // A negative probe is only conclusive for a direct function. The call
+                // signatures of an interface are not inspected.
+                if classification == Some(false)
+                    && ty.callable_function(db).is_none()
+                    && !matches!(
+                        ty,
+                        InferredTypeData::BigInt
+                            | InferredTypeData::Boolean
+                            | InferredTypeData::Null
+                            | InferredTypeData::Number
+                            | InferredTypeData::String
+                            | InferredTypeData::Symbol
+                            | InferredTypeData::Undefined
+                            | InferredTypeData::Conditional
+                            | InferredTypeData::Literal(_)
+                            | InferredTypeData::NeverKeyword
+                            | InferredTypeData::VoidKeyword
+                    )
+                {
+                    return TypeInferenceClassification::Indeterminate;
+                }
+                return classify_inferred_promise_result(classification);
+            }
             classify_promise_result(classify_expression_function_return(
                 db,
                 module,
@@ -178,6 +210,14 @@ fn infer_expression_function_returns_promise_cycle_result<'db>(
 
 // #region QUERY HELPER FUNCTIONS
 
+fn classify_inferred_promise_result(classification: Option<bool>) -> TypeInferenceClassification {
+    match classification {
+        Some(true) => TypeInferenceClassification::Match,
+        Some(false) => TypeInferenceClassification::NoMatch,
+        None => TypeInferenceClassification::Indeterminate,
+    }
+}
+
 fn classify_promise_result(classification: PromiseClassification) -> TypeInferenceClassification {
     match classification {
         PromiseClassification::ReturnsPromise => TypeInferenceClassification::Match,
@@ -217,12 +257,13 @@ pub fn is_array_of_promise_type<'db>(
 /// Classifies whether `ty` is callable and returns a Promise.
 ///
 /// Returns `Some(true)` when a reachable callable has a Promise-like return
-/// type. Returns `Some(false)` when traversal finds no supported direct function
-/// with a Promise-like return. Callable object and interface shapes are not
-/// inspected and may therefore return `Some(false)`. Returns `None` when an
-/// unresolved or recursive branch, or exhausted traversal, prevents a
-/// conclusive result. Callable parameters and unrelated nested types are not
-/// resolved.
+/// type. An overloaded function, which is an object with call signatures,
+/// returns a Promise when every overload does. Returns `Some(false)` when
+/// traversal finds no supported callable with a Promise-like return. Callable
+/// interface shapes are not inspected and may therefore return `Some(false)`.
+/// Returns `None` when overloads disagree, or when an unresolved or recursive
+/// branch, or exhausted traversal, prevents a conclusive result. Callable
+/// parameters and unrelated nested types are not resolved.
 pub fn function_returns_promise<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,

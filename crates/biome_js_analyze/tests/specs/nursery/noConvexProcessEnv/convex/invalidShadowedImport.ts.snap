@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShadowedImport.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { env } from "./_generated/server";
+
+function apiKey(env: unknown) {
+	return process.env.GIPHY_KEY;
+}
+
+```
+
+# Diagnostics
+```
+invalidShadowedImport.ts:5:9 lint/nursery/noConvexProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.env in Convex functions.
+  
+    4 │ function apiKey(env: unknown) {
+  > 5 │ 	return process.env.GIPHY_KEY;
+      │ 	       ^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Variables read from process.env have no types, so misspelled or missing variables are only found when the code runs.
+  
+  i Declare the environment variables in convex/convex.config.ts, and read them from the env object exported by _generated/server.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
