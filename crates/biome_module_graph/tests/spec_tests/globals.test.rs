@@ -573,6 +573,40 @@ fn promise_constructor_leaves_uninferred_value_type_unknown() {
 }
 
 #[test]
+fn promise_method_approximations_return_canonical_promise_instances() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const promise: Promise<number>;
+        interface Query<T> extends Promise<T> {}
+        declare const query: Query<number>;
+        export const resolve = Promise.resolve;
+        export const then = promise.then;
+        export const caught = promise.catch;
+        export const settled = promise.finally;
+        export const inherited = query.then;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    // Substituting into an instance visits every member of an expanded target
+    // class, so these return types must name `Promise` through its handle.
+    for name in ["resolve", "then", "caught", "settled", "inherited"] {
+        let returned = inferred_function_return_ty_by_name(&db, module, inferred, name).unwrap();
+        let InferredTypeData::InstanceOf(instance) = returned else {
+            panic!("{name} must return an instance, got {returned:?}")
+        };
+        assert_eq!(
+            instance.ty(&db),
+            InferredTypeData::promise_class(),
+            "{name}"
+        );
+    }
+}
+
+#[test]
 fn promise_subtypes_infer_handler_results() {
     let fs = MemoryFileSystem::default();
     fs.insert(
