@@ -153,8 +153,7 @@ impl Format<JsFormatContext> for ChainMember {
                         write!(
                             f,
                             [
-                                optional_chain_token.format(),
-                                type_arguments.format(),
+                                FormatChainEndCallWithoutArguments::new(expression),
                                 arguments.format(),
                             ]
                         )
@@ -175,5 +174,33 @@ impl Format<JsFormatContext> for ChainMember {
                 write!(f, [node.format()])
             }
         }
+    }
+}
+
+/// Formats the optional chain token and type arguments of the chain's last
+/// call, without its arguments. The member chain formats the arguments
+/// separately so that it can pass options to them.
+pub(super) struct FormatChainEndCallWithoutArguments<'a> {
+    expression: &'a JsCallExpression,
+}
+
+impl<'a> FormatChainEndCallWithoutArguments<'a> {
+    pub(super) fn new(expression: &'a JsCallExpression) -> Self {
+        Self { expression }
+    }
+}
+
+impl Format<JsFormatContext> for FormatChainEndCallWithoutArguments<'_> {
+    fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let JsCallExpressionFields {
+            // Formatted as part of the previous item
+            callee: _,
+            optional_chain_token,
+            type_arguments,
+            // Formatted by the caller
+            arguments: _,
+        } = self.expression.as_fields();
+
+        write!(f, [optional_chain_token.format(), type_arguments.format()])
     }
 }

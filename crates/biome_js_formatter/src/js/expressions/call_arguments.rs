@@ -10,7 +10,7 @@ use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::rowan::BestFittingVariants;
-use biome_formatter::{VecBuffer, format_args, write};
+use biome_formatter::{FormatRuleWithOptions, VecBuffer, format_args, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
@@ -21,7 +21,27 @@ use biome_js_syntax::{
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsCallArguments;
+pub(crate) struct FormatJsCallArguments {
+    options: FormatJsCallArgumentsOptions,
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct FormatJsCallArgumentsOptions {
+    /// Stores the hugged layout with
+    /// [JsFormatContext::set_hugged_call_arguments] if the last argument is
+    /// grouped and doesn't already break. The caller takes it with
+    /// [JsFormatContext::take_hugged_call_arguments].
+    pub(crate) store_hugged_layout: bool,
+}
+
+impl FormatRuleWithOptions<JsCallArguments> for FormatJsCallArguments {
+    type Options = FormatJsCallArgumentsOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.options = options;
+        self
+    }
+}
 
 impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
     fn fmt_fields(&self, node: &JsCallArguments, f: &mut JsFormatter) -> FormatResult<()> {
@@ -141,7 +161,14 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
         }
 
         if let Some(group_layout) = arguments_grouped_layout(&args, f.comments()) {
-            write_grouped_arguments(node, arguments, group_layout, should_insert_space, f)
+            write_grouped_arguments(
+                node,
+                arguments,
+                group_layout,
+                should_insert_space,
+                f,
+                self.options.store_hugged_layout,
+            )
         } else if is_long_curried_call(call_expression.as_ref()) {
             let should_insert_space = f.options().delimiter_spacing().value();
             write!(
@@ -356,6 +383,7 @@ fn write_grouped_arguments(
     group_layout: GroupedCallArgumentLayout,
     should_insert_space: bool,
     f: &mut JsFormatter,
+    store_hugged_layout: bool,
 ) -> FormatResult<()> {
     let l_paren_token = call_arguments.l_paren_token();
     let r_paren_token = call_arguments.r_paren_token();
@@ -633,6 +661,25 @@ fn write_grouped_arguments(
 
         buffer.into_vec()
     };
+
+    if store_hugged_layout
+        && !grouped_breaks
+        && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument)
+    {
+        // Store the middle variant without wrapping it in `best_fitting!`.
+        // Member chains place this layout inside a flat `best_fitting!`
+        // variant, where a nested `best_fitting!` would always measure and
+        // print its most flat variant instead of the middle one.
+        let middle_variant = middle_variant_with_spaces
+            .as_deref()
+            .unwrap_or(&middle_variant_no_spaces);
+        // Strip the surrounding `StartBestFittingEntry` and `EndBestFittingEntry` tags.
+        let hugged = middle_variant[1..middle_variant.len() - 1].to_vec();
+        if let Some(hugged) = f.intern_vec(hugged) {
+            f.context_mut()
+                .set_hugged_call_arguments(call_arguments, hugged);
+        }
+    }
 
     // If the grouped content breaks, then we can skip the most_flat variants,
     // since we already know that they won't be fitting on a single line.
@@ -968,7 +1015,7 @@ fn should_group_first_argument(
 }
 
 /// Checks if the last argument should be grouped.
-fn should_group_last_argument(
+pub(crate) fn should_group_last_argument(
     list: &JsCallArgumentList,
     comments: &JsComments,
 ) -> SyntaxResult<bool> {
