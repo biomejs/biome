@@ -1332,7 +1332,8 @@ fn test_conditional_compares_builtin_members() {
         &[
             // Iterator members use symbol keys, which can't be compared.
             "defaultedArguments",
-            // The generated signatures of `Promise` methods are simplified.
+            // `then` is generic. A mismatch with a generic method is not conclusive,
+            // and the method can't be read through an indexed access.
             "promiseThenMismatch",
             "promiseThenParameters",
         ],

@@ -29,7 +29,7 @@ pub struct LoweringGap {
 pub(super) struct GenericLowerer<'a> {
     manifest: &'a GlobalManifest,
     ids: &'a GlobalIds,
-    pub(super) sources: ParsedSourceCache<'a>,
+    sources: ParsedSourceCache<'a>,
     gaps: Vec<LoweringGap>,
 }
 

@@ -735,7 +735,7 @@ impl<'db> TypeData<'db> {
     ///
     /// Built-in declarations refer to `PromiseLike` through this handle, as in
     /// the return type of `AsyncDisposable[Symbol.asyncDispose]`.
-    pub(crate) fn is_promise_like_interface(self) -> bool {
+    pub fn is_promise_like_interface(self) -> bool {
         self == Self::GlobalType(PROMISE_LIKE_ID_GLOBAL_TYPE_ID)
     }
 
