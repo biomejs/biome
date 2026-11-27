@@ -21,6 +21,20 @@ let e = undefined/**/ ;
 let f = /**/undefined/**/ ;
 let g 
   /**/= /**/undefined/**/ ;
+
+// No fix for `var`: removing the initializer would keep the previous iteration's value.
+for (let i = 0; i < 3; i++) {
+	var h = undefined;
+	if (i === 1) h = "set";
+}
+
+// No fix for `var`: removing the initializer would keep the previous value of the redeclared variable.
+function redeclared() {
+	var j = 1;
+	var j = undefined;
+	return j;
+}
+
 ```
 
 # Diagnostics
@@ -45,7 +59,7 @@ invalid.js:2:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
 ```
 
 ```
-invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i It's not necessary to initialize c to undefined.
   
@@ -58,15 +72,11 @@ invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
   
   i A variable that is declared and not initialized to any value automatically gets the value of undefined.
   
-  i Safe fix: Remove undefined initialization.
-  
-    3 │ var·c·=·undefined,
-      │       ----------- 
 
 ```
 
 ```
-invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i It's not necessary to initialize o to undefined.
   
@@ -79,10 +89,6 @@ invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━
   
   i A variable that is declared and not initialized to any value automatically gets the value of undefined.
   
-  i Safe fix: Remove undefined initialization.
-  
-    4 │ → o·=·undefined;
-      │     ----------- 
 
 ```
 
@@ -213,6 +219,8 @@ invalid.js:17:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
     16 │ let g·
   > 17 │   /**/= /**/undefined/**/ ;
        │       ^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // No fix for `var`: removing the initializer would keep the previous iteration's value.
   
   i A variable that is declared and not initialized to any value automatically gets the value of undefined.
   
@@ -223,6 +231,42 @@ invalid.js:17:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━�
     16    │ - let·g·
     17    │ - ··/**/=·/**/undefined/**/·;
        16 │ + let·g·;/**//**/
+    18 17 │   
+    19 18 │   // No fix for `var`: removing the initializer would keep the previous iteration's value.
+  
+
+```
+
+```
+invalid.js:21:8 lint/complexity/noUselessUndefinedInitialization ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i It's not necessary to initialize h to undefined.
+  
+    19 │ // No fix for `var`: removing the initializer would keep the previous iteration's value.
+    20 │ for (let i = 0; i < 3; i++) {
+  > 21 │ 	var h = undefined;
+       │ 	      ^^^^^^^^^^^
+    22 │ 	if (i === 1) h = "set";
+    23 │ }
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+
+```
+
+```
+invalid.js:28:8 lint/complexity/noUselessUndefinedInitialization ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i It's not necessary to initialize j to undefined.
+  
+    26 │ function redeclared() {
+    27 │ 	var j = 1;
+  > 28 │ 	var j = undefined;
+       │ 	      ^^^^^^^^^^^
+    29 │ 	return j;
+    30 │ }
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
   
 
 ```
