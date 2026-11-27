@@ -611,7 +611,16 @@ impl Session {
             } else {
                 Some(configuration_path.as_path())
             };
-            if path == configuration_path || path.parent() == directory {
+            // The `.editorconfig` is searched from the configuration directory upwards.
+            let is_editorconfig_of_configuration = path.file_name() == Some(".editorconfig")
+                && path
+                    .parent()
+                    .zip(directory)
+                    .is_some_and(|(parent, directory)| directory.starts_with(parent));
+            if path == configuration_path
+                || path.parent() == directory
+                || is_editorconfig_of_configuration
+            {
                 return false;
             }
         }
@@ -1433,7 +1442,8 @@ impl Session {
         force: bool,
     ) {
         if force {
-            self.workspace.clear_configuration_errors(project_key);
+            self.workspace
+                .forget_deleted_configuration_errors(project_key);
         }
         let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
         let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {

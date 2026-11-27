@@ -689,6 +689,14 @@ impl WorkspaceServer {
             .retain(|(key, _)| *key != project_key);
     }
 
+    /// Forgets the errors of configuration files that no longer exist. The errors of
+    /// other files stay until a scan loads those files again.
+    pub fn forget_deleted_configuration_errors(&self, project_key: ProjectKey) {
+        self.configuration_errors
+            .lock()
+            .retain(|(key, path)| *key != project_key || self.fs.path_exists(path));
+    }
+
     fn record_configuration_error(&self, project_key: ProjectKey, path: &Utf8Path, failed: bool) {
         let entry = (project_key, path.to_path_buf());
         let mut errors = self.configuration_errors.lock();

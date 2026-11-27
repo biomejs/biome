@@ -411,6 +411,45 @@ async fn watched_ignore_file_under_vcs_root_keeps_updating() -> Result<()> {
 }
 
 #[tokio::test]
+async fn watched_editorconfig_above_configuration_directory_keeps_updating() -> Result<()> {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        to_utf8_file_path_buf(uri!("settings/team/biome.json")),
+        r#"{ "files": { "includes": ["**", "!!**/.editorconfig"] }, "formatter": { "useEditorconfig": true } }"#,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("settings/.editorconfig")),
+        "root = true\n[*]\nindent_style = space\nindent_size = 3\n",
+    );
+    let TestClient {
+        mut server,
+        client_settings,
+        reader,
+        ..
+    } = start_server(fs.clone(), None).await?;
+    let custom_settings = json!({
+        "configurationPath": to_utf8_file_path_buf(uri!("settings/team/biome.json")).as_str(),
+    });
+    *client_settings.lock().unwrap() = json!([custom_settings.clone()]);
+    server
+        .load_configuration_with_settings(custom_settings)
+        .await?;
+    server
+        .open_named_document("function f(){return 1;}", uri!("src/main.js"), "javascript")
+        .await?;
+    assert_indentation(&mut server, uri!("src/main.js"), 3).await?;
+    fs.insert(
+        to_utf8_file_path_buf(uri!("settings/.editorconfig")),
+        "root = true\n[*]\nindent_style = space\nindent_size = 5\n",
+    );
+    notify_configuration_change(&mut server, uri!("settings/.editorconfig")).await?;
+    assert_indentation(&mut server, uri!("src/main.js"), 5).await?;
+    server.shutdown().await?;
+    reader.abort();
+    Ok(())
+}
+
+#[tokio::test]
 async fn watched_configuration_dependencies_cross_workspace_folders() -> Result<()> {
     let fs = Arc::new(MemoryFileSystem::default());
     fs.insert(
