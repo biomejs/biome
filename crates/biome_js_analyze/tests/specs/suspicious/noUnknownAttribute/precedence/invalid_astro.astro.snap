@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_astro.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+---
+{true && (
+	<>
+		<style href="face" precedence="default">
+			{":root{--face:Geist}"}
+		</style>
+		<link rel="stylesheet" href="/theme.css" precedence="high" />
+	</>
+)}
+
+```
+
+# Diagnostics
+```
+invalid_astro.astro:6:22 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'precedence' is not a valid DOM attribute.
+  
+    4 │ {true && (
+    5 │ 	<>
+  > 6 │ 		<style href="face" precedence="default">
+      │ 		                   ^^^^^^^^^^^^^^^^^^^^
+    7 │ 			{":root{--face:Geist}"}
+    8 │ 		</style>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid_astro.astro:9:44 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'precedence' is not a valid DOM attribute.
+  
+     7 │ 			{":root{--face:Geist}"}
+     8 │ 		</style>
+   > 9 │ 		<link rel="stylesheet" href="/theme.css" precedence="high" />
+       │ 		                                         ^^^^^^^^^^^^^^^^^
+    10 │ 	</>
+    11 │ )}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
