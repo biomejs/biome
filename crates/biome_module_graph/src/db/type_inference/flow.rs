@@ -25,7 +25,7 @@ use biome_js_type_info::interned_types::{Literal, TypeData};
 use biome_js_type_info::{
     NarrowingPredicate, PropertyTest, RawTypeData, RawTypeId, TypeId, TypeReference,
     TypeofExpression, TypeofKind, is_narrowing_invariant, may_narrow_by_property,
-    narrow_by_property, narrow_type,
+    narrow_by_in_operator, narrow_by_property, narrow_type,
 };
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
@@ -146,7 +146,10 @@ enum FlatteningError {
     Cycle,
 }
 
-/// The state that the guards of one solve share.
+/// The state of one solve that its guards share: the subject it narrows, the
+/// subject's declared type at the root's start, and the results of the
+/// property guards and `in` tests applied so far, keyed by guard index and
+/// incoming type.
 struct GuardSolve<'db> {
     /// The subject that the solve narrows.
     subject: FlowSubjectId,
@@ -828,6 +831,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if *tested != subject {
                     return Some(ty);
                 }
+                if let FlowTest::In(key) = test {
+                    // Loops revisit conditions, and each application looks
+                    // up the property in every member of the union.
+                    if let Some(narrowed) = solve.properties.get(&(index, ty)) {
+                        return Some(*narrowed);
+                    }
+                    let narrowed = self.narrow_by_in(ty, solve.declared, *key, *positive);
+                    solve.properties.insert((index, ty), narrowed);
+                    return Some(narrowed);
+                }
                 match self.test_predicate(*test) {
                     Some(predicate) => {
                         narrow_type(self.db, ty, predicate, *positive, self.narrowing_resolver())
@@ -896,6 +909,43 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
+    /// Narrows `ty` by `name in value`, where `name` is the string or number
+    /// literal at `key`. When `positive` is true, the members of `ty` that
+    /// lack the property are removed. When `positive` is false, the members
+    /// that declare it as required are removed. See [`narrow_by_in_operator`].
+    ///
+    /// Returns `ty` unchanged when the subject's `declared` type is not a
+    /// union with two object types, because the test could then only make a
+    /// branch impossible. Also returns `ty` unchanged when the key doesn't
+    /// resolve to a string or number literal.
+    fn narrow_by_in(
+        &mut self,
+        ty: TypeData<'db>,
+        declared: TypeData<'db>,
+        key: TextRange,
+        positive: bool,
+    ) -> TypeData<'db> {
+        if !may_narrow_by_property(self.db, declared) {
+            return ty;
+        }
+        let Some(reference) = self.js_info.raw_expressions.get(&key) else {
+            return ty;
+        };
+        let TypeData::Literal(literal) = self.resolve(reference) else {
+            return ty;
+        };
+        let name = match literal.literal(self.db) {
+            Literal::String(string) => string.as_str(),
+            Literal::Number(number) => number.as_str(),
+            Literal::BigInt(_)
+            | Literal::Boolean(_)
+            | Literal::Object(_)
+            | Literal::RegExp(_)
+            | Literal::Template(_) => return ty,
+        };
+        narrow_by_in_operator(self.db, ty, name, positive, self.narrowing_resolver())
+    }
+
     fn test_predicate(&mut self, test: FlowTest) -> Option<NarrowingPredicate<'db>> {
         Some(match test {
             FlowTest::Truthy => NarrowingPredicate::Truthy,
@@ -911,6 +961,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
             FlowTest::Predicate(function) => return self.guard_predicate(function),
+            FlowTest::In(_) => return None,
         })
     }
 
