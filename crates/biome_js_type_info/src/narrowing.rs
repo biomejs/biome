@@ -916,10 +916,11 @@ mod tests {
             string(&db, &"a".repeat(MAX_LITERAL_BYTES + 1)),
             bigint(&db, &format!("{}n", "1".repeat(MAX_LITERAL_BYTES))),
             number(&db, "0x100000000000000000000000000000000"),
-            InferredTypeData::Literal(InternedLiteral::new(
+            InferredTypeData::template_literal(
                 &db,
-                Literal::Template(Text::new_static("text")),
-            )),
+                Box::new(["text".to_string(), String::new()]),
+                Box::new([InferredTypeData::String]),
+            ),
         ] {
             for positive in [false, true] {
                 assert_eq!(
