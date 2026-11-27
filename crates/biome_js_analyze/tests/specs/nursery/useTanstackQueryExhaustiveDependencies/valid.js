@@ -268,3 +268,22 @@ function LocalIndex({ cursors }) {
 		queryFn: ({ pageParam }) => fetchPage(cursors[pageParam]),
 	});
 }
+
+function KeyVariableReadByQueryFunction(dep, queryClient) {
+	const queryKey = ["thing", dep];
+	useQuery({
+		queryKey,
+		queryFn: () =>
+			fetchThing(dep).then((thing) => {
+				queryClient.setQueryData(queryKey, thing);
+				return thing;
+			}),
+	});
+
+	const key = ["other", dep];
+	const alias = key;
+	useQuery({ queryKey: alias, queryFn: () => fetchOther(key, alias[1]) });
+
+	const factoryKey = keyFactory(dep);
+	useQuery({ queryKey: factoryKey, queryFn: () => fetchOther(factoryKey) });
+}

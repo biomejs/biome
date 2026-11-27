@@ -30,34 +30,15 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Require query keys to include every value that the query function uses.
     ///
-    /// TanStack Query saves the data returned by a query function under the query key, and
-    /// fetches the data again when the key changes. When the query function uses a value that
-    /// the key doesn't include, changing that value doesn't fetch new data. The query keeps
-    /// returning the data that belongs to the old value, and queries that use different values
-    /// share the same saved data.
+    /// TanStack Query saves a query's data under its key, and fetches the data again when the
+    /// key changes. When the query function uses a value that the key doesn't include, changing
+    /// that value doesn't fetch new data, and the query keeps returning the old data.
     ///
     /// This rule checks objects that have both a `queryKey` and a `queryFn` property, such as
-    /// the options passed to `useQuery` or `queryOptions`. It reports the variables that the
-    /// query function reads but the query key doesn't include.
-    ///
-    /// The rule only checks variables declared inside the function that contains the query
-    /// options, such as a component, a hook, or a function that creates query options. It
-    /// doesn't report:
-    ///
-    /// - variables declared outside that function, such as imports and top-level constants;
-    /// - functions that the query function calls, such as `fetchTodo` in `fetchTodo(id)`;
-    /// - objects whose methods the query function calls, such as `api` in `api.getTodo(id)`;
-    /// - classes used with `new` or `instanceof`.
-    ///
-    /// When a property of a variable is in the query key, such as `todo.id`, the query function
-    /// can read that property. When the whole variable is in the query key, the query function
-    /// can read any of its properties.
-    ///
-    /// In Vue files, the rule also checks variables declared at the top level of the script,
-    /// except imports.
-    ///
-    /// When `queryFn` chooses between a function and `skipToken`, such as
-    /// `enabled ? () => fetchTodo(id) : skipToken`, the rule only checks the function.
+    /// the options passed to `useQuery` or `queryOptions`. It only reports variables declared
+    /// inside the function that contains those options, such as a component or a hook. It
+    /// doesn't report functions that the query function calls, or objects whose methods it
+    /// calls, such as `api` in `api.getTodo(id)`.
     ///
     /// ## Examples
     ///
@@ -235,15 +216,20 @@ impl Rule for UseTanstackQueryExhaustiveDependencies {
             return None;
         }
 
+        // The variables that hold the query key. A query function that reads one of them reads
+        // the key itself, so the key can't be missing that variable.
+        let mut key_variables = Vec::new();
         let query_key = match &query_key_member {
             AnyJsObjectMember::JsPropertyObjectMember(member) => member.value().ok()?,
             // A shorthand `{ queryKey }` can only be checked when the variable's value is known.
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                variable_initializer(&member.name().ok()?, model)?
+                let (variable, initializer) = variable_initializer(&member.name().ok()?, model)?;
+                key_variables.push(variable);
+                initializer
             }
             _ => return None,
         };
-        let query_key = dereference_query_key(query_key, model);
+        let query_key = dereference_query_key(query_key, model, &mut key_variables);
         let key_dependencies = QueryKeyDependencies::from_query_key(&query_key, model);
 
         let mut missing: Vec<Dependency> = Vec::new();
@@ -253,6 +239,7 @@ impl Rule for UseTanstackQueryExhaustiveDependencies {
                 .roots
                 .iter()
                 .any(|key_root| key_root.text() == root)
+                || key_variables.contains(&dependency.binding)
                 || options
                     .ignored_variables()
                     .iter()
@@ -786,7 +773,14 @@ fn is_instanceof_operand(expression: &AnyJsExpression) -> bool {
 }
 
 /// Follows variables and type assertions from `expression` to the value of the query key.
-fn dereference_query_key(expression: AnyJsExpression, model: &SemanticModel) -> AnyJsExpression {
+///
+/// Adds each variable that it follows to `variables`. For example, following `alias` through
+/// `const key = ["todo"]; const alias = key;` adds `alias` and `key`.
+fn dereference_query_key(
+    expression: AnyJsExpression,
+    model: &SemanticModel,
+    variables: &mut Vec<Binding>,
+) -> AnyJsExpression {
     let mut expression = expression;
     // Bounds the search when variables refer to each other in a cycle.
     for _ in 0..MAX_DEREFERENCE_STEPS {
@@ -794,31 +788,33 @@ fn dereference_query_key(expression: AnyJsExpression, model: &SemanticModel) -> 
             break;
         };
         expression = inner;
-        let Some(initializer) = expression
+        let Some((variable, initializer)) = expression
             .as_js_identifier_expression()
             .and_then(|identifier| identifier.name().ok())
             .and_then(|reference| variable_initializer(&reference, model))
         else {
             break;
         };
+        variables.push(variable);
         expression = initializer;
     }
     expression
 }
 
-/// Returns the initial value of the variable that `reference` refers to, such as `["todo"]`
-/// for `const key = ["todo"]`.
+/// Returns the variable that `reference` refers to, and the initial value of that variable.
+/// For example, the initial value of `key` is `["todo"]` for `const key = ["todo"]`.
 fn variable_initializer(
     reference: &JsReferenceIdentifier,
     model: &SemanticModel,
-) -> Option<AnyJsExpression> {
-    model
-        .binding(reference)?
+) -> Option<(Binding, AnyJsExpression)> {
+    let binding = model.binding(reference)?;
+    let initializer = binding
         .tree()
         .parent::<JsVariableDeclarator>()?
         .initializer()?
         .expression()
-        .ok()
+        .ok()?;
+    Some((binding, initializer))
 }
 
 /// Returns whether `binding` is a parameter or variable whose type annotation mentions one of
