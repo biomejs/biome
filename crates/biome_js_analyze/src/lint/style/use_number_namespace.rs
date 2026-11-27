@@ -5,6 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_semantic::{SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyPossibleGlobalIdentifier, JsUnaryExpression,
     JsUnaryOperator, T, global_identifier, static_value::StaticValue,
@@ -134,7 +135,9 @@ impl Rule for UseNumberNamespace {
         let (old_node, new_node) = match node {
             AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => {
                 let name = expression.name().ok()?.value_token().ok()?;
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text_trimmed()) {
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text_trimmed())
+                    || is_number_shadowed(node, ctx.model())
+                {
                     return None;
                 }
                 let (old_node, replacement) = match name.text_trimmed() {
@@ -250,4 +253,30 @@ impl Rule for UseNumberNamespace {
             mutation,
         ))
     }
+}
+
+/// Returns whether a declaration named `Number` is visible from `node`, which means that `Number`
+/// doesn't refer to the built-in object there.
+///
+/// Type-only declarations, such as `interface Number {}`, don't shadow the value. Type-only
+/// imports do, because TypeScript rejects value uses of a name imported with `import type`.
+fn is_number_shadowed(node: &AnyPossibleGlobalIdentifier, model: &SemanticModel) -> bool {
+    model.scope(node.syntax()).ancestors().any(|scope| {
+        let Some(reference) = scope.get_binding_reference("Number") else {
+            return false;
+        };
+        let is_type_only = matches!(
+            reference,
+            TsBindingReference::Type(_)
+                | TsBindingReference::Merged {
+                    value_ty: None,
+                    namespace_ty: None,
+                    ..
+                }
+        );
+        !is_type_only
+            || scope
+                .get_binding("Number")
+                .is_some_and(|binding| binding.is_imported())
+    })
 }

@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_shadowed_number_type.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function f() {
+	interface Number {
+		foo(): void;
+	}
+	return NaN;
+}
+
+function g() {
+	type Number = string;
+	return parseInt("1");
+}
+
+function h() {
+	enum Number {
+		A,
+	}
+	return parseFloat("1.1");
+}
+
+```
+
+# Diagnostics
+```
+invalid_shadowed_number_type.ts:6:9 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.NaN instead of the equivalent global.
+  
+    4 │ 		foo(): void;
+    5 │ 	}
+  > 6 │ 	return NaN;
+      │ 	       ^^^
+    7 │ }
+    8 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+  i Safe fix: Use Number.NaN instead.
+  
+     4  4 │       foo(): void;
+     5  5 │     }
+     6    │ - → return·NaN;
+        6 │ + → return·Number.NaN;
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalid_shadowed_number_type.ts:11:9 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.parseInt instead of the equivalent global.
+  
+     9 │ function g() {
+    10 │ 	type Number = string;
+  > 11 │ 	return parseInt("1");
+       │ 	       ^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+  i Safe fix: Use Number.parseInt instead.
+  
+     9  9 │   function g() {
+    10 10 │     type Number = string;
+    11    │ - → return·parseInt("1");
+       11 │ + → return·Number.parseInt("1");
+    12 12 │   }
+    13 13 │   
+  
+
+```
+
+```
+invalid_shadowed_number_type.ts:18:9 lint/style/useNumberNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.parseFloat instead of the equivalent global.
+  
+    16 │ 		A,
+    17 │ 	}
+  > 18 │ 	return parseFloat("1.1");
+       │ 	       ^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+
+```
