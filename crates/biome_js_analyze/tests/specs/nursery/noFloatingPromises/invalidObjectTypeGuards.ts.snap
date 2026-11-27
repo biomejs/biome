@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidObjectTypeGuards.ts
+---
+# Input
+```ts
+// should generate diagnostics
+// A type-guard function or an assertion function whose target is an object
+// type narrows the tested value, as in TypeScript, so a value narrowed to a
+// promise and not handled is reported.
+
+interface Job {
+	run(): void;
+}
+
+declare function isPromise(input: unknown): input is Promise<void>;
+declare function isJob(input: unknown): input is Job;
+declare function assertPromise(input: unknown): asserts input is Promise<void>;
+
+function trueBranch(value: unknown) {
+	if (isPromise(value)) {
+		value;
+	}
+}
+
+function falseBranch(value: Promise<void> | Job) {
+	if (!isJob(value)) {
+		value;
+	}
+}
+
+function assertion(value: unknown) {
+	assertPromise(value);
+	value;
+}
+
+```
+
+# Diagnostics
+```
+invalidObjectTypeGuards.ts:16:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │ function trueBranch(value: unknown) {
+    15 │ 	if (isPromise(value)) {
+  > 16 │ 		value;
+       │ 		^^^^^^
+    17 │ 	}
+    18 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:22:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    20 │ function falseBranch(value: Promise<void> | Job) {
+    21 │ 	if (!isJob(value)) {
+  > 22 │ 		value;
+       │ 		^^^^^^
+    23 │ 	}
+    24 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidObjectTypeGuards.ts:28:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    26 │ function assertion(value: unknown) {
+    27 │ 	assertPromise(value);
+  > 28 │ 	value;
+       │ 	^^^^^^
+    29 │ }
+    30 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

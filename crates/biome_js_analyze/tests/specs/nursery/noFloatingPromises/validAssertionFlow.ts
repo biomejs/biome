@@ -3,7 +3,6 @@
 declare function assert(condition: unknown): asserts condition;
 declare function assertString(input: unknown): asserts input is string;
 declare function assertFalse(input: unknown): asserts input is false;
-declare function assertPromise(input: unknown): asserts input is Promise<void>;
 declare function fail(input: unknown): never;
 declare function consume(...values: unknown[]): void;
 declare function identity<T>(input: T): T;
@@ -62,11 +61,6 @@ function assigned(value: Promise<void> | null) {
 async function handled(value: Promise<void> | null) {
 	assert(value);
 	await value;
-}
-
-function unsupportedTarget(value: unknown) {
-	assertPromise(value);
-	value;
 }
 
 function neverReturning(value: Promise<void> | null) {

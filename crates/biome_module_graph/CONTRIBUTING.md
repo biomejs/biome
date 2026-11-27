@@ -145,7 +145,15 @@ one of its own variables or a path on its own `this`. Its parts live in
   function becomes a runtime test of its argument: collection selects the
   tested argument from the function's collected signature, and inference
   later resolves only the target of its type predicate. Neither step infers
-  the function's body. For a standalone call to an assertion function,
+  the function's body. Collection also tells from the raw tables, and from
+  the declarations that the target's names refer to, whether every member of
+  the target is an object type, as for an interface, a class, or a type
+  literal. Such a test, as `isFoo(x)` with `x is Foo`, narrows only a type
+  with an object type or `unknown`, so the decomposed condition lists `x`
+  with the objects of property guards and among the subjects that
+  `instanceof` tests. An imported name can be an alias of a primitive, so it
+  doesn't count as an object type, and a target of `any` or `unknown` makes
+  the function unsupported. For a standalone call to an assertion function,
   the builder adds a condition node after the call, so the call and its
   arguments still use the types from before it. `asserts value is T` becomes a
   runtime test of the argument, as `value is T` does, while `asserts value`
@@ -234,7 +242,8 @@ reach, and only for subjects that can narrow. A read of an element of a
 pattern is also kept when a test of the pattern reaches it: its point becomes
 a read point of the pattern, and `RootFlow::pattern_elements` maps the
 element to the pattern. A subject that conditions narrow only through
-property guards, `in`, or `instanceof` is in `RootFlow::property_only`, and
+property guards, `in`, `instanceof`, or type-guard functions whose targets
+have only object types is in `RootFlow::property_only`, and
 every pattern is. The declared type of a pattern is the collected type of the value
 that its elements' collected `Destructure` types read from
 (`ModuleFlow::pattern_type`). A property
@@ -243,8 +252,9 @@ drops a variable or a pattern in it when its collected type shows that it is not
 without resolving anything (`raw_may_be_object_union` in
 `biome_js_type_info`): a primitive, a single object type or class written in
 place, a union with at most one object type, or the result of `new`. A
-subject in `RootFlow::property_only` that an `instanceof` test checks is
-also in `RootFlow::instance_tested`, and collection drops it only when its
+subject in `RootFlow::property_only` that an `instanceof` test or a
+type-guard function whose target has only object types checks is also in
+`RootFlow::instance_tested`, and collection drops it only when its
 collected type shows that it has no object type
 (`raw_may_narrow_by_instanceof`). A
 variable whose type is a name, an import, or inferred from an expression stays. A variable can narrow when it is
@@ -264,10 +274,11 @@ test of the elements themselves reaches, make a candidate records that
 variable or pattern (`ModuleFlow::property_only_candidate`), so inference can
 skip it as a whole when that variable or pattern can't narrow. A candidate
 made only by reads of one variable records the variable too when only
-`instanceof` tests reach those reads, even though other tests of the
-variable reach its other reads; a second walk from those other tests finds
-such reads. A root that declares no variable that can narrow and has no
-`this` subject gets no graph.
+`instanceof` tests and type-guard functions whose targets have only object
+types reach those reads, even though other tests of the variable reach its
+other reads; a second walk from those other tests finds such reads. A root
+that declares no variable that can narrow and has no `this` subject gets no
+graph.
 Other variable types are resolved only when a candidate read is queried,
 because resolving them can be costly.
 
@@ -351,9 +362,17 @@ finds the instance types of the constructor, and `is_derived_from` compares
 the members of the narrowed type with them by following `extends` clauses to
 the same declaration. The solve resolves the constructor from
 `raw_expressions` only when `may_narrow_by_instanceof` accepts the subject's
-declared type. It memoizes the result of each property guard, `in` test, and
-`instanceof` test by guard and incoming type, because a loop applies the same
-guard again.
+declared type. A call to a type-guard function applies
+`narrow_by_type_predicate`, following TypeScript's `getNarrowedType`: a
+primitive target, such as `string` or `"ready"`, stands for a `typeof` or
+equality test, and other targets compare the members of the narrowed type
+with those of the target in TypeScript's subtype relation (`is_subtype` in
+`type_relation.rs`). The solve resolves the target from the guard's
+collected signature, and, for a target with only object types, only when
+`may_narrow_by_instanceof` accepts the subject's declared type. It memoizes
+the result of each property guard, `in` test, `instanceof` test, and call to
+a type-guard function by guard and incoming type, because a loop applies the
+same guard again.
 
 #### Caching
 
