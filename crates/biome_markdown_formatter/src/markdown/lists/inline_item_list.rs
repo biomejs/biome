@@ -1,3 +1,4 @@
+use crate::container::is_in_quoted_list_item;
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
@@ -116,6 +117,49 @@ fn outdented_list_marker_lines(
     }
 
     Ok((lines, indented_lines))
+}
+
+/// Returns the lines of a paragraph that follow a soft break and continue the
+/// paragraph lazily, without the quote marker, in ascending order. Returns no
+/// lines unless the paragraph belongs to a list item opened inside a block
+/// quote.
+///
+/// Lines are counted from 0, and every soft or hard break starts a new line,
+/// as in [`ProseItemList`]. A lazy line belongs to the containers outside the
+/// quote (CommonMark 5.1), so printing it at the list item's content
+/// indentation doesn't keep it in the paragraph: a list marker, HTML tag, or
+/// `>` at its start would open a block outside the quote. Joining it to the
+/// previous line keeps it in the paragraph.
+fn lazy_quote_lines(node: &MdInlineItemList) -> FormatResult<Vec<usize>> {
+    let mut lines = Vec::new();
+    if !is_in_quoted_list_item(node.syntax()) {
+        return Ok(lines);
+    }
+
+    let mut line_index = 0;
+    let mut is_line_start = false;
+    for item in node.iter() {
+        match item {
+            AnyMdInline::MdTextual(textual) if textual.is_newline()? => {
+                line_index += 1;
+                is_line_start = true;
+            }
+            AnyMdInline::MdHardLine(_) => {
+                line_index += 1;
+                is_line_start = false;
+            }
+            AnyMdInline::MdIndentToken(_) => {}
+            AnyMdInline::MdQuotePrefix(_) => is_line_start = false,
+            _ => {
+                if is_line_start {
+                    lines.push(line_index);
+                }
+                is_line_start = false;
+            }
+        }
+    }
+
+    Ok(lines)
 }
 
 fn starts_with_list_marker(text: &str) -> bool {
@@ -917,7 +961,9 @@ impl FormatMdInlineItemList {
     /// A line that would start a list item, heading, or blockquote at its
     /// printed indentation joins the previous line with a space. These are the
     /// lines in `indented_block_marker_lines` and, inside a list item, the
-    /// indented lazy continuation lines that start with a list marker.
+    /// indented lazy continuation lines that start with a list marker. Inside a
+    /// list item opened in a block quote, every line without the quote marker
+    /// joins the previous line, as [`lazy_quote_lines`] explains.
     /// An unindented lazy continuation line that starts with a list marker
     /// stays at the start of the line, outside the list item's indentation.
     fn fmt_prose_preserve(
@@ -935,6 +981,11 @@ impl FormatMdInlineItemList {
                 .unwrap_or_default()
         } else {
             (Vec::new(), Vec::new())
+        };
+        let lazy_quote_lines = if inside_list {
+            lazy_quote_lines(node)?
+        } else {
+            Vec::new()
         };
 
         let mut is_first_line = true;
@@ -971,7 +1022,8 @@ impl FormatMdInlineItemList {
                     let line_items = &items[line_start..i];
                     if !line_items.is_empty() {
                         let join_next_line = indented_outdented_lines.contains(&(line_index + 1))
-                            || indented_block_marker_lines.contains(&(line_index + 1));
+                            || indented_block_marker_lines.contains(&(line_index + 1))
+                            || lazy_quote_lines.binary_search(&(line_index + 1)).is_ok();
                         format_source_line(
                             line_items,
                             line_index,

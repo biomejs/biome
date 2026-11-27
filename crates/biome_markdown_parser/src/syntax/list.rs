@@ -220,6 +220,35 @@ pub(crate) fn enclosing_list_content_indent(p: &MarkdownParser, indent: usize) -
     0
 }
 
+/// Content column of the deepest open list item outside the innermost block
+/// quote that a line indented by `indent` columns still continues, or 0 when
+/// it continues none.
+///
+/// Use for a line without the innermost quote's prefix: containers match from
+/// the outside in (CommonMark §5.1), so items inside that quote cannot continue
+/// the line. When no quote prefix remains, only list items outside every quote
+/// can continue the line. Partially prefixed lines whose nearest outer list
+/// item is quoted are not handled yet and return 0.
+pub(crate) fn list_content_indent_outside_quote(p: &MarkdownParser, indent: usize) -> usize {
+    let quote_depth = p.state().block_quote_depth;
+    let mut line_has_outer_quote_prefix = None;
+    let mut item = p.state().open_list_item.as_deref();
+    while let Some(current) = item {
+        if current.block_quote_depth > 0
+            && current.block_quote_depth < quote_depth
+            && *line_has_outer_quote_prefix
+                .get_or_insert_with(|| line_has_quote_prefix_at_current(p, 1))
+        {
+            return 0;
+        }
+        if current.block_quote_depth == 0 && current.required_indent <= indent {
+            return current.required_indent;
+        }
+        item = current.parent.as_deref();
+    }
+    0
+}
+
 fn list_item_within_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
     if !p.is_at_line_start() {
         return false;
@@ -1606,6 +1635,10 @@ struct BlankLineOutcome {
     /// Whether the current line started with a block-quote prefix (`>`).
     /// The orchestrator needs this to consume the prefix after fall-through.
     line_has_quote_prefix: bool,
+    /// Whether the current line, inside a block quote, starts without the
+    /// prefix of the innermost quote, and no nested list item consumed that
+    /// prefix earlier. Set only on fall-through.
+    line_lacks_quote_prefix: bool,
 }
 
 impl BlankLineOutcome {
@@ -1613,6 +1646,7 @@ impl BlankLineOutcome {
         Self {
             action,
             line_has_quote_prefix: false,
+            line_lacks_quote_prefix: false,
         }
     }
 
@@ -1620,6 +1654,7 @@ impl BlankLineOutcome {
         Self {
             action,
             line_has_quote_prefix: has_prefix,
+            line_lacks_quote_prefix: false,
         }
     }
 }
@@ -1737,9 +1772,12 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
     // the prefixes of a line that it then leaves to this item. Probing again
     // would take a `>` in the line's content for a continuation prefix, as in
     // the second `>` of `> - one\n>   - nested\n> > quoted`.
-    let line_has_quote_prefix = quote_depth > 0
-        && (p.is_at_line_start() || p.has_preceding_line_break())
-        && !line_has_quote_prefix_at_current(p, quote_depth)
+    let is_quoted_line_start =
+        quote_depth > 0 && (p.is_at_line_start() || p.has_preceding_line_break());
+    let prefix_was_consumed =
+        is_quoted_line_start && line_has_quote_prefix_at_current(p, quote_depth);
+    let line_has_quote_prefix = is_quoted_line_start
+        && !prefix_was_consumed
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
@@ -1751,7 +1789,12 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
     }
 
     // Phase 5: Blank line after prefix with indent checks.
-    blank_line_phase_after_prefix(p, state, quote_depth, line_has_quote_prefix)
+    let mut outcome = blank_line_phase_after_prefix(p, state, quote_depth, line_has_quote_prefix);
+    outcome.line_lacks_quote_prefix = matches!(outcome.action, LoopAction::FallThrough)
+        && is_quoted_line_start
+        && !prefix_was_consumed
+        && !line_has_quote_prefix;
+    outcome
 }
 
 /// Phase 1: If past the first line and the next quoted content has
@@ -3050,8 +3093,16 @@ fn parse_list_item_block_content(
         }
         let line_has_quote_prefix = blank.line_has_quote_prefix;
 
-        // Consume quote prefix if present
+        // Containers match from the outside in (CommonMark §5.1), so a line
+        // without the prefix of the quote holding this item cannot continue
+        // the item, whatever its indentation. Lazy paragraph lines never get
+        // here: the paragraph consumes them.
+        if blank.line_lacks_quote_prefix && !state.first_line && !p.at(NEWLINE) {
+            break;
+        }
         let quote_depth = p.state().block_quote_depth;
+
+        // Consume quote prefix if present
         if line_has_quote_prefix {
             consume_quote_prefix(p, quote_depth);
         }

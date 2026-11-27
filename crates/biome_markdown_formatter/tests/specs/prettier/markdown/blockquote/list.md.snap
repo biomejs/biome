@@ -40,8 +40,7 @@ info: markdown/blockquote/list.md
    > - list item in quote in list
    >   > quote in list item in quote in list
    >   > with multiple lines
--  - nested list
-+      - nested list
+   - nested list
  
 -- > quote in list
 -  > this line is indented by tab
@@ -65,7 +64,7 @@ info: markdown/blockquote/list.md
   > - list item in quote in list
   >   > quote in list item in quote in list
   >   > with multiple lines
-      - nested list
+  - nested list
 
 -   > quote in list
     > this line is indented by tab

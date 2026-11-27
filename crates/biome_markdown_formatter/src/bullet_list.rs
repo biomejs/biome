@@ -1,3 +1,4 @@
+use crate::container::{has_quote_continuation_to_preserve, is_outermost_container};
 use crate::context::{MarkdownFormatContext, ProseWrap};
 use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentOptions;
 use crate::markdown::auxiliary::fenced_code_block::FormatMdFencedCodeBlockOptions;
@@ -23,7 +24,7 @@ use biome_markdown_syntax::{
     MdBlockList, MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
     MdIndentTokenList, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix,
 };
-use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError};
+use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError, TextRange};
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::FusedIterator;
@@ -41,7 +42,9 @@ impl FmtAnyList {
 
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        if f.context().comments().is_suppressed(self.node.syntax()) {
+        if f.context().comments().is_suppressed(self.node.syntax())
+            || is_list_printed_as_written(&self.node, f.context())
+        {
             let source = format_suppressed_node(self.node.syntax());
             // The quote prefix at the end of the list belongs to the next
             // line, whose formatter prints it again.
@@ -738,6 +741,54 @@ fn list_sibling_index(node: &AnyListItem) -> usize {
     }
 
     index
+}
+
+/// Returns whether the list `node` is printed as written: when it's outside
+/// any block quote or list item, and [`has_quote_continuation_to_preserve`] holds
+/// for it or for a list in its group of adjacent lists of the same kind.
+///
+/// Adjacent lists stay separate only while their markers differ. The formatter
+/// alternates the markers of adjacent lists, as [`list_sibling_index`] counts
+/// them, and a list printed as written keeps its source marker, so the whole
+/// group is printed as written.
+fn is_list_printed_as_written(node: &AnyListItem, context: &MarkdownFormatContext) -> bool {
+    fn adjacent_lists(
+        node: &AnyListItem,
+        direction: Direction,
+    ) -> impl Iterator<Item = AnyListItem> + '_ {
+        node.syntax()
+            .siblings(direction)
+            .skip(1)
+            .map_while(AnyMdBlock::cast)
+            .filter(|block| !block.is_newline() && !block.is_continuation_indent())
+            .map_while(|block| block.as_any_list_item())
+            .take_while(|list_item| list_item.is_ordered() == node.is_ordered())
+    }
+
+    if !is_outermost_container(node.syntax()) {
+        return false;
+    }
+    let range = node.syntax().text_range_with_trivia();
+    if let Some((group, printed_as_written)) = context.printed_as_written_lists.get()
+        && group.contains_range(range)
+    {
+        return printed_as_written;
+    }
+    let first = adjacent_lists(node, Direction::Prev)
+        .last()
+        .unwrap_or_else(|| node.clone());
+    let mut group_end = range.end();
+    let mut printed_as_written = false;
+    for list_item in std::iter::once(first.clone()).chain(adjacent_lists(&first, Direction::Next)) {
+        group_end = list_item.syntax().text_range_with_trivia().end();
+        printed_as_written =
+            printed_as_written || has_quote_continuation_to_preserve(list_item.syntax());
+    }
+    let group = TextRange::new(first.syntax().text_range_with_trivia().start(), group_end);
+    context
+        .printed_as_written_lists
+        .set(Some((group, printed_as_written)));
+    printed_as_written
 }
 
 fn has_indented_code_block_after_content(content: &MdBlockList) -> bool {
