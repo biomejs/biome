@@ -6025,6 +6025,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNegatedComparisonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNegatedComparisonOptions" }
+			]
+		},
+		"NoNegatedComparisonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNegationElseConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10094,6 +10104,13 @@
 					"description": "Disallow negating the result of Array#some() or Array#every().\nSee https://biomejs.dev/linter/rules/no-negated-array-predicate",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegatedArrayPredicateConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNegatedComparison": {
+					"description": "Disallow negating a whole equality comparison.\nSee https://biomejs.dev/linter/rules/no-negated-comparison",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNegatedComparisonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15456,6 +15473,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNegatedArrayPredicateOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNegatedComparisonOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNegatedComparisonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

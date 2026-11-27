@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExportDefault.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default !(function () {} === value);
+
+```
+
+# Diagnostics
+```
+invalidExportDefault.js:2:16 lint/nursery/noNegatedComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This comparison is negated as a whole.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default !(function () {} === value);
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Reading it means working out the comparison and then reversing the result.
+  
+  i Use the opposite operator !== instead, which gives the same result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use !== instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - export·default·!(function·()·{}·===·value);
+      2 │ + export·default·(function·()·{}·!==·value);
+    3 3 │   
+  
+
+```

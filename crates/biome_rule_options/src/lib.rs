@@ -229,6 +229,7 @@ pub mod no_mutable_exports;
 pub mod no_namespace;
 pub mod no_namespace_import;
 pub mod no_negated_array_predicate;
+pub mod no_negated_comparison;
 pub mod no_negation_else;
 pub mod no_negation_in_equality_check;
 pub mod no_nested_component_definitions;

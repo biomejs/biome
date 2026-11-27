@@ -3294,6 +3294,11 @@ export interface Nursery {
 	 */
 	noNegatedArrayPredicate?: NoNegatedArrayPredicateConfiguration;
 	/**
+	 * Disallow negating a whole equality comparison.
+	 * See https://biomejs.dev/linter/rules/no-negated-comparison
+	 */
+	noNegatedComparison?: NoNegatedComparisonConfiguration;
+	/**
 	 * Disallow negated expressions on the left side of an equality check.
 	 * See https://biomejs.dev/linter/rules/no-negation-in-equality-check
 	 */
@@ -7205,6 +7210,9 @@ export type NoMutableExportsConfiguration =
 export type NoNegatedArrayPredicateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegatedArrayPredicateOptions;
+export type NoNegatedComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNegatedComparisonOptions;
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
@@ -10571,6 +10579,14 @@ export interface RuleWithNoNegatedArrayPredicateOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoNegatedArrayPredicateOptions;
+}
+export interface RuleWithNoNegatedComparisonOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNegatedComparisonOptions;
 }
 export interface RuleWithNoNegationInEqualityCheckOptions {
 	/**
@@ -14459,6 +14475,7 @@ export type NoMisusedPromisesOptions = {};
 export type NoMisusedSpreadOptions = {};
 export type NoMutableExportsOptions = {};
 export type NoNegatedArrayPredicateOptions = {};
+export type NoNegatedComparisonOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
@@ -16926,6 +16943,7 @@ export type Category =
 	| "lint/nursery/noMisusedSpread"
 	| "lint/nursery/noMutableExports"
 	| "lint/nursery/noNegatedArrayPredicate"
+	| "lint/nursery/noNegatedComparison"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
@@ -17041,10 +17059,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"

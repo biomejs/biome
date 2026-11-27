@@ -1,0 +1,16 @@
+[
+	"foo\n!([a] === b)",
+	"foo\n!(a === b) + c",
+	"const foo = [a]\n!(b === c) + d",
+	"setup()\n!({ value: 1 }.value === 1);",
+	"foo\n!(a === b)",
+	"foo;\n!([a] === b)",
+	"function foo() {\n\treturn!\n\t\t(a === b);\n}",
+	"function foo() {\n\tthrow!\n\t\t(a === b);\n}",
+	"function* foo() { yield !\n(a === b); }",
+	"function foo() { return !\n(a === b) && ready; }",
+	"function* foo() { yield (!\n(a === b)); }",
+	"function* foo() { yield* !\n(a === b); }",
+	"function foo() { return !/* a\n b */(a === b); }",
+	"!// keep\n(a === b);"
+]
