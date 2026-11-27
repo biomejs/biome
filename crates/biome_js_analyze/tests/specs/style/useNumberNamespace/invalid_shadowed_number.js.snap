@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_shadowed_number.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function f(Number) {
+	return { [NaN]: 1 }.NaN;
+}
+
+function g() {
+	const Number = null;
+	return parseInt("1");
+}
+
+class Number {}
+const foo = -Infinity;
+
+function h() {
+	return globalThis.parseFloat("1.1");
+}
+
+```
+
+# Diagnostics
+```
+invalid_shadowed_number.js:3:12 lint/style/useNumberNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.NaN instead of the equivalent global.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f(Number) {
+  > 3 │ 	return { [NaN]: 1 }.NaN;
+      │ 	          ^^^
+    4 │ }
+    5 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+
+```
+
+```
+invalid_shadowed_number.js:8:9 lint/style/useNumberNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.parseInt instead of the equivalent global.
+  
+     6 │ function g() {
+     7 │ 	const Number = null;
+   > 8 │ 	return parseInt("1");
+       │ 	       ^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+
+```
+
+```
+invalid_shadowed_number.js:12:14 lint/style/useNumberNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  
+    11 │ class Number {}
+  > 12 │ const foo = -Infinity;
+       │              ^^^^^^^^
+    13 │ 
+    14 │ function h() {
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+
+```
+
+```
+invalid_shadowed_number.js:15:9 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Number.parseFloat instead of the equivalent global.
+  
+    14 │ function h() {
+  > 15 │ 	return globalThis.parseFloat("1.1");
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+  i Safe fix: Use Number.parseFloat instead.
+  
+    13 13 │   
+    14 14 │   function h() {
+    15    │ - → return·globalThis.parseFloat("1.1");
+       15 │ + → return·globalThis.Number.parseFloat("1.1");
+    16 16 │   }
+    17 17 │   
+  
+
+```
