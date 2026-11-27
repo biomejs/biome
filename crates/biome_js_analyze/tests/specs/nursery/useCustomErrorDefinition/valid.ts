@@ -1,0 +1,82 @@
+/* should not generate diagnostics */
+abstract class AppError extends Error {}
+
+export abstract class HttpError extends Error {
+	public abstract readonly status: number;
+}
+
+export default abstract class BaseFailure extends Error {}
+
+abstract class ProtectedError extends Error {
+	protected constructor(message: string) {
+		super(message);
+	}
+}
+
+class OverloadError extends Error {
+	constructor(type: string, text: string, reply?: any);
+}
+
+declare class AmbientError extends Error {
+	constructor(message: string);
+}
+
+class TypedError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message, options);
+		this.name = "TypedError";
+	}
+}
+
+class OptionalOptionsError extends Error {
+	constructor(status: number, message: string, options?: ErrorOptions) {
+		super(message, options);
+		this.name = "OptionalOptionsError";
+	}
+}
+
+class ParameterPropertyError extends Error {
+	constructor(message: string, public readonly options: ErrorOptions) {
+		super(message, options);
+		this.name = "ParameterPropertyError";
+	}
+}
+
+class DefaultParameterPropertyError extends Error {
+	constructor(message: string, public options: ErrorOptions = {}) {
+		super(message, options);
+		this.name = "DefaultParameterPropertyError";
+	}
+}
+
+class ConstNameError extends Error {
+	name = "ConstNameError" as const;
+}
+
+class NonNullError extends Error {
+	constructor(message: string, options: ErrorOptions) {
+		super(message!, options!);
+		this.name = "NonNullError" as const;
+	}
+}
+
+class AssertedInlineError extends Error {
+	constructor(cause: unknown) {
+		super("Fixed message" as string, ({ cause } as ErrorOptions));
+		this.name = "AssertedInlineError";
+	}
+}
+
+class SatisfiesInlineError extends Error {
+	constructor(cause: unknown) {
+		super("Fixed message" satisfies string, ({ cause } satisfies ErrorOptions));
+		this.name = "SatisfiesInlineError";
+	}
+}
+
+class ForwardedCauseError extends Error {
+	name = "ForwardedCauseError";
+	constructor(message: string, private readonly options: ErrorOptions) {
+		super(message, { cause: options.cause });
+	}
+}

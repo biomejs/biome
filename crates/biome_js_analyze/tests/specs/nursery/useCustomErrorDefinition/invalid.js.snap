@@ -1,0 +1,1293 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+class MissingNameError extends Error {}
+
+class WrongNamePropertyError extends Error {
+	name = "BadError";
+}
+
+class StaticNameError extends Error {
+	static name = "StaticNameError";
+}
+
+class ComputedNameError extends Error {
+	["name"] = "ComputedNameError";
+}
+
+class TemplateSubstitutionError extends Error {
+	name = `${"TemplateSubstitutionError"}`;
+}
+
+class fooError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "fooError";
+	}
+}
+
+class Foo extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "Foo";
+	}
+}
+
+class fooerror extends Error {
+	name = "fooerror";
+}
+
+class NoSuperError extends Error {
+	constructor() {}
+}
+
+class AssignedMessageError extends Error {
+	constructor() {
+		super();
+		this.message = "My custom message";
+	}
+}
+
+class EmptyConstructorError extends Error {
+	constructor() {
+		super();
+	}
+}
+
+class ConstructorNameError extends Error {
+	constructor() {
+		super("My awesome Foo Error");
+		this.name = this.constructor.name;
+	}
+}
+
+class DuplicateMessageError extends Error {
+	constructor(message) {
+		super(message);
+		this.message = message;
+		this.name = "DuplicateMessageError";
+	}
+}
+
+class MessageBeforeSuperError extends Error {
+	constructor(message) {
+		if (message instanceof Error) {
+			this.originalError = message;
+			message = message.message;
+		}
+
+		super();
+		this.name = "MessageBeforeSuperError";
+		this.message = message;
+	}
+}
+
+class WrongLiteralNameError extends Http.ProtocolError {
+	constructor() {
+		super();
+		this.name = "foo";
+	}
+}
+
+class WrongTemplateNameError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = `foo`;
+	}
+}
+
+module.exports = class ModuleError extends TypeError {
+	constructor() {
+		super();
+		this.name = "foo";
+	}
+};
+
+exports.fooError = class ExportError extends Error {
+	constructor(error, options) {
+		super(error, options);
+		this.name = "ExportError";
+	}
+};
+
+exports["fooError"] = class ComputedExportError extends Error {
+	constructor(error, options) {
+		super(error, options);
+		this.name = "ComputedExportError";
+	}
+};
+
+class MissingOptionsError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "MissingOptionsError";
+	}
+}
+
+class DefaultMessageError extends Error {
+	constructor(message = "Default message") {
+		super(message);
+		this.name = "DefaultMessageError";
+	}
+}
+
+class CauseParameterError extends Error {
+	constructor(cause) {
+		super("Fixed message", cause);
+		this.name = "CauseParameterError";
+	}
+}
+
+class InlineDetailsError extends Error {
+	constructor(details) {
+		super("Fixed message", { details });
+		this.name = "InlineDetailsError";
+	}
+}
+
+class InlineExtraOptionError extends Error {
+	constructor(cause) {
+		super("Fixed message", { cause, code: 1 });
+		this.name = "InlineExtraOptionError";
+	}
+}
+
+class ExtraArgumentError extends Error {
+	constructor(cause) {
+		super("Fixed message", { cause }, cause);
+		this.name = "ExtraArgumentError";
+	}
+}
+
+class ComputedMessageError extends Error {
+	constructor(cause) {
+		super(getMessage(), { cause });
+		this.name = "ComputedMessageError";
+	}
+}
+
+class UnrelatedCauseError extends Error {
+	constructor(message, options) {
+		super("Fixed message", { cause: new TypeError("other") });
+		this.name = "UnrelatedCauseError";
+	}
+}
+
+class DroppedOptionsError extends Error {
+	constructor(message) {
+		super(message, { cause });
+		this.name = "DroppedOptionsError";
+	}
+}
+
+class NotForwardedOptionsError extends Error {
+	constructor(message, options) {
+		super(message);
+		this.name = "NotForwardedOptionsError";
+	}
+}
+
+class OptionsObjectAsCauseError extends Error {
+	constructor(message, options) {
+		super(message, { cause: options });
+		this.name = "OptionsObjectAsCauseError";
+	}
+}
+
+class MissingMessageError extends Error {
+	constructor(message, options) {
+		super();
+		this.name = "MissingMessageError";
+	}
+}
+
+class UndefinedMessageError extends Error {
+	constructor(message, options) {
+		super(undefined, options);
+		this.name = "UndefinedMessageError";
+	}
+}
+
+class OptionsAsMessageError extends Error {
+	constructor(options) {
+		super(options);
+		this.name = "OptionsAsMessageError";
+	}
+}
+
+class FixedMessageOptionsError extends Error {
+	constructor(options) {
+		super("Fixed message");
+		this.name = "FixedMessageOptionsError";
+	}
+}
+
+class DetailsParameterError extends Error {
+	constructor(message, details) {
+		super(message);
+		this.details = details;
+		this.name = "DetailsParameterError";
+	}
+}
+
+class GlobalThisBaseError extends globalThis.Error {
+	constructor(message, details) {
+		super(message, details);
+		this.name = "GlobalThisBaseError";
+	}
+}
+
+class OptsError extends TypeError {
+	constructor(message, opts) {
+		super(message, opts);
+		this.name = "OptsError";
+	}
+}
+
+class OptionsLastError extends Error {
+	constructor(status, message, options) {
+		super(message);
+		this.name = "OptionsLastError";
+	}
+}
+
+class GetterWithMessageError extends Error {
+	#message;
+	constructor(message) {
+		super(message);
+		this.#message = message;
+		this.name = "GetterWithMessageError";
+	}
+	get message() {
+		return this.#message;
+	}
+}
+
+class GetterWithoutOptionsError extends Error {
+	#message;
+	constructor(message) {
+		super();
+		this.#message = message;
+		this.name = "GetterWithoutOptionsError";
+	}
+	get message() {
+		return this.#message;
+	}
+}
+
+class GetterAssignmentError extends Error {
+	constructor(message) {
+		super();
+		this.message = message;
+		this.name = "GetterAssignmentError";
+	}
+	get message() {
+		return "Custom message";
+	}
+}
+
+class SetterWithMessageError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "SetterWithMessageError";
+	}
+	set message(message) {
+		this._message = message;
+	}
+}
+
+const NamedExpressionError = class NamedExpression extends Error {
+	name = "NamedExpression";
+};
+
+export default class DefaultExportedError extends TypeError {
+	constructor() {
+		super();
+		this.name = "foo";
+	}
+}
+
+class RestOptionsError extends Error {
+	constructor(message, ...options) {
+		super(message, ...options);
+		this.name = "RestOptionsError";
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "MissingNameError".
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ class MissingNameError extends Error {}
+      │       ^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ class WrongNamePropertyError extends Error {
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "MissingNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "WrongNamePropertyError".
+  
+    4 │ class WrongNamePropertyError extends Error {
+  > 5 │ 	name = "BadError";
+      │ 	       ^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "WrongNamePropertyError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "StaticNameError".
+  
+     6 │ }
+     7 │ 
+   > 8 │ class StaticNameError extends Error {
+       │       ^^^^^^^^^^^^^^^
+     9 │ 	static name = "StaticNameError";
+    10 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "StaticNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "ComputedNameError".
+  
+    10 │ }
+    11 │ 
+  > 12 │ class ComputedNameError extends Error {
+       │       ^^^^^^^^^^^^^^^^^
+    13 │ 	["name"] = "ComputedNameError";
+    14 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "ComputedNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:9 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "TemplateSubstitutionError".
+  
+    16 │ class TemplateSubstitutionError extends Error {
+  > 17 │ 	name = `${"TemplateSubstitutionError"}`;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "TemplateSubstitutionError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of the error class fooError doesn't start with an uppercase letter and end with Error.
+  
+    18 │ }
+    19 │ 
+  > 20 │ class fooError extends Error {
+       │       ^^^^^^^^
+    21 │ 	constructor(message, options) {
+    22 │ 		super(message, options);
+  
+  i A consistent naming convention makes error classes easy to recognize.
+  
+  i Rename the class to FooError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of the error class Foo doesn't start with an uppercase letter and end with Error.
+  
+    25 │ }
+    26 │ 
+  > 27 │ class Foo extends Error {
+       │       ^^^
+    28 │ 	constructor(message, options) {
+    29 │ 		super(message, options);
+  
+  i A consistent naming convention makes error classes easy to recognize.
+  
+  i Rename the class to FooError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of the error class fooerror doesn't start with an uppercase letter and end with Error.
+  
+    32 │ }
+    33 │ 
+  > 34 │ class fooerror extends Error {
+       │       ^^^^^^^^
+    35 │ 	name = "fooerror";
+    36 │ }
+  
+  i A consistent naming convention makes error classes easy to recognize.
+  
+  i Rename the class to FooError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "NoSuperError".
+  
+    36 │ }
+    37 │ 
+  > 38 │ class NoSuperError extends Error {
+       │       ^^^^^^^^^^^^
+    39 │ 	constructor() {}
+    40 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "NoSuperError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't call super().
+  
+    38 │ class NoSuperError extends Error {
+  > 39 │ 	constructor() {}
+       │ 	^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i A class that extends another class must call super() in its constructor. Otherwise, creating the error throws a ReferenceError.
+  
+  i Call super() in the constructor, and pass it the error message.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "AssignedMessageError".
+  
+    40 │ }
+    41 │ 
+  > 42 │ class AssignedMessageError extends Error {
+       │       ^^^^^^^^^^^^^^^^^^^^
+    43 │ 	constructor() {
+    44 │ 		super();
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "AssignedMessageError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error message is set with this.message instead of being passed to super().
+  
+    43 │ 	constructor() {
+    44 │ 		super();
+  > 45 │ 		this.message = "My custom message";
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 	}
+    47 │ }
+  
+  i The Error constructor already sets the message from its first argument.
+  
+  i Pass the message to super() as the first argument, and remove this assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:7 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "EmptyConstructorError".
+  
+    47 │ }
+    48 │ 
+  > 49 │ class EmptyConstructorError extends Error {
+       │       ^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	constructor() {
+    51 │ 		super();
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "EmptyConstructorError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:15 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "ConstructorNameError".
+  
+    56 │ 	constructor() {
+    57 │ 		super("My awesome Foo Error");
+  > 58 │ 		this.name = this.constructor.name;
+       │ 		            ^^^^^^^^^^^^^^^^^^^^^
+    59 │ 	}
+    60 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "ConstructorNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error message is set with this.message instead of being passed to super().
+  
+    63 │ 	constructor(message) {
+    64 │ 		super(message);
+  > 65 │ 		this.message = message;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 		this.name = "DuplicateMessageError";
+    67 │ 	}
+  
+  i The Error constructor already sets the message from its first argument.
+  
+  i Pass the message to super() as the first argument, and remove this assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error message is set with this.message instead of being passed to super().
+  
+    77 │ 		super();
+    78 │ 		this.name = "MessageBeforeSuperError";
+  > 79 │ 		this.message = message;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 	}
+    81 │ }
+  
+  i The Error constructor already sets the message from its first argument.
+  
+  i Pass the message to super() as the first argument, and remove this assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:15 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "WrongLiteralNameError".
+  
+    84 │ 	constructor() {
+    85 │ 		super();
+  > 86 │ 		this.name = "foo";
+       │ 		            ^^^^^
+    87 │ 	}
+    88 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "WrongLiteralNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:93:15 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "WrongTemplateNameError".
+  
+    91 │ 	constructor(message, options) {
+    92 │ 		super(message, options);
+  > 93 │ 		this.name = `foo`;
+       │ 		            ^^^^^
+    94 │ 	}
+    95 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "WrongTemplateNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:100:15 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "ModuleError".
+  
+     98 │ 	constructor() {
+     99 │ 		super();
+  > 100 │ 		this.name = "foo";
+        │ 		            ^^^^^
+    101 │ 	}
+    102 │ };
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "ModuleError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:9 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This export name doesn't match the name of the error class ExportError.
+  
+    102 │ };
+    103 │ 
+  > 104 │ exports.fooError = class ExportError extends Error {
+        │         ^^^^^^^^
+    105 │ 	constructor(error, options) {
+    106 │ 		super(error, options);
+  
+  i Exporting an error class under its own name makes it easy to find where the error is defined.
+  
+  i Rename the export to ExportError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:111:9 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This export name doesn't match the name of the error class ComputedExportError.
+  
+    109 │ };
+    110 │ 
+  > 111 │ exports["fooError"] = class ComputedExportError extends Error {
+        │         ^^^^^^^^^^
+    112 │ 	constructor(error, options) {
+    113 │ 		super(error, options);
+  
+  i Exporting an error class under its own name makes it easy to find where the error is defined.
+  
+  i Rename the export to ComputedExportError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:119:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    118 │ class MissingOptionsError extends Error {
+  > 119 │ 	constructor(message) {
+        │ 	            ^^^^^^^
+    120 │ 		super(message);
+    121 │ 		this.name = "MissingOptionsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:126:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    125 │ class DefaultMessageError extends Error {
+  > 126 │ 	constructor(message = "Default message") {
+        │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │ 		super(message);
+    128 │ 		this.name = "DefaultMessageError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:133:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    132 │ class CauseParameterError extends Error {
+  > 133 │ 	constructor(cause) {
+        │ 	            ^^^^^
+    134 │ 		super("Fixed message", cause);
+    135 │ 		this.name = "CauseParameterError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:140:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    139 │ class InlineDetailsError extends Error {
+  > 140 │ 	constructor(details) {
+        │ 	            ^^^^^^^
+    141 │ 		super("Fixed message", { details });
+    142 │ 		this.name = "InlineDetailsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:147:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    146 │ class InlineExtraOptionError extends Error {
+  > 147 │ 	constructor(cause) {
+        │ 	            ^^^^^
+    148 │ 		super("Fixed message", { cause, code: 1 });
+    149 │ 		this.name = "InlineExtraOptionError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:154:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    153 │ class ExtraArgumentError extends Error {
+  > 154 │ 	constructor(cause) {
+        │ 	            ^^^^^
+    155 │ 		super("Fixed message", { cause }, cause);
+    156 │ 		this.name = "ExtraArgumentError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:161:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    160 │ class ComputedMessageError extends Error {
+  > 161 │ 	constructor(cause) {
+        │ 	            ^^^^^
+    162 │ 		super(getMessage(), { cause });
+    163 │ 		this.name = "ComputedMessageError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:169:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The message parameter isn't passed to super().
+  
+    167 │ class UnrelatedCauseError extends Error {
+    168 │ 	constructor(message, options) {
+  > 169 │ 		super("Fixed message", { cause: new TypeError("other") });
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    170 │ 		this.name = "UnrelatedCauseError";
+    171 │ 	}
+  
+  i The Error constructor sets the message from its first argument, so the error doesn't get the message it was created with.
+  
+  i Pass message to super() as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:175:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    174 │ class DroppedOptionsError extends Error {
+  > 175 │ 	constructor(message) {
+        │ 	            ^^^^^^^
+    176 │ 		super(message, { cause });
+    177 │ 		this.name = "DroppedOptionsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:183:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The options parameter isn't passed to super().
+  
+    181 │ class NotForwardedOptionsError extends Error {
+    182 │ 	constructor(message, options) {
+  > 183 │ 		super(message);
+        │ 		^^^^^^^^^^^^^^
+    184 │ 		this.name = "NotForwardedOptionsError";
+    185 │ 	}
+  
+  i The Error constructor reads options such as cause from its second argument, so the options the error was created with are lost.
+  
+  i Pass options to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:190:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The options parameter isn't passed to super().
+  
+    188 │ class OptionsObjectAsCauseError extends Error {
+    189 │ 	constructor(message, options) {
+  > 190 │ 		super(message, { cause: options });
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    191 │ 		this.name = "OptionsObjectAsCauseError";
+    192 │ 	}
+  
+  i The Error constructor reads options such as cause from its second argument, so the options the error was created with are lost.
+  
+  i Pass options to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:197:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The message parameter isn't passed to super().
+  
+    195 │ class MissingMessageError extends Error {
+    196 │ 	constructor(message, options) {
+  > 197 │ 		super();
+        │ 		^^^^^^^
+    198 │ 		this.name = "MissingMessageError";
+    199 │ 	}
+  
+  i The Error constructor sets the message from its first argument, so the error doesn't get the message it was created with.
+  
+  i Pass message to super() as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:204:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The message parameter isn't passed to super().
+  
+    202 │ class UndefinedMessageError extends Error {
+    203 │ 	constructor(message, options) {
+  > 204 │ 		super(undefined, options);
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+    205 │ 		this.name = "UndefinedMessageError";
+    206 │ 	}
+  
+  i The Error constructor sets the message from its first argument, so the error doesn't get the message it was created with.
+  
+  i Pass message to super() as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:211:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The options parameter isn't passed to super().
+  
+    209 │ class OptionsAsMessageError extends Error {
+    210 │ 	constructor(options) {
+  > 211 │ 		super(options);
+        │ 		^^^^^^^^^^^^^^
+    212 │ 		this.name = "OptionsAsMessageError";
+    213 │ 	}
+  
+  i The Error constructor reads options such as cause from its second argument, so the options the error was created with are lost.
+  
+  i Pass options to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:218:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The options parameter isn't passed to super().
+  
+    216 │ class FixedMessageOptionsError extends Error {
+    217 │ 	constructor(options) {
+  > 218 │ 		super("Fixed message");
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    219 │ 		this.name = "FixedMessageOptionsError";
+    220 │ 	}
+  
+  i The Error constructor reads options such as cause from its second argument, so the options the error was created with are lost.
+  
+  i Pass options to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:224:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept the error options in a single parameter named options.
+  
+    223 │ class DetailsParameterError extends Error {
+  > 224 │ 	constructor(message, details) {
+        │ 	^^^^^^^^^^^
+    225 │ 		super(message);
+    226 │ 		this.details = details;
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Accept the options in a parameter named options that isn't a rest parameter such as ...options, and pass it to super() as the second argument. Other values can be read from it, such as options.details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:232:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept the error options in a single parameter named options.
+  
+    231 │ class GlobalThisBaseError extends globalThis.Error {
+  > 232 │ 	constructor(message, details) {
+        │ 	^^^^^^^^^^^
+    233 │ 		super(message, details);
+    234 │ 		this.name = "GlobalThisBaseError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Accept the options in a parameter named options that isn't a rest parameter such as ...options, and pass it to super() as the second argument. Other values can be read from it, such as options.details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:239:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept the error options in a single parameter named options.
+  
+    238 │ class OptsError extends TypeError {
+  > 239 │ 	constructor(message, opts) {
+        │ 	^^^^^^^^^^^
+    240 │ 		super(message, opts);
+    241 │ 		this.name = "OptsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Accept the options in a parameter named options that isn't a rest parameter such as ...options, and pass it to super() as the second argument. Other values can be read from it, such as options.details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:247:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The options parameter isn't passed to super().
+  
+    245 │ class OptionsLastError extends Error {
+    246 │ 	constructor(status, message, options) {
+  > 247 │ 		super(message);
+        │ 		^^^^^^^^^^^^^^
+    248 │ 		this.name = "OptionsLastError";
+    249 │ 	}
+  
+  i The Error constructor reads options such as cause from its second argument, so the options the error was created with are lost.
+  
+  i Pass options to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:255:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error message is passed to super(), but the class defines its own message accessor.
+  
+    253 │ 	#message;
+    254 │ 	constructor(message) {
+  > 255 │ 		super(message);
+        │ 		^^^^^^^^^^^^^^
+    256 │ 		this.#message = message;
+    257 │ 		this.name = "GetterWithMessageError";
+  
+  i The message passed to super() is stored directly on the error, which hides the message getter and setter of the class.
+  
+  i Pass undefined as the first argument of super(), and store the message somewhere else, such as in a private field.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:266:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    264 │ class GetterWithoutOptionsError extends Error {
+    265 │ 	#message;
+  > 266 │ 	constructor(message) {
+        │ 	            ^^^^^^^
+    267 │ 		super();
+    268 │ 		this.#message = message;
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:279:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code assigns this.message, but the class only defines a getter for message.
+  
+    277 │ 	constructor(message) {
+    278 │ 		super();
+  > 279 │ 		this.message = message;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    280 │ 		this.name = "GetterAssignmentError";
+    281 │ 	}
+  
+  i A property with a getter and no setter can't be assigned, so creating the error throws a TypeError.
+  
+  i Remove the assignment, or add a message setter to the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:289:3 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The error message is passed to super(), but the class defines its own message accessor.
+  
+    287 │ class SetterWithMessageError extends Error {
+    288 │ 	constructor(message) {
+  > 289 │ 		super(message);
+        │ 		^^^^^^^^^^^^^^
+    290 │ 		this.name = "SetterWithMessageError";
+    291 │ 	}
+  
+  i The message passed to super() is stored directly on the error, which hides the message getter and setter of the class.
+  
+  i Pass undefined as the first argument of super(), and store the message somewhere else, such as in a private field.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:297:36 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name of the error class NamedExpression doesn't start with an uppercase letter and end with Error.
+  
+    295 │ }
+    296 │ 
+  > 297 │ const NamedExpressionError = class NamedExpression extends Error {
+        │                                    ^^^^^^^^^^^^^^^
+    298 │ 	name = "NamedExpression";
+    299 │ };
+  
+  i A consistent naming convention makes error classes easy to recognize.
+  
+  i Rename the class to NamedExpressionError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:304:15 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "DefaultExportedError".
+  
+    302 │ 	constructor() {
+    303 │ 		super();
+  > 304 │ 		this.name = "foo";
+        │ 		            ^^^^^
+    305 │ 	}
+    306 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "DefaultExportedError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:309:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept the error options in a single parameter named options.
+  
+    308 │ class RestOptionsError extends Error {
+  > 309 │ 	constructor(message, ...options) {
+        │ 	^^^^^^^^^^^
+    310 │ 		super(message, ...options);
+    311 │ 		this.name = "RestOptionsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Accept the options in a parameter named options that isn't a rest parameter such as ...options, and pass it to super() as the second argument. Other values can be read from it, such as options.details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

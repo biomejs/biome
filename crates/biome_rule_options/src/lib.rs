@@ -610,6 +610,7 @@ pub mod use_consistent_unicode_bom;
 pub mod use_const;
 pub mod use_control_label;
 pub mod use_convex_access_control;
+pub mod use_custom_error_definition;
 pub mod use_date_now;
 pub mod use_default_parameter_last;
 pub mod use_default_switch_clause;

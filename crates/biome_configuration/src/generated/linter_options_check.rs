@@ -2811,6 +2811,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "useCustomErrorDefinition",
+        TypeId::of::<
+            biome_rule_options::use_custom_error_definition::UseCustomErrorDefinitionOptions,
+        >(),
+    ));
+    result.push((
         "complexity",
         "useDateNow",
         TypeId::of::<biome_rule_options::use_date_now::UseDateNowOptions>(),

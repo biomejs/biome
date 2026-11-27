@@ -1,0 +1,179 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+abstract class OuterError extends Error {
+	static create() {
+		class InnerError extends Error {
+			constructor() {
+				super();
+			}
+		}
+		return new InnerError();
+	}
+}
+
+abstract class HttpError extends Error {
+	public abstract readonly status: number;
+}
+
+export class NotFoundError extends HttpError {
+	public readonly status = 404;
+}
+
+export class TypeOnlyNameError extends Error {
+	"name": SomeType;
+	constructor(message) {
+		super(message);
+	}
+}
+
+exports[("fooError" as const)] = class ExportError extends Error {
+	constructor(message, options) {
+		super(message, options);
+		this.name = "ExportError";
+	}
+};
+
+class TypedMissingOptionsError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "TypedMissingOptionsError";
+	}
+}
+
+class AssertedBaseError extends (Error as ErrorConstructor) {
+	constructor(message: string, details: unknown) {
+		super(message);
+		this.name = "AssertedBaseError";
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:9 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "InnerError".
+  
+    2 │ abstract class OuterError extends Error {
+    3 │ 	static create() {
+  > 4 │ 		class InnerError extends Error {
+      │ 		      ^^^^^^^^^^
+    5 │ 			constructor() {
+    6 │ 				super();
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "InnerError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "NotFoundError".
+  
+    15 │ }
+    16 │ 
+  > 17 │ export class NotFoundError extends HttpError {
+       │              ^^^^^^^^^^^^^
+    18 │ 	public readonly status = 404;
+    19 │ }
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "NotFoundError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name property of this error class isn't set to "TypeOnlyNameError".
+  
+    21 │ export class TypeOnlyNameError extends Error {
+  > 22 │ 	"name": SomeType;
+       │ 	^^^^^^^^^^^^^^^^^
+    23 │ 	constructor(message) {
+    24 │ 		super(message);
+  
+  i The name property is shown in stack traces and logs. When it isn't the class name, the error is hard to tell apart from other errors.
+  
+  i Set the name property to the string "TypeOnlyNameError", either in the class body or in the constructor. Use a string rather than this.constructor.name, because tools that shrink code can rename the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:10 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This export name doesn't match the name of the error class ExportError.
+  
+    26 │ }
+    27 │ 
+  > 28 │ exports[("fooError" as const)] = class ExportError extends Error {
+       │          ^^^^^^^^^^
+    29 │ 	constructor(message, options) {
+    30 │ 		super(message, options);
+  
+  i Exporting an error class under its own name makes it easy to find where the error is defined.
+  
+  i Rename the export to ExportError.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:14 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept an options parameter.
+  
+    35 │ class TypedMissingOptionsError extends Error {
+  > 36 │ 	constructor(message: string) {
+       │ 	            ^^^^^^^^^^^^^^^
+    37 │ 		super(message);
+    38 │ 		this.name = "TypedMissingOptionsError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Add an options parameter, and pass it to super() as the second argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:43:2 lint/nursery/useCustomErrorDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This error constructor doesn't accept the error options in a single parameter named options.
+  
+    42 │ class AssertedBaseError extends (Error as ErrorConstructor) {
+  > 43 │ 	constructor(message: string, details: unknown) {
+       │ 	^^^^^^^^^^^
+    44 │ 		super(message);
+    45 │ 		this.name = "AssertedBaseError";
+  
+  i The options object lets the code that creates the error attach the original error as its cause. This keeps the chain of failures available for debugging.
+  
+  i Accept the options in a parameter named options that isn't a rest parameter such as ...options, and pass it to super() as the second argument. Other values can be read from it, such as options.details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
