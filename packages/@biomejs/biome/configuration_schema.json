@@ -4558,6 +4558,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateIfBranchesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateIfBranchesOptions" }
+			]
+		},
+		"NoDuplicateIfBranchesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateInputFieldNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9859,6 +9869,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateIfBranches": {
+					"description": "Disallow two branches next to each other in an if statement from running the same code.\nSee https://biomejs.dev/linter/rules/no-duplicate-if-branches",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateIfBranchesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateMapKeys": {
 					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
 					"anyOf": [
@@ -14220,6 +14237,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateGraphqlOperationNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateIfBranchesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateIfBranchesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

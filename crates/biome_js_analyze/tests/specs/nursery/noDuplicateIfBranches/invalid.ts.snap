@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+if (foo) {
+	const bar = value as string;
+	baz(bar);
+} else {
+	const bar = value as string;
+	baz(bar);
+}
+
+if (foo) {
+	const bar = value satisfies string;
+	baz(bar!);
+} else {
+	const bar = value satisfies string;
+	baz(bar!);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+     3 │ 	const bar = value as string;
+     4 │ 	baz(bar);
+   > 5 │ } else {
+       │        ^
+   > 6 │ 	const bar = value as string;
+   > 7 │ 	baz(bar);
+   > 8 │ }
+       │ ^
+     9 │ 
+    10 │ if (foo) {
+  
+  i The branch before it is here:
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (foo) {
+      │          ^
+  > 3 │ 	const bar = value as string;
+  > 4 │ 	baz(bar);
+  > 5 │ } else {
+      │ ^
+    6 │ 	const bar = value as string;
+    7 │ 	baz(bar);
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:8 lint/nursery/noDuplicateIfBranches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This branch runs the same code as the branch before it.
+  
+    11 │ 	const bar = value satisfies string;
+    12 │ 	baz(bar!);
+  > 13 │ } else {
+       │        ^
+  > 14 │ 	const bar = value satisfies string;
+  > 15 │ 	baz(bar!);
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i The branch before it is here:
+  
+     8 │ }
+     9 │ 
+  > 10 │ if (foo) {
+       │          ^
+  > 11 │ 	const bar = value satisfies string;
+  > 12 │ 	baz(bar!);
+  > 13 │ } else {
+       │ ^
+    14 │ 	const bar = value satisfies string;
+    15 │ 	baz(bar!);
+  
+  i The condition that chooses between these branches makes no difference, which is often a copy-paste mistake.
+  
+  i Change the code of one of the branches, or merge the branches into one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
