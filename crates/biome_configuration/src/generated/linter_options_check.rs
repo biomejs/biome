@@ -1041,6 +1041,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_misused_spread::NoMisusedSpreadOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMixedReturns",
+        TypeId::of::<biome_rule_options::no_mixed_returns::NoMixedReturnsOptions>(),
+    ));
+    result.push((
         "style",
         "noMultiAssign",
         TypeId::of::<biome_rule_options::no_multi_assign::NoMultiAssignOptions>(),

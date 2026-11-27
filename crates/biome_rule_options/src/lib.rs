@@ -223,6 +223,7 @@ pub mod no_missing_throw;
 pub mod no_missing_var_function;
 pub mod no_misused_promises;
 pub mod no_misused_spread;
+pub mod no_mixed_returns;
 pub mod no_multi_assign;
 pub mod no_multiline_string;
 pub mod no_mutable_exports;
