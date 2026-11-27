@@ -88,6 +88,7 @@ impl<'a> SpdxExpression<'a> {
                 // Must be a valid SPDX identifier (optionally with a trailing `+` "or later" operator)
                 let Some(license) = LICENSE_LIST.find(id).or_else(|| {
                     id.strip_suffix('+')
+                        .filter(|base| !base.ends_with('+'))
                         .and_then(|base| LICENSE_LIST.find(base))
                 }) else {
                     return Err(RejectReason::Untrusted);
@@ -604,12 +605,17 @@ mod tests {
             Err(RejectReason::Deprecated)
         );
 
-        // Invalid `+` forms remain untrusted
-        for invalid in ["MIT++", "+", "foo+"] {
+        // Invalid `+` forms remain untrusted (including repeated `+` on a
+        // deprecated SPDX ID that already ends with `+`, even when ignoring deprecated)
+        let ignore_deprecated_config = TrustConfig {
+            ignore_deprecated: true,
+            ..TrustConfig::default()
+        };
+        for invalid in ["MIT++", "GPL-2.0++", "+", "foo+"] {
             assert_eq!(
                 SpdxExpression::parse(invalid)
                     .unwrap()
-                    .check_trust(&default_config),
+                    .check_trust(&ignore_deprecated_config),
                 Err(RejectReason::Untrusted),
                 "expected {invalid} to be untrusted"
             );
