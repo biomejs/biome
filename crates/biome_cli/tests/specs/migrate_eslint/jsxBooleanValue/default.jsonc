@@ -1,0 +1,4 @@
+{
+  "biome": {},
+  "eslint": { "rules": { "react/jsx-boolean-value": "warn" } }
+}

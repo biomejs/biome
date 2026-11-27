@@ -7,6 +7,29 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_rule_options::use_consistent_boolean_props::BooleanPropMode;
+
+#[derive(Debug, Deserializable)]
+pub(crate) enum JsxBooleanValue {
+    Always,
+    Never,
+}
+
+impl From<JsxBooleanValue> for BooleanPropMode {
+    fn from(value: JsxBooleanValue) -> Self {
+        match value {
+            JsxBooleanValue::Always => Self::Explicit,
+            JsxBooleanValue::Never => Self::Implicit,
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct JsxBooleanExceptions {
+    pub always: Vec<Box<str>>,
+    pub never: Vec<Box<str>>,
+    pub assume_undefined_is_false: bool,
+}
 
 /// Options for the [react/forbid-elements](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/forbid-elements.md) rule.
 #[derive(Debug, Default, Deserializable)]

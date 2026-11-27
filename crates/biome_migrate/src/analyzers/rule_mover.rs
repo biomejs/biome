@@ -11,7 +11,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, AstSeparatedListExt, BatchMutationExt};
 
 use crate::{MigrationAction, declare_migration};
 
@@ -27,6 +27,7 @@ declare_migration! {
 /// The first element of every pair is the old name of the rule.
 #[rustfmt::skip]
 const RULE_RENAMING: &[(&str, RuleName)] = &[
+    ("noImplicitBoolean", RuleName::UseConsistentBooleanProps),
     ("noConsoleLog", RuleName::NoConsole),
     ("noInvalidNewBuiltin", RuleName::NoInvalidBuiltinInstantiation),
     ("noMultipleSpacesInRegularExpressionLiterals", RuleName::NoAdjacentSpacesInRegex),
@@ -108,7 +109,9 @@ impl Rule for RuleMover {
                         continue;
                     };
                     let rule_name = rule_name.text();
-                    if let Ok(new_rule) = RuleName::from_str(rule_name) {
+                    if let Ok(new_rule) = RuleName::from_str(rule_name)
+                        && new_rule != RuleName::NoImplicitBoolean
+                    {
                         // TODO: remove the `useNamingConvention` exception,
                         // once we have promoted the GraphQL `useNamingConvention` rule
                         //
@@ -126,6 +129,21 @@ impl Rule for RuleMover {
                         .find(|(old_name, _)| old_name == &rule_name)
                         .copied()
                     {
+                        // Move the nursery settings first so the old rule's explicit mode cannot overwrite them.
+                        if new_rule == RuleName::UseConsistentBooleanProps
+                            && rules
+                                .find_member("nursery")
+                                .and_then(|group| {
+                                    group
+                                        .value()
+                                        .ok()?
+                                        .as_json_object_value()?
+                                        .find_member(new_rule.as_str())
+                                })
+                                .is_some()
+                        {
+                            continue;
+                        }
                         result.push(State {
                             rule_node,
                             new_rule_name: AnyRule::Lint(new_rule),
@@ -214,6 +232,45 @@ impl Rule for RuleMover {
         let rules = rules.as_json_object_value()?;
         let old_rules_list = rules.json_member_list();
         let mut mutation = ctx.root().begin();
+        let mut keep_inherited_boolean_props = false;
+        if state.old_rule_name == Some("noImplicitBoolean") {
+            let root = ctx.root().value().ok()?;
+            let root = root.as_json_object_value()?;
+            let root_rules = linter_rules(root);
+            let root_replacement = root_rules.as_ref().and_then(|rules| {
+                object_member(rules, "nursery")
+                    .and_then(|group| group.find_member("useConsistentBooleanProps"))
+                    .or_else(|| {
+                        object_member(rules, "style")?.find_member("useConsistentBooleanProps")
+                    })
+            });
+            let is_override = root_rules
+                .as_ref()
+                .is_some_and(|root_rules| root_rules != rules);
+            // Resolve scoped disables before a root rename makes the replacement look pre-existing.
+            if !is_override
+                && root_replacement.is_none()
+                && root
+                    .find_member("overrides")
+                    .and_then(|member| member.value().ok())
+                    .and_then(|value| value.as_json_array_value().cloned())
+                    .is_some_and(|overrides| {
+                        overrides.elements().into_iter().flatten().any(|value| {
+                            let old_rule = value
+                                .as_json_object_value()
+                                .and_then(linter_rules)
+                                .and_then(|rules| object_member(&rules, "style"))
+                                .and_then(|style| style.find_member("noImplicitBoolean"));
+                            old_rule.is_some_and(boolean_rule_is_off)
+                        })
+                    })
+            {
+                return None;
+            }
+            keep_inherited_boolean_props = is_override
+                && root_replacement.is_some_and(|rule| !boolean_rule_is_off(rule))
+                && boolean_rule_is_off(state.rule_node.clone());
+        }
 
         // If the rule is moved or renamed
         let rule_node = state.rule_node.clone();
@@ -250,7 +307,7 @@ impl Rule for RuleMover {
             let old_list = group_obj.json_member_list();
             let mut new_elements = Vec::with_capacity(old_list.len() + 1);
             let mut last_has_separator = false;
-            let mut is_rule_migrated = false;
+            let mut is_rule_migrated = keep_inherited_boolean_props;
             for elt in old_list.elements() {
                 let node = elt.node.ok()?;
                 let trailing_separator = elt.trailing_separator.ok()?;
@@ -468,6 +525,7 @@ impl AnyRule {
 
 fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<AnyJsonValue> {
     let options = match old_rule_name {
+        "noImplicitBoolean" => return explicit_boolean_props(value),
         "noConsoleLog" => create_console_log_options(),
         "useShorthandArrayType" => create_shorthand_array_type_options(),
         _ => {
@@ -549,4 +607,83 @@ fn create_shorthand_array_type_options() -> AnyJsonValue {
         make::token(T!['}']).with_trailing_space(),
     )
     .into()
+}
+
+fn explicit_boolean_props(value: AnyJsonValue) -> Option<AnyJsonValue> {
+    let member = |name, value| {
+        make::json_member(
+            make::json_member_name(make::json_string_literal(name)).into(),
+            make::token(T![:]).with_trailing_space(),
+            value,
+        )
+    };
+    let mode = member(
+        "mode",
+        make::json_string_value(make::json_string_literal("explicit")).into(),
+    );
+    let object =
+        |members| make::json_object_value(make::token(T!['{']), members, make::token(T!['}']));
+    let options = member(
+        "options",
+        object(make::json_member_list([mode.clone()], [])).into(),
+    );
+    let comma = || make::token(T![,]).with_trailing_space();
+    if let AnyJsonValue::JsonObjectValue(config) = value {
+        if let Some(existing) = config.find_member("options") {
+            let old = existing.value().ok()?.as_json_object_value()?.clone();
+            let new = old
+                .clone()
+                .with_json_member_list(make::json_member_list([mode], []));
+            return Some(config.replace_node(old, new)?.into());
+        }
+        let members = config.json_member_list();
+        let separator = (!members.is_empty()).then(comma);
+        return Some(
+            config
+                .with_json_member_list(members.splice(0..0, [(options, separator)]))
+                .into(),
+        );
+    }
+    let separator = if value
+        .syntax()
+        .last_trailing_trivia()?
+        .pieces()
+        .any(|piece| piece.is_comments())
+    {
+        comma().with_leading_newline()
+    } else {
+        comma()
+    };
+    Some(
+        object(make::json_member_list(
+            [member("level", value), options],
+            [separator],
+        ))
+        .into(),
+    )
+}
+
+fn object_member(object: &JsonObjectValue, name: &str) -> Option<JsonObjectValue> {
+    object
+        .find_member(name)?
+        .value()
+        .ok()?
+        .as_json_object_value()
+        .cloned()
+}
+
+fn linter_rules(config: &JsonObjectValue) -> Option<JsonObjectValue> {
+    object_member(&object_member(config, "linter")?, "rules")
+}
+
+fn boolean_rule_is_off(rule: JsonMember) -> bool {
+    rule.value()
+        .ok()
+        .and_then(|value| {
+            get_rule_level(value)
+                .as_json_string_value()?
+                .inner_string_text()
+                .ok()
+        })
+        .is_some_and(|level| level.text() == "off")
 }

@@ -1,0 +1,13 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": { "useConsistentBooleanProps": { "level": "warn", "options": { "mode": null } } }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.jsx"],
+      "linter": { "rules": { "style": { "noImplicitBoolean": "off" } } }
+    }
+  ]
+}

@@ -900,6 +900,8 @@ fn generate_for_groups(
                     let mut disabled_rules = FxHashSet::default();
                     #( #group_as_default_rules )*
 
+                    #[cfg(feature = "lang_js")]
+                    disabled_rules.extend(self.superseded_boolean_prop_rule(Some(&enabled_rules)));
                     enabled_rules.difference(&disabled_rules).copied().collect()
                 }
 
@@ -907,6 +909,8 @@ fn generate_for_groups(
                 pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                     let mut disabled_rules = FxHashSet::default();
                     #( #group_as_disabled_rules )*
+                    #[cfg(feature = "lang_js")]
+                    disabled_rules.extend(self.superseded_boolean_prop_rule(None));
                     disabled_rules
                 }
 

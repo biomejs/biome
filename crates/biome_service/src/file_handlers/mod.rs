@@ -2790,6 +2790,20 @@ impl<'a, 'settings> AnalyzerVisitorBuilder<'a, 'settings> {
             disabled_rules.extend(configured_disabled_rules);
             globals = configured_globals;
         }
+        // Selecting the style group uses the replacement. The old rule can still be selected by name.
+        if !use_configured_rules
+            && enabled_rules
+                .iter()
+                .any(|rule| rule.match_rule_name("style", "noImplicitBoolean"))
+            && enabled_rules
+                .iter()
+                .any(|rule| rule.match_rule_name("style", "useConsistentBooleanProps"))
+            && !disabled_rules
+                .iter()
+                .any(|rule| rule.match_rule_name("style", "useConsistentBooleanProps"))
+        {
+            disabled_rules.push(RuleFilter::Rule("style", "noImplicitBoolean"));
+        }
 
         let only_excludes_plugins = self
             .only

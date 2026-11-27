@@ -1,5 +1,7 @@
 use crate::JsRuleAction;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsBooleanLiteralExpression, JsxAttribute, T};
@@ -12,8 +14,8 @@ declare_lint_rule! {
     /// Require a consistent style for JSX props with the value `true`
     ///
     /// In JSX, `<Foo bar />` and `<Foo bar={true} />` are equivalent.
-    ///
-    /// If `style.noImplicitBoolean` is enabled, turn it off before using `implicit` mode.
+    /// Run `biome migrate --write` to move an existing nursery configuration to `style`.
+    /// If `style` is set to a group-wide severity such as `"off"`, move the rule settings manually.
     ///
     /// ## Examples
     ///
@@ -43,10 +45,16 @@ declare_lint_rule! {
     /// <Foo bar={true} />
     /// ```
     ///
+    /// ## Migrating from ESLint
+    ///
+    /// `biome migrate eslint --include-inspired` maps `react/jsx-boolean-value` to this rule.
+    /// It preserves the severity and maps `"always"` to `"explicit"` and `"never"` to `"implicit"`.
+    /// Per-prop exceptions and `assumeUndefinedIsFalse` are not migrated.
     pub UseConsistentBooleanProps {
         version: "next",
         name: "useConsistentBooleanProps",
         language: "jsx",
+        sources: &[RuleSource::EslintReact("jsx-boolean-value").inspired()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -71,7 +79,8 @@ impl Rule for UseConsistentBooleanProps {
                     .as_jsx_expression_attribute_value()?
                     .expression()
                     .ok()?;
-                let literal = JsBooleanLiteralExpression::cast(expression.omit_parentheses().into_syntax())?;
+                let literal =
+                    JsBooleanLiteralExpression::cast(expression.omit_parentheses().into_syntax())?;
                 // The React JSX transform requires explicit values for these reserved props.
                 literal.value_token().ok()?.kind() == T![true]
                     && !attribute.name().ok()?.as_jsx_name().is_some_and(|name| {

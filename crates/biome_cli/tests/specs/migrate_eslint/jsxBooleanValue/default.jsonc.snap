@@ -1,0 +1,31 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: default.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "react/jsx-boolean-value": "warn" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"style": { "useConsistentBooleanProps": "warn" }
+		}
+	}
+}
+
+```

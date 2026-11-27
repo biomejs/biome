@@ -1,0 +1,158 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: booleanProps.jsonc
+---
+# Input
+```json
+{
+  "linter": { "rules": {
+    "nursery": "off",
+    "style": {
+      // Keep this convention for existing components.
+      "noImplicitBoolean": "warn" // Preserve the project's JSX style.
+    }
+  } },
+  "overrides": [
+    {
+      "includes": ["trial/**"],
+      "linter": { "rules": {
+        "style": { "noImplicitBoolean": "warn" },
+        "nursery": { "useConsistentBooleanProps": { "level": "error", "options": { "mode": "implicit" } } }
+      } }
+    },
+    {
+      "includes": ["**/*.tsx"],
+      "linter": { "rules": { "style": {
+        "noImplicitBoolean": { "level": "error", "fix": "none", "options": {} }
+      } } }
+    },
+    {
+      "includes": ["legacy/**"],
+      "linter": { "rules": { "style": {
+        "noImplicitBoolean": "off",
+        "useConsistentBooleanProps": "warn"
+      } } }
+    },
+    {
+      "includes": ["**/*.test.jsx"],
+      "linter": { "rules": { "style": { "noImplicitBoolean": "off" } } }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+booleanProps.jsonc:6:7 migrate  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useConsistentBooleanProps.
+  
+    4 │     "style": {
+    5 │       // Keep this convention for existing components.
+  > 6 │       "noImplicitBoolean": "warn" // Preserve the project's JSX style.
+      │       ^^^^^^^^^^^^^^^^^^^
+    7 │     }
+    8 │   } },
+  
+
+```
+
+```
+booleanProps.jsonc:14:22 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to style/useConsistentBooleanProps.
+  
+    12 │       "linter": { "rules": {
+    13 │         "style": { "noImplicitBoolean": "warn" },
+  > 14 │         "nursery": { "useConsistentBooleanProps": { "level": "error", "options": { "mode": "implicit" } } }
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │       } }
+    16 │     },
+  
+  i Safe fix: Move the lint rule.
+  
+    11 11 │         "includes": ["trial/**"],
+    12 12 │         "linter": { "rules": {
+    13    │ - ········"style":·{·"noImplicitBoolean":·"warn"·},
+    14    │ - ········"nursery":·{·"useConsistentBooleanProps":·{·"level":·"error",·"options":·{·"mode":·"implicit"·}·}·}
+       13 │ + ········"style":·{·"noImplicitBoolean":·"warn","useConsistentBooleanProps":·{·"level":·"error",·"options":·{·"mode":·"implicit"·}·}·},
+       14 │ + ········"nursery":·{·}
+    15 15 │         } }
+    16 16 │       },
+  
+
+```
+
+```
+booleanProps.jsonc:20:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useConsistentBooleanProps.
+  
+    18 │       "includes": ["**/*.tsx"],
+    19 │       "linter": { "rules": { "style": {
+  > 20 │         "noImplicitBoolean": { "level": "error", "fix": "none", "options": {} }
+       │         ^^^^^^^^^^^^^^^^^^^
+    21 │       } } }
+    22 │     },
+  
+  i Safe fix: Rename the lint rule.
+  
+    18 18 │         "includes": ["**/*.tsx"],
+    19 19 │         "linter": { "rules": { "style": {
+    20    │ - ········"noImplicitBoolean":·{·"level":·"error",·"fix":·"none",·"options":·{}·}
+       20 │ + ········"useConsistentBooleanProps":·{·"level":·"error",·"fix":·"none",·"options":·{"mode":·"explicit"}·}
+    21 21 │         } } }
+    22 22 │       },
+  
+
+```
+
+```
+booleanProps.jsonc:26:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useConsistentBooleanProps.
+  
+    24 │       "includes": ["legacy/**"],
+    25 │       "linter": { "rules": { "style": {
+  > 26 │         "noImplicitBoolean": "off",
+       │         ^^^^^^^^^^^^^^^^^^^
+    27 │         "useConsistentBooleanProps": "warn"
+    28 │       } } }
+  
+  i Safe fix: Rename the lint rule.
+  
+    24 24 │         "includes": ["legacy/**"],
+    25 25 │         "linter": { "rules": { "style": {
+    26    │ - ········"noImplicitBoolean":·"off",
+    27    │ - ········"useConsistentBooleanProps":·"warn"
+       26 │ + ········"useConsistentBooleanProps":·"warn"
+    28 27 │         } } }
+    29 28 │       },
+  
+
+```
+
+```
+booleanProps.jsonc:32:41 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useConsistentBooleanProps.
+  
+    30 │     {
+    31 │       "includes": ["**/*.test.jsx"],
+  > 32 │       "linter": { "rules": { "style": { "noImplicitBoolean": "off" } } }
+       │                                         ^^^^^^^^^^^^^^^^^^^
+    33 │     }
+    34 │   ]
+  
+  i Safe fix: Rename the lint rule.
+  
+    30 30 │       {
+    31 31 │         "includes": ["**/*.test.jsx"],
+    32    │ - ······"linter":·{·"rules":·{·"style":·{·"noImplicitBoolean":·"off"·}·}·}
+       32 │ + ······"linter":·{·"rules":·{·"style":·{·"useConsistentBooleanProps":·{"level":·"off"·,·"options":·{"mode":·"explicit"}}}·}·}
+    33 33 │       }
+    34 34 │     ]
+  
+
+```

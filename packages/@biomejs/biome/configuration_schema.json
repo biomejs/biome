@@ -11235,13 +11235,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentBooleanProps": {
-					"description": "Require a consistent style for JSX props with the value true.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-props",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentBooleanPropsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentExistenceIndexCheck": {
 					"description": "Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.\nSee https://biomejs.dev/linter/rules/use-consistent-existence-index-check",
 					"anyOf": [
@@ -22764,6 +22757,13 @@
 					"description": "Enforce consistent arrow function bodies.\nSee https://biomejs.dev/linter/rules/use-consistent-arrow-return",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentArrowReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentBooleanProps": {
+					"description": "Require a consistent style for JSX props with the value true.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBooleanPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},

@@ -4186,11 +4186,6 @@ export interface Nursery {
 	 */
 	useConsistentBooleanName?: UseConsistentBooleanNameConfiguration;
 	/**
-	 * Require a consistent style for JSX props with the value true.
-	 * See https://biomejs.dev/linter/rules/use-consistent-boolean-props
-	 */
-	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
-	/**
 	 * Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.
 	 * See https://biomejs.dev/linter/rules/use-consistent-existence-index-check
 	 */
@@ -5256,6 +5251,11 @@ export interface Style {
 	 * See https://biomejs.dev/linter/rules/use-consistent-arrow-return
 	 */
 	useConsistentArrowReturn?: UseConsistentArrowReturnConfiguration;
+	/**
+	 * Require a consistent style for JSX props with the value true.
+	 * See https://biomejs.dev/linter/rules/use-consistent-boolean-props
+	 */
+	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
 	/**
 	 * Enforce the use of new for all builtins, except String, Number and Boolean.
 	 * See https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation
@@ -7693,9 +7693,6 @@ export type UseConsistentBlockLangConfiguration =
 export type UseConsistentBooleanNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBooleanNameOptions;
-export type UseConsistentBooleanPropsConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseConsistentBooleanPropsOptions;
 export type UseConsistentExistenceIndexCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentExistenceIndexCheckOptions;
@@ -8305,6 +8302,9 @@ export type UseConsistentArrayTypeConfiguration =
 export type UseConsistentArrowReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentArrowReturnOptions;
+export type UseConsistentBooleanPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBooleanPropsOptions;
 export type UseConsistentBuiltinInstantiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBuiltinInstantiationOptions;
@@ -11388,14 +11388,6 @@ export interface RuleWithUseConsistentBooleanNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBooleanNameOptions;
 }
-export interface RuleWithUseConsistentBooleanPropsOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseConsistentBooleanPropsOptions;
-}
 export interface RuleWithUseConsistentExistenceIndexCheckOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12539,6 +12531,14 @@ export interface RuleWithUseConsistentArrowReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentArrowReturnOptions;
+}
+export interface RuleWithUseConsistentBooleanPropsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBooleanPropsOptions;
 }
 export interface RuleWithUseConsistentBuiltinInstantiationOptions {
 	/**
@@ -14714,12 +14714,6 @@ export interface UseConsistentBooleanNameOptions {
 	 */
 	prefixes?: Record<string, boolean>;
 }
-export interface UseConsistentBooleanPropsOptions {
-	/**
-	 * How to write JSX props whose value is `true`. Defaults to `explicit`.
-	 */
-	mode?: BooleanPropMode;
-}
 export type UseConsistentExistenceIndexCheckOptions = {};
 export interface UseConsistentFontWeightNotationOptions {
 	/**
@@ -15347,6 +15341,12 @@ export interface UseConsistentArrowReturnOptions {
 	 * The style to enforce for arrow function return statements.
 	 */
 	style?: UseConsistentArrowReturnStyle;
+}
+export interface UseConsistentBooleanPropsOptions {
+	/**
+	 * How to write JSX props whose value is `true`. Defaults to `explicit`.
+	 */
+	mode?: BooleanPropMode;
 }
 export type UseConsistentBuiltinInstantiationOptions = {};
 export type UseConsistentCurlyBracesOptions = {};
@@ -16130,7 +16130,6 @@ export interface BlockLangOptions {
 	 */
 	required?: boolean;
 }
-export type BooleanPropMode = "implicit" | "explicit";
 export type FontWeightNotation = "numeric" | "namedWherePossible";
 /**
  * The required form for function definitions: `"expression"` or `"declaration"`.
@@ -16192,6 +16191,7 @@ export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
+export type BooleanPropMode = "implicit" | "explicit";
 /**
  * The GraphQL description style to enforce.
  */
@@ -16943,7 +16943,6 @@ export type Category =
 	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
-	| "lint/nursery/useConsistentBooleanProps"
 	| "lint/nursery/useConsistentExistenceIndexCheck"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
@@ -17165,6 +17164,7 @@ export type Category =
 	| "lint/style/useComponentExportOnlyModules"
 	| "lint/style/useConsistentArrayType"
 	| "lint/style/useConsistentArrowReturn"
+	| "lint/style/useConsistentBooleanProps"
 	| "lint/style/useConsistentBuiltinInstantiation"
 	| "lint/style/useConsistentCurlyBraces"
 	| "lint/style/useConsistentEnumValueType"

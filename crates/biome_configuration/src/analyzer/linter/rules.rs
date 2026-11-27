@@ -2398,7 +2398,7 @@ impl RuleName {
             Self::UseConsistentArrowReturn => RuleGroup::Style,
             Self::UseConsistentBlockLang => RuleGroup::Nursery,
             Self::UseConsistentBooleanName => RuleGroup::Nursery,
-            Self::UseConsistentBooleanProps => RuleGroup::Nursery,
+            Self::UseConsistentBooleanProps => RuleGroup::Style,
             Self::UseConsistentBuiltinInstantiation => RuleGroup::Style,
             Self::UseConsistentCurlyBraces => RuleGroup::Style,
             Self::UseConsistentEnumValueType => RuleGroup::Style,
@@ -3832,6 +3832,8 @@ impl Rules {
         } else if !self.preset().is_none() {
             enabled_rules.extend(Suspicious::preset_as_filters(self.preset()));
         }
+        #[cfg(feature = "lang_js")]
+        disabled_rules.extend(self.superseded_boolean_prop_rule(Some(&enabled_rules)));
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
     #[doc = r" It returns the disabled rules by configuration"]
@@ -3861,6 +3863,8 @@ impl Rules {
         if let Some(group) = self.suspicious.as_ref() {
             disabled_rules.extend(&group.get_disabled_rules());
         }
+        #[cfg(feature = "lang_js")]
+        disabled_rules.extend(self.superseded_boolean_prop_rule(None));
         disabled_rules
     }
     #[doc = r" It returns the rules enabled by configuration, excluding the ones enabled by presets"]

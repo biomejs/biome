@@ -1,1 +1,0 @@
-{ "linter": { "rules": { "nursery": { "useConsistentBooleanProps": { "level": "warn", "options": { "mode": "implicit" } } } } } }

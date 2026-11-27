@@ -616,6 +616,28 @@ impl Deserializable for Rules {
                                 result.insert(Rule::ReactForbidElements(conf));
                             }
                         }
+                        "react/jsx-boolean-value" => {
+                            if let Some(conf) =
+                                RuleConf::<_, eslint_react::JsxBooleanExceptions>::deserialize(
+                                    ctx, &value, name,
+                                )
+                            {
+                                if let RuleConf::Options(_, _, exceptions) = &conf
+                                    && (!exceptions.always.is_empty()
+                                        || !exceptions.never.is_empty()
+                                        || exceptions.assume_undefined_is_false)
+                                {
+                                    ctx.report(
+                                        DeserializationDiagnostic::new(
+                                            "Per-prop exceptions and assumeUndefinedIsFalse are ignored when migrating react/jsx-boolean-value.",
+                                        )
+                                        .with_range(value.range())
+                                        .with_custom_severity(biome_diagnostics::Severity::Warning),
+                                    );
+                                }
+                                result.insert(Rule::ReactJsxBooleanValue(conf));
+                            }
+                        }
                         "jsx-a11y/aria-role" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::Jsxa11yArioaRoles(conf));
@@ -1286,6 +1308,9 @@ pub(crate) enum Rule {
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     ReactForbidElements(RuleConf<eslint_react::ForbidElementsOptions>),
+    ReactJsxBooleanValue(
+        RuleConf<eslint_react::JsxBooleanValue, eslint_react::JsxBooleanExceptions>,
+    ),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
     TypeScriptConsistentTypeImports(RuleConf<eslint_typescript::ConsistentTypeImportsOptions>),
     TypeScriptExplicitMemberAccessibility(
@@ -1329,6 +1354,7 @@ impl Rule {
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::ReactForbidElements(_) => Cow::Borrowed("react/forbid-elements"),
+            Self::ReactJsxBooleanValue(_) => Cow::Borrowed("react/jsx-boolean-value"),
             Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
             Self::TypeScriptConsistentTypeImports(_) => {
                 Cow::Borrowed("@typescript-eslint/consistent-type-imports")

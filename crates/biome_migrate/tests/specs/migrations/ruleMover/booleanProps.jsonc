@@ -1,0 +1,35 @@
+{
+  "linter": { "rules": {
+    "nursery": "off",
+    "style": {
+      // Keep this convention for existing components.
+      "noImplicitBoolean": "warn" // Preserve the project's JSX style.
+    }
+  } },
+  "overrides": [
+    {
+      "includes": ["trial/**"],
+      "linter": { "rules": {
+        "style": { "noImplicitBoolean": "warn" },
+        "nursery": { "useConsistentBooleanProps": { "level": "error", "options": { "mode": "implicit" } } }
+      } }
+    },
+    {
+      "includes": ["**/*.tsx"],
+      "linter": { "rules": { "style": {
+        "noImplicitBoolean": { "level": "error", "fix": "none", "options": {} }
+      } } }
+    },
+    {
+      "includes": ["legacy/**"],
+      "linter": { "rules": { "style": {
+        "noImplicitBoolean": "off",
+        "useConsistentBooleanProps": "warn"
+      } } }
+    },
+    {
+      "includes": ["**/*.test.jsx"],
+      "linter": { "rules": { "style": { "noImplicitBoolean": "off" } } }
+    }
+  ]
+}

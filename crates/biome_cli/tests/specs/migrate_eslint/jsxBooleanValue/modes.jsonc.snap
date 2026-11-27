@@ -1,0 +1,69 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: modes.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{
+			"files": ["explicit/*.jsx"],
+			"rules": { "react/jsx-boolean-value": "error" }
+		},
+		{
+			"files": ["implicit/*.jsx"],
+			"rules": { "react/jsx-boolean-value": ["warn", "never"] }
+		}
+	],
+	"rules": { "react/jsx-boolean-value": ["warn", "always"] }
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"style": {
+				"useConsistentBooleanProps": {
+					"level": "warn",
+					"options": { "mode": "explicit" }
+				}
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["explicit/*.jsx"],
+			"linter": {
+				"rules": { "style": { "useConsistentBooleanProps": "error" } }
+			}
+		},
+		{
+			"includes": ["implicit/*.jsx"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConsistentBooleanProps": {
+							"level": "warn",
+							"options": { "mode": "implicit" }
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```

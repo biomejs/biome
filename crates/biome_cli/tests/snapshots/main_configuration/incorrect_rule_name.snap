@@ -239,6 +239,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useComponentExportOnlyModules
   - useConsistentArrayType
   - useConsistentArrowReturn
+  - useConsistentBooleanProps
   - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
   - useConsistentEnumValueType

@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
@@ -14,6 +12,9 @@ use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Disallow implicit `true` values on JSX boolean attributes
+    ///
+    /// Use [`useConsistentBooleanProps`](https://biomejs.dev/linter/rules/use-consistent-boolean-props/) with `mode: "explicit"` instead.
+    /// Run `biome migrate --write` to update existing configurations.
     ///
     /// ## Examples
     ///
@@ -48,7 +49,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noImplicitBoolean",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-boolean-value").inspired()],
+        deprecated: "Use useConsistentBooleanProps with mode set to explicit.",
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

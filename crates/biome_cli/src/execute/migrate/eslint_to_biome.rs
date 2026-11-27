@@ -1041,6 +1041,24 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::ReactJsxBooleanValue(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(_, mode)
+                | eslint_eslint::RuleConf::Options(_, mode, _) = conf
+                && let Some(rule) = rules.style.as_mut().and_then(|group| {
+                    group
+                        .unwrap_group_as_mut()
+                        .use_consistent_boolean_props
+                        .as_mut()
+                })
+            {
+                *rule = biome_config::RuleFixConfiguration::WithOptions(biome_config::RuleWithFixOptions {
+                    level: rule.level(),
+                    fix: None,
+                    options: biome_rule_options::use_consistent_boolean_props::UseConsistentBooleanPropsOptions { mode: Some(mode.into()) },
+                });
+            }
+        }
         eslint_eslint::Rule::ReactForbidElements(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && !matches!(conf.severity(), eslint_eslint::Severity::Off)
@@ -1586,6 +1604,25 @@ mod tests {
         }, {
             insta::assert_snapshot!(file_name, snapshot, file_name);
         });
+    }
+
+    #[test]
+    fn jsx_boolean_value_keeps_mode_and_warns_about_exceptions() {
+        let (rules, diagnostics) = biome_deserialize::json::deserialize_from_json_str::<Rules>(
+            r#"{"react/jsx-boolean-value": ["warn", "never", {"always": ["disabled"]}]}"#,
+            Default::default(),
+            "",
+        )
+        .consume();
+        assert!(matches!(
+            rules.unwrap().iter().next(),
+            Some(Rule::ReactJsxBooleanValue(RuleConf::Options(
+                Severity::Warn,
+                super::super::eslint_react::JsxBooleanValue::Never,
+                _
+            )))
+        ));
+        assert_eq!(diagnostics.len(), 1);
     }
 
     #[test]

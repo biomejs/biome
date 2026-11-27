@@ -1,0 +1,10 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": { "react/jsx-boolean-value": ["warn", "always"] },
+    "overrides": [
+      { "files": ["explicit/*.jsx"], "rules": { "react/jsx-boolean-value": "error" } },
+      { "files": ["implicit/*.jsx"], "rules": { "react/jsx-boolean-value": ["warn", "never"] } }
+    ]
+  }
+}

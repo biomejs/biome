@@ -1,7 +1,11 @@
 mod rules;
 
+#[cfg(feature = "lang_js")]
+use super::SeverityOrGroup;
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
+#[cfg(feature = "lang_js")]
+use biome_analyze::RuleFilter;
 use biome_console::markup;
 use biome_deserialize::{
     DeserializableValidator, DeserializationContext, DeserializationDiagnostic, TextRange,
@@ -14,6 +18,85 @@ pub use rules::*;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
+
+#[cfg(feature = "lang_js")]
+impl Rules {
+    fn superseded_boolean_prop_rule(
+        &self,
+        enabled: Option<&rustc_hash::FxHashSet<RuleFilter<'static>>>,
+    ) -> Option<RuleFilter<'static>> {
+        let old = RuleFilter::Rule("style", "noImplicitBoolean");
+        // Prefer an explicitly configured replacement. Enabling the whole group preserves the old behavior.
+        match &self.style {
+            Some(SeverityOrGroup::Group(group)) if group.use_consistent_boolean_props.is_some() => {
+                Some(old)
+            }
+            Some(SeverityOrGroup::Group(group)) if group.no_implicit_boolean.is_some() => {
+                Some(RuleFilter::Rule("style", "useConsistentBooleanProps"))
+            }
+            _ if enabled.is_some_and(|rules| rules.contains(&old)) => {
+                Some(RuleFilter::Rule("style", "useConsistentBooleanProps"))
+            }
+            _ => None,
+        }
+    }
+}
+
+#[test]
+#[cfg(feature = "lang_js")]
+fn migrated_boolean_props_override_the_all_preset() {
+    use super::{RuleFixConfiguration, RulePlainConfiguration, presets::PresetConfig};
+
+    let old = RuleFilter::Rule("style", "noImplicitBoolean");
+    let new = RuleFilter::Rule("style", "useConsistentBooleanProps");
+    let mut rules = Rules {
+        preset: Some(PresetConfig::All),
+        ..Rules::default()
+    };
+    assert!(rules.as_enabled_rules().contains(&old));
+    assert!(!rules.as_enabled_rules().contains(&new));
+    for level in [RulePlainConfiguration::Off, RulePlainConfiguration::Warn] {
+        rules.style = Some(SeverityOrGroup::Group(Style {
+            use_consistent_boolean_props: Some(RuleFixConfiguration::Plain(level)),
+            ..Style::default()
+        }));
+        let enabled = rules.as_enabled_rules();
+        assert!(!enabled.contains(&old));
+        assert!(rules.as_disabled_rules().contains(&old));
+        assert_eq!(
+            enabled.contains(&new),
+            level == RulePlainConfiguration::Warn
+        );
+    }
+}
+
+#[test]
+#[cfg(feature = "lang_js")]
+fn boolean_props_requires_opt_in_with_the_recommended_preset() {
+    use super::{RuleFixConfiguration, RulePlainConfiguration};
+
+    let old = RuleFilter::Rule("style", "noImplicitBoolean");
+    let new = RuleFilter::Rule("style", "useConsistentBooleanProps");
+    let mut rules = Rules::default();
+    assert!(!rules.as_enabled_rules().contains(&new));
+    assert!(!rules.as_enabled_rules().contains(&old));
+
+    rules.style = Some(SeverityOrGroup::Group(Style {
+        no_implicit_boolean: Some(RuleFixConfiguration::Plain(RulePlainConfiguration::Warn)),
+        ..Style::default()
+    }));
+    assert!(rules.as_enabled_rules().contains(&old));
+    assert!(!rules.as_enabled_rules().contains(&new));
+
+    rules.style = Some(SeverityOrGroup::Group(Style {
+        use_consistent_boolean_props: Some(RuleFixConfiguration::Plain(
+            RulePlainConfiguration::Warn,
+        )),
+        ..Style::default()
+    }));
+    assert!(!rules.as_enabled_rules().contains(&old));
+    assert!(rules.as_enabled_rules().contains(&new));
+}
 
 pub type LinterEnabled = Bool<true>;
 

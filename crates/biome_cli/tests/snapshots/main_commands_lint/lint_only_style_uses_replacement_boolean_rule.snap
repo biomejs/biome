@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=style --write props.jsx
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useConsistentBooleanProps": {
+          "level": "warn",
+          "options": { "mode": "implicit" }
+        }
+      }
+    }
+  }
+}
+```
+
+## `props.jsx`
+
+```jsx
+<Foo enabled={true} />;
+```
+
+# Emitted Messages
+
+```block
+props.jsx:1:6 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX attribute already implies true when written without a value.
+  
+  > 1 │ <Foo enabled={true} />;
+      │      ^^^^^^^^^^^^^^
+  
+  i Safe fix: Remove the explicit true value.
+  
+    1 │ <Foo·enabled={true}·/>;
+      │             -------    
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

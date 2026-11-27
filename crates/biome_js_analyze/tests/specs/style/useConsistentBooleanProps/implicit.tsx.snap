@@ -18,7 +18,7 @@ expression: implicit.tsx
 
 # Diagnostics
 ```
-implicit.tsx:2:12 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:2:12 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -28,8 +28,6 @@ implicit.tsx:2:12 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
     3 │ <Foo a={true}b={true}c />;
     4 │ <input disabled={  true  } /* keep */ />;
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the explicit true value.
   
     2 │ <Foo·first·bar={true}·last·/>;
@@ -38,7 +36,7 @@ implicit.tsx:2:12 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
 ```
 
 ```
-implicit.tsx:3:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:3:6 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -48,8 +46,6 @@ implicit.tsx:3:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
       │      ^^^^^^^^
     4 │ <input disabled={  true  } /* keep */ />;
     5 │ <Foo bar={/* keep */ true} />;
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the explicit true value.
   
@@ -64,7 +60,7 @@ implicit.tsx:3:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
 ```
 
 ```
-implicit.tsx:3:14 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:3:14 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -74,8 +70,6 @@ implicit.tsx:3:14 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
       │              ^^^^^^^^
     4 │ <input disabled={  true  } /* keep */ />;
     5 │ <Foo bar={/* keep */ true} />;
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the explicit true value.
   
@@ -90,7 +84,7 @@ implicit.tsx:3:14 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
 ```
 
 ```
-implicit.tsx:4:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:4:8 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -101,8 +95,6 @@ implicit.tsx:4:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
     5 │ <Foo bar={/* keep */ true} />;
     6 │ <Foo bar /* keep */ ={true} />;
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
   i Safe fix: Remove the explicit true value.
   
     4 │ <input·disabled={··true··}·/*·keep·*/·/>;
@@ -111,7 +103,7 @@ implicit.tsx:4:8 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
 ```
 
 ```
-implicit.tsx:5:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:5:6 lint/style/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -122,13 +114,11 @@ implicit.tsx:5:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━
     6 │ <Foo bar /* keep */ ={true} />;
     7 │ <Foo key={true} __self={true} __source={true} />;
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-implicit.tsx:6:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:6:6 lint/style/useConsistentBooleanProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -139,13 +129,11 @@ implicit.tsx:6:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━
     7 │ <Foo key={true} __self={true} __source={true} />;
     8 │ <Foo enabled={false} checked={flag} text="true" />;
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-implicit.tsx:9:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+implicit.tsx:9:6 lint/style/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This JSX attribute already implies true when written without a value.
   
@@ -154,8 +142,6 @@ implicit.tsx:9:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
    > 9 │ <Foo enabled={(true)} />;
        │      ^^^^^^^^^^^^^^^^
     10 │ 
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Remove the explicit true value.
   

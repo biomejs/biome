@@ -2956,6 +2956,30 @@ fn lint_only_rule() {
 }
 
 #[test]
+fn lint_only_style_uses_replacement_boolean_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(Utf8Path::new("biome.json").into(), br#"{"linter":{"rules":{"style":{"useConsistentBooleanProps":{"level":"warn","options":{"mode":"implicit"}}}}}}"#);
+    fs.insert(
+        Utf8Path::new("props.jsx").into(),
+        b"<Foo enabled={true} />;",
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=style", "--write", "props.jsx"].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_only_style_uses_replacement_boolean_rule",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_only_multiple_rules() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

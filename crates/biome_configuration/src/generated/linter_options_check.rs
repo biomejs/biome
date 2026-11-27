@@ -2691,7 +2691,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
-        "nursery",
+        "style",
         "useConsistentBooleanProps",
         TypeId::of::<
             biome_rule_options::use_consistent_boolean_props::UseConsistentBooleanPropsOptions,
