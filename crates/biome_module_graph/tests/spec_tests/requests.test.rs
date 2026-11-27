@@ -521,6 +521,43 @@ fn overloaded_promise_statics_classify_arrays_by_every_overload() {
 }
 
 #[test]
+fn array_classification_stays_indeterminate_for_unclassifiable_callees() {
+    use TypeInferenceClassification::{Indeterminate, NoMatch};
+    const SOURCE: &str = r#"
+        declare const values: Array<Promise<void>>;
+        unknownGlobal(values);
+        Array(values);
+        String(values);
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    for (expression, expected) in [
+        // The callee has no known type.
+        ("unknownGlobal(values)", Indeterminate),
+        // The call signatures of `Array` return different types.
+        ("Array(values)", Indeterminate),
+        // Every call signature of `String` returns a string.
+        ("String(values)", NoMatch),
+    ] {
+        let range = expression_range_by_source(&db, module, SOURCE, expression);
+        assert_eq!(
+            execute_type_inference_request(
+                &db,
+                TypeInferenceCaller::new("test", "unclassifiableCallees"),
+                ArrayOfPromisesClassificationRequest::new(module, range),
+            ),
+            expected,
+            "{expression}"
+        );
+    }
+}
+
+#[test]
 fn classification_and_return_type_requests_stay_selective() {
     let source = r#"
         const promise = Promise.resolve(1);

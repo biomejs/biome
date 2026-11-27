@@ -32,7 +32,7 @@ use biome_js_type_info::{
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
     interned_types::{
         InternedFunction as InferredFunction, ReturnType, TypeData as InferredTypeData,
-        TypeSubstitution, TypeTransformResult,
+        TypeMember as InferredTypeMember, TypeSubstitution, TypeTransformResult,
     },
 };
 use biome_rowan::Text;
@@ -1140,44 +1140,113 @@ fn classify_expression(
 ///
 /// `classify` receives a function and its declared return type. It answers
 /// whether the return type has the requested shape, or `None` when it can't
-/// tell. A callee that isn't a function returns nothing to classify.
+/// tell.
 ///
-/// An object with call signatures is an overloaded function, and every overload
-/// is classified. The result is indeterminate unless the overloads agree,
-/// because the answer depends on the overload that a call selects.
+/// An object, class, or interface with call signatures is an overloaded
+/// function, and every overload is classified. The result is indeterminate
+/// unless the overloads agree, because the answer depends on the overload that
+/// a call selects.
+///
+/// A callee that can't be called returns nothing to classify. The result is
+/// indeterminate for any other callee, such as an unresolved type, `any`, or a
+/// union.
 fn classify_callee_return<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
     mut classify: impl FnMut(InferredFunction<'db>, InferredTypeData<'db>) -> Option<bool>,
 ) -> PromiseClassification {
+    let callee = resolve_local_type_on_demand(db, callee).expand_canonical_global(db);
     let result = if callee.callable_function(db).is_some() {
         classify_function_return(db, callee, &mut classify)
-    } else if let InferredTypeData::Object(object) =
-        resolve_local_type_on_demand(db, callee).expand_structural_global(db)
-    {
-        let mut overloads = object
-            .members(db)
-            .iter()
-            .filter(|member| member.kind.is_call_signature())
-            .map(|member| {
-                classify_function_return(
-                    db,
-                    resolve_local_type_on_demand(db, member.ty).expand_structural_global(db),
-                    &mut classify,
-                )
-            });
-        match overloads.next() {
-            Some(first) if overloads.all(|overload| overload == first) => first,
-            Some(_) => None,
-            None => Some(false),
-        }
     } else {
-        Some(false)
+        match callee {
+            InferredTypeData::Object(object) => {
+                classify_call_signatures(db, object.members(db), false, &mut classify)
+            }
+            InferredTypeData::Class(class) => classify_call_signatures(
+                db,
+                class.members(db),
+                class.extends(db).is_some(),
+                &mut classify,
+            ),
+            InferredTypeData::Interface(interface) => classify_call_signatures(
+                db,
+                interface.members(db),
+                !interface.extends(db).is_empty(),
+                &mut classify,
+            ),
+            InferredTypeData::Global
+            | InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Literal(_)
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::VoidKeyword => Some(false),
+            InferredTypeData::Unknown
+            | InferredTypeData::Conditional
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
+            | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword => None,
+        }
     };
     match result {
         Some(true) => PromiseClassification::ReturnsPromise,
         Some(false) => PromiseClassification::DoesNotReturnPromise,
         None => PromiseClassification::Indeterminate,
+    }
+}
+
+/// Classifies the call signatures among `members`, as described by
+/// [`classify_callee_return`].
+///
+/// A type that declares no call signature can't be called, unless
+/// `may_inherit_call_signatures` says that a base type may declare one.
+fn classify_call_signatures<'db>(
+    db: &'db dyn ModuleDb,
+    members: &[InferredTypeMember<'db>],
+    may_inherit_call_signatures: bool,
+    classify: &mut impl FnMut(InferredFunction<'db>, InferredTypeData<'db>) -> Option<bool>,
+) -> Option<bool> {
+    let mut overloads = members
+        .iter()
+        .filter(|member| member.kind.is_call_signature())
+        .map(|member| {
+            classify_function_return(
+                db,
+                resolve_local_type_on_demand(db, member.ty).expand_structural_global(db),
+                classify,
+            )
+        });
+    match overloads.next() {
+        Some(first) if overloads.all(|overload| overload == first) => first,
+        Some(_) => None,
+        None if may_inherit_call_signatures => None,
+        None => Some(false),
     }
 }
 
