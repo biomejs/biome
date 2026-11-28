@@ -44,3 +44,6 @@ let changingElement = "1";
 changingElement = 1;
 const valuesWithChangedElement = [changingElement, 2];
 const changedElementMaximum = valuesWithChangedElement.reduce((a, b) => (a > b ? a : b));
+
+const mappedNumbers = [1, 2].map((value) => value);
+const mappedMaximum = mappedNumbers.reduce((a, b) => (a > b ? a : b), 0);
