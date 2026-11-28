@@ -4,8 +4,8 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
     CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
     CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule,
-    ScssExpression, ScssPartialCombinatorSelector, decode_css_identifier,
-    property_syntax::PropertySyntaxResult,
+    ScssExpression, ScssIncludeAtRule, ScssMixinAtRule, ScssPartialCombinatorSelector,
+    decode_css_identifier, property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
     AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
@@ -164,6 +164,38 @@ impl SemanticModel {
             .is_ok()
     }
 
+    /// Returns the `@mixin` in this document that `include` refers to, or `None` if there is none,
+    /// such as for `@include theme.button`.
+    ///
+    /// This picks the last matching mixin declared in a block that encloses `include` and defined
+    /// before `called_at`, where the include is evaluated. That's normally the start of `include`
+    /// itself, but an include in a mixin body is evaluated at the outermost `@include` it's reached
+    /// through.
+    pub fn scss_mixin_for_include(
+        &self,
+        include: &ScssIncludeAtRule,
+        called_at: TextSize,
+    ) -> Option<ScssMixinAtRule> {
+        let name = include
+            .name()
+            .ok()?
+            .as_css_identifier()?
+            .value_token()
+            .ok()?;
+        let include_range = include.syntax().text_trimmed_range();
+        self.data
+            .scss_mixins
+            .iter()
+            .filter(|mixin| {
+                mixin.range.end() <= called_at
+                    && mixin.scope.contains_range(include_range)
+                    && compare_scss_function_names(mixin.name.text(), name.text_trimmed())
+                        == Ordering::Equal
+            })
+            .max_by_key(|mixin| mixin.range.start())
+            .map(|mixin| mixin.node.to_node(self.data.root().syntax()))
+    }
+
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
         matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
     }
@@ -216,6 +248,8 @@ pub(crate) struct SemanticModelData {
     /// The names of the SCSS `@function` rules declared anywhere in the
     /// document, sorted by [compare_scss_function_names].
     pub(crate) scss_function_names: Vec<TokenText>,
+    /// The SCSS `@mixin` rules declared anywhere in the document, in source order.
+    pub(crate) scss_mixins: Vec<ScssMixinData>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
 }
@@ -263,6 +297,7 @@ impl PartialEq for SemanticModel {
                 .zip(&other.data.at_property_rules)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
             && self.data.scss_function_names == other.data.scss_function_names
+            && self.data.scss_mixins == other.data.scss_mixins
             && self.data.global_custom_variables.len() == other.data.global_custom_variables.len()
             && self.data.global_custom_variables.iter().all(|(key, val)| {
                 other
@@ -272,6 +307,17 @@ impl PartialEq for SemanticModel {
                     .is_some_and(|other_val| val.semantic_eq(other_val, &self_root, &other_root))
             })
     }
+}
+
+/// Stored data for an SCSS `@mixin` rule.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub(crate) struct ScssMixinData {
+    pub(crate) name: TokenText,
+    pub(crate) node: AstPtr<ScssMixinAtRule>,
+    /// The range of the at-rule, including its `@`.
+    pub(crate) range: TextRange,
+    /// The range of the block or list the mixin is declared in, which bounds where it is visible.
+    pub(crate) scope: TextRange,
 }
 
 /// Stored data for a CSS rule.

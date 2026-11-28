@@ -9,7 +9,7 @@ use std::{collections::BTreeMap, sync::LazyLock};
 
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
-    RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity,
+    RuleData, RuleId, ScssMixinData, SelectorData, SemanticModel, SemanticModelData, Specificity,
     compare_scss_function_names, selector_tokens,
 };
 use super::{SemanticModelOptions, SyntheticCustomProperty};
@@ -42,6 +42,7 @@ pub struct SemanticModelBuilder {
     at_property_by_range: FxHashMap<TextRange, usize>,
     last_at_property_by_name: FxHashMap<TokenText, usize>,
     scss_function_names: Vec<TokenText>,
+    scss_mixins: Vec<ScssMixinData>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -65,6 +66,7 @@ impl SemanticModelBuilder {
             at_property_by_range: FxHashMap::default(),
             last_at_property_by_name: FxHashMap::default(),
             scss_function_names: Vec::new(),
+            scss_mixins: Vec::new(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
@@ -171,6 +173,7 @@ impl SemanticModelBuilder {
             at_property_by_range: self.at_property_by_range,
             last_at_property_by_name: self.last_at_property_by_name,
             scss_function_names: self.scss_function_names,
+            scss_mixins: self.scss_mixins,
             range_to_rule_id: self.range_to_rule_id,
         };
         SemanticModel::new(data)
@@ -338,6 +341,21 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::ScssFunctionDeclaration { name } => {
                 self.scss_function_names.push(name.token_text_trimmed());
+            }
+            SemanticEvent::ScssMixinDeclaration { node, name } => {
+                // The mixin is the rule of a `CssAtRule`, which is an item of its block or list.
+                let Some(at_rule) = node.syntax().parent() else {
+                    return;
+                };
+                let Some(scope) = at_rule.parent() else {
+                    return;
+                };
+                self.scss_mixins.push(ScssMixinData {
+                    name: name.token_text_trimmed(),
+                    node: AstPtr::new(&node),
+                    range: at_rule.text_trimmed_range(),
+                    scope: scope.text_trimmed_range(),
+                });
             }
         }
     }

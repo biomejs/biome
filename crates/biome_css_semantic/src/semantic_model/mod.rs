@@ -87,7 +87,7 @@ pub fn semantic_model_with_options(
 mod tests {
     use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_syntax::{
-        CssPropertyAtRule,
+        CssPropertyAtRule, ScssIncludeAtRule,
         property_syntax::{
             PropertySyntax, PropertySyntaxComponentName, PropertySyntaxErrorKind,
             PropertySyntaxResult, PropertySyntaxType,
@@ -299,6 +299,46 @@ mod tests {
         assert!(model.has_scss_function("rem-from-px"));
         assert!(model.has_scss_function("nested_spacing"));
         assert!(!model.has_scss_function("rem"));
+    }
+
+    #[test]
+    fn test_scss_mixin_for_include() {
+        let source = r#"@mixin my-card { a: 1; }
+@mixin my-card { a: 2; }
+@include my_card;
+.scope {
+  @mixin local { a: 3; }
+  @include local;
+}
+@include local;
+@mixin my-card { a: 4; }
+@include theme.my-card;
+"#;
+        let parse = parse_css(source, CssFileSource::scss(), CssParserOptions::default());
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let includes: Vec<_> = root
+            .syntax()
+            .descendants()
+            .filter_map(ScssIncludeAtRule::cast)
+            .collect();
+        let resolve = |index: usize, called_at: TextSize| {
+            model
+                .scss_mixin_for_include(&includes[index], called_at)
+                .map(|mixin| mixin.to_trimmed_string())
+        };
+        let at = |index: usize| includes[index].syntax().text_trimmed_range().start();
+        let end = TextSize::of(source);
+
+        assert_eq!(
+            resolve(0, at(0)).as_deref(),
+            Some("mixin my-card { a: 2; }")
+        );
+        assert_eq!(resolve(0, end).as_deref(), Some("mixin my-card { a: 4; }"));
+        assert_eq!(resolve(0, TextSize::from(0)), None);
+        assert_eq!(resolve(1, at(1)).as_deref(), Some("mixin local { a: 3; }"));
+        assert_eq!(resolve(2, at(2)), None);
+        assert_eq!(resolve(3, at(3)), None);
     }
 
     #[test]

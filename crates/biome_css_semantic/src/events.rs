@@ -5,7 +5,7 @@ use biome_css_syntax::{
     CssPropertyAtRule, CssQualifiedRule, CssRelativeSelectorList, CssSelectorList, CssString,
     CssSyntaxKind::*,
     CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
-    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
+    ScssInterpolation, ScssMixinAtRule, ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
@@ -65,6 +65,11 @@ pub enum SemanticEvent {
     ScssFunctionDeclaration {
         name: CssSyntaxToken,
     },
+    /// An SCSS `@mixin` rule
+    ScssMixinDeclaration {
+        node: ScssMixinAtRule,
+        name: CssSyntaxToken,
+    },
 }
 
 #[derive(Default, Debug)]
@@ -80,7 +85,8 @@ impl SemanticEventExtractor {
         .union(CssRelativeSelectorList::KIND_SET)
         .union(CssDeclaration::KIND_SET)
         .union(CssPropertyAtRule::KIND_SET)
-        .union(ScssFunctionAtRule::KIND_SET);
+        .union(ScssFunctionAtRule::KIND_SET)
+        .union(ScssMixinAtRule::KIND_SET);
 
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         // If you read a new node kind, add it to [Self::VISITED_KINDS].
@@ -221,6 +227,14 @@ impl SemanticEventExtractor {
                 if let Ok(name) = function.name().and_then(|name| name.value_token()) {
                     self.stash
                         .push_back(SemanticEvent::ScssFunctionDeclaration { name });
+                }
+            }
+            SCSS_MIXIN_AT_RULE => {
+                // SAFETY: the match checks for its kind already.
+                let mixin = ScssMixinAtRule::cast_ref(node).unwrap();
+                if let Ok(name) = mixin.name().and_then(|name| name.value_token()) {
+                    self.stash
+                        .push_back(SemanticEvent::ScssMixinDeclaration { node: mixin, name });
                 }
             }
             _ => {}

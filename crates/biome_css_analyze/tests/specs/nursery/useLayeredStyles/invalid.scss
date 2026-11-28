@@ -3,3 +3,85 @@ $color: red;
 .unlayered {
   color: $color;
 }
+
+@mixin card {
+  .card {
+    color: red;
+  }
+}
+
+@mixin dashed_name {
+  .dashed {
+    color: red;
+  }
+}
+
+@include card;
+@include dashed-name;
+
+@mixin base-card {
+  .base {
+    color: red;
+  }
+}
+
+@mixin wrapped-card {
+  @include base-card;
+}
+
+@include wrapped-card;
+
+@mixin wrapper {
+  @include defined-after;
+}
+
+@mixin defined-after {
+  .after {
+    color: red;
+  }
+}
+
+@include wrapper;
+
+@mixin plain-wrapper {
+  @content;
+}
+
+@include plain-wrapper {
+  .content-unlayered {
+    color: red;
+  }
+}
+
+@mixin passes-content-to-plain-wrapper {
+  @include plain-wrapper {
+    .nested-content-unlayered {
+      color: red;
+    }
+  }
+}
+
+@include passes-content-to-plain-wrapper;
+
+@include breakpoints.tablet {
+  .unresolved-content {
+    color: red;
+  }
+}
+
+@mixin wraps-twice {
+  @include plain-wrapper {
+    @layer base {
+      .layered-content {
+        color: red;
+      }
+    }
+  }
+  @include plain-wrapper {
+    .second-content-unlayered {
+      color: red;
+    }
+  }
+}
+
+@include wraps-twice;
