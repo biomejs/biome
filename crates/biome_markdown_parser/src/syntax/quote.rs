@@ -684,6 +684,31 @@ pub(crate) fn skip_quote_prefixes_in_line(
     limit: usize,
     depth: usize,
 ) -> Option<usize> {
+    quote_prefixes_end_in_line(p, line_start, limit, depth).map(|end| end.offset)
+}
+
+/// Position just past the `>` prefixes of a source line.
+pub(crate) struct QuotePrefixesEnd {
+    /// Byte offset just past the last prefix.
+    pub(crate) offset: usize,
+    /// Absolute column of `offset`, with tabs expanded to the next tab stop.
+    pub(crate) column: usize,
+    /// Column where the innermost quote's content starts.
+    ///
+    /// A tab after the last `>` provides the separator with its first column
+    /// only (CommonMark §5.1), so `column` can lie past this column. The
+    /// difference is indentation of the quote's content.
+    pub(crate) content_column: usize,
+}
+
+/// Like [`skip_quote_prefixes_in_line`], but also reports the columns at the
+/// end of the prefixes.
+pub(crate) fn quote_prefixes_end_in_line(
+    p: &MarkdownParser,
+    line_start: usize,
+    limit: usize,
+    depth: usize,
+) -> Option<QuotePrefixesEnd> {
     let bytes = p.source().source_text().as_bytes();
     let mut idx = line_start;
     let mut column = 0usize;
@@ -699,7 +724,11 @@ pub(crate) fn skip_quote_prefixes_in_line(
             container_indent,
         ) && try_consume_quote_marker(bytes, &mut idx, &mut column, &mut content_column, limit)
     })
-    .then_some(idx)
+    .then_some(QuotePrefixesEnd {
+        offset: idx,
+        column,
+        content_column,
+    })
 }
 
 /// Advance `column` past one space or tab, with tabs reaching the next tab stop.
