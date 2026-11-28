@@ -1,11 +1,5 @@
 // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
 function takeVoid(thing: void) {}
-const arrowGeneric = <T extends void>(arg: T) => {};
-const arrowGeneric2 = <T extends void = void>(arg: T) => {};
-function functionGeneric<T extends void>(arg: T) {}
-function functionGeneric2<T extends void = void>(arg: T) {}
-declare function functionDeclaration<T extends void>(arg: T): void;
-declare function functionDeclaration2<T extends void = void>(arg: T): void;
 
 declare function voidArray(args: void[]): void[];
 let value = undefined as void;
@@ -44,3 +38,5 @@ type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
 type voidNeverStringUnion = void | never | string;
+type NestedVoidConstraint<U, T extends (U extends string ? void : number)> = T;
+type NestedVoidConstraint2<U, T extends U extends string ? void : number> = T;

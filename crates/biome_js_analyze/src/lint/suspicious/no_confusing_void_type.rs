@@ -5,7 +5,9 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsVoidType};
+use biome_js_syntax::{
+    AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsTypeConstraintClause, TsVoidType,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_confusing_void_type::NoConfusingVoidTypeOptions;
 
@@ -58,6 +60,10 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// function printArg<T = void>(arg: T) {}
+    /// ```
+    ///
+    /// ```ts
+    /// function printArg<T extends void>(arg: T) {}
     /// ```
     pub NoConfusingVoidType {
         version: "1.2.0",
@@ -160,6 +166,18 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             | JsSyntaxKind::TS_TYPE_ANNOTATION
             | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {}
 
+            // fn<T extends void>() {}
+            // Only a `void` that is the constraint itself is allowed. One nested deeper, as in
+            // `T extends (U extends string ? void : number)`, is still reported.
+            JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {
+                let is_constraint = TsTypeConstraintClause::unwrap_cast(parent.clone())
+                    .ty()
+                    .is_ok_and(|ty| matches!(ty.omit_parentheses(), AnyTsType::TsVoidType(_)));
+                if !is_constraint {
+                    return Some(VoidTypeContext::Unknown);
+                }
+            }
+
             JsSyntaxKind::TS_UNION_TYPE => {
                 return Some(VoidTypeContext::Union);
             }
@@ -185,6 +203,7 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
             // function fn(): void;
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
             // function fn<T = void>() {}
+            // function fn<T extends void>() {}
             | JsSyntaxKind::TS_TYPE_PARAMETER
             // () => void
             | JsSyntaxKind::TS_FUNCTION_TYPE => {
