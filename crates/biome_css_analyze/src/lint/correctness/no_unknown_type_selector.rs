@@ -2,12 +2,24 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssPseudoElementFunctionSelector, CssTypeSelector};
+use biome_css_syntax::stmt_ext::AnyScssControlFlowAtRule;
+use biome_css_syntax::{
+    AnyCssAtRule, CssCompoundSelector, CssLanguage, CssNestedQualifiedRule,
+    CssPseudoElementFunctionSelector, CssQualifiedRule, CssRelativeSelector, CssTypeSelector,
+    ScssIncludeAtRule, ScssMixinAtRule,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_languages::CssFileSource;
+use biome_rowan::{AstNode, AstNodeList, SyntaxKindSet};
 use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
 use crate::utils::is_known_type_selector;
+
+const STYLE_RULE_KINDS: SyntaxKindSet<CssLanguage> =
+    CssQualifiedRule::KIND_SET.union(CssNestedQualifiedRule::KIND_SET);
+
+const MIXIN_BLOCK_KINDS: SyntaxKindSet<CssLanguage> =
+    ScssMixinAtRule::KIND_SET.union(ScssIncludeAtRule::KIND_SET);
 
 const VIEW_TRANSITION_PSEUDO_ELEMENTS: [&str; 5] = [
     "view-transition",
@@ -115,10 +127,15 @@ impl Rule for NoUnknownTypeSelector {
             .value_token()
             .ok()?
             .token_text_trimmed();
-        if !is_known_type_selector(&type_selector) {
-            return Some(css_type_selector.clone());
+        if is_known_type_selector(&type_selector) {
+            return None;
         }
-        None
+        if ctx.source_type::<CssFileSource>().is_scss()
+            && is_keyframe_selector_in_scss_block(css_type_selector, &type_selector)
+        {
+            return None;
+        }
+        Some(css_type_selector.clone())
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
@@ -142,4 +159,50 @@ impl Rule for NoUnknownTypeSelector {
             }),
         )
     }
+}
+
+/// Returns whether the type selector is the whole selector `from` or `to` of a rule placed
+/// directly in a mixin body or an `@include` content block, where it becomes a keyframe selector
+/// once Sass places it inside `@keyframes`.
+///
+/// Control-flow at-rules such as `@if` between the rule and the block don't change where Sass puts
+/// the rule. An enclosing style rule or another at-rule, such as `@media`, does.
+fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &str) -> bool {
+    if !(name.eq_ignore_ascii_case("from") || name.eq_ignore_ascii_case("to"))
+        || type_selector.namespace().is_some()
+    {
+        return false;
+    }
+    let Some(compound) = type_selector.parent::<CssCompoundSelector>() else {
+        return false;
+    };
+    if !compound.nesting_selectors().is_empty() || !compound.sub_selectors().is_empty() {
+        return false;
+    }
+    let selector = match compound.parent::<CssRelativeSelector>() {
+        Some(relative) if relative.combinator().is_some() => return false,
+        Some(relative) => relative.into_syntax(),
+        None => compound.into_syntax(),
+    };
+    let Some(rule) = selector
+        .grand_parent()
+        .filter(|rule| STYLE_RULE_KINDS.matches(rule.kind()))
+    else {
+        return false;
+    };
+    rule.ancestors()
+        .skip(1)
+        .find_map(|node| {
+            let kind = node.kind();
+            if MIXIN_BLOCK_KINDS.matches(kind) {
+                Some(true)
+            } else if STYLE_RULE_KINDS.matches(kind)
+                || (AnyCssAtRule::can_cast(kind) && !AnyScssControlFlowAtRule::can_cast(kind))
+            {
+                Some(false)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(false)
 }
