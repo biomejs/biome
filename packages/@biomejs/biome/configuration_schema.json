@@ -11506,6 +11506,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCustomErrorDefinition": {
+					"description": "Enforce a consistent way of defining custom error classes.\nSee https://biomejs.dev/linter/rules/use-custom-error-definition",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseCustomErrorDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDescribeFunctionTitle": {
 					"description": "Require passing an imported function as a test suite title instead of a string with its name.\nSee https://biomejs.dev/linter/rules/use-describe-function-title",
 					"anyOf": [
@@ -19529,6 +19536,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseCustomErrorDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseCustomErrorDefinitionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDateNowOptions": {
 			"type": "object",
 			"properties": {
@@ -25607,6 +25623,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseCustomErrorDefinitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseCustomErrorDefinitionOptions" }
+			]
+		},
+		"UseCustomErrorDefinitionOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseDateNowConfiguration": {

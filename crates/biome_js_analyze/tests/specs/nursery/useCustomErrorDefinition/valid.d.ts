@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+export class NotFoundError extends Error {
+	name: "NotFoundError";
+}
+
+export class MissingNameError extends Error {}
+
+export class foo extends Error {
+	constructor(message: string);
+}
