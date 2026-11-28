@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsObjectMember, JsCallArgumentList, JsCallExpression,
-    JsLanguage, JsSyntaxKind, T, global_identifier,
+    JsExpressionStatement, JsLanguage, JsSyntaxKind, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::use_object_spread::UseObjectSpreadOptions;
@@ -131,6 +131,17 @@ impl Rule for UseObjectSpread {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {
+        let query = ctx.query();
+        if query
+            .syntax()
+            .parent()
+            .is_some_and(|parent| JsExpressionStatement::can_cast(parent.kind()))
+            && let Some(prev_token) = query.syntax().first_token().and_then(|t| t.prev_token())
+            && !matches!(prev_token.kind(), T![;] | T!['{'] | T!['}'])
+        {
+            return None;
+        }
+
         let args = &state.args;
         let mut object_members = Vec::new();
         let mut object_member_separators = Vec::new();
