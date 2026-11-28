@@ -39,8 +39,8 @@ pub use db::queries::{
     infer_expression_is_promise, infer_expression_type, infer_local_type, infer_module_types,
     infer_module_types_bottom_up, is_array_of_promise_type, is_class_referenced_by_importers,
     is_promise_type, js_module_sccs, module_dependencies, normalize_type, resolve_callable_type,
-    tailwind_stylesheet, transitive_importers_of, traverse_import_tree_for_classes,
-    traverse_import_tree_for_html_classes,
+    server_rendered_component_importer, tailwind_stylesheet, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 pub use db::{
     MAX_ON_DEMAND_IMPORT_DEPTH, ModuleDb, ModuleGraphGeneration, ResolverDb, TypeDb, module_for_key,

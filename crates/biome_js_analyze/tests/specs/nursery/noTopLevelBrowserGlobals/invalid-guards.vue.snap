@@ -1,0 +1,145 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
+expression: invalid-guards.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+if (import.meta.client) { document.title; }
+if (!import.meta.server) { document.title; }
+if (import.meta.env.SSR == false) { document.title; }
+if (import.meta.env.SSR === true) { document.title; }
+if (import.meta.env.SSR !== false) { document.title; }
+if ((typeof window !== "undefined" && ready) !== false) { document.title; }
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-guards.vue:3:27 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ if (import.meta.client) { document.title; }
+      │                           ^^^^^^^^
+    4 │ if (!import.meta.server) { document.title; }
+    5 │ if (import.meta.env.SSR == false) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.vue:4:28 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    2 │ <script setup>
+    3 │ if (import.meta.client) { document.title; }
+  > 4 │ if (!import.meta.server) { document.title; }
+      │                            ^^^^^^^^
+    5 │ if (import.meta.env.SSR == false) { document.title; }
+    6 │ if (import.meta.env.SSR === true) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.vue:5:37 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    3 │ if (import.meta.client) { document.title; }
+    4 │ if (!import.meta.server) { document.title; }
+  > 5 │ if (import.meta.env.SSR == false) { document.title; }
+      │                                     ^^^^^^^^
+    6 │ if (import.meta.env.SSR === true) { document.title; }
+    7 │ if (import.meta.env.SSR !== false) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.vue:6:37 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    4 │ if (!import.meta.server) { document.title; }
+    5 │ if (import.meta.env.SSR == false) { document.title; }
+  > 6 │ if (import.meta.env.SSR === true) { document.title; }
+      │                                     ^^^^^^^^
+    7 │ if (import.meta.env.SSR !== false) { document.title; }
+    8 │ if ((typeof window !== "undefined" && ready) !== false) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.vue:7:38 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    5 │ if (import.meta.env.SSR == false) { document.title; }
+    6 │ if (import.meta.env.SSR === true) { document.title; }
+  > 7 │ if (import.meta.env.SSR !== false) { document.title; }
+      │                                      ^^^^^^^^
+    8 │ if ((typeof window !== "undefined" && ready) !== false) { document.title; }
+    9 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.vue:8:59 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+     6 │ if (import.meta.env.SSR === true) { document.title; }
+     7 │ if (import.meta.env.SSR !== false) { document.title; }
+   > 8 │ if ((typeof window !== "undefined" && ready) !== false) { document.title; }
+       │                                                           ^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

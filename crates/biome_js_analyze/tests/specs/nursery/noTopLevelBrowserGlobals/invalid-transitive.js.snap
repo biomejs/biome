@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
+expression: invalid-transitive.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export const width = window.innerWidth;
+
+```
+
+# Diagnostics
+```
+invalid-transitive.js:2:22 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export const width = window.innerWidth;
+      │                      ^^^^^^
+    3 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i This module runs during server-side rendering because tests/specs/nursery/noTopLevelBrowserGlobals/valid-imports.vue imports it.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,8 @@
+---
+// should generate diagnostics
+const width = window.innerWidth;
+const { document: { title } } = globalThis;
+if (import.meta.client) { localStorage.getItem("theme"); }
+---
+
+<p>{width}</p>

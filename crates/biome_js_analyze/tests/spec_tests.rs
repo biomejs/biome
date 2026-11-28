@@ -17,8 +17,8 @@ use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_for_test_file, register_leak_checker, scripts_from_json,
+    has_bogus_nodes_or_empty_slots, module_graph_for_html_test_file, module_graph_for_test_file,
+    parse_test_path, project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::{Utf8Path, Utf8PathBuf};
@@ -277,7 +277,13 @@ pub(crate) fn analyze_and_snap(
         .with_language_db(language_db)
         .with_parsed_source(parsed_source.into());
     if needs_module_graph {
-        let module_db = module_graph_for_test_file(input_file, &project_layout);
+        // Components are only indexed by the workspace, so tests that import them from
+        // modules, or that are imported by them, need the workspace's module graph.
+        let module_db = if has_component_siblings(input_file) {
+            module_graph_for_html_test_file(input_file, &project_layout)
+        } else {
+            module_graph_for_test_file(input_file, &project_layout)
+        };
         services = services.with_module_db(module_db.rc_module_db());
     }
 
@@ -366,6 +372,18 @@ pub(crate) fn analyze_and_snap(
     }
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
+}
+
+fn has_component_siblings(input_file: &Utf8Path) -> bool {
+    let Some(dir) = input_file.parent() else {
+        return false;
+    };
+    std::fs::read_dir(dir).is_ok_and(|entries| {
+        entries.flatten().any(|entry| {
+            Utf8PathBuf::try_from(entry.path())
+                .is_ok_and(|path| matches!(path.extension(), Some("vue" | "svelte" | "astro")))
+        })
+    })
 }
 
 fn check_code_action(

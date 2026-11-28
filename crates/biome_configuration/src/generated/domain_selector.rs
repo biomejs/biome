@@ -8,6 +8,7 @@ static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noAstroComponentDefaultExport"),
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
     ]
 });
@@ -79,6 +80,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestrictedClasses"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("nursery", "noUnresolvedDefaultImport"),
@@ -168,6 +170,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noSvelteObjectInTextMustaches"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
         RuleFilter::Rule("nursery", "noSvelteUselessDerivedBy"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "useConsistentBlockLang"),
         RuleFilter::Rule("nursery", "useSvelteEventDispatcherTypes"),
         RuleFilter::Rule("nursery", "useSvelteKitResolve"),
@@ -292,6 +295,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVOnce"),
         RuleFilter::Rule("correctness", "useVueValidVPre"),
         RuleFilter::Rule("correctness", "useVueValidVText"),
+        RuleFilter::Rule("nursery", "noTopLevelBrowserGlobals"),
         RuleFilter::Rule("nursery", "noVueAsyncComputed"),
         RuleFilter::Rule("nursery", "noVueBooleanDefault"),
         RuleFilter::Rule("nursery", "noVueChildContent"),

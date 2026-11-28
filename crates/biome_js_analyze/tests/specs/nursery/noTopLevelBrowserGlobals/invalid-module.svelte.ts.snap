@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-module.svelte.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const title: string = document.title;
+
+```
+
+# Diagnostics
+```
+invalid-module.svelte.ts:2:23 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const title: string = document.title;
+      │                       ^^^^^^^^
+    3 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

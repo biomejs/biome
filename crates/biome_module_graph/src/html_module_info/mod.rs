@@ -80,6 +80,11 @@ pub struct HtmlImport {
     pub specifier: Text,
     /// Whether the import is visible outside the containing HTML-like component.
     pub applicability: EmbeddingStyleApplicability,
+    /// Whether server-side rendering evaluates the import when it loads the component.
+    ///
+    /// This holds for static value imports in Vue and Svelte `<script>` blocks and in Astro
+    /// frontmatter, but not for dynamic imports or client-only scripts.
+    pub server_rendered: bool,
 }
 
 impl HtmlImport {

@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-guards.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+import { browser } from "$app/environment";
+if (!browser) { window.innerWidth; }
+if (browser) {} else { document.title; }
+if (import.meta.env.SSR) { document.title; }
+{ const browser = true; if (browser) { window.innerWidth; } }
+if (!import.meta.server) { document.title; }
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-guards.svelte:4:17 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    2 │ <script>
+    3 │ import { browser } from "$app/environment";
+  > 4 │ if (!browser) { window.innerWidth; }
+      │                 ^^^^^^
+    5 │ if (browser) {} else { document.title; }
+    6 │ if (import.meta.env.SSR) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.svelte:5:24 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    3 │ import { browser } from "$app/environment";
+    4 │ if (!browser) { window.innerWidth; }
+  > 5 │ if (browser) {} else { document.title; }
+      │                        ^^^^^^^^
+    6 │ if (import.meta.env.SSR) { document.title; }
+    7 │ { const browser = true; if (browser) { window.innerWidth; } }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.svelte:6:28 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+    4 │ if (!browser) { window.innerWidth; }
+    5 │ if (browser) {} else { document.title; }
+  > 6 │ if (import.meta.env.SSR) { document.title; }
+      │                            ^^^^^^^^
+    7 │ { const browser = true; if (browser) { window.innerWidth; } }
+    8 │ if (!import.meta.server) { document.title; }
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.svelte:7:40 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global window.
+  
+    5 │ if (browser) {} else { document.title; }
+    6 │ if (import.meta.env.SSR) { document.title; }
+  > 7 │ { const browser = true; if (browser) { window.innerWidth; } }
+      │                                        ^^^^^^
+    8 │ if (!import.meta.server) { document.title; }
+    9 │ </script>
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-guards.svelte:8:28 lint/nursery/noTopLevelBrowserGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected top-level browser global document.
+  
+     6 │ if (import.meta.env.SSR) { document.title; }
+     7 │ { const browser = true; if (browser) { window.innerWidth; } }
+   > 8 │ if (!import.meta.server) { document.title; }
+       │                            ^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Browser globals may be unavailable on the server. Accessing them can throw an error and prevent the page from rendering.
+  
+  i Move this access into onMounted in Vue or onMount in Svelte, or guard it with a browser availability check.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

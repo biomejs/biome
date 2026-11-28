@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 198
+expression: valid-imports.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+import "./invalid-astro-imported.js";
+---
+
+<p>Hello</p>
+
+```

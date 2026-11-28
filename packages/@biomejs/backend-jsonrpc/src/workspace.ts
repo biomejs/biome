@@ -3619,6 +3619,11 @@ export interface Nursery {
 	 */
 	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
+	 * Disallow unguarded browser globals at the top level of code that runs during server-side rendering.
+	 * See https://biomejs.dev/linter/rules/no-top-level-browser-globals
+	 */
+	noTopLevelBrowserGlobals?: NoTopLevelBrowserGlobalsConfiguration;
+	/**
 	 * Disallow triple-slash reference comments that can be replaced by imports.
 	 * See https://biomejs.dev/linter/rules/no-triple-slash-reference
 	 */
@@ -7413,6 +7418,9 @@ export type NoTestHooksConfiguration =
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
+export type NoTopLevelBrowserGlobalsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTopLevelBrowserGlobalsOptions;
 export type NoTripleSlashReferenceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTripleSlashReferenceOptions;
@@ -10925,6 +10933,10 @@ export interface RuleWithNoTestHooksOptions {
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
+}
+export interface RuleWithNoTopLevelBrowserGlobalsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTopLevelBrowserGlobalsOptions;
 }
 export interface RuleWithNoTripleSlashReferenceOptions {
 	level: RulePlainConfiguration;
@@ -14638,6 +14650,7 @@ export type NoTanstackQueryVoidQueryFnOptions = {};
 export type NoTestGlobalsOptions = {};
 export type NoTestHooksOptions = {};
 export type NoThisOutsideOfClassOptions = {};
+export type NoTopLevelBrowserGlobalsOptions = {};
 export interface NoTripleSlashReferenceOptions {
 	/**
 	 * Whether `/// <reference lib="..." />` comments are allowed.
@@ -17045,6 +17058,7 @@ export type Category =
 	| "lint/nursery/noTestGlobals"
 	| "lint/nursery/noTestHooks"
 	| "lint/nursery/noThisOutsideOfClass"
+	| "lint/nursery/noTopLevelBrowserGlobals"
 	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
