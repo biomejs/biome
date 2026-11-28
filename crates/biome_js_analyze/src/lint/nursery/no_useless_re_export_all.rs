@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// - To report names that more than one `export * from` statement exports,
     ///   see [`noDuplicateExports`](https://biomejs.dev/linter/rules/no-duplicate-exports/).
     pub NoUselessReExportAll {
-        version: "next",
+        version: "2.6.10",
         name: "noUselessReExportAll",
         language: "js",
         sources: &[RuleSource::EslintImport("export").inspired()],

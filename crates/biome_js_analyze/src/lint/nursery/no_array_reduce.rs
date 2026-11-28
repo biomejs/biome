@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// });
     /// ```
     pub NoArrayReduce {
-        version: "next",
+        version: "2.6.10",
         name: "noArrayReduce",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-array-reduce").same()],

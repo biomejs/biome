@@ -143,7 +143,7 @@ declare_lint_rule! {
     ///   suggests early `continue` statements, which `checkContinue` reports inside nested loops.
     ///
     pub NoBreakInNestedLoop {
-        version: "next",
+        version: "2.6.10",
         name: "noBreakInNestedLoop",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-break-in-nested-loop").same()],

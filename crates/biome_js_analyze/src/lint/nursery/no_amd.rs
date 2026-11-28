@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// - If you want to disallow CommonJS `require()` and `module.exports` too, see [`noCommonJs`](https://biomejs.dev/linter/rules/no-common-js/).
     ///
     pub NoAmd {
-        version: "next",
+        version: "2.6.10",
         name: "noAmd",
         language: "js",
         sources: &[RuleSource::EslintImport("no-amd").same()],

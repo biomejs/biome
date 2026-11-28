@@ -111,7 +111,7 @@ declare_lint_rule! {
     ///   the same scope, including exported ones, see
     ///   [`noRedeclare`](https://biomejs.dev/linter/rules/no-redeclare/).
     pub NoDuplicateExports {
-        version: "next",
+        version: "2.6.10",
         name: "noDuplicateExports",
         language: "js",
         sources: &[RuleSource::EslintImport("export").inspired()],

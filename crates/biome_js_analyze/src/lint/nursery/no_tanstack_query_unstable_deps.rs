@@ -86,7 +86,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTanstackQueryUnstableDeps {
-        version: "next",
+        version: "2.6.10",
         name: "noTanstackQueryUnstableDeps",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("no-unstable-deps").same()],

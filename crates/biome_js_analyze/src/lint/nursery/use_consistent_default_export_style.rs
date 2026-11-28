@@ -147,7 +147,7 @@ declare_lint_rule! {
     /// - If you want to choose between function declarations and functions assigned to variables, see [`useConsistentFunctionStyle`](https://biomejs.dev/linter/rules/use-consistent-function-style/).
     ///
     pub UseConsistentDefaultExportStyle {
-        version: "next",
+        version: "2.6.10",
         name: "useConsistentDefaultExportStyle",
         language: "js",
         recommended: false,

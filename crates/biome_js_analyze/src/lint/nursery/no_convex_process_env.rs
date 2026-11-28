@@ -94,7 +94,7 @@ declare_lint_rule! {
     /// - If you want to disallow `process.env` in every file, see [`noProcessEnv`](https://biomejs.dev/linter/rules/no-process-env/).
     ///
     pub NoConvexProcessEnv {
-        version: "next",
+        version: "2.6.10",
         name: "noConvexProcessEnv",
         language: "js",
         sources: &[RuleSource::EslintConvex("no-process-env").inspired()],

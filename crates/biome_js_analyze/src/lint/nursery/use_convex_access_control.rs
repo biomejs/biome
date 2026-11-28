@@ -174,7 +174,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConvexAccessControl {
-        version: "next",
+        version: "2.6.10",
         name: "useConvexAccessControl",
         language: "js",
         sources: &[RuleSource::EslintConvex("require-access-control").inspired()],

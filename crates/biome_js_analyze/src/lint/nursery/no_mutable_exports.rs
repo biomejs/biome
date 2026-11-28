@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMutableExports {
-        version: "next",
+        version: "2.6.10",
         name: "noMutableExports",
         language: "js",
         sources: &[RuleSource::EslintImport("no-mutable-exports").same()],
