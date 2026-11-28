@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "suspicious": {
+                "noUntrustedLicenses": {
+                    "level": "error",
+                    "options": {
+                        "allow": ["SEE LICENSE IN LICENSE.md"]
+                    }
+                }
+            }
+        }
+    }
+}
