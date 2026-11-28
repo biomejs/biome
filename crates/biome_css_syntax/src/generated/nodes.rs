@@ -2558,7 +2558,7 @@ impl CssDocumentAtRule {
     pub fn matchers(&self) -> CssDocumentMatcherList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -2574,7 +2574,7 @@ impl Serialize for CssDocumentAtRule {
 pub struct CssDocumentAtRuleFields {
     pub document_token: SyntaxResult<SyntaxToken>,
     pub matchers: CssDocumentMatcherList,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDocumentCustomMatcher {
