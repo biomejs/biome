@@ -5,7 +5,9 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Merge;
 use biome_diagnostics::Severity;
-use serde::{Deserialize, Serialize};
+use serde::de::{self, SeqAccess, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 /// Extends the current configuration with settings from other Biome configurations.
 ///
@@ -13,8 +15,7 @@ use serde::{Deserialize, Serialize};
 /// relative path or installed package specifier. Biome merges list entries from left to right:
 /// later configurations take precedence for single-value options, list entries are combined, and
 /// the current configuration is applied last.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Merge)]
-#[serde(deny_unknown_fields, rename_all = "camelCase", untagged)]
+#[derive(Clone, Debug, Eq, PartialEq, Merge)]
 pub enum Extends {
     List(Box<[Box<str>]>),
     ExtendsRoot,
@@ -65,6 +66,46 @@ impl Deserializable for Extends {
     }
 }
 
+// A derived `untagged` impl writes `ExtendsRoot` as `null`. Biome reads a
+// nested configuration file with `null` as a second root.
+impl Serialize for Extends {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Self::List(list) => list.serialize(serializer),
+            Self::ExtendsRoot => serializer.serialize_str("//"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Extends {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct ExtendsVisitor;
+
+        impl<'de> Visitor<'de> for ExtendsVisitor {
+            type Value = Extends;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("`//` or an array of paths")
+            }
+
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                if value == "//" {
+                    Ok(Extends::ExtendsRoot)
+                } else {
+                    Err(E::invalid_value(de::Unexpected::Str(value), &self))
+                }
+            }
+
+            fn visit_seq<A: SeqAccess<'de>>(self, seq: A) -> Result<Self::Value, A::Error> {
+                Deserialize::deserialize(de::value::SeqAccessDeserializer::new(seq))
+                    .map(Extends::List)
+            }
+        }
+
+        deserializer.deserialize_any(ExtendsVisitor)
+    }
+}
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Extends {
     fn schema_name() -> std::borrow::Cow<'static, str> {
@@ -87,5 +128,31 @@ impl schemars::JsonSchema for Extends {
                 }
             ]
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serde_round_trip() {
+        let cases = [
+            (Extends::ExtendsRoot, r#""//""#),
+            (
+                Extends::List(Box::new(["./base.json".into()])),
+                r#"["./base.json"]"#,
+            ),
+        ];
+        for (extends, json) in cases {
+            assert_eq!(serde_json::to_string(&extends).unwrap(), json);
+            assert_eq!(serde_json::from_str::<Extends>(json).unwrap(), extends);
+        }
+    }
+
+    #[test]
+    fn serde_rejects_other_strings() {
+        assert!(serde_json::from_str::<Extends>(r#""./base.json""#).is_err());
+        assert!(serde_json::from_str::<Extends>("null").is_err());
     }
 }

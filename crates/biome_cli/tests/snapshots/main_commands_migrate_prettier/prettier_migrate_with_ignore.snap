@@ -42,41 +42,41 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   
     1    │ - {·"linter":·{·"enabled":·true·}·}
        1 │ + {
-       2 │ + → "formatter":·{
-       3 │ + → → "enabled":·true,
-       4 │ + → → "formatWithErrors":·false,
-       5 │ + → → "indentStyle":·"space",
-       6 │ + → → "indentWidth":·2,
-       7 │ + → → "lineEnding":·"lf",
-       8 │ + → → "lineWidth":·80,
-       9 │ + → → "attributePosition":·"auto",
-      10 │ + → → "bracketSameLine":·false,
-      11 │ + → → "bracketSpacing":·true,
-      12 │ + → → "expand":·"auto",
-      13 │ + → → "useEditorconfig":·true,
-      14 │ + → → "includes":·["**",·"!dist/**",·"!node_modules/**",·"!generated/*.spec.js"]
-      15 │ + → },
-      16 │ + → "linter":·{·"enabled":·true·},
-      17 │ + → "javascript":·{
-      18 │ + → → "formatter":·{
-      19 │ + → → → "jsxQuoteStyle":·"double",
-      20 │ + → → → "quoteProperties":·"asNeeded",
-      21 │ + → → → "trailingCommas":·"all",
-      22 │ + → → → "semicolons":·"always",
-      23 │ + → → → "arrowParentheses":·"always",
-      24 │ + → → → "bracketSameLine":·false,
-      25 │ + → → → "quoteStyle":·"single",
-      26 │ + → → → "attributePosition":·"auto",
-      27 │ + → → → "bracketSpacing":·true
-      28 │ + → → }
-      29 │ + → },
-      30 │ + → "markdown":·{·"parser":·{·"frontmatter":·true·}·},
-      31 │ + → "html":·{
-      32 │ + → → "formatter":·{
-      33 │ + → → → "indentScriptAndStyle":·false,
-      34 │ + → → → "selfCloseVoidElements":·"always"
-      35 │ + → → }
-      36 │ + → }
+       2 │ + ··"formatter":·{
+       3 │ + ····"enabled":·true,
+       4 │ + ····"formatWithErrors":·false,
+       5 │ + ····"indentStyle":·"space",
+       6 │ + ····"indentWidth":·2,
+       7 │ + ····"lineEnding":·"lf",
+       8 │ + ····"lineWidth":·80,
+       9 │ + ····"attributePosition":·"auto",
+      10 │ + ····"bracketSameLine":·false,
+      11 │ + ····"bracketSpacing":·true,
+      12 │ + ····"expand":·"auto",
+      13 │ + ····"useEditorconfig":·true,
+      14 │ + ····"includes":·["**",·"!dist/**",·"!node_modules/**",·"!generated/*.spec.js"]
+      15 │ + ··},
+      16 │ + ··"linter":·{·"enabled":·true·},
+      17 │ + ··"javascript":·{
+      18 │ + ····"formatter":·{
+      19 │ + ······"jsxQuoteStyle":·"double",
+      20 │ + ······"quoteProperties":·"asNeeded",
+      21 │ + ······"trailingCommas":·"all",
+      22 │ + ······"semicolons":·"always",
+      23 │ + ······"arrowParentheses":·"always",
+      24 │ + ······"bracketSameLine":·false,
+      25 │ + ······"quoteStyle":·"single",
+      26 │ + ······"attributePosition":·"auto",
+      27 │ + ······"bracketSpacing":·true
+      28 │ + ····}
+      29 │ + ··},
+      30 │ + ··"markdown":·{·"parser":·{·"frontmatter":·true·}·},
+      31 │ + ··"html":·{
+      32 │ + ····"formatter":·{
+      33 │ + ······"indentScriptAndStyle":·false,
+      34 │ + ······"selfCloseVoidElements":·"always"
+      35 │ + ····}
+      36 │ + ··}
       37 │ + }
       38 │ + 
   
