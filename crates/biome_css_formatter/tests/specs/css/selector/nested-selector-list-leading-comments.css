@@ -1,0 +1,38 @@
+.a {
+	/* first */
+	& > .b,
+	/* second */
+	& > .c,
+	& > .d {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	.b,
+	/* second */
+	.c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	> .b,
+	/* second */
+	+ .c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	& .b,
+	/* second */
+	&:hover,
+	/* third */
+	&.active > .c {
+		display: none;
+	}
+}

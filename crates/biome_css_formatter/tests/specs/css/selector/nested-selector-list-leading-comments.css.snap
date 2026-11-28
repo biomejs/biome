@@ -1,0 +1,93 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selector/nested-selector-list-leading-comments.css
+---
+
+# Input
+
+```css
+.a {
+	/* first */
+	& > .b,
+	/* second */
+	& > .c,
+	& > .d {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	.b,
+	/* second */
+	.c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	> .b,
+	/* second */
+	+ .c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	& .b,
+	/* second */
+	&:hover,
+	/* third */
+	&.active > .c {
+		display: none;
+	}
+}
+
+```
+
+
+# Formatted
+
+```css
+.a {
+	/* first */
+	& > .b,
+	/* second */
+	& > .c,
+	& > .d {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	.b,
+	/* second */
+	.c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	> .b,
+	/* second */
+	+ .c {
+		display: none;
+	}
+}
+
+.a {
+	/* first */
+	& .b,
+	/* second */
+	&:hover,
+	/* third */
+	&.active > .c {
+		display: none;
+	}
+}
+
+```
