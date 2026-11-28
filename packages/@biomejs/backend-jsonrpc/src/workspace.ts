@@ -4350,6 +4350,11 @@ export interface Nursery {
 	 */
 	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
 	/**
+	 * Require a name for the jobs of GitHub Actions workflows.
+	 * See https://biomejs.dev/linter/rules/use-github-workflow-job-name
+	 */
+	useGithubWorkflowJobName?: UseGithubWorkflowJobNameConfiguration;
+	/**
 	 * Require a name for GitHub Actions workflows.
 	 * See https://biomejs.dev/linter/rules/use-github-workflow-name
 	 */
@@ -7857,6 +7862,9 @@ export type UseFencedCodeLanguageConfiguration =
 export type UseFlatMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseFlatMathMinMaxOptions;
+export type UseGithubWorkflowJobNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseGithubWorkflowJobNameOptions;
 export type UseGithubWorkflowNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGithubWorkflowNameOptions;
@@ -11731,6 +11739,10 @@ export interface RuleWithUseFlatMathMinMaxOptions {
 	level: RulePlainConfiguration;
 	options?: UseFlatMathMinMaxOptions;
 }
+export interface RuleWithUseGithubWorkflowJobNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseGithubWorkflowJobNameOptions;
+}
 export interface RuleWithUseGithubWorkflowNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseGithubWorkflowNameOptions;
@@ -15067,6 +15079,7 @@ export interface UseFencedCodeLanguageOptions {
 	languageOnly?: boolean;
 }
 export type UseFlatMathMinMaxOptions = {};
+export type UseGithubWorkflowJobNameOptions = {};
 export type UseGithubWorkflowNameOptions = {};
 export type UseGlobalRegexInMatchAllOptions = {};
 export type UseGlobalRegexInReplaceAllOptions = {};
@@ -17214,6 +17227,7 @@ export type Category =
 	| "lint/nursery/useFencedCodeLanguage"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useFlatMathMinMax"
+	| "lint/nursery/useGithubWorkflowJobName"
 	| "lint/nursery/useGithubWorkflowName"
 	| "lint/nursery/useGlobalRegexInMatchAll"
 	| "lint/nursery/useGlobalRegexInReplaceAll"

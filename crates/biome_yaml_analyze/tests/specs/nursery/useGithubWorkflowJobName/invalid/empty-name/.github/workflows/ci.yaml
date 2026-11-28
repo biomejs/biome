@@ -1,0 +1,10 @@
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  empty:
+    name:
+    runs-on: ubuntu-latest
+  blank:
+    name: "  "
+    runs-on: ubuntu-latest
