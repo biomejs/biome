@@ -1,0 +1,20 @@
+/* should generate diagnostics */
+.base {
+  color: red;
+}
+
+.button {
+  @extend .base;
+}
+
+%placeholder {
+  color: blue;
+}
+
+.link {
+  @extend %placeholder;
+}
+
+.orphan {
+  color: green;
+}
