@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxElement, jsx_ext::AnyJsxElement};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
@@ -94,6 +95,16 @@ impl Rule for UseHeadingContent {
             }
 
             if has_valid_heading_content(node) {
+                return None;
+            }
+
+            if ctx
+                .source_type::<JsFileSource>()
+                .as_embedding_kind()
+                .is_astro_template()
+                && (node.find_attribute_by_name("set:html").is_some()
+                    || node.find_attribute_by_name("set:text").is_some())
+            {
                 return None;
             }
 
