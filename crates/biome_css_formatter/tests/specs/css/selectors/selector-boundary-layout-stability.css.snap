@@ -125,13 +125,13 @@ comment */ {
 
 .parent {
 	.functional-pseudo:is(
-			.other,
-			/* leading */
-			.a
-			/* boundary */
-			>
-			.b
-		) {
+		.other,
+		/* leading */
+		.a
+		/* boundary */
+		>
+		.b
+	) {
 		color: teal;
 	}
 }
