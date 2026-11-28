@@ -8632,3 +8632,41 @@ export const reportArguments = defineRule({
         assert_eq!(diagnostic.location().span, Some(range));
     }
 }
+
+#[test]
+fn forgetting_deleted_configuration_errors_keeps_errors_of_existing_files() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/broken/biome.json".into(), b"{");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let broken = Utf8Path::new("/project/broken/biome.json");
+    let deleted = Utf8Path::new("/project/deleted/biome.json");
+    workspace
+        .server
+        .record_configuration_error(project_key, broken, true);
+    workspace
+        .server
+        .record_configuration_error(project_key, deleted, true);
+
+    workspace
+        .server
+        .forget_deleted_configuration_errors(project_key);
+
+    let errors = workspace.server.configuration_errors.lock();
+    assert!(errors.contains(&(project_key, broken.to_path_buf())));
+    assert!(!errors.contains(&(project_key, deleted.to_path_buf())));
+}

@@ -116,7 +116,8 @@ use std::panic::RefUnwindSafe;
 use std::rc::Rc;
 use std::sync::Arc;
 #[cfg(test)]
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{instrument, warn};
@@ -163,6 +164,9 @@ pub struct WorkspaceServer {
     /// Tracks which clients still use each project so one client cannot unload another's context.
     project_clients: Mutex<FxHashMap<ProjectKey, FxHashSet<ClientId>>>,
 
+    configuration_loads: AtomicUsize,
+    configuration_errors: Mutex<FxHashSet<(ProjectKey, Utf8PathBuf)>>,
+
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
 
@@ -181,6 +185,14 @@ pub struct WorkspaceServer {
 
     #[cfg(test)]
     scanner_test_state: ScannerTestState,
+}
+
+struct ConfigurationLoadGuard<'a>(&'a AtomicUsize);
+
+impl Drop for ConfigurationLoadGuard<'_> {
+    fn drop(&mut self) {
+        self.0.fetch_sub(1, Ordering::Release);
+    }
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -647,6 +659,8 @@ impl WorkspaceServer {
             notification_tx,
             closed_clients: Default::default(),
             project_clients: Default::default(),
+            configuration_loads: AtomicUsize::new(0),
+            configuration_errors: Default::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
@@ -662,6 +676,35 @@ impl WorkspaceServer {
 
     pub fn with_db_state<'a>(&'a self, db_state: &'a DbState) -> WorkspaceServerWithDb<'a> {
         self.with_client(db_state, ClientId::default())
+    }
+
+    pub fn begin_configuration_load(&self) -> impl Drop + '_ {
+        self.configuration_loads.fetch_add(1, Ordering::AcqRel);
+        ConfigurationLoadGuard(&self.configuration_loads)
+    }
+
+    pub fn clear_configuration_errors(&self, project_key: ProjectKey) {
+        self.configuration_errors
+            .lock()
+            .retain(|(key, _)| *key != project_key);
+    }
+
+    /// Forgets the errors of configuration files that no longer exist. The errors of
+    /// other files stay until a scan loads those files again.
+    pub fn forget_deleted_configuration_errors(&self, project_key: ProjectKey) {
+        self.configuration_errors
+            .lock()
+            .retain(|(key, path)| *key != project_key || self.fs.path_exists(path));
+    }
+
+    fn record_configuration_error(&self, project_key: ProjectKey, path: &Utf8Path, failed: bool) {
+        let entry = (project_key, path.to_path_buf());
+        let mut errors = self.configuration_errors.lock();
+        if failed {
+            errors.insert(entry);
+        } else {
+            errors.remove(&entry);
+        }
     }
 
     /// Returns the workspace that serves the requests of `client`.
@@ -2963,6 +3006,49 @@ impl WorkspaceServerWithDb<'_> {
         project_db.is_ignored(project_key, path, is_dir, features, ignore_kind)
     }
 
+    pub fn is_force_ignored_configuration_file(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+    ) -> bool {
+        if self.server.configuration_loads.load(Ordering::Acquire) > 0
+            || !self.server.configuration_errors.lock().is_empty()
+        {
+            return false;
+        }
+        let db = self.db_state.fork();
+        let project_db: &dyn ProjectDb = db.deref();
+        let Some(project) = project_db.get_project(&project_key) else {
+            return false;
+        };
+        let mut is_used = false;
+        project_db.for_each_project(&mut |input| {
+            let settings = input.root_settings(project_db);
+            let settings = settings.as_ref();
+            is_used |= settings.uses_configuration_file(path)
+                || settings.source_path().as_deref() == path.parent()
+                || input.nested_settings(project_db).values().any(|settings| {
+                    settings.as_ref().uses_configuration_file(path)
+                        || settings.as_ref().source_path().as_deref() == path.parent()
+                });
+            if settings.is_vcs_enabled()
+                && settings.vcs_settings.should_use_ignore_file()
+                && matches!(path.file_name(), Some(".gitignore" | ".ignore"))
+                && let Some(directory) = settings
+                    .vcs_settings
+                    .to_base_path(settings.source_path().as_deref())
+            {
+                is_used |= path.parent() == Some(normalize_path(&directory).as_path());
+            }
+        });
+        if is_used {
+            return false;
+        }
+        path.ancestors()
+            .take_while(|ancestor| ancestor.starts_with(project.path(project_db)))
+            .any(|ancestor| project_db.is_force_ignored(project_key, ancestor))
+    }
+
     fn project_is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         let db = self.db_state.fork();
         let project_db: &dyn ProjectDb = db.deref();
@@ -3662,6 +3748,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             project_clients.remove(&params.project_key);
         }
 
+        self.server.clear_configuration_errors(params.project_key);
         self.remove_project(params.project_key);
         self.scanner
             .unload_project(params.project_key, project_path.clone().to_path_buf());
@@ -5241,9 +5328,24 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                 self.fs.as_ref(),
                 ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
                 false,
-            )?;
+            )
+            .inspect_err(|_| {
+                self.server
+                    .record_configuration_error(project_key, filtered_path, true);
+            })?;
             let loaded_nested_configuration =
-                LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
+                LoadedConfiguration::try_from_payload(config, self.fs.as_ref()).inspect_err(
+                    |_| {
+                        self.server
+                            .record_configuration_error(project_key, filtered_path, true);
+                    },
+                )?;
+
+            self.server.record_configuration_error(
+                project_key,
+                filtered_path,
+                loaded_nested_configuration.has_errors(),
+            );
 
             let nested_directory_path = loaded_nested_configuration
                 .directory_path()
@@ -5302,7 +5404,10 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                     .collect(),
                 module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
             };
-            let result = self.update_settings(params)?;
+            let result = self.update_settings(params).inspect_err(|_| {
+                self.server
+                    .record_configuration_error(project_key, filtered_path, true);
+            })?;
 
             returned_diagnostics.extend(result.diagnostics)
         }

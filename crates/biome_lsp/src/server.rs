@@ -449,6 +449,10 @@ impl LanguageServer for LSPServer {
                 || file_path.ends_with(".ignore")
                 || self.session.is_vcs_watch_path(&file_path);
             if is_watched_file {
+                if self.session.should_ignore_watched_file(&file_path) {
+                    continue;
+                }
+
                 info!(
                     path = %file_path,
                     "Received watched file change notification"
@@ -1081,3 +1085,7 @@ mod server_goto;
 #[cfg(test)]
 #[path = "server_type_on_format.tests.rs"]
 mod server_type_on_format;
+
+#[cfg(test)]
+#[path = "server_watched_files.tests.rs"]
+mod server_watched_files;

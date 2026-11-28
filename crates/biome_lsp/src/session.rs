@@ -568,6 +568,71 @@ impl Session {
             .any(|registered_key| *registered_key == project_key)
     }
 
+    pub(crate) fn should_ignore_watched_file(&self, path: &Utf8Path) -> bool {
+        if path.file_name() == Some("pnpm-workspace.yaml") || self.is_vcs_watch_path(path) {
+            return false;
+        }
+        let is_configuration_error = |status: &ConfigurationStatus| {
+            status.is_error() || status.is_editorconfig_error() || status.is_plugin_error()
+        };
+        if self
+            .configuration_status
+            .pin()
+            .values()
+            .any(is_configuration_error)
+            || self
+                .configuration_status_by_path
+                .try_read()
+                .map_or(true, |statuses| {
+                    statuses.values().any(is_configuration_error)
+                })
+        {
+            return false;
+        }
+        let Some(project_key) = self.project_for_path(path) else {
+            return false;
+        };
+
+        if self
+            .projects
+            .pin()
+            .iter()
+            .any(|(root, key)| *key == project_key && path.parent() == Some(root.as_path()))
+        {
+            return false;
+        }
+
+        if let Some(configuration_path) = self
+            .resolve_configuration_path(None)
+            .and_then(|hint| hint.to_path_buf())
+        {
+            let directory = if self.workspace().fs().path_is_file(&configuration_path) {
+                configuration_path.parent()
+            } else {
+                Some(configuration_path.as_path())
+            };
+            // The `.editorconfig` is searched from the configuration directory upwards.
+            let is_editorconfig_of_configuration = path.file_name() == Some(".editorconfig")
+                && path
+                    .parent()
+                    .zip(directory)
+                    .is_some_and(|(parent, directory)| directory.starts_with(parent));
+            if path == configuration_path
+                || path.parent() == directory
+                || is_editorconfig_of_configuration
+            {
+                return false;
+            }
+        }
+
+        salsa::Cancelled::catch(std::panic::AssertUnwindSafe(|| {
+            self.workspace
+                .with_db_state(&self.db_state)
+                .is_force_ignored_configuration_file(project_key, path)
+        }))
+        .unwrap_or(false)
+    }
+
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn insert_and_scan_project(
@@ -1317,6 +1382,7 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
+        let _configuration_load = self.workspace.begin_configuration_load();
         // Warn again about configurations that still fail to load after this reload.
         self.notified_broken_configuration_folders.pin().clear();
 
@@ -1376,6 +1442,10 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
+        if force {
+            self.workspace
+                .forget_deleted_configuration_errors(project_key);
+        }
         let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
         let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
             params
@@ -1528,6 +1598,7 @@ impl Session {
         base_path: ConfigurationPathHint,
         force: bool,
     ) -> ConfigurationStatus {
+        let _configuration_load = self.workspace.begin_configuration_load();
         let loaded_configuration =
             match load_configuration(self.workspace().fs(), base_path.clone()) {
                 Ok(loaded_configuration) => loaded_configuration,
@@ -1695,7 +1766,11 @@ impl Session {
             project_key,
             workspace_directory: configuration_path.as_ref().map(|path| fs.biome_path(path)),
             configuration,
-            extended_configurations: Default::default(),
+            extended_configurations: loaded_configuration
+                .extended_configurations()
+                .into_iter()
+                .map(|(path, config)| (BiomePath::from(path), config))
+                .collect(),
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
         if result.is_ok() {
