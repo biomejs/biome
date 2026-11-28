@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAstro.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+{items.map((item) => <div tabindex="2">{item}</div>)}
+
+```
+
+# Diagnostics
+```
+invalidAstro.astro:2:36 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex prop.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ {items.map((item) => <div tabindex="2">{item}</div>)}
+      │                                    ^^^
+    3 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Replace the tabindex prop value with 0.
+  
+  - items.map((item)·=>·<div·tabindex="2">{item}</div>)
+  + items.map((item)·=>·<div·tabindex="0">{item}</div>)
+  
+
+```

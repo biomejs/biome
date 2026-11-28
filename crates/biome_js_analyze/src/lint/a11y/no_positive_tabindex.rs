@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use crate::a11y::TabindexSpelling;
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
@@ -13,7 +14,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
     JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 declare_lint_rule! {
@@ -23,6 +24,8 @@ declare_lint_rule! {
     /// overrides the page's natural focus order and can make keyboard navigation unpredictable.
     /// Use `0` to include an element in the natural order, or `-1` to exclude it from keyboard
     /// navigation while keeping it focusable through code.
+    ///
+    /// In Astro templates and in projects that depend on `solid-js`, the rule also recognizes the HTML spelling `tabindex`.
     ///
     /// ## Accessibility guidelines
     ///
@@ -89,11 +92,13 @@ declare_node_union! {
 }
 
 impl NoPositiveTabindexQuery {
-    fn find_tabindex_attribute(&self, model: &SemanticModel) -> Option<TabindexProp> {
+    fn find_tabindex_attribute(
+        &self,
+        model: &SemanticModel,
+        spelling: TabindexSpelling,
+    ) -> Option<TabindexProp> {
         match self {
-            Self::AnyJsxElement(jsx) => jsx
-                .find_attribute_by_name("tabIndex")
-                .map(TabindexProp::from),
+            Self::AnyJsxElement(jsx) => spelling.find_attribute(jsx).map(TabindexProp::from),
             Self::JsCallExpression(expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(expression, model)?;
@@ -101,6 +106,18 @@ impl NoPositiveTabindexQuery {
                     .find_prop_by_name("tabIndex")
                     .map(TabindexProp::from)
             }
+        }
+    }
+}
+
+impl TabindexProp {
+    /// The attribute or property name as written in the source.
+    fn name(&self) -> Option<TokenText> {
+        match self {
+            Self::JsxAttribute(attribute) => {
+                Some(attribute.name_value_token().ok()?.token_text_trimmed())
+            }
+            Self::JsPropertyObjectMember(member) => member.name().ok()?.name(),
         }
     }
 }
@@ -114,7 +131,8 @@ impl Rule for NoPositiveTabindex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let tabindex_attribute = node.find_tabindex_attribute(model)?;
+        let tabindex_attribute =
+            node.find_tabindex_attribute(model, TabindexSpelling::from_context(ctx))?;
 
         match tabindex_attribute {
             TabindexProp::JsxAttribute(jsx_attribute) => {
@@ -153,20 +171,25 @@ impl Rule for NoPositiveTabindex {
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let tabindex_name = ctx
+            .query()
+            .find_tabindex_attribute(ctx.model(), TabindexSpelling::from_context(ctx))?
+            .name()?;
+        let tabindex_name = tabindex_name.text();
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             state,
-            markup!{"Avoid positive values for the "<Emphasis>"tabIndex"</Emphasis>" prop."}.to_owned(),
+            markup!{"Avoid positive values for the "<Emphasis>{tabindex_name}</Emphasis>" prop."}.to_owned(),
         )
         .note(
             markup!{
-                "Elements with a positive "<Emphasis>"tabIndex"</Emphasis>" override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard."
+                "Elements with a positive "<Emphasis>{tabindex_name}</Emphasis>" override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard."
             }.to_owned(),
         )
         .note(
             markup!{
-                "Use only 0 and -1 as "<Emphasis>"tabIndex"</Emphasis>" values. Avoid using "<Emphasis>"tabIndex"</Emphasis>" values greater than 0 and CSS properties that can change the order of focusable HTML elements."
+                "Use only 0 and -1 as "<Emphasis>{tabindex_name}</Emphasis>" values. Avoid using "<Emphasis>{tabindex_name}</Emphasis>" values greater than 0 and CSS properties that can change the order of focusable HTML elements."
             }
         );
 
@@ -176,7 +199,9 @@ impl Rule for NoPositiveTabindex {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let element = ctx.query();
         let model = ctx.model();
-        let tabindex_attribute = element.find_tabindex_attribute(model)?;
+        let tabindex_attribute =
+            element.find_tabindex_attribute(model, TabindexSpelling::from_context(ctx))?;
+        let tabindex_name = tabindex_attribute.name()?;
 
         let mut mutation = ctx.root().begin();
         match tabindex_attribute {
@@ -199,7 +224,7 @@ impl Rule for NoPositiveTabindex {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Replace the "<Emphasis>"tabIndex"</Emphasis>" prop value with 0." }
+            markup! { "Replace the "<Emphasis>{tabindex_name.text()}</Emphasis>" prop value with 0." }
                 .to_owned(),
             mutation,
         ))

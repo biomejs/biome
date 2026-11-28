@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAstro.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+{items.map((item) => <button aria-hidden="true" tabindex="-1">{item}</button>)}
+
+```

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAstro.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+{items.map((item) => <div aria-activedescendant={item} />)}
+
+```
+
+# Diagnostics
+```
+invalidAstro.astro:2:22 lint/a11y/useAriaActivedescendantWithTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ {items.map((item) => <div aria-activedescendant={item} />)}
+      │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabindex attribute to the element with a value greater than or equal to -1.
+  
+  i Unsafe fix: Add the tabindex attribute.
+  
+    1 │ items.map((item)·=>·<div·aria-activedescendant={item}··tabindex="0"·/>)
+      │                                                      ++++++++++++++    
+
+```

@@ -1,6 +1,64 @@
+use std::sync::Arc;
+
+use biome_analyze::{Rule, context::RuleContext};
 use biome_aria::event_handlers::matches_event_handler;
-use biome_js_syntax::{AnyJsxAttributeName, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute, jsx_ext::AnyJsxElement};
+use biome_languages::JsFileSource;
+use biome_package::PackageJson;
 use biome_rowan::AstNodeList;
+use camino::Utf8PathBuf;
+
+/// The spelling of the tab index attribute expected by the JSX framework of the analyzed file.
+///
+/// Astro templates use the HTML spelling. Elsewhere, the framework is detected from the
+/// dependencies of the nearest `package.json`.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum TabindexSpelling {
+    /// `tabIndex`, the DOM property name used by React and the default for JSX.
+    CamelCase,
+    /// `tabindex`, the HTML attribute name used by Astro and Solid.
+    ///
+    /// HTML attribute names are case-insensitive and Solid 1 also accepts `tabIndex`, so both
+    /// spellings are recognized.
+    Lowercase,
+}
+
+impl TabindexSpelling {
+    pub(crate) fn from_context<R: Rule + 'static>(ctx: &RuleContext<R>) -> Self {
+        let is_astro_template = ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template();
+        let is_solid = || {
+            ctx.get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
+                .and_then(Option::as_ref)
+                .is_some_and(|(_, manifest)| manifest.contains_dependency("solid-js"))
+        };
+        if is_astro_template || is_solid() {
+            Self::Lowercase
+        } else {
+            Self::CamelCase
+        }
+    }
+
+    /// The attribute name to suggest in diagnostics and code actions.
+    pub(crate) const fn attribute_name(self) -> &'static str {
+        match self {
+            Self::CamelCase => "tabIndex",
+            Self::Lowercase => "tabindex",
+        }
+    }
+
+    /// Returns the tab index attribute of `element`, if any.
+    pub(crate) fn find_attribute(self, element: &AnyJsxElement) -> Option<JsxAttribute> {
+        match self {
+            Self::CamelCase => element.find_attribute_by_name("tabIndex"),
+            Self::Lowercase => element
+                .find_attribute_by_name("tabindex")
+                .or_else(|| element.find_attribute_by_name("tabIndex")),
+        }
+    }
+}
 
 /// Check the element is hidden from screen reader.
 ///
