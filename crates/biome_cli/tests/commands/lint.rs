@@ -328,6 +328,50 @@ function _f() { arguments; }
 }
 
 #[test]
+fn apply_unsafe_conflicting_fixes_terminates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // `useAriaActivedescendantWithTabindex` adds `tabIndex`, and
+    // `noNoninteractiveTabindex` removes it again.
+    let source = "export const List = () => <div aria-activedescendant=\"x\">hi</div>;\n";
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "a11y": {
+                "useAriaActivedescendantWithTabindex": "error",
+                "noNoninteractiveTabindex": "error"
+            }
+        }
+    }
+}"#,
+    );
+    let file = Utf8Path::new("test.tsx");
+    fs.insert(file.into(), source.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file, source);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "apply_unsafe_conflicting_fixes_terminates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn no_lint_if_linter_is_disabled_when_run_apply() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
