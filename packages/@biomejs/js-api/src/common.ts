@@ -243,8 +243,41 @@ export interface PrintDiagnosticsOptions {
  */
 const initialized = new WeakSet();
 
-export class BiomeCommon<Configuration, Diagnostic> {
+function isPosixAbsolutePath(path: string): boolean {
+	return path.startsWith("/") && !path.startsWith("//");
+}
+
+function normalizePathSeparators(path: string): string {
+	return isPosixAbsolutePath(path) ? path : path.replaceAll("\\", "/");
+}
+
+function normalizeAbsolutePath(path: string): string | undefined {
+	const root = /^(?:[a-z]:\/|\/\/[^/]+\/[^/]+\/?|\/)/i.exec(path)?.[0];
+	if (root === undefined) {
+		return undefined;
+	}
+
+	const segments: string[] = [];
+	for (const segment of path.slice(root.length).split("/")) {
+		if (segment === "..") {
+			segments.pop();
+		} else if (segment && segment !== ".") {
+			segments.push(segment);
+		}
+	}
+	const rootPrefix = root.endsWith("/") ? root : `${root}/`;
+	return `${rootPrefix}${segments.join("/")}`;
+}
+
+interface DiagnosticLocation {
+	location: {
+		path?: string | { file: string };
+	};
+}
+
+export class BiomeCommon<Configuration, Diagnostic extends DiagnosticLocation> {
 	private readonly workspace: Workspace<Configuration, Diagnostic>;
+	private readonly absoluteProjectPrefixes = new Map<ProjectKey, string>();
 
 	constructor(private readonly module: Module<Configuration, Diagnostic>) {
 		if (!initialized.has(module)) {
@@ -292,10 +325,38 @@ export class BiomeCommon<Configuration, Diagnostic> {
 	 * @param [path]
 	 */
 	openProject(path?: string): OpenProjectResult {
-		return this.workspace.openProject({
+		const result = this.workspace.openProject({
 			path: path || "",
 			openUninitialized: true,
 		});
+		const directory = normalizeAbsolutePath(
+			normalizePathSeparators(path ?? ""),
+		);
+		if (directory !== undefined) {
+			const prefix = directory.endsWith("/") ? directory : `${directory}/`;
+			this.absoluteProjectPrefixes.set(result.projectKey, prefix);
+		}
+		return result;
+	}
+
+	private formatPath(projectKey: ProjectKey, filePath: string): BiomePath {
+		const prefix = this.absoluteProjectPrefixes.get(projectKey);
+		if (prefix === undefined) {
+			return normalizePathSeparators(filePath);
+		}
+
+		const posix = isPosixAbsolutePath(prefix);
+		const path = posix ? filePath : normalizePathSeparators(filePath);
+		const absolutePath = normalizeAbsolutePath(path);
+		if (absolutePath === undefined) {
+			return path;
+		}
+
+		const pathPrefix = absolutePath.slice(0, prefix.length);
+		const insideProject = posix
+			? pathPrefix === prefix
+			: pathPrefix.toLowerCase() === prefix.toLowerCase();
+		return insideProject ? `./${absolutePath.slice(prefix.length)}` : path;
 	}
 
 	private withFile<T>(
@@ -345,7 +406,8 @@ export class BiomeCommon<Configuration, Diagnostic> {
 		content: string,
 		options: FormatContentOptions | FormatContentDebugOptions,
 	): FormatResult<Diagnostic> | FormatDebugResult<Diagnostic> {
-		return this.withFile(projectKey, options.filePath, content, (path) => {
+		const virtualPath = this.formatPath(projectKey, options.filePath);
+		return this.withFile(projectKey, virtualPath, content, (path) => {
 			let code = content;
 
 			const result = this.workspace.pullDiagnostics({
@@ -354,6 +416,18 @@ export class BiomeCommon<Configuration, Diagnostic> {
 				categories: ["syntax"],
 				pullCodeActions: false,
 			});
+
+			if (path !== options.filePath) {
+				for (const diagnostic of result.diagnostics) {
+					const diagnosticPath = diagnostic.location.path;
+					if (
+						typeof diagnosticPath === "object" &&
+						diagnosticPath?.file === path
+					) {
+						diagnosticPath.file = options.filePath;
+					}
+				}
+			}
 
 			if (0 === result.errors) {
 				if (options.range) {

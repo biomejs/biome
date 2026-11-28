@@ -132,6 +132,65 @@ describe("Biome WebAssembly formatContent", () => {
 		expect(result.content).toEqual(formatted);
 	});
 
+	it.each([
+		[".", "src/a.js", 8],
+		["src", "src/a.js", 8],
+		["/project", "./src/a.js", 8],
+		["/project", "/project/src/a.js", 8],
+		["/project/.", "/project/src/a.js", 8],
+		["/project", "/project/src/../../outside/a.js", 2],
+		["/project", "/project-other/src/a.js", 2],
+		["/project", "/project/src\\a.js", 2],
+		["/project", "src\\a.js", 2],
+		["C:\\project", "src\\a.js", 8],
+		["C:\\project", ".\\src\\nested/a.js", 8],
+		["C:\\project", "C:\\project\\src\\a.js", 8],
+		["C:\\project", "C:/project/src/a.js", 8],
+		["C:\\project", "c:\\project\\src\\a.js", 8],
+		["\\\\server\\share", "\\\\server\\share\\src\\a.js", 8],
+	] as const)(
+		"should match formatter overrides in %s for %s",
+		(root, filePath, indentWidth) => {
+			const { projectKey } = biome.openProject(root);
+			biome.openProject("/other-project");
+			biome.applyConfiguration(projectKey, {
+				formatter: { indentStyle: "space", indentWidth: 2 },
+				overrides: [{ includes: ["src/**"], formatter: { indentWidth: 8 } }],
+			});
+
+			const result = biome.formatContent(projectKey, "function f(){return 1}", {
+				filePath,
+			});
+
+			const indent = " ".repeat(indentWidth);
+			expect(result.content).toEqual(`function f() {\n${indent}return 1;\n}\n`);
+		},
+	);
+
+	it.each([
+		["/project", "./src/a.js"],
+		["/project", "/project/src/a.js"],
+		["C:\\project", "src\\a.js"],
+	])("should report the supplied filename in %s for %s", (root, filePath) => {
+		const { projectKey } = biome.openProject(root);
+		const result = biome.formatContent(projectKey, "function () {}", {
+			filePath,
+		});
+		expect(result.diagnostics[0].location.path).toEqual({ file: filePath });
+	});
+
+	it("should apply nested settings to project-relative file paths", () => {
+		const { projectKey } = biome.openProject("/project");
+		biome.applyConfiguration(projectKey, {
+			root: false,
+			formatter: { indentStyle: "space", indentWidth: 8 },
+		});
+		const result = biome.formatContent(projectKey, "function f(){return 1}", {
+			filePath: "./src/a.js",
+		});
+		expect(result.content).toEqual("function f() {\n        return 1;\n}\n");
+	});
+
 	it("should format content with custom configuration (8 spaces, jsx single quotes, preserve quotes)", () => {
 		const content = `<div bar="foo" baz={"foo"} />`;
 		const formatted = `<div bar='foo' baz={"foo"} />;
