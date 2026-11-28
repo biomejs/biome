@@ -1,0 +1,36 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: eol_comment_after_opening_brace.jsonc
+---
+# Input
+```jsonc
+{ // header
+  "b": 2, "a": 1
+}
+
+```
+
+# Diagnostics
+```
+eol_comment_after_opening_brace.jsonc:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by key.
+  
+  > 1 │ { // header
+      │ ^^^^^^^^^^^
+  > 2 │   "b": 2, "a": 1
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Safe fix: Sort the members by key.
+  
+    1 1 │   { // header
+    2   │ - ··"b":·2,·"a":·1
+      2 │ + "a":·1,
+      3 │ + ··"b":·2·
+    3 4 │   }
+    4 5 │   
+  
+
+```
