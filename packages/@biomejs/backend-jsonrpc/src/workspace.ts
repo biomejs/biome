@@ -1268,6 +1268,7 @@ export interface RuleDomains {
 	biomePlugin?: RuleDomainValue;
 	convex?: RuleDomainValue;
 	drizzle?: RuleDomainValue;
+	github?: RuleDomainValue;
 	next?: RuleDomainValue;
 	playwright?: RuleDomainValue;
 	project?: RuleDomainValue;

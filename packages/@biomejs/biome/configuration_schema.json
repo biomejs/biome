@@ -13164,6 +13164,7 @@
 				"biomePlugin": { "$ref": "#/$defs/RuleDomainValue" },
 				"convex": { "$ref": "#/$defs/RuleDomainValue" },
 				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
+				"github": { "$ref": "#/$defs/RuleDomainValue" },
 				"next": { "$ref": "#/$defs/RuleDomainValue" },
 				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
 				"project": { "$ref": "#/$defs/RuleDomainValue" },
