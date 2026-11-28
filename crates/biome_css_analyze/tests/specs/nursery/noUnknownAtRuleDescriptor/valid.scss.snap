@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$name: "family";
+
+@font-face {
+	font-#{$name}: "Example";
+	@include font-options {
+		bar: 0;
+	}
+	font: {
+		family: "Example";
+	}
+}
+
+```

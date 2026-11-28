@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+$name: "family";
+
+@font-face {
+	font-#{$name}: "Example";
+	@include font-options {
+		bar: 0;
+	}
+	font: {
+		family: "Example";
+	}
+}

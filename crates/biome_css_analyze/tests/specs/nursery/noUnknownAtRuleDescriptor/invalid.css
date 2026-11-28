@@ -1,0 +1,41 @@
+/* should generate diagnostics */
+@font-face {
+	font-famliy: "Example";
+}
+
+@FONT-FACE {
+	FONT-FAMLIY: "Example";
+}
+
+@counter-style foo {
+	bar: 0;
+}
+
+@property --foo {
+	bar: 0;
+	baz: 0;
+}
+
+@property --foo {
+	system: cyclic;
+}
+
+@color-profile --swop5c {
+	source: url("https://example.com/swop5c.icc");
+}
+
+@font-palette-values --identifier {
+	font-size: 1em;
+}
+
+@position-try --foo {
+	color: red;
+}
+
+@view-transition {
+	navigaton: auto;
+}
+
+@font-face {
+	--custom: 1;
+}

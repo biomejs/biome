@@ -392,3 +392,49 @@ pub const COLOR_KEYWORDS: &[&str] = &[
     "yellow",
     "yellowgreen",
 ];
+#[doc = " Descriptors of the CSS `@color-profile` at-rule."]
+pub const COLOR_PROFILE_DESCRIPTORS: &[&str] = &["components", "rendering-intent", "src"];
+#[doc = " Descriptors of the CSS `@counter-style` at-rule."]
+pub const COUNTER_STYLE_DESCRIPTORS: &[&str] = &[
+    "additive-symbols",
+    "fallback",
+    "negative",
+    "pad",
+    "prefix",
+    "range",
+    "speak-as",
+    "suffix",
+    "symbols",
+    "system",
+];
+#[doc = " Descriptors of the CSS `@font-face` at-rule."]
+pub const FONT_FACE_DESCRIPTORS: &[&str] = &[
+    "ascent-override",
+    "descent-override",
+    "font-display",
+    "font-family",
+    "font-feature-settings",
+    "font-language-override",
+    "font-named-instance",
+    "font-size",
+    "font-stretch",
+    "font-style",
+    "font-variation-settings",
+    "font-weight",
+    "font-width",
+    "line-gap-override",
+    "size-adjust",
+    "src",
+    "subscript-position-override",
+    "subscript-size-override",
+    "superscript-position-override",
+    "superscript-size-override",
+    "unicode-range",
+];
+#[doc = " Descriptors of the CSS `@font-palette-values` at-rule."]
+pub const FONT_PALETTE_VALUES_DESCRIPTORS: &[&str] =
+    &["base-palette", "font-family", "override-colors"];
+#[doc = " Descriptors of the CSS `@property` at-rule."]
+pub const PROPERTY_DESCRIPTORS: &[&str] = &["inherits", "initial-value", "syntax"];
+#[doc = " Descriptors of the CSS `@view-transition` at-rule."]
+pub const VIEW_TRANSITION_DESCRIPTORS: &[&str] = &["navigation", "types"];
