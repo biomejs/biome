@@ -173,6 +173,13 @@ describe("foo", () => {
 	});
 });
 
+import { afterEach } from "vitest";
+
+describe("imported hooks are still checked", () => {
+	afterEach(() => {});
+	afterEach(() => {});
+});
+
 ```
 
 # Diagnostics
@@ -455,6 +462,23 @@ invalid.js:163:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
         │ 	^^
     165 │ 	test("bar", () => {
     166 │ 		someFn();
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalid.js:174:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+    172 │ describe("imported hooks are still checked", () => {
+    173 │ 	afterEach(() => {});
+  > 174 │ 	afterEach(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    175 │ });
+    176 │ 
   
   i Remove this duplicate hook or consolidate the logic into a single hook.
   
