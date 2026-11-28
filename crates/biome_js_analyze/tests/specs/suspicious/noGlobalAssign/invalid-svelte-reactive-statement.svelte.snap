@@ -1,0 +1,139 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-reactive-statement.svelte
+---
+# Input
+```svelte
+<script>
+	export let expanded = false;
+
+	// Only a top-level `$: name = ...` declares a variable. These assign to the globals.
+	$: {
+		length = expanded ? 24 : 4;
+	}
+	$: if (expanded) parent = 1;
+	$: x = (status = 1);
+	$: self += 1;
+	// Only `name` is declared here; `top` is the global.
+	$: name = top++;
+
+	function update() {
+		$: top = 1;
+	}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-reactive-statement.svelte:6:3 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    4 │ 	// Only a top-level `$: name = ...` declares a variable. These assign to the globals.
+    5 │ 	$: {
+  > 6 │ 		length = expanded ? 24 : 4;
+      │ 		^^^^^^
+    7 │ 	}
+    8 │ 	$: if (expanded) parent = 1;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:8:19 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+     6 │ 		length = expanded ? 24 : 4;
+     7 │ 	}
+   > 8 │ 	$: if (expanded) parent = 1;
+       │ 	                 ^^^^^^
+     9 │ 	$: x = (status = 1);
+    10 │ 	$: self += 1;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:9:10 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+     7 │ 	}
+     8 │ 	$: if (expanded) parent = 1;
+   > 9 │ 	$: x = (status = 1);
+       │ 	        ^^^^^^
+    10 │ 	$: self += 1;
+    11 │ 	// Only `name` is declared here; `top` is the global.
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:10:5 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+     8 │ 	$: if (expanded) parent = 1;
+     9 │ 	$: x = (status = 1);
+  > 10 │ 	$: self += 1;
+       │ 	   ^^^^
+    11 │ 	// Only `name` is declared here; `top` is the global.
+    12 │ 	$: name = top++;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:12:12 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    10 │ 	$: self += 1;
+    11 │ 	// Only `name` is declared here; `top` is the global.
+  > 12 │ 	$: name = top++;
+       │ 	          ^^^
+    13 │ 
+    14 │ 	function update() {
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:15:6 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    14 │ 	function update() {
+  > 15 │ 		$: top = 1;
+       │ 		   ^^^
+    16 │ 	}
+    17 │ </script>
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
