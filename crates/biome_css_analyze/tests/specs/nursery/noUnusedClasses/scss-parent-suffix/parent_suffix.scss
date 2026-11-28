@@ -1,0 +1,111 @@
+/* should generate diagnostics */
+$state: active;
+
+.block {
+  color: red;
+
+  &__used {
+    color: red;
+  }
+
+  &__unused {
+    color: red;
+  }
+
+  &--used {
+    color: red;
+
+    &__deep {
+      color: red;
+    }
+  }
+
+  &-#{$state} {
+    color: red;
+  }
+
+  @at-root &__root {
+    color: red;
+  }
+}
+
+.first,
+.second {
+  &-suffix {
+    color: red;
+  }
+}
+
+@mixin element {
+  &__mixin {
+    color: red;
+  }
+}
+
+.parent {
+  @at-root .other {
+    &-child {
+      color: red;
+    }
+  }
+
+  @at-root &__root {
+    &--modifier {
+      color: red;
+    }
+  }
+}
+
+@mixin modifier($name) {
+  &--#{$name} {
+    @content;
+  }
+}
+
+.card {
+  @include modifier(big) {
+    &__title {
+      color: red;
+    }
+  }
+}
+
+div {
+  &-type {
+    color: red;
+  }
+}
+
+#id {
+  &-id {
+    color: red;
+  }
+}
+
+.hover:hover {
+  &-pseudo {
+    color: red;
+  }
+}
+
+.one.two,
+span {
+  &-mixed {
+    color: red;
+  }
+}
+
+.btn,
+.theme-dark .btn {
+  &__icon {
+    color: red;
+  }
+}
+
+.outer {
+  .inner {
+    @supports selector(&-supported) {
+      color: red;
+    }
+  }
+}
