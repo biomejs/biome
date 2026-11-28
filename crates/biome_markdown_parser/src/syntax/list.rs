@@ -3534,6 +3534,7 @@ fn has_list_item_after_blank_lines_at_indent<F>(
 where
     F: Fn(&mut MarkdownParser) -> bool,
 {
+    let quote_depth = p.state().block_quote_depth;
     p.lookahead(|p| {
         // Skip all blank lines, tracking the indent of the last line visited.
         // The loop consumes whitespace on each line to check if it's blank
@@ -3541,6 +3542,7 @@ where
         // whitespace was already consumed, so we must track the indent here
         // rather than counting it separately afterwards.
         let mut indent;
+        let mut crossed_line = false;
         loop {
             indent = 0;
             while p.at(MD_TEXTUAL_LITERAL) {
@@ -3557,9 +3559,17 @@ where
             }
             if p.at(NEWLINE) {
                 p.bump(NEWLINE);
+                crossed_line = true;
                 continue;
             }
             break;
+        }
+
+        // Inside a block quote, the next line either starts with the quote's
+        // `>` prefix, which is not a list marker, or lacks it and so closes the
+        // quote. Either way no item of this list starts there.
+        if quote_depth > 0 && crossed_line {
+            return false;
         }
 
         // Check indent matches the list's marker indent range
