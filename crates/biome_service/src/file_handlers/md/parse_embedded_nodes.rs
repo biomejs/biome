@@ -210,8 +210,17 @@ fn build_html_block_candidate(html_block: &MdHtmlBlock) -> Option<EmbedCandidate
         // such as its suppression comments.
         return None;
     }
+    // Comments before the HTML are trivia of the literal. The Markdown
+    // formatter prints them as Markdown comments, so they aren't part of the
+    // embedded HTML.
+    let content_range = token.text_trimmed_range();
     Some(EmbedCandidate::HtmlBlock {
-        content: embed_content(html_block.range(), token),
+        content: EmbedContent {
+            element_range: html_block.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: token.token_text_trimmed(),
+        },
     })
 }
 
