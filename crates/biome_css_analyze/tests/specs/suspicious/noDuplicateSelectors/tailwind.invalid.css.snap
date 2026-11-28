@@ -1,0 +1,175 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: tailwind.invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* Duplicate nested selector inside the same @utility block */
+@utility fade {
+  color: red;
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: blue;
+  }
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: green;
+  }
+}
+
+/* Duplicate nested selector inside the same @variant block */
+.btn {
+  @variant hover {
+    &:focus {
+      color: red;
+    }
+    &:focus {
+      color: blue;
+    }
+  }
+}
+
+/* Duplicate selector inside the same @custom-variant block */
+@custom-variant theme-a {
+  &:where([data-theme="a"] *) {
+    @slot;
+  }
+  &:where([data-theme="a"] *) {
+    @slot;
+  }
+}
+
+/* Top-level duplicate alongside @utility blocks */
+.a {}
+.a {}
+
+```
+
+# Diagnostics
+```
+tailwind.invalid.css:9:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "&:where([dir="rtl"],[dir="rtl"] *)".
+  
+     7 │     color: blue;
+     8 │   }
+   > 9 │   &:where([dir="rtl"], [dir="rtl"] *) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │     color: green;
+  > 11 │   }
+       │   ^
+    12 │ }
+    13 │ 
+  
+  i It was first defined here.
+  
+     4 │ @utility fade {
+     5 │   color: red;
+   > 6 │   &:where([dir="rtl"], [dir="rtl"] *) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 7 │     color: blue;
+   > 8 │   }
+       │   ^
+     9 │   &:where([dir="rtl"], [dir="rtl"] *) {
+    10 │     color: green;
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+tailwind.invalid.css:20:5 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".btn:focus".
+  
+    18 │       color: red;
+    19 │     }
+  > 20 │     &:focus {
+       │     ^^^^^^^^^
+  > 21 │       color: blue;
+  > 22 │     }
+       │     ^
+    23 │   }
+    24 │ }
+  
+  i It was first defined here.
+  
+    15 │ .btn {
+    16 │   @variant hover {
+  > 17 │     &:focus {
+       │     ^^^^^^^^^
+  > 18 │       color: red;
+  > 19 │     }
+       │     ^
+    20 │     &:focus {
+    21 │       color: blue;
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+tailwind.invalid.css:31:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "&:where([data-theme="a"] *)".
+  
+    29 │     @slot;
+    30 │   }
+  > 31 │   &:where([data-theme="a"] *) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 32 │     @slot;
+  > 33 │   }
+       │   ^
+    34 │ }
+    35 │ 
+  
+  i It was first defined here.
+  
+    26 │ /* Duplicate selector inside the same @custom-variant block */
+    27 │ @custom-variant theme-a {
+  > 28 │   &:where([data-theme="a"] *) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │     @slot;
+  > 30 │   }
+       │   ^
+    31 │   &:where([data-theme="a"] *) {
+    32 │     @slot;
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+tailwind.invalid.css:38:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".a".
+  
+    36 │ /* Top-level duplicate alongside @utility blocks */
+    37 │ .a {}
+  > 38 │ .a {}
+       │ ^^^^^
+    39 │ 
+  
+  i It was first defined here.
+  
+    36 │ /* Top-level duplicate alongside @utility blocks */
+  > 37 │ .a {}
+       │ ^^^^^
+    38 │ .a {}
+    39 │ 
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```

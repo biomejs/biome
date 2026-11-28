@@ -1,0 +1,38 @@
+/* should generate diagnostics */
+
+/* Duplicate nested selector inside the same @utility block */
+@utility fade {
+  color: red;
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: blue;
+  }
+  &:where([dir="rtl"], [dir="rtl"] *) {
+    color: green;
+  }
+}
+
+/* Duplicate nested selector inside the same @variant block */
+.btn {
+  @variant hover {
+    &:focus {
+      color: red;
+    }
+    &:focus {
+      color: blue;
+    }
+  }
+}
+
+/* Duplicate selector inside the same @custom-variant block */
+@custom-variant theme-a {
+  &:where([data-theme="a"] *) {
+    @slot;
+  }
+  &:where([data-theme="a"] *) {
+    @slot;
+  }
+}
+
+/* Top-level duplicate alongside @utility blocks */
+.a {}
+.a {}

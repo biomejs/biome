@@ -1,0 +1,41 @@
+/* should generate diagnostics */
+
+@utility fade {
+  .a .inner {
+    color: red;
+  }
+  .inner {
+    color: blue;
+  }
+}
+
+@variant dark {
+  .a .card {
+    color: white;
+  }
+  .card {
+    color: black;
+  }
+}
+
+.btn {
+  @variant hover {
+    .a &:focus {
+      color: red;
+    }
+    &:focus {
+      color: blue;
+    }
+  }
+}
+
+@custom-variant theme-a {
+  .a .slot-target {
+    color: red;
+    @slot;
+  }
+  .slot-target {
+    color: blue;
+    @slot;
+  }
+}

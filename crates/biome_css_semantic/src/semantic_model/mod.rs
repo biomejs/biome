@@ -261,6 +261,46 @@ mod tests {
     }
 
     #[test]
+    fn test_root_custom_variables_after_nested_rules() {
+        let parse = parse_css(
+            r#":root {
+  @variant dark {
+    color: black;
+  }
+  --brand: red;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default().allow_tailwind_directives(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        assert!(model.global_custom_variables().contains_key("--brand"));
+
+        let parse = parse_css(
+            r#":root {
+  @media (prefers-color-scheme: dark) {
+    color: black;
+  }
+  .nested {
+    color: gray;
+  }
+  :root {
+    color: white;
+  }
+  --brand: red;
+}
+.other {
+  --local: blue;
+}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        let vars = model.global_custom_variables();
+        assert!(vars.contains_key("--brand"));
+        assert!(!vars.contains_key("--local"));
+    }
+
+    #[test]
     fn test_scss_global_custom_variables() {
         let parse = parse_css(
             r#":root {

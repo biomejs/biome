@@ -819,3 +819,52 @@ fn test_requires_scss_evaluation() {
     assert!(!requires("[data-x=\"50%\"] {}"));
     assert!(!requires("#id {}"));
 }
+
+#[test]
+fn test_nested_inside_tailwind_at_rules() {
+    let css = r#"
+        @utility fade {
+            color: red;
+            &:hover {
+                color: blue;
+            }
+        }
+
+        .btn {
+            @variant hover {
+                &:focus {
+                    color: green;
+                }
+            }
+        }
+    "#;
+    let parse = parse_css(
+        css,
+        CssFileSource::css(),
+        CssParserOptions::default().allow_tailwind_directives(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    assert_eq!(rules.len(), 2);
+
+    let utility_rule = &rules[0];
+    assert!(utility_rule.selectors.is_empty());
+    let utility_child_id = utility_rule.child_ids().first().unwrap();
+    let utility_child = model.get_rule_by_id(utility_child_id).unwrap();
+    assert_eq!(utility_child.selectors[0].resolved().to_string(), "&:hover");
+
+    let btn_rule = &rules[1];
+    assert_eq!(btn_rule.selectors[0].resolved().to_string(), ".btn");
+    let variant_rule_id = btn_rule.child_ids().first().unwrap();
+    let variant_rule = model.get_rule_by_id(variant_rule_id).unwrap();
+    assert!(variant_rule.selectors.is_empty());
+    let variant_child_id = variant_rule.child_ids().first().unwrap();
+    let variant_child = model.get_rule_by_id(variant_child_id).unwrap();
+    assert_eq!(
+        variant_child.selectors[0].resolved().to_string(),
+        ".btn:focus"
+    );
+}

@@ -70,7 +70,8 @@ pub enum SemanticEvent {
 #[derive(Default, Debug)]
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
-    is_in_root_selector: bool,
+    /// Tracks whether each open `AnyRuleStart` rule matched `:root`.
+    rule_is_root_stack: Vec<bool>,
 }
 
 impl SemanticEventExtractor {
@@ -99,6 +100,7 @@ impl SemanticEventExtractor {
             kind if AnyRuleStart::can_cast(kind) => {
                 if let Some(start) = AnyRuleStart::cast(node.clone()) {
                     self.stash.push_back(SemanticEvent::RuleStart(start));
+                    self.rule_is_root_stack.push(false);
                 }
             }
             CSS_SELECTOR_LIST => {
@@ -237,9 +239,14 @@ impl SemanticEventExtractor {
 
             AnyCssSelector::CssCompoundSelector(selector) => {
                 let selector_text = selector.to_trimmed_string();
-                if selector_text == ROOT_SELECTOR {
-                    self.stash.push_back(SemanticEvent::RootSelectorStart);
-                    self.is_in_root_selector = true;
+                if selector_text == ROOT_SELECTOR && self.rule_is_root_stack.last() == Some(&false)
+                {
+                    if !self.rule_is_root_stack.iter().any(|&in_root| in_root) {
+                        self.stash.push_back(SemanticEvent::RootSelectorStart);
+                    }
+                    if let Some(is_root) = self.rule_is_root_stack.last_mut() {
+                        *is_root = true;
+                    }
                 }
                 let specificity = evaluate_compound_selector(&selector);
                 self.add_selector_event(selector.into(), specificity)
@@ -354,9 +361,10 @@ impl SemanticEventExtractor {
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         if AnyRuleStart::can_cast(node.kind()) {
             self.stash.push_back(SemanticEvent::RuleEnd);
-            if self.is_in_root_selector {
+            if self.rule_is_root_stack.pop() == Some(true)
+                && !self.rule_is_root_stack.iter().any(|&in_root| in_root)
+            {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);
-                self.is_in_root_selector = false;
             }
         }
     }
