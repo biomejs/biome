@@ -207,6 +207,12 @@ function DeclaredAfterQuery() {
 	return query;
 }
 
+function KeyVariableReadByQueryFunction(dep) {
+	// The key's own variable is not a missing value, so only `dep` is reported.
+	const queryKey = ["thing"];
+	useQuery({ queryKey, queryFn: () => fetchThing(dep, queryKey) });
+}
+
 ```
 
 # Diagnostics
@@ -1247,5 +1253,39 @@ invalid.js:199:27 lint/nursery/useTanstackQueryExhaustiveDependencies ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+
+```
+
+```
+invalid.js:207:13 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    205 │ 	// The key's own variable is not a missing value, so only `dep` is reported.
+    206 │ 	const queryKey = ["thing"];
+  > 207 │ 	useQuery({ queryKey, queryFn: () => fetchThing(dep, queryKey) });
+        │ 	           ^^^^^^^^
+    208 │ }
+    209 │ 
+  
+  i The query function uses dep here, but the query key doesn't include it.
+  
+    205 │ 	// The key's own variable is not a missing value, so only `dep` is reported.
+    206 │ 	const queryKey = ["thing"];
+  > 207 │ 	useQuery({ queryKey, queryFn: () => fetchThing(dep, queryKey) });
+        │ 	                                               ^^^
+    208 │ }
+    209 │ 
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    206 │ → const·queryKey·=·["thing",·dep];
+        │                            +++++  
 
 ```

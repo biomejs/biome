@@ -200,3 +200,9 @@ function DeclaredAfterQuery() {
 	const id = 1;
 	return query;
 }
+
+function KeyVariableReadByQueryFunction(dep) {
+	// The key's own variable is not a missing value, so only `dep` is reported.
+	const queryKey = ["thing"];
+	useQuery({ queryKey, queryFn: () => fetchThing(dep, queryKey) });
+}
