@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConvexTopOfHourCrons {
-        version: "next",
+        version: "2.6.10",
         name: "noConvexTopOfHourCrons",
         language: "js",
         sources: &[RuleSource::EslintConvex("no-top-of-hour-crons").same()],

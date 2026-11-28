@@ -133,7 +133,7 @@ declare_lint_rule! {
     /// - If you want to disallow copying a value into a new `Set` right before or after calling one of these methods, see [`noUselessSetConstruction`](https://biomejs.dev/linter/rules/no-useless-set-construction/).
     ///
     pub UseSetMethods {
-        version: "next",
+        version: "2.6.10",
         name: "useSetMethods",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-set-methods").same()],

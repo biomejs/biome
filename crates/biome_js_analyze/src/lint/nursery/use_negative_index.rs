@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// - If you want to use `at()` instead of reading an element by its index, see [`useAtIndex`](https://biomejs.dev/linter/rules/use-at-index/).
     ///
     pub UseNegativeIndex {
-        version: "next",
+        version: "2.6.10",
         name: "useNegativeIndex",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-negative-index").same()],

@@ -107,7 +107,7 @@ declare_lint_rule! {
     /// - If you use Playwright and only want to check the functions passed to `page.evaluate()`, see [`noPlaywrightUnsafeReferences`](https://biomejs.dev/linter/rules/no-playwright-unsafe-references/).
     ///
     pub NoOuterScopeInIsolatedFunctions {
-        version: "next",
+        version: "2.6.10",
         name: "noOuterScopeInIsolatedFunctions",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("isolated-functions").inspired()],

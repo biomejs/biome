@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueComputedPropertyCall {
-        version: "next",
+        version: "2.6.10",
         name: "noVueComputedPropertyCall",
         language: "js",
         recommended: true,

@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTanstackQueryQueryOptions {
-        version: "next",
+        version: "2.6.10",
         name: "useTanstackQueryQueryOptions",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("prefer-query-options").same()],

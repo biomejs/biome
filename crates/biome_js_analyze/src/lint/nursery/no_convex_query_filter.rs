@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConvexQueryFilter {
-        version: "next",
+        version: "2.6.10",
         name: "noConvexQueryFilter",
         language: "js",
         sources: &[RuleSource::EslintConvex("no-filter-in-query").same()],

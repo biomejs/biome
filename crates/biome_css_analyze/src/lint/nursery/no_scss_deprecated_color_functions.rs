@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoScssDeprecatedColorFunctions {
-        version: "next",
+        version: "2.6.10",
         name: "noScssDeprecatedColorFunctions",
         language: "css",
         recommended: false,

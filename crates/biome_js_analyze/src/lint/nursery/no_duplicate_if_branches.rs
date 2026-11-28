@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// - If you want to disallow the same code at the start or end of every branch of an `if` statement, see [`noSharedBranchCode`](https://biomejs.dev/linter/rules/no-shared-branch-code/).
     ///
     pub NoDuplicateIfBranches {
-        version: "next",
+        version: "2.6.10",
         name: "noDuplicateIfBranches",
         language: "js",
         recommended: false,

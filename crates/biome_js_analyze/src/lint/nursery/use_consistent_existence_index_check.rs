@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentExistenceIndexCheck {
-        version: "next",
+        version: "2.6.10",
         name: "useConsistentExistenceIndexCheck",
         language: "js",
         recommended: false,

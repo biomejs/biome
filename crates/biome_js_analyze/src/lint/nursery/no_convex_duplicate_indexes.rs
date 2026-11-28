@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConvexDuplicateIndexes {
-        version: "next",
+        version: "2.6.10",
         name: "noConvexDuplicateIndexes",
         language: "js",
         sources: &[RuleSource::EslintConvex("no-duplicate-indexes").same()],

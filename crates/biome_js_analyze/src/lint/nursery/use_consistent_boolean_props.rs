@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentBooleanProps {
-        version: "next",
+        version: "2.6.10",
         name: "useConsistentBooleanProps",
         language: "jsx",
         recommended: false,

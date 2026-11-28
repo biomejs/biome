@@ -115,7 +115,7 @@ declare_lint_rule! {
     /// - If you want to remove `else` after a branch that ends with `return` or `throw`, see [`noUselessElse`](https://biomejs.dev/linter/rules/no-useless-else/).
     /// - If you want to turn `else { if (...) {} }` into `else if (...) {}`, see [`useCollapsedElseIf`](https://biomejs.dev/linter/rules/use-collapsed-else-if/).
     pub UseElseIf {
-        version: "next",
+        version: "2.6.10",
         name: "useElseIf",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-else-if").inspired()],

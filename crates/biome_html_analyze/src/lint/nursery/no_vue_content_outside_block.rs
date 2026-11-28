@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueContentOutsideBlock {
-        version: "next",
+        version: "2.6.10",
         name: "noVueContentOutsideBlock",
         language: "html",
         recommended: false,
