@@ -29,6 +29,45 @@ class Class1 {}
 const instance2 = new Class2();
 export default class Class2 {}
 
+function run1() {
+	class A extends B {}
+	class B {}
+}
+
+function run2() {
+	class C { static p = B; }
+	class B {}
+}
+
+function run3() {
+	class D { [B.name]() {} }
+	class B {}
+}
+
+function run4() {
+	class E { static { B; } }
+	class B {}
+}
+
+function run5() {
+	class F { [B.name] = 1; }
+	class B {}
+}
+
+function run6() {
+	const o = { [B.name]() {} };
+	class B {}
+}
+
+function run7() {
+	class G { static { x; let x; } }
+}
+
+function run8() {
+	const H = class extends B {};
+	class B {}
+}
+
 ```
 
 # Diagnostics
@@ -268,6 +307,222 @@ invalid.js:23:23 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
   > 24 │ export default class Class2 {}
        │                      ^^^^^^
     25 │ 
+    26 │ function run1() {
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:27:18 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    26 │ function run1() {
+  > 27 │ 	class A extends B {}
+       │ 	                ^
+    28 │ 	class B {}
+    29 │ }
+  
+  i The class is declared here:
+  
+    26 │ function run1() {
+    27 │ 	class A extends B {}
+  > 28 │ 	class B {}
+       │ 	      ^
+    29 │ }
+    30 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:32:23 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    31 │ function run2() {
+  > 32 │ 	class C { static p = B; }
+       │ 	                     ^
+    33 │ 	class B {}
+    34 │ }
+  
+  i The class is declared here:
+  
+    31 │ function run2() {
+    32 │ 	class C { static p = B; }
+  > 33 │ 	class B {}
+       │ 	      ^
+    34 │ }
+    35 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:37:13 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    36 │ function run3() {
+  > 37 │ 	class D { [B.name]() {} }
+       │ 	           ^
+    38 │ 	class B {}
+    39 │ }
+  
+  i The class is declared here:
+  
+    36 │ function run3() {
+    37 │ 	class D { [B.name]() {} }
+  > 38 │ 	class B {}
+       │ 	      ^
+    39 │ }
+    40 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:42:21 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    41 │ function run4() {
+  > 42 │ 	class E { static { B; } }
+       │ 	                   ^
+    43 │ 	class B {}
+    44 │ }
+  
+  i The class is declared here:
+  
+    41 │ function run4() {
+    42 │ 	class E { static { B; } }
+  > 43 │ 	class B {}
+       │ 	      ^
+    44 │ }
+    45 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:47:13 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    46 │ function run5() {
+  > 47 │ 	class F { [B.name] = 1; }
+       │ 	           ^
+    48 │ 	class B {}
+    49 │ }
+  
+  i The class is declared here:
+  
+    46 │ function run5() {
+    47 │ 	class F { [B.name] = 1; }
+  > 48 │ 	class B {}
+       │ 	      ^
+    49 │ }
+    50 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:52:15 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    51 │ function run6() {
+  > 52 │ 	const o = { [B.name]() {} };
+       │ 	             ^
+    53 │ 	class B {}
+    54 │ }
+  
+  i The class is declared here:
+  
+    51 │ function run6() {
+    52 │ 	const o = { [B.name]() {} };
+  > 53 │ 	class B {}
+       │ 	      ^
+    54 │ }
+    55 │ 
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:57:21 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    56 │ function run7() {
+  > 57 │ 	class G { static { x; let x; } }
+       │ 	                   ^
+    58 │ }
+    59 │ 
+  
+  i The variable is declared here:
+  
+    56 │ function run7() {
+  > 57 │ 	class G { static { x; let x; } }
+       │ 	                          ^
+    58 │ }
+    59 │ 
+  
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalid.js:61:26 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    60 │ function run8() {
+  > 61 │ 	const H = class extends B {};
+       │ 	                        ^
+    62 │ 	class B {}
+    63 │ }
+  
+  i The class is declared here:
+  
+    60 │ function run8() {
+    61 │ 	const H = class extends B {};
+  > 62 │ 	class B {}
+       │ 	      ^
+    63 │ }
+    64 │ 
   
   i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
   
