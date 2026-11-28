@@ -54,6 +54,17 @@ biome check --stdin-file-path=file.js --write --unsafe
 let a = "a"; if (true) { a = "b" }
 ```
 
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -61,5 +72,23 @@ let _a = 'a';
 if (true) {
    _a = 'b';
 }
+
+```
+
+```block
+<TEMP_DIR>/should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config/file.js:2:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━
+
+  × This condition always evaluates to the same value.
+  
+    1 │ let _a = 'a';
+  > 2 │ if (true) {
+      │     ^^^^
+    3 │    _a = 'b';
+    4 │ }
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
+  
 
 ```
