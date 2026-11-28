@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementStart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const map = new Map();
+setup()
+delete (map)["foo"];
+setup();
+delete (map)["foo"];
+
+```
+
+# Diagnostics
+```
+invalidStatementStart.js:4:8 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    2 │ const map = new Map();
+    3 │ setup()
+  > 4 │ delete (map)["foo"];
+      │        ^^^^^^^^^^^^
+    5 │ setup();
+    6 │ delete (map)["foo"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:6:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    4 │ delete (map)["foo"];
+    5 │ setup();
+  > 6 │ delete (map)["foo"];
+      │        ^^^^^^^^^^^^
+    7 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    4 4 │   delete (map)["foo"];
+    5 5 │   setup();
+    6   │ - delete·(map)["foo"];
+      6 │ + (map).delete("foo");
+    7 7 │   
+  
+
+```

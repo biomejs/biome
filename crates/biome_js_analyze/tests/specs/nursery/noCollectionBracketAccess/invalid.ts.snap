@@ -1,0 +1,267 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function read(map: Map<string, number>) {
+	return map["foo"];
+}
+function write(map: Map<string, number>) {
+	map["foo"] = 1;
+}
+function writeReadonly(map: ReadonlyMap<string, number>, set: ReadonlySet<string>) {
+	map["foo"];
+	set["foo"];
+}
+function writeWeak(map: WeakMap<object, number>, set: WeakSet<object>) {
+	map[key] = 1;
+	set[key];
+}
+declare const declared: Map<string, number>;
+(declared as Map<string, number>)["foo"];
+declared!["foo"];
+declared[("foo" as string)] = 1;
+// A union with a weak collection type of another kind uses the initial value
+const mixed: Set<string> | WeakSet<object> = new Set();
+mixed["foo"];
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function read(map: Map<string, number>) {
+  > 3 │ 	return map["foo"];
+      │ 	       ^^^^^^^^^^
+    4 │ }
+    5 │ function write(map: Map<string, number>) {
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:2 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    4 │ }
+    5 │ function write(map: Map<string, number>) {
+  > 6 │ 	map["foo"] = 1;
+      │ 	^^^^^^^^^^
+    7 │ }
+    8 │ function writeReadonly(map: ReadonlyMap<string, number>, set: ReadonlySet<string>) {
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+     4  4 │   }
+     5  5 │   function write(map: Map<string, number>) {
+     6    │ - → map["foo"]·=·1;
+        6 │ + → map.set("foo",·1);
+     7  7 │   }
+     8  8 │   function writeReadonly(map: ReadonlyMap<string, number>, set: ReadonlySet<string>) {
+  
+
+```
+
+```
+invalid.ts:9:2 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+     7 │ }
+     8 │ function writeReadonly(map: ReadonlyMap<string, number>, set: ReadonlySet<string>) {
+   > 9 │ 	map["foo"];
+       │ 	^^^^^^^^^^
+    10 │ 	set["foo"];
+    11 │ }
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:2 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Set, not one of its entries.
+  
+     8 │ function writeReadonly(map: ReadonlyMap<string, number>, set: ReadonlySet<string>) {
+     9 │ 	map["foo"];
+  > 10 │ 	set["foo"];
+       │ 	^^^^^^^^^^
+    11 │ }
+    12 │ function writeWeak(map: WeakMap<object, number>, set: WeakSet<object>) {
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:2 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the WeakMap, not one of its entries.
+  
+    11 │ }
+    12 │ function writeWeak(map: WeakMap<object, number>, set: WeakSet<object>) {
+  > 13 │ 	map[key] = 1;
+       │ 	^^^^^^^^
+    14 │ 	set[key];
+    15 │ }
+  
+  i A WeakMap doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    11 11 │   }
+    12 12 │   function writeWeak(map: WeakMap<object, number>, set: WeakSet<object>) {
+    13    │ - → map[key]·=·1;
+       13 │ + → map.set(key,·1);
+    14 14 │     set[key];
+    15 15 │   }
+  
+
+```
+
+```
+invalid.ts:14:2 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the WeakSet, not one of its entries.
+  
+    12 │ function writeWeak(map: WeakMap<object, number>, set: WeakSet<object>) {
+    13 │ 	map[key] = 1;
+  > 14 │ 	set[key];
+       │ 	^^^^^^^^
+    15 │ }
+    16 │ declare const declared: Map<string, number>;
+  
+  i A WeakSet doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    15 │ }
+    16 │ declare const declared: Map<string, number>;
+  > 17 │ (declared as Map<string, number>)["foo"];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ declared!["foo"];
+    19 │ declared[("foo" as string)] = 1;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    16 │ declare const declared: Map<string, number>;
+    17 │ (declared as Map<string, number>)["foo"];
+  > 18 │ declared!["foo"];
+       │ ^^^^^^^^^^^^^^^^
+    19 │ declared[("foo" as string)] = 1;
+    20 │ // A union with a weak collection type of another kind uses the initial value
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    17 │ (declared as Map<string, number>)["foo"];
+    18 │ declared!["foo"];
+  > 19 │ declared[("foo" as string)] = 1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ // A union with a weak collection type of another kind uses the initial value
+    21 │ const mixed: Set<string> | WeakSet<object> = new Set();
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    17 17 │   (declared as Map<string, number>)["foo"];
+    18 18 │   declared!["foo"];
+    19    │ - declared[("foo"·as·string)]·=·1;
+       19 │ + declared.set(("foo"·as·string),·1);
+    20 20 │   // A union with a weak collection type of another kind uses the initial value
+    21 21 │   const mixed: Set<string> | WeakSet<object> = new Set();
+  
+
+```
+
+```
+invalid.ts:22:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Set, not one of its entries.
+  
+    20 │ // A union with a weak collection type of another kind uses the initial value
+    21 │ const mixed: Set<string> | WeakSet<object> = new Set();
+  > 22 │ mixed["foo"];
+       │ ^^^^^^^^^^^^
+    23 │ 
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

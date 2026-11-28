@@ -45,6 +45,7 @@ pub mod no_catch_assign;
 pub mod no_chained_comparison;
 pub mod no_children_prop;
 pub mod no_class_assign;
+pub mod no_collection_bracket_access;
 pub mod no_comma_operator;
 pub mod no_comment_text;
 pub mod no_common_js;

@@ -1,0 +1,1414 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Read
+const map = new Map();
+map["foo"];
+map[key];
+map[0];
+const value = map["foo"];
+if (map["foo"]) {}
+map?.["foo"];
+(map)["foo"];
+map["foo"].bar;
+map[`${prefix}foo`];
+map[`foo`];
+
+const set = new Set();
+set["foo"];
+const weakMap = new WeakMap();
+weakMap[key];
+const weakSet = new WeakSet();
+weakSet[key];
+weakMap[Symbol.iterator];
+
+// Keys that may not be a property
+const symbol = Symbol("x");
+map[symbol];
+map[Symbol.for("foo")];
+map[Symbol.asyncIterator];
+const fooKey = "foo";
+map[fooKey];
+set[condition ? "add" : "foo"]("foo");
+map[key || "get"];
+map[(0, "foo")];
+map["fo\x6f"];
+map[+(condition ? "size" : "get")];
+
+// `Symbol` is a local variable, not the global one
+function shadowedSymbol(Symbol) {
+	map[Symbol.iterator];
+}
+
+// Write
+map["foo"] = "bar";
+map[key] = value;
+weakMap[key] = value;
+map["foo"] += 1;
+map["foo"]++;
+++map["foo"];
+map["foo"] ??= "bar";
+[map["foo"]] = array;
+({ a: map["foo"] } = object);
+for (map["foo"] of array) {}
+for (map["foo"] in object) {}
+map["foo"] = (a, b);
+map[a, b] = d;
+map[(key)] = value;
+set["foo"] = 1;
+weakSet[key] = 1;
+
+// Delete
+delete map["foo"];
+delete set["foo"];
+delete weakMap[key];
+delete weakSet[key];
+delete map[a, b];
+delete map?.["foo"];
+delete (map["foo"]);
+
+// No fix: the value of the assignment or `delete` is used
+const x = (map["foo"] = "bar");
+if (delete map["foo"]) {}
+(delete map["foo"], 1);
+
+// No fix: comments inside
+map["foo"] = /* keep */ "bar";
+delete map[/* keep */ "foo"];
+map /* keep */ ["foo"] = "bar";
+
+// No fix: the object isn't a variable
+(condition ? map : map)["foo"] = "bar";
+new Map()["foo"] = "bar";
+
+// Nested: both maps are reported
+const keys = new Map();
+map[keys["foo"]];
+
+// The fix keeps the comments around the statement
+/* before */ map["foo"] = "bar"; // after
+
+```
+
+# Diagnostics
+```
+invalid.js:5:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    3 │ // Read
+    4 │ const map = new Map();
+  > 5 │ map["foo"];
+      │ ^^^^^^^^^^
+    6 │ map[key];
+    7 │ map[0];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    4 │ const map = new Map();
+    5 │ map["foo"];
+  > 6 │ map[key];
+      │ ^^^^^^^^
+    7 │ map[0];
+    8 │ const value = map["foo"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    5 │ map["foo"];
+    6 │ map[key];
+  > 7 │ map[0];
+      │ ^^^^^^
+    8 │ const value = map["foo"];
+    9 │ if (map["foo"]) {}
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:15 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+     6 │ map[key];
+     7 │ map[0];
+   > 8 │ const value = map["foo"];
+       │               ^^^^^^^^^^
+     9 │ if (map["foo"]) {}
+    10 │ map?.["foo"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+     7 │ map[0];
+     8 │ const value = map["foo"];
+   > 9 │ if (map["foo"]) {}
+       │     ^^^^^^^^^^
+    10 │ map?.["foo"];
+    11 │ (map)["foo"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+     8 │ const value = map["foo"];
+     9 │ if (map["foo"]) {}
+  > 10 │ map?.["foo"];
+       │ ^^^^^^^^^^^^
+    11 │ (map)["foo"];
+    12 │ map["foo"].bar;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+     9 │ if (map["foo"]) {}
+    10 │ map?.["foo"];
+  > 11 │ (map)["foo"];
+       │ ^^^^^^^^^^^^
+    12 │ map["foo"].bar;
+    13 │ map[`${prefix}foo`];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    10 │ map?.["foo"];
+    11 │ (map)["foo"];
+  > 12 │ map["foo"].bar;
+       │ ^^^^^^^^^^
+    13 │ map[`${prefix}foo`];
+    14 │ map[`foo`];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    11 │ (map)["foo"];
+    12 │ map["foo"].bar;
+  > 13 │ map[`${prefix}foo`];
+       │ ^^^^^^^^^^^^^^^^^^^
+    14 │ map[`foo`];
+    15 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    12 │ map["foo"].bar;
+    13 │ map[`${prefix}foo`];
+  > 14 │ map[`foo`];
+       │ ^^^^^^^^^^
+    15 │ 
+    16 │ const set = new Set();
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Set, not one of its entries.
+  
+    16 │ const set = new Set();
+  > 17 │ set["foo"];
+       │ ^^^^^^^^^^
+    18 │ const weakMap = new WeakMap();
+    19 │ weakMap[key];
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the WeakMap, not one of its entries.
+  
+    17 │ set["foo"];
+    18 │ const weakMap = new WeakMap();
+  > 19 │ weakMap[key];
+       │ ^^^^^^^^^^^^
+    20 │ const weakSet = new WeakSet();
+    21 │ weakSet[key];
+  
+  i A WeakMap doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the WeakSet, not one of its entries.
+  
+    19 │ weakMap[key];
+    20 │ const weakSet = new WeakSet();
+  > 21 │ weakSet[key];
+       │ ^^^^^^^^^^^^
+    22 │ weakMap[Symbol.iterator];
+    23 │ 
+  
+  i A WeakSet doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the WeakMap, not one of its entries.
+  
+    20 │ const weakSet = new WeakSet();
+    21 │ weakSet[key];
+  > 22 │ weakMap[Symbol.iterator];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // Keys that may not be a property
+  
+  i A WeakMap doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    24 │ // Keys that may not be a property
+    25 │ const symbol = Symbol("x");
+  > 26 │ map[symbol];
+       │ ^^^^^^^^^^^
+    27 │ map[Symbol.for("foo")];
+    28 │ map[Symbol.asyncIterator];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    25 │ const symbol = Symbol("x");
+    26 │ map[symbol];
+  > 27 │ map[Symbol.for("foo")];
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    28 │ map[Symbol.asyncIterator];
+    29 │ const fooKey = "foo";
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    26 │ map[symbol];
+    27 │ map[Symbol.for("foo")];
+  > 28 │ map[Symbol.asyncIterator];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ const fooKey = "foo";
+    30 │ map[fooKey];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    28 │ map[Symbol.asyncIterator];
+    29 │ const fooKey = "foo";
+  > 30 │ map[fooKey];
+       │ ^^^^^^^^^^^
+    31 │ set[condition ? "add" : "foo"]("foo");
+    32 │ map[key || "get"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Set, not one of its entries.
+  
+    29 │ const fooKey = "foo";
+    30 │ map[fooKey];
+  > 31 │ set[condition ? "add" : "foo"]("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ map[key || "get"];
+    33 │ map[(0, "foo")];
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use has() to check whether it contains a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    30 │ map[fooKey];
+    31 │ set[condition ? "add" : "foo"]("foo");
+  > 32 │ map[key || "get"];
+       │ ^^^^^^^^^^^^^^^^^
+    33 │ map[(0, "foo")];
+    34 │ map["fo\x6f"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    31 │ set[condition ? "add" : "foo"]("foo");
+    32 │ map[key || "get"];
+  > 33 │ map[(0, "foo")];
+       │ ^^^^^^^^^^^^^^^
+    34 │ map["fo\x6f"];
+    35 │ map[+(condition ? "size" : "get")];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    32 │ map[key || "get"];
+    33 │ map[(0, "foo")];
+  > 34 │ map["fo\x6f"];
+       │ ^^^^^^^^^^^^^
+    35 │ map[+(condition ? "size" : "get")];
+    36 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    33 │ map[(0, "foo")];
+    34 │ map["fo\x6f"];
+  > 35 │ map[+(condition ? "size" : "get")];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // `Symbol` is a local variable, not the global one
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    37 │ // `Symbol` is a local variable, not the global one
+    38 │ function shadowedSymbol(Symbol) {
+  > 39 │ 	map[Symbol.iterator];
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    42 │ // Write
+  > 43 │ map["foo"] = "bar";
+       │ ^^^^^^^^^^
+    44 │ map[key] = value;
+    45 │ weakMap[key] = value;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    41 41 │   
+    42 42 │   // Write
+    43    │ - map["foo"]·=·"bar";
+       43 │ + map.set("foo",·"bar");
+    44 44 │   map[key] = value;
+    45 45 │   weakMap[key] = value;
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    42 │ // Write
+    43 │ map["foo"] = "bar";
+  > 44 │ map[key] = value;
+       │ ^^^^^^^^
+    45 │ weakMap[key] = value;
+    46 │ map["foo"] += 1;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    42 42 │   // Write
+    43 43 │   map["foo"] = "bar";
+    44    │ - map[key]·=·value;
+       44 │ + map.set(key,·value);
+    45 45 │   weakMap[key] = value;
+    46 46 │   map["foo"] += 1;
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the WeakMap, not one of its entries.
+  
+    43 │ map["foo"] = "bar";
+    44 │ map[key] = value;
+  > 45 │ weakMap[key] = value;
+       │ ^^^^^^^^^^^^
+    46 │ map["foo"] += 1;
+    47 │ map["foo"]++;
+  
+  i A WeakMap doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    43 43 │   map["foo"] = "bar";
+    44 44 │   map[key] = value;
+    45    │ - weakMap[key]·=·value;
+       45 │ + weakMap.set(key,·value);
+    46 46 │   map["foo"] += 1;
+    47 47 │   map["foo"]++;
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    44 │ map[key] = value;
+    45 │ weakMap[key] = value;
+  > 46 │ map["foo"] += 1;
+       │ ^^^^^^^^^^
+    47 │ map["foo"]++;
+    48 │ ++map["foo"];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    45 │ weakMap[key] = value;
+    46 │ map["foo"] += 1;
+  > 47 │ map["foo"]++;
+       │ ^^^^^^^^^^
+    48 │ ++map["foo"];
+    49 │ map["foo"] ??= "bar";
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:3 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    46 │ map["foo"] += 1;
+    47 │ map["foo"]++;
+  > 48 │ ++map["foo"];
+       │   ^^^^^^^^^^
+    49 │ map["foo"] ??= "bar";
+    50 │ [map["foo"]] = array;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    47 │ map["foo"]++;
+    48 │ ++map["foo"];
+  > 49 │ map["foo"] ??= "bar";
+       │ ^^^^^^^^^^
+    50 │ [map["foo"]] = array;
+    51 │ ({ a: map["foo"] } = object);
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:2 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    48 │ ++map["foo"];
+    49 │ map["foo"] ??= "bar";
+  > 50 │ [map["foo"]] = array;
+       │  ^^^^^^^^^^
+    51 │ ({ a: map["foo"] } = object);
+    52 │ for (map["foo"] of array) {}
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:7 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    49 │ map["foo"] ??= "bar";
+    50 │ [map["foo"]] = array;
+  > 51 │ ({ a: map["foo"] } = object);
+       │       ^^^^^^^^^^
+    52 │ for (map["foo"] of array) {}
+    53 │ for (map["foo"] in object) {}
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:6 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    50 │ [map["foo"]] = array;
+    51 │ ({ a: map["foo"] } = object);
+  > 52 │ for (map["foo"] of array) {}
+       │      ^^^^^^^^^^
+    53 │ for (map["foo"] in object) {}
+    54 │ map["foo"] = (a, b);
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:6 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    51 │ ({ a: map["foo"] } = object);
+    52 │ for (map["foo"] of array) {}
+  > 53 │ for (map["foo"] in object) {}
+       │      ^^^^^^^^^^
+    54 │ map["foo"] = (a, b);
+    55 │ map[a, b] = d;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    52 │ for (map["foo"] of array) {}
+    53 │ for (map["foo"] in object) {}
+  > 54 │ map["foo"] = (a, b);
+       │ ^^^^^^^^^^
+    55 │ map[a, b] = d;
+    56 │ map[(key)] = value;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    52 52 │   for (map["foo"] of array) {}
+    53 53 │   for (map["foo"] in object) {}
+    54    │ - map["foo"]·=·(a,·b);
+       54 │ + map.set("foo",·(a,·b));
+    55 55 │   map[a, b] = d;
+    56 56 │   map[(key)] = value;
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    53 │ for (map["foo"] in object) {}
+    54 │ map["foo"] = (a, b);
+  > 55 │ map[a, b] = d;
+       │ ^^^^^^^^^
+    56 │ map[(key)] = value;
+    57 │ set["foo"] = 1;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    53 53 │   for (map["foo"] in object) {}
+    54 54 │   map["foo"] = (a, b);
+    55    │ - map[a,·b]·=·d;
+       55 │ + map.set((a,·b),·d);
+    56 56 │   map[(key)] = value;
+    57 57 │   set["foo"] = 1;
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    54 │ map["foo"] = (a, b);
+    55 │ map[a, b] = d;
+  > 56 │ map[(key)] = value;
+       │ ^^^^^^^^^^
+    57 │ set["foo"] = 1;
+    58 │ weakSet[key] = 1;
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    54 54 │   map["foo"] = (a, b);
+    55 55 │   map[a, b] = d;
+    56    │ - map[(key)]·=·value;
+       56 │ + map.set((key),·value);
+    57 57 │   set["foo"] = 1;
+    58 58 │   weakSet[key] = 1;
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Set, not one of its entries.
+  
+    55 │ map[a, b] = d;
+    56 │ map[(key)] = value;
+  > 57 │ set["foo"] = 1;
+       │ ^^^^^^^^^^
+    58 │ weakSet[key] = 1;
+    59 │ 
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use add() to add a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the WeakSet, not one of its entries.
+  
+    56 │ map[(key)] = value;
+    57 │ set["foo"] = 1;
+  > 58 │ weakSet[key] = 1;
+       │ ^^^^^^^^^^^^
+    59 │ 
+    60 │ // Delete
+  
+  i A WeakSet doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use add() to add a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    60 │ // Delete
+  > 61 │ delete map["foo"];
+       │        ^^^^^^^^^^
+    62 │ delete set["foo"];
+    63 │ delete weakMap[key];
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    59 59 │   
+    60 60 │   // Delete
+    61    │ - delete·map["foo"];
+       61 │ + map.delete("foo");
+    62 62 │   delete set["foo"];
+    63 63 │   delete weakMap[key];
+  
+
+```
+
+```
+invalid.js:62:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Set, not one of its entries.
+  
+    60 │ // Delete
+    61 │ delete map["foo"];
+  > 62 │ delete set["foo"];
+       │        ^^^^^^^^^^
+    63 │ delete weakMap[key];
+    64 │ delete weakSet[key];
+  
+  i A Set doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    60 60 │   // Delete
+    61 61 │   delete map["foo"];
+    62    │ - delete·set["foo"];
+       62 │ + set.delete("foo");
+    63 63 │   delete weakMap[key];
+    64 64 │   delete weakSet[key];
+  
+
+```
+
+```
+invalid.js:63:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the WeakMap, not one of its entries.
+  
+    61 │ delete map["foo"];
+    62 │ delete set["foo"];
+  > 63 │ delete weakMap[key];
+       │        ^^^^^^^^^^^^
+    64 │ delete weakSet[key];
+    65 │ delete map[a, b];
+  
+  i A WeakMap doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    61 61 │   delete map["foo"];
+    62 62 │   delete set["foo"];
+    63    │ - delete·weakMap[key];
+       63 │ + weakMap.delete(key);
+    64 64 │   delete weakSet[key];
+    65 65 │   delete map[a, b];
+  
+
+```
+
+```
+invalid.js:64:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the WeakSet, not one of its entries.
+  
+    62 │ delete set["foo"];
+    63 │ delete weakMap[key];
+  > 64 │ delete weakSet[key];
+       │        ^^^^^^^^^^^^
+    65 │ delete map[a, b];
+    66 │ delete map?.["foo"];
+  
+  i A WeakSet doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    62 62 │   delete set["foo"];
+    63 63 │   delete weakMap[key];
+    64    │ - delete·weakSet[key];
+       64 │ + weakSet.delete(key);
+    65 65 │   delete map[a, b];
+    66 66 │   delete map?.["foo"];
+  
+
+```
+
+```
+invalid.js:65:8 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    63 │ delete weakMap[key];
+    64 │ delete weakSet[key];
+  > 65 │ delete map[a, b];
+       │        ^^^^^^^^^
+    66 │ delete map?.["foo"];
+    67 │ delete (map["foo"]);
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use delete() instead.
+  
+    63 63 │   delete weakMap[key];
+    64 64 │   delete weakSet[key];
+    65    │ - delete·map[a,·b];
+       65 │ + map.delete((a,·b));
+    66 66 │   delete map?.["foo"];
+    67 67 │   delete (map["foo"]);
+  
+
+```
+
+```
+invalid.js:66:8 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    64 │ delete weakSet[key];
+    65 │ delete map[a, b];
+  > 66 │ delete map?.["foo"];
+       │        ^^^^^^^^^^^^
+    67 │ delete (map["foo"]);
+    68 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:9 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    65 │ delete map[a, b];
+    66 │ delete map?.["foo"];
+  > 67 │ delete (map["foo"]);
+       │         ^^^^^^^^^^
+    68 │ 
+    69 │ // No fix: the value of the assignment or `delete` is used
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:12 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    69 │ // No fix: the value of the assignment or `delete` is used
+  > 70 │ const x = (map["foo"] = "bar");
+       │            ^^^^^^^^^^
+    71 │ if (delete map["foo"]) {}
+    72 │ (delete map["foo"], 1);
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:12 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    69 │ // No fix: the value of the assignment or `delete` is used
+    70 │ const x = (map["foo"] = "bar");
+  > 71 │ if (delete map["foo"]) {}
+       │            ^^^^^^^^^^
+    72 │ (delete map["foo"], 1);
+    73 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:9 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    70 │ const x = (map["foo"] = "bar");
+    71 │ if (delete map["foo"]) {}
+  > 72 │ (delete map["foo"], 1);
+       │         ^^^^^^^^^^
+    73 │ 
+    74 │ // No fix: comments inside
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:75:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    74 │ // No fix: comments inside
+  > 75 │ map["foo"] = /* keep */ "bar";
+       │ ^^^^^^^^^^
+    76 │ delete map[/* keep */ "foo"];
+    77 │ map /* keep */ ["foo"] = "bar";
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:76:8 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This deletes a property of the Map, not one of its entries.
+  
+    74 │ // No fix: comments inside
+    75 │ map["foo"] = /* keep */ "bar";
+  > 76 │ delete map[/* keep */ "foo"];
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    77 │ map /* keep */ ["foo"] = "bar";
+    78 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use delete() to remove an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:77:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    75 │ map["foo"] = /* keep */ "bar";
+    76 │ delete map[/* keep */ "foo"];
+  > 77 │ map /* keep */ ["foo"] = "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    78 │ 
+    79 │ // No fix: the object isn't a variable
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    79 │ // No fix: the object isn't a variable
+  > 80 │ (condition ? map : map)["foo"] = "bar";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ new Map()["foo"] = "bar";
+    82 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:81:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    79 │ // No fix: the object isn't a variable
+    80 │ (condition ? map : map)["foo"] = "bar";
+  > 81 │ new Map()["foo"] = "bar";
+       │ ^^^^^^^^^^^^^^^^
+    82 │ 
+    83 │ // Nested: both maps are reported
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:1 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    83 │ // Nested: both maps are reported
+    84 │ const keys = new Map();
+  > 85 │ map[keys["foo"]];
+       │ ^^^^^^^^^^^^^^^^
+    86 │ 
+    87 │ // The fix keeps the comments around the statement
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:5 lint/nursery/noCollectionBracketAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This reads a property of the Map, not one of its entries.
+  
+    83 │ // Nested: both maps are reported
+    84 │ const keys = new Map();
+  > 85 │ map[keys["foo"]];
+       │     ^^^^^^^^^^^
+    86 │ 
+    87 │ // The fix keeps the comments around the statement
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use get() to read an entry, or has() to check whether it exists.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:14 lint/nursery/noCollectionBracketAccess  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes a property of the Map, not one of its entries.
+  
+    87 │ // The fix keeps the comments around the statement
+  > 88 │ /* before */ map["foo"] = "bar"; // after
+       │              ^^^^^^^^^^
+    89 │ 
+  
+  i A Map doesn't store its entries as properties, so square brackets don't find or change them.
+  
+  i Use set() to add or change an entry.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use set() instead.
+  
+    86 86 │   
+    87 87 │   // The fix keeps the comments around the statement
+    88    │ - /*·before·*/·map["foo"]·=·"bar";·//·after
+       88 │ + /*·before·*/·map.set("foo",·"bar");·//·after
+    89 89 │   
+  
+
+```

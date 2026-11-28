@@ -3059,6 +3059,11 @@ export interface Nursery {
 	 */
 	noChainedComparison?: NoChainedComparisonConfiguration;
 	/**
+	 * Disallow using square brackets to read, write, or delete the entries of a Map, Set, WeakMap, or WeakSet.
+	 * See https://biomejs.dev/linter/rules/no-collection-bracket-access
+	 */
+	noCollectionBracketAccess?: NoCollectionBracketAccessConfiguration;
+	/**
 	 * Disallow splice() and toSpliced() calls that are harder to read than the operation they perform.
 	 * See https://biomejs.dev/linter/rules/no-confusing-array-splice
 	 */
@@ -7077,6 +7082,9 @@ export type NoCanvasToImageConfiguration =
 export type NoChainedComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoChainedComparisonOptions;
+export type NoCollectionBracketAccessConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoCollectionBracketAccessOptions;
 export type NoConfusingArraySpliceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConfusingArraySpliceOptions;
@@ -10337,6 +10345,14 @@ export interface RuleWithNoCanvasToImageOptions {
 export interface RuleWithNoChainedComparisonOptions {
 	level: RulePlainConfiguration;
 	options?: NoChainedComparisonOptions;
+}
+export interface RuleWithNoCollectionBracketAccessOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoCollectionBracketAccessOptions;
 }
 export interface RuleWithNoConfusingArraySpliceOptions {
 	/**
@@ -14293,6 +14309,7 @@ export type NoBufferConstructorOptions = {};
 export type NoBunModulesOptions = {};
 export type NoCanvasToImageOptions = {};
 export type NoChainedComparisonOptions = {};
+export type NoCollectionBracketAccessOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
@@ -16907,6 +16924,7 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noCanvasToImage"
 	| "lint/nursery/noChainedComparison"
+	| "lint/nursery/noCollectionBracketAccess"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
@@ -17085,10 +17103,10 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueContentOutsideBlock"
 	| "lint/nursery/noVueDefineModelDefault"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
-	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedEventsApi"

@@ -108,3 +108,7 @@ function loopVariable(sets) {
 		selected.union(new Set(other));
 	}
 }
+
+// A `WeakSet` can't be passed to the method, so copying the receiver isn't reported.
+const weakArgument = new WeakSet();
+new Set(selected).union(weakArgument);
