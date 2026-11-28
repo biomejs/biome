@@ -209,6 +209,7 @@ pub mod no_late_current_target_access;
 pub mod no_late_event_control;
 pub mod no_leaked_render;
 pub mod no_loop_func;
+pub mod no_loop_iterable_mutation;
 pub mod no_magic_array_flat_depth;
 pub mod no_magic_numbers;
 pub mod no_map_spread;

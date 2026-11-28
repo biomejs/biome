@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function deleteValues(set: Set<string>) {
+	for (const value of set.values()) {
+		set.delete(value);
+	}
+}
+
+function deleteEntries(map: Map<string, number>) {
+	for (const entry of map) {
+		map.delete(entry);
+	}
+}
+
+function reinsert(set: Set<number>) {
+	for (const value of (set as Set<number>)) {
+		try {
+			set.delete(value);
+		} finally {
+			continue;
+		}
+		set.add(value);
+	}
+}
+
+const items = [] as string[] & { add(item: string): void };
+for (const item of items) {
+	items.add(other);
+}
+
+const set = new Set<string>() as Set<string> & { push(value: string): void };
+for (const value of set) {
+	set.push(other);
+}
+
+function addToArray(list: string[] & { add(item: string): void }) {
+	const copy: string[] = list;
+	for (const item of copy) {
+		copy.add(other);
+	}
+}
+
+function addToReadonlyArray(list: readonly string[] & { add(item: string): void }) {
+	const copy: readonly string[] = list;
+	for (const item of copy) {
+		copy.add(other);
+	}
+}
+
+function setInMap(map: ReadonlyMap<string, number> & { push(value: number): void }) {
+	const copy: Map<string, number> = map;
+	for (const [key] of copy) {
+		copy.push(other);
+	}
+}
+
+```
