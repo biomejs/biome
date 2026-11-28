@@ -155,6 +155,10 @@ impl Rule for NoUselessUndefinedInitialization {
         let assignment_statement = node.clone();
 
         let current_declaration_statement = node.clone().declaration().ok()?;
+        // `var x;` is a no-op at runtime, while `var x = undefined;` reassigns `x` every time it runs.
+        if current_declaration_statement.is_var() {
+            return None;
+        }
         let declarators = current_declaration_statement.declarators();
 
         let current_declaration = state.clone();
