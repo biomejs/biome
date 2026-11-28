@@ -1,0 +1,22 @@
+@utility plain {
+  --accent: red;
+  --accent: blue;
+}
+
+@utility nested {
+  &:hover {
+    --accent: red;
+    --accent: blue;
+  }
+}
+
+@utility mixed-* {
+  --accent: red;
+  --tab: --value(integer);
+  --accent: blue;
+}
+
+a {
+  --tab: --value(integer);
+  --tab: --value(number);
+}

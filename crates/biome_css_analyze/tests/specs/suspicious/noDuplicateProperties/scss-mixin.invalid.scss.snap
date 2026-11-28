@@ -1,0 +1,71 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-mixin.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin colors {
+  color: red;
+  color: blue;
+}
+
+@include wrapper {
+  margin: 0;
+  margin: 1px;
+}
+
+```
+
+# Diagnostics
+```
+scss-mixin.invalid.scss:4:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    2 │ @mixin colors {
+    3 │   color: red;
+  > 4 │   color: blue;
+      │   ^^^^^
+    5 │ }
+    6 │ 
+  
+  i color is already defined here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin colors {
+  > 3 │   color: red;
+      │   ^^^^^
+    4 │   color: blue;
+    5 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-mixin.invalid.scss:9:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+     7 │ @include wrapper {
+     8 │   margin: 0;
+   > 9 │   margin: 1px;
+       │   ^^^^^^
+    10 │ }
+    11 │ 
+  
+  i margin is already defined here.
+  
+     7 │ @include wrapper {
+   > 8 │   margin: 0;
+       │   ^^^^^^
+     9 │   margin: 1px;
+    10 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
