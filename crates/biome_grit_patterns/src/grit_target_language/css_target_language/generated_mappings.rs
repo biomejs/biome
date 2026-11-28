@@ -164,6 +164,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssLayerDeclaration" => lang::CssLayerDeclaration::KIND_SET.iter().next(),
         "CssLayerReference" => lang::CssLayerReference::KIND_SET.iter().next(),
         "CssLegacyFilterValue" => lang::CssLegacyFilterValue::KIND_SET.iter().next(),
+        "CssListOfComponentValuesExpression" => lang::CssListOfComponentValuesExpression::KIND_SET
+            .iter()
+            .next(),
         "CssMarginAtRule" => lang::CssMarginAtRule::KIND_SET.iter().next(),
         "CssMediaAndCondition" => lang::CssMediaAndCondition::KIND_SET.iter().next(),
         "CssMediaAndTypeQuery" => lang::CssMediaAndTypeQuery::KIND_SET.iter().next(),
@@ -202,8 +205,18 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .iter()
                 .next()
         }
+        "CssPseudoClassFunctionCompoundSelectorList" => {
+            lang::CssPseudoClassFunctionCompoundSelectorList::KIND_SET
+                .iter()
+                .next()
+        }
         "CssPseudoClassFunctionCustomIdentifier" => {
             lang::CssPseudoClassFunctionCustomIdentifier::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssPseudoClassFunctionCustomIdentifierList" => {
+            lang::CssPseudoClassFunctionCustomIdentifierList::KIND_SET
                 .iter()
                 .next()
         }
@@ -211,9 +224,20 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "CssPseudoClassFunctionNth" => lang::CssPseudoClassFunctionNth::KIND_SET.iter().next(),
+        "CssPseudoClassFunctionRelativeSelectorList" => {
+            lang::CssPseudoClassFunctionRelativeSelectorList::KIND_SET
+                .iter()
+                .next()
+        }
         "CssPseudoClassFunctionSelector" => {
             lang::CssPseudoClassFunctionSelector::KIND_SET.iter().next()
         }
+        "CssPseudoClassFunctionSelectorList" => lang::CssPseudoClassFunctionSelectorList::KIND_SET
+            .iter()
+            .next(),
+        "CssPseudoClassFunctionValueList" => lang::CssPseudoClassFunctionValueList::KIND_SET
+            .iter()
+            .next(),
         "CssPseudoClassIdentifier" => lang::CssPseudoClassIdentifier::KIND_SET.iter().next(),
         "CssPseudoClassNth" => lang::CssPseudoClassNth::KIND_SET.iter().next(),
         "CssPseudoClassNthIdentifier" => lang::CssPseudoClassNthIdentifier::KIND_SET.iter().next(),
@@ -345,6 +369,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssHideClause" => lang::ScssHideClause::KIND_SET.iter().next(),
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
+        "ScssIncludeArgumentList" => lang::ScssIncludeArgumentList::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
         "ScssIncludeUsingClause" => lang::ScssIncludeUsingClause::KIND_SET.iter().next(),
         "ScssInterpolatedDashedIdentifier" => lang::ScssInterpolatedDashedIdentifier::KIND_SET
@@ -407,16 +432,20 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssLegacyIfFunction" => lang::ScssLegacyIfFunction::KIND_SET.iter().next(),
+        "ScssListExpression" => lang::ScssListExpression::KIND_SET.iter().next(),
+        "ScssListExpressionElement" => lang::ScssListExpressionElement::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
         "ScssMediaQuery" => lang::ScssMediaQuery::KIND_SET.iter().next(),
         "ScssMixinAtRule" => lang::ScssMixinAtRule::KIND_SET.iter().next(),
         "ScssModuleConfiguration" => lang::ScssModuleConfiguration::KIND_SET.iter().next(),
+        "ScssModuleConfigurationList" => lang::ScssModuleConfigurationList::KIND_SET.iter().next(),
         "ScssModuleMemberAccess" => lang::ScssModuleMemberAccess::KIND_SET.iter().next(),
         "ScssNamespacedVariable" => lang::ScssNamespacedVariable::KIND_SET.iter().next(),
         "ScssNestingDeclaration" => lang::ScssNestingDeclaration::KIND_SET.iter().next(),
         "ScssParameter" => lang::ScssParameter::KIND_SET.iter().next(),
         "ScssParameterDefaultValue" => lang::ScssParameterDefaultValue::KIND_SET.iter().next(),
+        "ScssParameterList" => lang::ScssParameterList::KIND_SET.iter().next(),
         "ScssParentSelector" => lang::ScssParentSelector::KIND_SET.iter().next(),
         "ScssParentSelectorSuffix" => lang::ScssParentSelectorSuffix::KIND_SET.iter().next(),
         "ScssParentSelectorSuffixHyphen" => {
@@ -576,6 +605,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssLayerDeclaration" => &[("references", 0), ("block", 1)],
         "CssLayerReference" => &[("references", 0)],
         "CssLegacyFilterValue" => &[("components", 0)],
+        "CssListOfComponentValuesExpression" => &[("css_component_value_list", 0)],
         "CssMarginAtRule" => &[("block", 2)],
         "CssMediaAndCondition" => &[("left", 0), ("right", 2)],
         "CssMediaAndTypeQuery" => &[("left", 0), ("right", 2)],
@@ -603,10 +633,15 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssPropertyAtRule" => &[("declarator", 0), ("block", 1)],
         "CssPropertyAtRuleDeclarator" => &[("name", 1)],
         "CssPseudoClassFunctionCompoundSelector" => &[("name", 0), ("selector", 2)],
+        "CssPseudoClassFunctionCompoundSelectorList" => &[("name", 0), ("compound_selectors", 2)],
         "CssPseudoClassFunctionCustomIdentifier" => &[("name", 0), ("ident", 2)],
+        "CssPseudoClassFunctionCustomIdentifierList" => &[("name", 0), ("items", 2)],
         "CssPseudoClassFunctionIdentifier" => &[("name", 0), ("ident", 2)],
         "CssPseudoClassFunctionNth" => &[("name", 0), ("selector", 2)],
+        "CssPseudoClassFunctionRelativeSelectorList" => &[("name", 0), ("relative_selectors", 2)],
         "CssPseudoClassFunctionSelector" => &[("name", 0), ("selector", 2)],
+        "CssPseudoClassFunctionSelectorList" => &[("name", 0), ("selectors", 2)],
+        "CssPseudoClassFunctionValueList" => &[("name", 0), ("values", 2)],
         "CssPseudoClassIdentifier" => &[("name", 0)],
         "CssPseudoClassNth" => &[("value", 1), ("offset", 3)],
         "CssPseudoClassNthNumber" => &[("value", 1)],
@@ -701,6 +736,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssHideClause" => &[("members", 1)],
         "ScssIfAtRule" => &[("condition", 1), ("block", 2), ("else_clause", 3)],
         "ScssImportAtRule" => &[("imports", 1)],
+        "ScssIncludeArgumentList" => &[("items", 1)],
         "ScssIncludeAtRule" => &[
             ("name", 1),
             ("arguments", 2),
@@ -729,16 +765,20 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssKeyframesVariableDeclaration" => &[("declaration", 0)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssLegacyIfFunction" => &[("items", 2)],
+        "ScssListExpression" => &[("elements", 0)],
+        "ScssListExpressionElement" => &[("value", 0)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
         "ScssMediaQuery" => &[("head", 0), ("tail", 1)],
         "ScssMixinAtRule" => &[("name", 1), ("parameters", 2), ("block", 3)],
         "ScssModuleConfiguration" => &[("name", 0), ("value", 2), ("modifier", 3)],
+        "ScssModuleConfigurationList" => &[("items", 1)],
         "ScssModuleMemberAccess" => &[("module", 0), ("member", 2)],
         "ScssNamespacedVariable" => &[("namespace", 0), ("name", 2)],
         "ScssNestingDeclaration" => &[("name", 0), ("value", 2), ("block", 3)],
         "ScssParameter" => &[("name", 0), ("default_value", 1)],
         "ScssParameterDefaultValue" => &[("value", 1)],
+        "ScssParameterList" => &[("items", 1)],
         "ScssParentSelector" => &[("suffix", 1)],
         "ScssParentSelectorSuffix" => &[("items", 0)],
         "ScssParenthesizedExpression" => &[("expression", 1)],
