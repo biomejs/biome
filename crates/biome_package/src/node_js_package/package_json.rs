@@ -868,6 +868,28 @@ mod tests {
     }
 
     #[test]
+    fn matches_dependency_with_zero_caret_range() {
+        for (range, matches) in [
+            ("^0", true),
+            ("^0.0", false),
+            ("^0.0.0", false),
+            ("^0.0.0-0", false),
+            ("^0.60.0", true),
+        ] {
+            let package_json = PackageJson {
+                dependencies: Dependencies(Box::new([("react-native".into(), range.into())])),
+                ..Default::default()
+            };
+
+            assert_eq!(
+                package_json.matches_dependency("react-native", ">=0.60.0"),
+                matches,
+                "{range}"
+            );
+        }
+    }
+
+    #[test]
     fn matches_dependency_with_pnpm_catalog() {
         let package_json = PackageJson {
             dependencies: Dependencies(Box::new([("react".into(), "catalog:".into())])),
