@@ -7230,6 +7230,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteDomManipulatingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteDomManipulatingOptions" }
+			]
+		},
+		"NoSvelteDomManipulatingOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteExportLetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10426,6 +10436,13 @@
 					"description": "Disallow Svelte's class: directive.\nSee https://biomejs.dev/linter/rules/no-svelte-class-directive",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteClassDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteDomManipulating": {
+					"description": "Disallow direct DOM manipulation of elements bound with bind:this.\nSee https://biomejs.dev/linter/rules/no-svelte-dom-manipulating",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteDomManipulatingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16695,6 +16712,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteClassDirectiveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteDomManipulatingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteDomManipulatingOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

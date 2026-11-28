@@ -1604,6 +1604,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_svelte_class_directive::NoSvelteClassDirectiveOptions>(
         ),
     ));
+    result.push(("nursery", "noSvelteDomManipulating", TypeId::of::<biome_rule_options::no_svelte_dom_manipulating::NoSvelteDomManipulatingOptions>()));
     result.push((
         "nursery",
         "noSvelteExportLet",

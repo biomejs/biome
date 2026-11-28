@@ -356,6 +356,7 @@ define_categories! {
     "lint/nursery/noSvelteAtHtmlTags": "https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
     "lint/nursery/noSvelteBindValueOnCheckableInputs": "https://biomejs.dev/linter/rules/no-svelte-bind-value-on-checkable-inputs",
     "lint/nursery/noSvelteClassDirective": "https://biomejs.dev/linter/rules/no-svelte-class-directive",
+    "lint/nursery/noSvelteDomManipulating": "https://biomejs.dev/linter/rules/no-svelte-dom-manipulating",
     "lint/nursery/noSvelteExportLet": "https://biomejs.dev/linter/rules/no-svelte-export-let",
     "lint/nursery/noSvelteIgnoredUnsubscribe": "https://biomejs.dev/linter/rules/no-svelte-ignored-unsubscribe",
     "lint/nursery/noSvelteInspect": "https://biomejs.dev/linter/rules/no-svelte-inspect",
