@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validMultipleContents.js
+---
+# Input
+```js
+/* Copyright 2026 Acme Inc. */
+// should not generate diagnostics
+const a = 1;
+
+```
