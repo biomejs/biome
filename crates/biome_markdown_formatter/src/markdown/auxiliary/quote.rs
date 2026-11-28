@@ -1,3 +1,4 @@
+use crate::container::{has_quote_continuation_to_preserve, is_outermost_container};
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::markdown::lists::block_list::{FormatMdBlockListOptions, quote_boundary_trim_range};
@@ -9,6 +10,12 @@ use biome_markdown_syntax::{MdQuote, MdQuoteFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdQuote;
 impl FormatNodeRule<MdQuote> for FormatMdQuote {
+    fn is_suppressed(&self, node: &MdQuote, f: &MarkdownFormatter) -> bool {
+        f.context().comments().is_suppressed(node.syntax())
+            || (is_outermost_container(node.syntax())
+                && has_quote_continuation_to_preserve(node.syntax()))
+    }
+
     fn fmt_fields(&self, node: &MdQuote, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let prose_wrap = f.options().prose_wrap();
         if prose_wrap == ProseWrap::Preserve && should_format_quote_structurally(node)? {

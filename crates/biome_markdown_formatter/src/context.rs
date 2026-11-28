@@ -8,7 +8,7 @@ use biome_formatter::{
 use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use biome_rowan::TextRange;
-use std::{fmt, rc::Rc, str::FromStr};
+use std::{cell::Cell, fmt, rc::Rc, str::FromStr};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
@@ -21,6 +21,12 @@ pub struct MarkdownFormatContext {
     /// Content ranges of the embedded snippets whose formatting is delegated to
     /// the formatter of their language, sorted by position.
     embedded_node_ranges: Vec<TextRange>,
+
+    /// The range of the last group of adjacent top-level lists checked for
+    /// printing as written, and the result. The lists of a group are formatted
+    /// one after another, so they reuse the result instead of walking the
+    /// whole group again.
+    pub(crate) printed_as_written_lists: Cell<Option<(TextRange, bool)>>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -207,6 +213,7 @@ impl MarkdownFormatContext {
             )),
             source_map,
             embedded_node_ranges: Vec::new(),
+            printed_as_written_lists: Cell::new(None),
         }
     }
 
