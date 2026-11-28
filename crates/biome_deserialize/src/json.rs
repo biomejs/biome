@@ -326,12 +326,13 @@ pub fn unescape_json_string(text: TokenText) -> Text {
     enum State {
         Normal,
         Escaped,
-        EscapedUnicode(u8, char),
+        EscapedUnicode(u8, u16),
     }
 
     match text.find('\\') {
         Some(index) => {
             let mut state = State::Escaped;
+            let mut pending_high_surrogate: Option<u16> = None;
             let mut string = text[..index].to_string();
             string.reserve(usize::from(text.len()) - string.len());
             for c in text[(index + 1)..].chars() {
@@ -344,44 +345,78 @@ pub fn unescape_json_string(text: TokenText) -> Text {
                             'r' => '\r',
                             't' => '\t',
                             'u' => {
-                                state = State::EscapedUnicode(0, '\0');
+                                state = State::EscapedUnicode(0, 0);
                                 continue;
                             }
                             c => c,
                         };
+                        if pending_high_surrogate.take().is_some() {
+                            string.push(char::REPLACEMENT_CHARACTER);
+                        }
                         string.push(escaped);
                         state = State::Normal;
                     }
-                    State::EscapedUnicode(digit, char) => {
+                    State::EscapedUnicode(digit, code_unit) => {
                         let value = if c.is_ascii_digit() {
-                            c as u32 - '0' as u32
+                            c as u16 - b'0' as u16
                         } else if ('a'..='f').contains(&c) {
-                            c as u32 - 'a' as u32 + 10
+                            c as u16 - b'a' as u16 + 10
                         } else if ('A'..='F').contains(&c) {
-                            c as u32 - 'A' as u32 + 10
+                            c as u16 - b'A' as u16 + 10
                         } else {
+                            if pending_high_surrogate.take().is_some() {
+                                string.push(char::REPLACEMENT_CHARACTER);
+                            }
                             string.push(c);
                             state = State::Normal;
                             continue;
                         };
 
-                        let char = match (16 * char as u32 + value).try_into() {
-                            Ok(char) => char,
-                            Err(_) => {
-                                state = State::Normal;
-                                continue;
-                            }
-                        };
+                        let code_unit = 16 * code_unit + value;
                         if digit == 3 {
-                            string.push(char);
+                            if (0xD800..=0xDBFF).contains(&code_unit) {
+                                if pending_high_surrogate.take().is_some() {
+                                    string.push(char::REPLACEMENT_CHARACTER);
+                                }
+                                pending_high_surrogate = Some(code_unit);
+                            } else if (0xDC00..=0xDFFF).contains(&code_unit) {
+                                if let Some(high) = pending_high_surrogate.take() {
+                                    if let Some(Ok(ch)) =
+                                        char::decode_utf16([high, code_unit]).next()
+                                    {
+                                        string.push(ch);
+                                    } else {
+                                        string.push(char::REPLACEMENT_CHARACTER);
+                                    }
+                                } else {
+                                    string.push(char::REPLACEMENT_CHARACTER);
+                                }
+                            } else {
+                                if pending_high_surrogate.take().is_some() {
+                                    string.push(char::REPLACEMENT_CHARACTER);
+                                }
+                                if let Some(ch) = char::from_u32(code_unit as u32) {
+                                    string.push(ch);
+                                } else {
+                                    string.push(char::REPLACEMENT_CHARACTER);
+                                }
+                            }
                             state = State::Normal;
                         } else {
-                            state = State::EscapedUnicode(digit + 1, char);
+                            state = State::EscapedUnicode(digit + 1, code_unit);
                         }
                     }
                     State::Normal if c == '\\' => state = State::Escaped,
-                    State::Normal => string.push(c),
+                    State::Normal => {
+                        if pending_high_surrogate.take().is_some() {
+                            string.push(char::REPLACEMENT_CHARACTER);
+                        }
+                        string.push(c);
+                    }
                 }
+            }
+            if pending_high_surrogate.is_some() {
+                string.push(char::REPLACEMENT_CHARACTER);
             }
             string.into()
         }
@@ -1081,5 +1116,19 @@ mod tests {
         );
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
+    }
+
+    #[test]
+    fn test_unescape_json_string_surrogates() {
+        let source = r#"["a", "\u0061", "\/", "/", "\ud800\udc00", "𐀀"]"#;
+        let Deserialized {
+            deserialized,
+            diagnostics,
+        } = deserialize_from_json_str::<Vec<String>>(source, JsonParserOptions::default(), "");
+        assert!(diagnostics.is_empty());
+        assert_eq!(
+            deserialized.unwrap(),
+            vec!["a", "a", "/", "/", "\u{10000}", "\u{10000}"]
+        );
     }
 }

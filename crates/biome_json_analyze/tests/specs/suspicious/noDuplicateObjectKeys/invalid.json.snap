@@ -13,7 +13,13 @@ expression: invalid.json
 		"lorem": "",
 		"ipsum": "",
 		"lorem": ""
-	}
+	},
+	"a": 1,
+	"\u0061": 2,
+	"/": 1,
+	"\/": 2,
+	"𐀀": 1,
+	"\ud800\udc00": 2
 }
 
 ```
@@ -80,8 +86,86 @@ invalid.json:7:3 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
      8 │ 		"ipsum": "",
    > 9 │ 		"lorem": ""
        │ 		^^^^^^^
-    10 │ 	}
-    11 │ }
+    10 │ 	},
+    11 │ 	"a": 1,
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+
+```
+
+```
+invalid.json:11:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key a was already declared.
+  
+     9 │ 		"lorem": ""
+    10 │ 	},
+  > 11 │ 	"a": 1,
+       │ 	^^^
+    12 │ 	"\u0061": 2,
+    13 │ 	"/": 1,
+  
+  i This is where a duplicated key was declared again.
+  
+    10 │ 	},
+    11 │ 	"a": 1,
+  > 12 │ 	"\u0061": 2,
+       │ 	^^^^^^^^
+    13 │ 	"/": 1,
+    14 │ 	"\/": 2,
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+
+```
+
+```
+invalid.json:13:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key / was already declared.
+  
+    11 │ 	"a": 1,
+    12 │ 	"\u0061": 2,
+  > 13 │ 	"/": 1,
+       │ 	^^^
+    14 │ 	"\/": 2,
+    15 │ 	"𐀀": 1,
+  
+  i This is where a duplicated key was declared again.
+  
+    12 │ 	"\u0061": 2,
+    13 │ 	"/": 1,
+  > 14 │ 	"\/": 2,
+       │ 	^^^^
+    15 │ 	"𐀀": 1,
+    16 │ 	"\ud800\udc00": 2
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+
+```
+
+```
+invalid.json:15:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key 𐀀 was already declared.
+  
+    13 │ 	"/": 1,
+    14 │ 	"\/": 2,
+  > 15 │ 	"𐀀": 1,
+       │ 	^^^
+    16 │ 	"\ud800\udc00": 2
+    17 │ }
+  
+  i This is where a duplicated key was declared again.
+  
+    14 │ 	"\/": 2,
+    15 │ 	"𐀀": 1,
+  > 16 │ 	"\ud800\udc00": 2
+       │ 	^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
   
   i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
   

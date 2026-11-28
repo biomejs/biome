@@ -1,5 +1,8 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule, RuleSource};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
+use biome_deserialize::json::unescape_json_string;
 use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -61,14 +64,15 @@ impl Rule for NoDuplicateObjectKeys {
             let Ok(text) = name.inner_string_text() else {
                 continue;
             };
-            if let Some(original_member) = keys_found.get(text.text()) {
+            let unescaped = unescape_json_string(text);
+            if let Some(original_member) = keys_found.get(unescaped.text()) {
                 if let Some(ranges) = names.get_mut(original_member) {
                     ranges.push(name.range());
                 } else {
                     names.insert(original_member.clone(), vec![name.range()]);
                 }
             } else {
-                keys_found.insert(text.to_string(), name);
+                keys_found.insert(unescaped.text().to_string(), name);
             }
         }
         let duplicated_keys: Vec<_> = names.into_iter().collect();
@@ -78,11 +82,12 @@ impl Rule for NoDuplicateObjectKeys {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let (original, ranges) = state;
         let name = original.inner_string_text().ok()?;
+        let unescaped = unescape_json_string(name);
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
             original.range(),
             markup! {
-                "The key "<Emphasis>{name.text()}</Emphasis>" was already declared."
+                "The key "<Emphasis>{unescaped.text()}</Emphasis>" was already declared."
             },
         );
         for range in ranges {
