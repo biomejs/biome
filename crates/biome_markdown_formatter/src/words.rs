@@ -580,7 +580,7 @@ impl ProseItemList {
 
         let mut items = Self(collector.items);
         items.mark_word_groups_for_escaping();
-        items.mark_outdented_setext_markers();
+        items.mark_continuation_setext_markers();
 
         Ok(items)
     }
@@ -665,7 +665,10 @@ impl ProseItemList {
         }
     }
 
-    fn mark_outdented_setext_markers(&mut self) {
+    /// Escapes continuation lines shaped like a setext underline, such as `===`
+    /// in `- foo\n===`. Printed with the paragraph's indentation, they would
+    /// turn the paragraph into a heading.
+    fn mark_continuation_setext_markers(&mut self) {
         let mut line_start = 0;
 
         for line_end in 0..=self.0.len() {
@@ -678,8 +681,9 @@ impl ProseItemList {
                 continue;
             }
 
-            if let Some(relative_index) =
-                Self::outdented_setext_word_group(&self.0[line_start..line_end])
+            if line_start > 0
+                && let Some(relative_index) =
+                    Self::setext_underline_word_group(&self.0[line_start..line_end])
             {
                 let ProseItem::WordGroup(group) = &mut self.0[line_start + relative_index] else {
                     unreachable!();
@@ -691,18 +695,15 @@ impl ProseItemList {
         }
     }
 
-    fn outdented_setext_word_group(line: &[ProseItem]) -> Option<usize> {
-        let mut has_removed_indent = false;
+    fn setext_underline_word_group(line: &[ProseItem]) -> Option<usize> {
         let mut first_word_group = None;
         let mut delimiter = None;
 
         for (index, item) in line.iter().enumerate() {
             match item {
-                ProseItem::OutdentedLineStart if first_word_group.is_none() => {
-                    has_removed_indent = true;
-                }
+                ProseItem::OutdentedLineStart if first_word_group.is_none() => {}
                 ProseItem::Space => {}
-                ProseItem::WordGroup(group) if has_removed_indent => {
+                ProseItem::WordGroup(group) => {
                     if first_word_group.is_some() && delimiter == Some(b'=') {
                         return None;
                     }
