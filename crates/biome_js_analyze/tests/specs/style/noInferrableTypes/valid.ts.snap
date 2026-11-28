@@ -5,6 +5,49 @@ expression: valid.ts
 # Input
 ```ts
 /* should not generate diagnostics */
+const x/*before*/: /*inside*/ 1 /*after*/ = (1);
+const x: 1n = 1n;
+const x: -1n = -1n;
+const x: false = false;
+const x: false = !true;
+const x: false = !1;
+const x: true = true;
+const x: true = !false;
+const x: true = !0;
+const x: 1 = +1;
+const x: -1 = -1;
+const x: 1e-5 = 1e-5;
+const x: "str" = "str";
+const x: "str" = `str`;
+const x: "str2" = `str${f()}`;
+const x: ("str") = ("str");
+
+export const VENDOR: "acme" = "acme";
+const fixture = { vendor: VENDOR };
+export const check: { vendor: "acme" } = fixture;
+
+class LiteralProperties {
+	readonly string: "str" = "str";
+	readonly number: 1 = 1;
+	readonly negativeNumber: -1 = -1;
+	readonly bigint: 1n = 1n;
+	readonly negativeBigint: -1n = -1n;
+	readonly boolean: true = true;
+	readonly falseBoolean: false = false;
+}
+
+class LiteralParameterProperties {
+	constructor(
+		readonly string: "str" = "str",
+		public readonly number: 1 = 1,
+		protected readonly negativeNumber: -1 = -1,
+		private readonly bigint: 1n = 1n,
+		readonly negativeBigint: -1n = -1n,
+		readonly boolean: true = true,
+		readonly falseBoolean: false = false,
+	) {}
+}
+
 const x: undefined = undefined; // undefined is an identifier
 const x: RegExp = /a/; // RegExp could be redefined
 

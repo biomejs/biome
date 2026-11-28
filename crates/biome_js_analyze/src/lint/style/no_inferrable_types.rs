@@ -20,7 +20,8 @@ declare_lint_rule! {
     /// There is no need to use an explicit `:` type annotation for trivially inferred types (boolean, bigint, number, regex, string).
     /// Doing so adds unnecessary verbosity to code making it harder to read.
     ///
-    /// In contrast to ESLint's rule, this rule allows to use a wide type for `const` declarations.
+    /// This rule allows type annotations on `const` declarations and `readonly` properties, including constructor parameter properties.
+    /// Removing a literal type annotation in these contexts can widen the type and change which assignments TypeScript accepts.
     /// Moreover, the rule does not recognize `undefined` values, primitive type constructors (String, Number, ...), and `RegExp` type.
     /// These global variables could be shadowed by local ones.
     ///
@@ -29,17 +30,7 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```ts,expect_diagnostic
-    /// const variable: 1 = 1;
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
     /// let variable: number = 1;
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
-    /// class SomeClass {
-    ///   readonly field: 1 = 1;
-    /// }
     /// ```
     ///
     /// ```ts,expect_diagnostic
@@ -55,11 +46,27 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```ts
+    /// const variable: 1 = 1;
+    /// ```
+    ///
+    /// ```ts
     /// const variable: number = 1;
     /// ```
     ///
     /// ```ts
     /// let variable: 1 | 2 = 1;
+    /// ```
+    ///
+    /// ```ts
+    /// class SomeClass {
+    ///   readonly field: 1 = 1;
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// class SomeClass {
+    ///   constructor(readonly field: "value" = "value") {}
+    /// }
     /// ```
     ///
     /// ```ts
@@ -147,26 +154,17 @@ impl Rule for NoInferrableTypes {
             }
             if let Some(type_annotation) = type_annotation {
                 let ty = type_annotation.ty().ok()?.omit_parentheses();
-                // In const contexts, literal type annotations are rejected.
-                // e.g. `const x: 1 = <literal>`
-                //
-                // However, we ignore `null` and `undefined` literal types,
-                // because in unsafe null mode, TypeScript widen an unannotated variable to `any`.
-                //
-                // In non-const contexts, wide type annotation are rejected.
-                // e.g. `let x: number = <literal>`
-                //
-                // However, we ignore the case where <literal> is `null`,
-                // because in unsafe null mode, it is possible to assign `null` and `undefined` to any type.
-                if (is_const && ty.is_non_null_literal_type())
-                    || (!is_const
-                        && ty.is_primitive_type()
-                        && !matches!(
-                            init_expr,
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsNullLiteralExpression(_)
-                            )
-                        ))
+                // Const and readonly annotations can prevent type widening.
+                // Without strict null checks, `null` is assignable to any type,
+                // so its initializer cannot determine whether an annotation is redundant.
+                if !is_const
+                    && ty.is_primitive_type()
+                    && !matches!(
+                        init_expr,
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                        )
+                    )
                 {
                     return Some(type_annotation);
                 }
