@@ -655,6 +655,7 @@ pub mod use_generic_font_names;
 pub mod use_getter_return;
 pub mod use_github_workflow_job_name;
 pub mod use_github_workflow_name;
+pub mod use_github_workflow_step_name;
 pub mod use_global_regex_in_match_all;
 pub mod use_global_regex_in_replace_all;
 pub mod use_global_this;

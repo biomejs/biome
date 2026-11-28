@@ -1,0 +1,12 @@
+# should generate diagnostics
+name: CI
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name:
+        run: echo "empty"
+      - name: "  "
+        run: echo "blank"

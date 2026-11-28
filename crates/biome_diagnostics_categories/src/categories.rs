@@ -535,6 +535,7 @@ define_categories! {
     "lint/nursery/useFlatMathMinMax": "https://biomejs.dev/linter/rules/use-flat-math-min-max",
     "lint/nursery/useGithubWorkflowJobName": "https://biomejs.dev/linter/rules/use-github-workflow-job-name",
     "lint/nursery/useGithubWorkflowName": "https://biomejs.dev/linter/rules/use-github-workflow-name",
+    "lint/nursery/useGithubWorkflowStepName": "https://biomejs.dev/linter/rules/use-github-workflow-step-name",
     "lint/nursery/useGlobalRegexInMatchAll": "https://biomejs.dev/linter/rules/use-global-regex-in-match-all",
     "lint/nursery/useGlobalRegexInReplaceAll": "https://biomejs.dev/linter/rules/use-global-regex-in-replace-all",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",

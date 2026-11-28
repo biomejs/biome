@@ -3052,6 +3052,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useGithubWorkflowStepName",
+        TypeId::of::<
+            biome_rule_options::use_github_workflow_step_name::UseGithubWorkflowStepNameOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useGlobalRegexInMatchAll",
         TypeId::of::<
             biome_rule_options::use_global_regex_in_match_all::UseGlobalRegexInMatchAllOptions,
