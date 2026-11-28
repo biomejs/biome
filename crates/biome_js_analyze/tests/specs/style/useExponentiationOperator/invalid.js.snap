@@ -57,6 +57,12 @@ Math.pow((a + b), (c + d))
 // tokens that can be adjacent
 a+Math.pow(b, c)+d
 
+// ASI hazard: do not autofix when result starts with '('/'[' etc. without preceding ';'
+const r = f
+Math.pow(1 + 2, 3);
+const s = f
+Math.pow(a, b);
+
 ```
 
 # Diagnostics
@@ -880,7 +886,7 @@ invalid.js:46:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:49:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -891,15 +897,6 @@ invalid.js:49:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
     51 │ // tokens that can be adjacent
   
   i The exponentiation operator is shorter, and it does not need a function call.
-  
-  i Safe fix: Use the '**' operator instead of 'Math.pow'.
-  
-    47 47 │   
-    48 48 │   // doesn't put extra parens
-    49    │ - Math.pow((a·+·b),·(c·+·d))
-       49 │ + (a·+·b)·**·(c·+·d)
-    50 50 │   
-    51 51 │   // tokens that can be adjacent
   
 
 ```
@@ -913,6 +910,7 @@ invalid.js:52:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
   > 52 │ a+Math.pow(b, c)+d
        │   ^^^^^^^^^^^^^^
     53 │ 
+    54 │ // ASI hazard: do not autofix when result starts with '('/'[' etc. without preceding ';'
   
   i The exponentiation operator is shorter, and it does not need a function call.
   
@@ -923,6 +921,48 @@ invalid.js:52:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
     52    │ - a+Math.pow(b,·c)+d
        52 │ + a+b·**·c+d
     53 53 │   
+    54 54 │   // ASI hazard: do not autofix when result starts with '('/'[' etc. without preceding ';'
+  
+
+```
+
+```
+invalid.js:56:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    54 │ // ASI hazard: do not autofix when result starts with '('/'[' etc. without preceding ';'
+    55 │ const r = f
+  > 56 │ Math.pow(1 + 2, 3);
+       │ ^^^^^^^^^^^^^^^^^^
+    57 │ const s = f
+    58 │ Math.pow(a, b);
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
+
+```
+
+```
+invalid.js:58:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    56 │ Math.pow(1 + 2, 3);
+    57 │ const s = f
+  > 58 │ Math.pow(a, b);
+       │ ^^^^^^^^^^^^^^
+    59 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+    56 56 │   Math.pow(1 + 2, 3);
+    57 57 │   const s = f
+    58    │ - Math.pow(a,·b);
+       58 │ + a·**·b;
+    59 59 │   
   
 
 ```

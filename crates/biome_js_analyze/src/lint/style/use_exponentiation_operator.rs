@@ -7,8 +7,8 @@ use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator, JsCallExpression,
-    JsClassDeclaration, JsClassExpression, JsExtendsClause, JsInExpression, OperatorPrecedence,
-    global_identifier,
+    JsClassDeclaration, JsClassExpression, JsExpressionStatement, JsExtendsClause, JsInExpression,
+    OperatorPrecedence, global_identifier,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, chain_trivia_pieces,
@@ -163,6 +163,19 @@ impl Rule for UseExponentiationOperator {
         } else {
             new_node
         };
+        if node
+            .syntax()
+            .parent()
+            .is_some_and(|parent| JsExpressionStatement::can_cast(parent.kind()))
+            && let Some(prev_token) = node.syntax().first_token().and_then(|t| t.prev_token())
+            && !matches!(prev_token.kind(), T![;] | T!['{'] | T!['}'])
+            && new_node
+                .syntax()
+                .first_token()
+                .is_some_and(|t| matches!(t.kind(), T!['('] | T!['['] | T![+] | T![-] | T![/]))
+        {
+            return None;
+        }
         // Transfer leading and trailing comments
         let new_node = new_node
             .prepend_trivia_pieces(node.syntax().first_leading_trivia()?.pieces())?

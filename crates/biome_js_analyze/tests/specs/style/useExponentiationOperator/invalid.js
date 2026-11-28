@@ -50,3 +50,9 @@ Math.pow((a + b), (c + d))
 
 // tokens that can be adjacent
 a+Math.pow(b, c)+d
+
+// ASI hazard: do not autofix when result starts with '('/'[' etc. without preceding ';'
+const r = f
+Math.pow(1 + 2, 3);
+const s = f
+Math.pow(a, b);
