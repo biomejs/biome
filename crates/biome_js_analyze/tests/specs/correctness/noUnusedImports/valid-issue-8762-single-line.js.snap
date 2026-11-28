@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-8762-single-line.js
+---
+# Input
+```js
+/** @module Wraps {@link helper}. */
+
+/* should not generate diagnostics */
+
+import { helper } from "./helper";
+
+```
