@@ -346,7 +346,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// When `strictCase` is set to `false`, consecutive uppercase characters are allowed.
-    /// For example, `HTTPServer` and `aHTTPServer` would be considered valid then:
+    /// For example, `HTTPServer`, `aHTTPServer` and `URL` would be considered valid then:
     ///
     /// ```json,options
     /// {
@@ -824,7 +824,7 @@ impl Rule for UseNamingConvention {
             }
             if !convention.formats.is_empty() {
                 let actual_case = Case::identify(name, options.strict_case());
-                if (*convention.formats | Case::Uni).contains(actual_case) {
+                if is_allowed_case(*convention.formats, actual_case, options.strict_case()) {
                     // Valid case
                     return None;
                 }
@@ -846,7 +846,12 @@ impl Rule for UseNamingConvention {
             name = trimmed_name;
         }
         let actual_case = Case::identify(name, options.strict_case());
-        if (*default_convention.formats | Case::Uni).contains(actual_case) || name.is_empty() {
+        if is_allowed_case(
+            *default_convention.formats,
+            actual_case,
+            options.strict_case(),
+        ) || name.is_empty()
+        {
             // Valid case
             return None;
         }
@@ -1496,6 +1501,11 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
         JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION => None,
         _ => Some(Scope::Any),
     }
+}
+
+fn is_allowed_case(formats: Cases, actual_case: Case, strict_case: bool) -> bool {
+    (formats | Case::Uni).contains(actual_case)
+        || (!strict_case && actual_case == Case::Upper && formats.contains(Case::Pascal))
 }
 
 /// trim underscores and dollar signs from `name` and returns the length of the trimmed prefix.
