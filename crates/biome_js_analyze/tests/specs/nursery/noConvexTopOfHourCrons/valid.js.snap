@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+crons.hourly("cleanup", internal.tasks.cleanup);
+crons.hourly("cleanup", {}, internal.tasks.cleanup);
+crons.daily("nightly", { hourUTC: 3 }, internal.tasks.nightly);
+crons.hourly("cleanup", { minuteUTC: 37 }, internal.tasks.cleanup);
+crons.weekly("digest", { dayOfWeek: "monday", hourUTC: 0, minuteUTC: 13 }, internal.tasks.digest);
+crons.monthly("invoice", { day: 1, hourUTC: 0, minuteUTC: 7 }, internal.tasks.invoice);
+crons.hourly("variable", { minuteUTC: minute }, internal.tasks.cleanup);
+crons.hourly("shorthand", { minuteUTC }, internal.tasks.cleanup);
+crons.hourly("computed key", { ["minuteUTC"]: 0 }, internal.tasks.cleanup);
+crons.hourly("string value", { minuteUTC: "0" }, internal.tasks.cleanup);
+crons.hourly("spread", ...args);
+crons.hourly("object variable", schedule, internal.tasks.cleanup);
+crons["hourly"]("computed method", { minuteUTC: 0 }, internal.tasks.cleanup);
+crons.interval("sync", { minutes: 0 }, internal.tasks.sync);
+crons.cron("nightly", "17 3 * * *", internal.tasks.nightly);
+crons.cron("every fifteen minutes", "*/15 * * * *", internal.tasks.often);
+crons.cron("step from seven", "7/15 * * * *", internal.tasks.step);
+crons.cron("ten", "10 * * * *", internal.tasks.ten);
+crons.cron("range not starting at zero", "10-20 * * * *", internal.tasks.range);
+crons.cron("hour zero", "30 0 * * *", internal.tasks.midnight);
+crons.cron("six fields", "0 0 3 * * *", internal.tasks.seconds);
+crons.cron("four fields", "0 3 * *", internal.tasks.broken);
+crons.cron("variable", expression, internal.tasks.variable);
+crons.cron("template with substitution", `${minute} 3 * * *`, internal.tasks.template);
+crons.cron("tagged template", String.raw`0 3 * * *`, internal.tasks.tagged);
+cron("not a method", "0 3 * * *", internal.tasks.nightly);
+
+```

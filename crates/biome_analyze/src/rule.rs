@@ -15,11 +15,77 @@ use biome_diagnostics::{
 };
 use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
+use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Add;
 use std::str::FromStr;
+
+/// Selects the syntax trees a rule runs on when a host document embeds
+/// snippets.
+///
+/// Each snippet is a separate syntax tree, and each tree gets its own rule
+/// registry, built with a [`RuleExecutionContext`]. Without a scope, a rule
+/// that reports on the host document as a whole would report once per snippet.
+#[bitflags]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RuleExecutionScope {
+    /// Runs on one syntax tree per host document. Use it for rules that report
+    /// on the document as a whole, such as a check of its file name.
+    HostDocument = 1 << 0,
+    /// Runs on every syntax tree: a standalone file, and each snippet of a host
+    /// document. A rule has this scope unless it overrides
+    /// [`Rule::execution_scope`].
+    Snippet = 1 << 1,
+}
+
+/// The scopes whose rules a registry registers for one syntax tree.
+///
+/// The caller passes the context with
+/// [`RuleRegistryBuilder::with_execution_context`](crate::RuleRegistryBuilder::with_execution_context).
+/// Across the trees it builds for one host document, the caller must include
+/// `HostDocument` in exactly one context, so that document-level rules report
+/// once.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RuleExecutionContext {
+    /// The scopes whose rules are registered. A rule is registered when its
+    /// scope is in the set.
+    scopes: BitFlags<RuleExecutionScope>,
+}
+
+impl RuleExecutionContext {
+    /// Creates a context that registers the rules of every scope, for a syntax
+    /// tree that isn't a snippet of a host document.
+    pub fn new() -> Self {
+        Self::from_scopes(BitFlags::all())
+    }
+
+    /// Creates a context that registers only the rules of `scopes`.
+    pub fn from_scopes(scopes: impl Into<BitFlags<RuleExecutionScope>>) -> Self {
+        Self {
+            scopes: scopes.into(),
+        }
+    }
+
+    /// Creates a context that registers only `HostDocument` rules, for a syntax
+    /// tree built only to run them, such as an empty tree when the host document
+    /// has no snippet that can run them.
+    pub fn new_host_document() -> Self {
+        Self::from_scopes(RuleExecutionScope::HostDocument)
+    }
+
+    pub(crate) fn includes(self, scope: RuleExecutionScope) -> bool {
+        self.scopes.contains(scope)
+    }
+}
+
+impl Default for RuleExecutionContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -215,6 +281,8 @@ pub enum RuleSource<'a> {
     EslintAstro(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
+    /// Rules from [Convex ESLint Plugin](https://docs.convex.dev/linting/eslint)
+    EslintConvex(&'a str),
     /// Action for https://github.com/keithamus/sort-package-json
     SortPackageJson,
     /// Rules from [Sherif](https://github.com/QuiiBz/sherif)
@@ -296,6 +364,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintCss(_) => write!(f, "@eslint/css"),
             Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::EslintConvex(_) => write!(f, "@convex-dev/eslint-plugin"),
             Self::SortPackageJson => write!(f, "sort-package-json"),
             Self::Sherif(_) => write!(f, "Sherif"),
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
@@ -392,6 +461,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintYml(rule_name)
             | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name)
+            | Self::EslintConvex(rule_name)
             | Self::EslintTypescriptSortKeys(rule_name)
             | Self::EslintTanstackQuery(rule_name)
             | Self::StylelintScss(rule_name)
@@ -463,6 +533,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintCss(_) => "css",
             Self::EslintAstro(_) => "astro",
             Self::EslintDrizzle(_) => "drizzle",
+            Self::EslintConvex(_) => "@convex-dev",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
             Self::EslintTanstackQuery(_) => "@tanstack/query",
             Self::StylelintScss(_) => "scss",
@@ -537,6 +608,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::EslintConvex(rule_name) => format!("https://docs.convex.dev/linting/overview#{rule_name}"),
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
@@ -674,6 +746,10 @@ impl RuleSourceKind {
 pub enum RuleDomain {
     /// Astro framework rules
     Astro,
+    /// Rules for authoring Biome JS plugins
+    BiomePlugin,
+    /// Convex backend rules
+    Convex,
     /// Drizzle ORM rules
     Drizzle,
     /// React library rules
@@ -711,6 +787,8 @@ impl Display for RuleDomain {
         // use lower case naming, it needs to match the name of the configuration
         match self {
             Self::Astro => fmt.write_str("astro"),
+            Self::BiomePlugin => fmt.write_str("biomePlugin"),
+            Self::Convex => fmt.write_str("convex"),
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::ReactNative => fmt.write_str("reactNative"),
@@ -750,6 +828,8 @@ impl RuleDomain {
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
             Self::Astro => &[&("astro", ">=1.0.0")],
+            Self::BiomePlugin => &[],
+            Self::Convex => &[&("convex", ">=1.0.0")],
             Self::React => &[&("react", ">=16.0.0")],
             Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
@@ -786,6 +866,8 @@ impl RuleDomain {
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
             Self::Astro => &[],
+            Self::BiomePlugin => &[],
+            Self::Convex => &[],
             Self::React => &[],
             Self::ReactNative => &[],
             Self::Test => &[
@@ -830,6 +912,8 @@ impl RuleDomain {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::Astro => "astro",
+            Self::BiomePlugin => "biomePlugin",
+            Self::Convex => "convex",
             Self::React => "react",
             Self::ReactNative => "reactNative",
             Self::Test => "test",
@@ -853,6 +937,9 @@ impl RuleDomain {
             Self::Astro => {
                 "Use this domain inside Astro projects. This domain enables rules that are specific to Astro projects."
             }
+            Self::BiomePlugin => {
+                "Use this domain when writing Biome JS plugins. This domain enables rules that help plugins use the plugin API efficiently. Biome doesn't enable this domain automatically, so enable it in your configuration."
+            }
             Self::React => {
                 "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
             }
@@ -864,6 +951,9 @@ impl RuleDomain {
             }
             Self::Solid => {
                 "Use this domain inside Solid projects. This domain enables rules that might conflict with the React domain."
+            }
+            Self::Convex => {
+                "Use this domain inside Convex projects. This domain enables rules that are specific to Convex."
             }
             Self::Next => "Use this domain inside Next.js projects.",
             Self::Playwright => {
@@ -904,6 +994,8 @@ impl FromStr for RuleDomain {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "astro" => Ok(Self::Astro),
+            "biomePlugin" => Ok(Self::BiomePlugin),
+            "convex" => Ok(Self::Convex),
             "react" => Ok(Self::React),
             "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),
@@ -1372,6 +1464,13 @@ pub trait Rule: RuleMeta + Sized {
 
     fn phase() -> Phases {
         <<<Self as Rule>::Query as Queryable>::Services as Phase>::phase()
+    }
+
+    /// Returns the [`RuleExecutionScope`] of the rule: the syntax trees it runs
+    /// on when a host document embeds snippets. The default, `Snippet`, runs
+    /// it on every tree.
+    fn execution_scope() -> RuleExecutionScope {
+        RuleExecutionScope::Snippet
     }
 
     /// This function is called once for each node matching `Query` in the tree

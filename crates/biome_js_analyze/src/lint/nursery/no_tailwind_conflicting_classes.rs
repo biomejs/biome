@@ -1,15 +1,10 @@
-use crate::tailwind::{AnyTailwindClassString, host_range};
+use crate::tailwind::{AnyTailwindClassString, concatenated_edges, host_range};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    JsBinaryExpression, JsConditionalExpression, JsLanguage, JsLogicalExpression,
-    JsParenthesizedExpression, JsTemplateElement, JsTemplateElementList, JsTemplateExpression,
-    TsAsExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
-};
-use biome_rowan::{AstNode, SyntaxKindSet, TextSize};
+use biome_rowan::{AstNode, TextSize};
 use biome_rule_options::no_tailwind_conflicting_classes::NoTailwindConflictingClassesOptions;
 use biome_tailwind_logic::no_tailwind_conflicting_classes::{
     ConflictingClass, find_conflicting_classes,
@@ -86,7 +81,7 @@ declare_lint_rule! {
     /// such as `sm:hover:flex` and `hover:sm:grid`.
     ///
     pub NoTailwindConflictingClasses {
-        version: "next",
+        version: "2.6.9",
         name: "noTailwindConflictingClasses",
         language: "jsx",
         domains: &[RuleDomain::Tailwind, RuleDomain::Project],
@@ -150,38 +145,3 @@ impl Rule for NoTailwindConflictingClasses {
         )
     }
 }
-
-/// Returns whether the start and the end of `node` touch other text of the
-/// same class string: another operand of a `+` expression, or the chunks around
-/// a template substitution. Both do for `"b"` in `a + "b" + c`.
-fn concatenated_edges(node: &AnyTailwindClassString) -> (bool, bool) {
-    let mut leading = false;
-    let mut trailing = false;
-    let mut child = node.syntax().clone();
-    for ancestor in node.syntax().ancestors().skip(1) {
-        if let Some(binary) = JsBinaryExpression::cast_ref(&ancestor) {
-            if binary.left().is_ok_and(|left| left.syntax() == &child) {
-                trailing = true;
-            } else {
-                leading = true;
-            }
-        } else if JsTemplateElement::can_cast(ancestor.kind()) {
-            return (true, true);
-        } else if !CONCATENATION_WRAPPER_KINDS.matches(ancestor.kind()) {
-            break;
-        }
-        child = ancestor;
-    }
-    (leading, trailing)
-}
-
-/// The nodes a class string can sit in while still being an operand of an outer
-/// `+` expression.
-const CONCATENATION_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsParenthesizedExpression::KIND_SET
-    .union(JsConditionalExpression::KIND_SET)
-    .union(JsLogicalExpression::KIND_SET)
-    .union(JsTemplateExpression::KIND_SET)
-    .union(JsTemplateElementList::KIND_SET)
-    .union(TsAsExpression::KIND_SET)
-    .union(TsSatisfiesExpression::KIND_SET)
-    .union(TsNonNullAssertionExpression::KIND_SET);

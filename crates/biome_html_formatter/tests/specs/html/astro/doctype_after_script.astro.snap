@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/doctype_after_script.astro
+---
+
+# Input
+
+```astro
+---
+const title="Astro";
+---
+<script is:inline>console.log("ready");</script>
+<!doctype html>
+<html lang="en"><head><title>{title}</title></head><body></body></html>
+<!doctype html>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const title = "Astro";
+---
+
+<script is:inline>
+console.log("ready");
+</script>
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>{title}</title>
+	</head>
+	<body></body>
+</html>
+<!doctype html>
+
+```

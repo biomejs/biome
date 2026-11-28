@@ -1,0 +1,608 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import * as React from "react";
+import { useCallback, useEffect, useMemo as useMemoAlias } from "react";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQueries,
+	useQuery,
+	useQuery as useRenamedQuery,
+	useSuspenseInfiniteQuery,
+	useSuspenseQueries,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
+
+function DirectHooks() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+	const suspenseQuery = useSuspenseQuery({ queryKey: ["a"], queryFn });
+	const infiniteQuery = useInfiniteQuery({ queryKey: ["a"], queryFn });
+	const suspenseInfiniteQuery = useSuspenseInfiniteQuery({ queryKey: ["a"], queryFn });
+	const queries = useQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+	const suspenseQueries = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+	const mutation = useMutation({ mutationFn });
+	const renamedQuery = useRenamedQuery({ queryKey: ["a"], queryFn });
+
+	useEffect(() => {}, [query]);
+	useEffect(() => {}, [suspenseQuery]);
+	useEffect(() => {}, [infiniteQuery]);
+	useEffect(() => {}, [suspenseInfiniteQuery]);
+	useEffect(() => {}, [queries]);
+	useEffect(() => {}, [suspenseQueries]);
+	useCallback(() => mutation.mutate("hello"), [mutation]);
+	useEffect(() => {}, [renamedQuery]);
+}
+
+function ReactHookForms() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+
+	React.useEffect(() => {}, [query]);
+	React.useCallback(() => {}, [query]);
+	React.useMemo(() => query.data, [query]);
+	useMemoAlias(() => query.data, [query]);
+	(useEffect)(() => {}, [(query)]);
+}
+
+function MultipleDependencies() {
+	const query = useQuery({ queryKey: ["a"], queryFn });
+	const mutation = useMutation({ mutationFn });
+
+	useEffect(() => {}, [query.data, query, mutation]);
+}
+
+function ArrayDestructuring() {
+	const [first, second = fallback, ...rest] = useQueries({
+		queries: [
+			{ queryKey: ["a"], queryFn },
+			{ queryKey: ["b"], queryFn },
+			{ queryKey: ["c"], queryFn },
+		],
+	});
+	const [suspenseFirst] = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+
+	useEffect(() => {}, [first, second, rest, suspenseFirst]);
+}
+
+function useArrowQuery() {
+	return useQuery({ queryKey: ["a"], queryFn });
+}
+
+const useArrowMutation = () => useMutation({ mutationFn });
+
+const useBlockArrowQuery = () => {
+	const options = { queryKey: ["a"], queryFn };
+	return useQuery(options);
+};
+
+const useFunctionExpressionQuery = function () {
+	return useSuspenseQuery({ queryKey: ["a"], queryFn });
+};
+
+function CustomHooks() {
+	const arrowQuery = useArrowQuery();
+	const arrowMutation = useArrowMutation();
+	const blockArrowQuery = useBlockArrowQuery();
+	const functionExpressionQuery = useFunctionExpressionQuery();
+	const laterQuery = useLaterQuery();
+
+	useEffect(() => {}, [
+		arrowQuery,
+		arrowMutation,
+		blockArrowQuery,
+		functionExpressionQuery,
+		laterQuery,
+	]);
+}
+
+function useLaterQuery() {
+	return useInfiniteQuery({ queryKey: ["a"], queryFn });
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:25:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    23 │ 	const renamedQuery = useRenamedQuery({ queryKey: ["a"], queryFn });
+    24 │ 
+  > 25 │ 	useEffect(() => {}, [query]);
+       │ 	                     ^^^^^
+    26 │ 	useEffect(() => {}, [suspenseQuery]);
+    27 │ 	useEffect(() => {}, [infiniteQuery]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useSuspenseQuery is a dependency of useEffect.
+  
+    25 │ 	useEffect(() => {}, [query]);
+  > 26 │ 	useEffect(() => {}, [suspenseQuery]);
+       │ 	                     ^^^^^^^^^^^^^
+    27 │ 	useEffect(() => {}, [infiniteQuery]);
+    28 │ 	useEffect(() => {}, [suspenseInfiniteQuery]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useInfiniteQuery is a dependency of useEffect.
+  
+    25 │ 	useEffect(() => {}, [query]);
+    26 │ 	useEffect(() => {}, [suspenseQuery]);
+  > 27 │ 	useEffect(() => {}, [infiniteQuery]);
+       │ 	                     ^^^^^^^^^^^^^
+    28 │ 	useEffect(() => {}, [suspenseInfiniteQuery]);
+    29 │ 	useEffect(() => {}, [queries]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useSuspenseInfiniteQuery is a dependency of useEffect.
+  
+    26 │ 	useEffect(() => {}, [suspenseQuery]);
+    27 │ 	useEffect(() => {}, [infiniteQuery]);
+  > 28 │ 	useEffect(() => {}, [suspenseInfiniteQuery]);
+       │ 	                     ^^^^^^^^^^^^^^^^^^^^^
+    29 │ 	useEffect(() => {}, [queries]);
+    30 │ 	useEffect(() => {}, [suspenseQueries]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQueries is a dependency of useEffect.
+  
+    27 │ 	useEffect(() => {}, [infiniteQuery]);
+    28 │ 	useEffect(() => {}, [suspenseInfiniteQuery]);
+  > 29 │ 	useEffect(() => {}, [queries]);
+       │ 	                     ^^^^^^^
+    30 │ 	useEffect(() => {}, [suspenseQueries]);
+    31 │ 	useCallback(() => mutation.mutate("hello"), [mutation]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useSuspenseQueries is a dependency of useEffect.
+  
+    28 │ 	useEffect(() => {}, [suspenseInfiniteQuery]);
+    29 │ 	useEffect(() => {}, [queries]);
+  > 30 │ 	useEffect(() => {}, [suspenseQueries]);
+       │ 	                     ^^^^^^^^^^^^^^^
+    31 │ 	useCallback(() => mutation.mutate("hello"), [mutation]);
+    32 │ 	useEffect(() => {}, [renamedQuery]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:47 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useMutation is a dependency of useCallback.
+  
+    29 │ 	useEffect(() => {}, [queries]);
+    30 │ 	useEffect(() => {}, [suspenseQueries]);
+  > 31 │ 	useCallback(() => mutation.mutate("hello"), [mutation]);
+       │ 	                                             ^^^^^^^^
+    32 │ 	useEffect(() => {}, [renamedQuery]);
+    33 │ }
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useCallback treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    30 │ 	useEffect(() => {}, [suspenseQueries]);
+    31 │ 	useCallback(() => mutation.mutate("hello"), [mutation]);
+  > 32 │ 	useEffect(() => {}, [renamedQuery]);
+       │ 	                     ^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:29 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    36 │ 	const query = useQuery({ queryKey: ["a"], queryFn });
+    37 │ 
+  > 38 │ 	React.useEffect(() => {}, [query]);
+       │ 	                           ^^^^^
+    39 │ 	React.useCallback(() => {}, [query]);
+    40 │ 	React.useMemo(() => query.data, [query]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:31 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useCallback.
+  
+    38 │ 	React.useEffect(() => {}, [query]);
+  > 39 │ 	React.useCallback(() => {}, [query]);
+       │ 	                             ^^^^^
+    40 │ 	React.useMemo(() => query.data, [query]);
+    41 │ 	useMemoAlias(() => query.data, [query]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useCallback treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:35 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useMemo.
+  
+    38 │ 	React.useEffect(() => {}, [query]);
+    39 │ 	React.useCallback(() => {}, [query]);
+  > 40 │ 	React.useMemo(() => query.data, [query]);
+       │ 	                                 ^^^^^
+    41 │ 	useMemoAlias(() => query.data, [query]);
+    42 │ 	(useEffect)(() => {}, [(query)]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useMemo treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:34 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useMemo.
+  
+    39 │ 	React.useCallback(() => {}, [query]);
+    40 │ 	React.useMemo(() => query.data, [query]);
+  > 41 │ 	useMemoAlias(() => query.data, [query]);
+       │ 	                                ^^^^^
+    42 │ 	(useEffect)(() => {}, [(query)]);
+    43 │ }
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useMemo treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:26 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    40 │ 	React.useMemo(() => query.data, [query]);
+    41 │ 	useMemoAlias(() => query.data, [query]);
+  > 42 │ 	(useEffect)(() => {}, [(query)]);
+       │ 	                        ^^^^^
+    43 │ }
+    44 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:35 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    47 │ 	const mutation = useMutation({ mutationFn });
+    48 │ 
+  > 49 │ 	useEffect(() => {}, [query.data, query, mutation]);
+       │ 	                                 ^^^^^
+    50 │ }
+    51 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:42 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useMutation is a dependency of useEffect.
+  
+    47 │ 	const mutation = useMutation({ mutationFn });
+    48 │ 
+  > 49 │ 	useEffect(() => {}, [query.data, query, mutation]);
+       │ 	                                        ^^^^^^^^
+    50 │ }
+    51 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQueries is a dependency of useEffect.
+  
+    60 │ 	const [suspenseFirst] = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+    61 │ 
+  > 62 │ 	useEffect(() => {}, [first, second, rest, suspenseFirst]);
+       │ 	                     ^^^^^
+    63 │ }
+    64 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:30 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQueries is a dependency of useEffect.
+  
+    60 │ 	const [suspenseFirst] = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+    61 │ 
+  > 62 │ 	useEffect(() => {}, [first, second, rest, suspenseFirst]);
+       │ 	                            ^^^^^^
+    63 │ }
+    64 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:38 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQueries is a dependency of useEffect.
+  
+    60 │ 	const [suspenseFirst] = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+    61 │ 
+  > 62 │ 	useEffect(() => {}, [first, second, rest, suspenseFirst]);
+       │ 	                                    ^^^^
+    63 │ }
+    64 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:44 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useSuspenseQueries is a dependency of useEffect.
+  
+    60 │ 	const [suspenseFirst] = useSuspenseQueries({ queries: [{ queryKey: ["a"], queryFn }] });
+    61 │ 
+  > 62 │ 	useEffect(() => {}, [first, second, rest, suspenseFirst]);
+       │ 	                                          ^^^^^^^^^^^^^
+    63 │ }
+    64 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:3 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    87 │ 	useEffect(() => {}, [
+  > 88 │ 		arrowQuery,
+       │ 		^^^^^^^^^^
+    89 │ 		arrowMutation,
+    90 │ 		blockArrowQuery,
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:89:3 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useMutation is a dependency of useEffect.
+  
+    87 │ 	useEffect(() => {}, [
+    88 │ 		arrowQuery,
+  > 89 │ 		arrowMutation,
+       │ 		^^^^^^^^^^^^^
+    90 │ 		blockArrowQuery,
+    91 │ 		functionExpressionQuery,
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:90:3 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+    88 │ 		arrowQuery,
+    89 │ 		arrowMutation,
+  > 90 │ 		blockArrowQuery,
+       │ 		^^^^^^^^^^^^^^^
+    91 │ 		functionExpressionQuery,
+    92 │ 		laterQuery,
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:91:3 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useSuspenseQuery is a dependency of useEffect.
+  
+    89 │ 		arrowMutation,
+    90 │ 		blockArrowQuery,
+  > 91 │ 		functionExpressionQuery,
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 		laterQuery,
+    93 │ 	]);
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:92:3 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useInfiniteQuery is a dependency of useEffect.
+  
+    90 │ 		blockArrowQuery,
+    91 │ 		functionExpressionQuery,
+  > 92 │ 		laterQuery,
+       │ 		^^^^^^^^^^
+    93 │ 	]);
+    94 │ }
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

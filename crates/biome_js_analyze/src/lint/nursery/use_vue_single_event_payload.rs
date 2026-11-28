@@ -108,7 +108,6 @@ impl Rule for UseVueSingleEventPayload {
     type Options = UseVueSingleEventPayloadOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let root = ctx.root();
         match ctx.query() {
             VueEventSite::Declaration(emit) => {
                 if emit.payload_params()? < 2 {
@@ -120,9 +119,9 @@ impl Rule for UseVueSingleEventPayload {
                 if reference.call_args()? < 2 {
                     return None;
                 }
-                let arguments = root
-                    .syntax()
-                    .covering_element(reference.range())
+                let arguments = ctx
+                    .vue_model()
+                    .node(reference)?
                     .ancestors()
                     .find_map(JsCallArguments::cast)?;
                 // Skips the event name and the first value.

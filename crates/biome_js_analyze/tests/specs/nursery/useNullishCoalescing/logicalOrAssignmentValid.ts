@@ -1,0 +1,26 @@
+/* should not generate diagnostics */
+
+// Already using `??=`
+declare let a: string | null;
+a ??= 'default';
+
+// `&&=`
+declare let b: string | null;
+b &&= 'value';
+
+// Non-nullish types
+declare let c: string;
+c ||= 'fallback';
+
+declare let d: number;
+d ||= 0;
+
+declare let e: boolean;
+e ||= true;
+
+// Non-nullish union types
+declare let f: string | number;
+f ||= 'fallback';
+
+declare let g: { a: string };
+g ||= { a: 'default' };

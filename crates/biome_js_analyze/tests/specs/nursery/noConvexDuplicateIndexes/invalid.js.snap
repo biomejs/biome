@@ -1,0 +1,432 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineTable } from "convex/server";
+import { defineTable as table } from "./helpers";
+import * as server from "convex/server";
+import { v } from "convex/values";
+
+// A prefix of a later index.
+defineTable({ author: v.string(), channel: v.string() })
+	.index("by_author", ["author"])
+	.index("by_author_and_channel", ["author", "channel"]);
+
+// A prefix of an earlier index.
+defineTable({ author: v.string(), channel: v.string() })
+	.index("by_author_and_channel", ["author", "channel"])
+	.index("by_author", ["author"]);
+
+// Same fields: only the later index is reported.
+defineTable({ author: v.string() })
+	.index("by_author", ["author"])
+	.index("by_writer", ["author"]);
+
+// Each redundant index is reported once, against the first index that covers it.
+defineTable({ a: v.string(), b: v.string(), c: v.string() })
+	.index("by_a", ["a"])
+	.index("by_a_b", ["a", "b"])
+	.index("by_a_b_c", ["a", "b", "c"]);
+
+// Renamed import.
+table({ author: v.string(), channel: v.string() })
+	.index("by_author", ["author"])
+	.index("by_author_and_channel", ["author", "channel"]);
+
+// Namespace import.
+server
+	.defineTable({ author: v.string(), channel: v.string() })
+	.index("by_author", ["author"])
+	.index("by_author_and_channel", ["author", "channel"]);
+
+// Other calls in the chain are followed.
+defineTable({ author: v.string(), body: v.string() })
+	.index("by_author", ["author"])
+	.searchIndex("search_body", { searchField: "body" })
+	.index("by_author_and_body", ["author", "body"]);
+
+// Config objects, `staged: false`, template literals and quoted keys.
+defineTable({ author: v.string(), channel: v.string() })
+	.index("by_author", { fields: [`author`], staged: false })
+	.index(`by_author_and_channel`, { "fields": ["author", "channel"] });
+
+// Parentheses around the table.
+(defineTable({ author: v.string(), channel: v.string() }))
+	.index("by_author", ["author"])
+	.index("by_author_and_channel", ["author", "channel"]);
+
+// Tables inside `defineSchema`.
+export default defineSchema({
+	messages: defineTable({ author: v.string(), channel: v.string() })
+		.index("by_author", ["author"])
+		.index("by_author_and_channel", ["author", "channel"]),
+});
+
+// Computed keys with a constant name are read like plain keys.
+defineTable({ author: v.string(), channel: v.string() })
+	.index("by_author", { ["fields"]: ["author"], [`staged`]: false })
+	.index("by_author_and_channel", ["author", "channel"]);
+
+```
+
+# Diagnostics
+```
+invalid.js:9:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+     7 │ // A prefix of a later index.
+     8 │ defineTable({ author: v.string(), channel: v.string() })
+   > 9 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	.index("by_author_and_channel", ["author", "channel"]);
+    11 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+     8 │ defineTable({ author: v.string(), channel: v.string() })
+     9 │ 	.index("by_author", ["author"])
+  > 10 │ 	.index("by_author_and_channel", ["author", "channel"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // A prefix of an earlier index.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    13 │ defineTable({ author: v.string(), channel: v.string() })
+    14 │ 	.index("by_author_and_channel", ["author", "channel"])
+  > 15 │ 	.index("by_author", ["author"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Same fields: only the later index is reported.
+  
+  i The index by_author_and_channel is defined here.
+  
+    12 │ // A prefix of an earlier index.
+    13 │ defineTable({ author: v.string(), channel: v.string() })
+  > 14 │ 	.index("by_author_and_channel", ["author", "channel"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	.index("by_author", ["author"]);
+    16 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_writer has the same fields as the index by_author.
+  
+    18 │ defineTable({ author: v.string() })
+    19 │ 	.index("by_author", ["author"])
+  > 20 │ 	.index("by_writer", ["author"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ // Each redundant index is reported once, against the first index that covers it.
+  
+  i The index by_author is defined here.
+  
+    17 │ // Same fields: only the later index is reported.
+    18 │ defineTable({ author: v.string() })
+  > 19 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 	.index("by_writer", ["author"]);
+    21 │ 
+  
+  i Both indexes find the same documents in the same order, but each one slows down inserts and updates and takes up storage. Delete by_writer and use by_author instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_a is redundant because the index by_a_b starts with the same fields.
+  
+    22 │ // Each redundant index is reported once, against the first index that covers it.
+    23 │ defineTable({ a: v.string(), b: v.string(), c: v.string() })
+  > 24 │ 	.index("by_a", ["a"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^
+    25 │ 	.index("by_a_b", ["a", "b"])
+    26 │ 	.index("by_a_b_c", ["a", "b", "c"]);
+  
+  i The index by_a_b is defined here.
+  
+    23 │ defineTable({ a: v.string(), b: v.string(), c: v.string() })
+    24 │ 	.index("by_a", ["a"])
+  > 25 │ 	.index("by_a_b", ["a", "b"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 	.index("by_a_b_c", ["a", "b", "c"]);
+    27 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_a find the same documents with by_a_b, so delete by_a and use by_a_b instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_a sorts matching documents by _creationTime, while by_a_b sorts them by b.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_a_b is redundant because the index by_a_b_c starts with the same fields.
+  
+    23 │ defineTable({ a: v.string(), b: v.string(), c: v.string() })
+    24 │ 	.index("by_a", ["a"])
+  > 25 │ 	.index("by_a_b", ["a", "b"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 	.index("by_a_b_c", ["a", "b", "c"]);
+    27 │ 
+  
+  i The index by_a_b_c is defined here.
+  
+    24 │ 	.index("by_a", ["a"])
+    25 │ 	.index("by_a_b", ["a", "b"])
+  > 26 │ 	.index("by_a_b_c", ["a", "b", "c"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ // Renamed import.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_a_b find the same documents with by_a_b_c, so delete by_a_b and use by_a_b_c instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_a_b sorts matching documents by _creationTime, while by_a_b_c sorts them by c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    28 │ // Renamed import.
+    29 │ table({ author: v.string(), channel: v.string() })
+  > 30 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	.index("by_author_and_channel", ["author", "channel"]);
+    32 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+    29 │ table({ author: v.string(), channel: v.string() })
+    30 │ 	.index("by_author", ["author"])
+  > 31 │ 	.index("by_author_and_channel", ["author", "channel"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // Namespace import.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    34 │ server
+    35 │ 	.defineTable({ author: v.string(), channel: v.string() })
+  > 36 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 	.index("by_author_and_channel", ["author", "channel"]);
+    38 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+    35 │ 	.defineTable({ author: v.string(), channel: v.string() })
+    36 │ 	.index("by_author", ["author"])
+  > 37 │ 	.index("by_author_and_channel", ["author", "channel"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Other calls in the chain are followed.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_body starts with the same fields.
+  
+    39 │ // Other calls in the chain are followed.
+    40 │ defineTable({ author: v.string(), body: v.string() })
+  > 41 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	.searchIndex("search_body", { searchField: "body" })
+    43 │ 	.index("by_author_and_body", ["author", "body"]);
+  
+  i The index by_author_and_body is defined here.
+  
+    41 │ 	.index("by_author", ["author"])
+    42 │ 	.searchIndex("search_body", { searchField: "body" })
+  > 43 │ 	.index("by_author_and_body", ["author", "body"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ // Config objects, `staged: false`, template literals and quoted keys.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_body, so delete by_author and use by_author_and_body instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_body sorts them by body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    45 │ // Config objects, `staged: false`, template literals and quoted keys.
+    46 │ defineTable({ author: v.string(), channel: v.string() })
+  > 47 │ 	.index("by_author", { fields: [`author`], staged: false })
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 	.index(`by_author_and_channel`, { "fields": ["author", "channel"] });
+    49 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+    46 │ defineTable({ author: v.string(), channel: v.string() })
+    47 │ 	.index("by_author", { fields: [`author`], staged: false })
+  > 48 │ 	.index(`by_author_and_channel`, { "fields": ["author", "channel"] });
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │ // Parentheses around the table.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    50 │ // Parentheses around the table.
+    51 │ (defineTable({ author: v.string(), channel: v.string() }))
+  > 52 │ 	.index("by_author", ["author"])
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 	.index("by_author_and_channel", ["author", "channel"]);
+    54 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+    51 │ (defineTable({ author: v.string(), channel: v.string() }))
+    52 │ 	.index("by_author", ["author"])
+  > 53 │ 	.index("by_author_and_channel", ["author", "channel"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ // Tables inside `defineSchema`.
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:4 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    56 │ export default defineSchema({
+    57 │ 	messages: defineTable({ author: v.string(), channel: v.string() })
+  > 58 │ 		.index("by_author", ["author"])
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 		.index("by_author_and_channel", ["author", "channel"]),
+    60 │ });
+  
+  i The index by_author_and_channel is defined here.
+  
+    57 │ 	messages: defineTable({ author: v.string(), channel: v.string() })
+    58 │ 		.index("by_author", ["author"])
+  > 59 │ 		.index("by_author_and_channel", ["author", "channel"]),
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ });
+    61 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:3 lint/nursery/noConvexDuplicateIndexes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The index by_author is redundant because the index by_author_and_channel starts with the same fields.
+  
+    62 │ // Computed keys with a constant name are read like plain keys.
+    63 │ defineTable({ author: v.string(), channel: v.string() })
+  > 64 │ 	.index("by_author", { ["fields"]: ["author"], [`staged`]: false })
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 	.index("by_author_and_channel", ["author", "channel"]);
+    66 │ 
+  
+  i The index by_author_and_channel is defined here.
+  
+    63 │ defineTable({ author: v.string(), channel: v.string() })
+    64 │ 	.index("by_author", { ["fields"]: ["author"], [`staged`]: false })
+  > 65 │ 	.index("by_author_and_channel", ["author", "channel"]);
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 
+  
+  i Every index slows down inserts and updates and takes up storage. Queries that use by_author find the same documents with by_author_and_channel, so delete by_author and use by_author_and_channel instead.
+  
+  i Keep both indexes only if you need the documents in a different order: by_author sorts matching documents by _creationTime, while by_author_and_channel sorts them by channel.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

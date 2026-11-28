@@ -19,9 +19,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteEachBlock {
             opening_block: SvelteEachOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -29,23 +27,10 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@16..20 "item" [] [],
-                    },
-                    index: SvelteEachIndex {
-                        comma_token: COMMA@20..22 "," [] [Whitespace(" ")],
-                        value: SvelteName {
-                            ident_token: IDENT@22..24 "i" [] [Whitespace(" ")],
-                        },
-                    },
-                    key: SvelteEachKey {
-                        l_paren_token: L_PAREN@24..25 "(" [] [],
-                        expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@25..32 "item.id" [] [],
-                        },
-                        r_paren_token: R_PAREN@32..33 ")" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@16..33 "item, i (item.id)" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@33..34 "}" [] [],
@@ -107,28 +92,17 @@ HtmlRoot {
 0: HTML_ROOT@0..73
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..72
+  2: HTML_ROOT_ITEM_LIST@0..72
     0: SVELTE_EACH_BLOCK@0..72
       0: SVELTE_EACH_OPENING_BLOCK@0..34
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@13..33
+        3: SVELTE_EACH_BINDING_CLAUSE@13..33
           0: AS_KW@13..16 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@16..20
-            0: IDENT@16..20 "item" [] []
-          2: SVELTE_EACH_INDEX@20..24
-            0: COMMA@20..22 "," [] [Whitespace(" ")]
-            1: SVELTE_NAME@22..24
-              0: IDENT@22..24 "i" [] [Whitespace(" ")]
-          3: SVELTE_EACH_KEY@24..33
-            0: L_PAREN@24..25 "(" [] []
-            1: HTML_TEXT_EXPRESSION@25..32
-              0: HTML_LITERAL@25..32 "item.id" [] []
-            2: R_PAREN@32..33 ")" [] []
+          1: HTML_TEXT_EXPRESSION@16..33
+            0: HTML_LITERAL@16..33 "item, i (item.id)" [] []
         4: R_CURLY@33..34 "}" [] []
       1: HTML_ELEMENT_LIST@34..64
         0: HTML_ELEMENT@34..64
@@ -162,6 +136,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@64..67 "{/" [Newline("\n")] []
         1: EACH_KW@67..71 "each" [] []
         2: R_CURLY@71..72 "}" [] []
-  5: EOF@72..73 "" [Newline("\n")] []
+  3: EOF@72..73 "" [Newline("\n")] []
 
 ```

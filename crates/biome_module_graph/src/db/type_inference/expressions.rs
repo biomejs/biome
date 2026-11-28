@@ -5,12 +5,12 @@ use super::{
         evaluate_mapped_type_with_resolver, find_member_key_type_with_resolver,
         find_member_type_with_resolver, substitutions_for_instance,
     },
-    normalize_structural_type,
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
-    CallArgumentTypeInput, CallableFunctionInput, ResolvedCallArgument, infer_call_argument_type,
-    infer_call_expression_return_type_from_args, infer_constructor_argument_type,
+    CallArgumentTypeInput, CallableFunctionInput, MemberTypeInput, ResolvedCallArgument,
+    infer_call_argument_type, infer_call_expression_return_type_from_args,
+    infer_constructor_argument_type, member_type_needs_normalization, normalize_member_type,
     resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
@@ -90,14 +90,22 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
         if biome_js_type_info::interned_types::well_known_symbol_name(ty).is_some() {
             return self.member_type(ty, is_optional);
         }
+        if let Some(ty) = self.inherited_promise_instance_method_type(ty, substitutions) {
+            return self.member_type(ty, false);
+        }
         let ty = if crossed_instance {
             self.resolve_member_references(ty)
         } else {
             ty
         };
         let ty = apply_substitutions(db, ty, substitutions);
-        let Ok(ty) = normalize_structural_type(db, ty, |ty| ty) else {
-            return InferredTypeData::Unknown;
+        let ty = if member_type_needs_normalization(ty) {
+            match normalize_member_type(db, MemberTypeInput::new(db, ty)) {
+                Some(ty) => ty,
+                None => return InferredTypeData::Unknown,
+            }
+        } else {
+            ty
         };
         self.member_type(ty, is_optional)
     }
@@ -186,6 +194,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let consequent = self.resolve(&expression.consequent);
                 let alternate = self.resolve(&expression.alternate);
                 self.resolve_conditional_expression(test, consequent, alternate)
+            }
+            RawTypeofExpression::DefaultedParameter(expression) => {
+                let ty = self.resolve(&expression.ty);
+                let default = self.resolve(&expression.default);
+                Some(self.defaulted_parameter_type(ty, default))
             }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
@@ -341,6 +354,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     expression.consequent,
                     expression.alternate,
                 ),
+            InferredTypeofExpression::DefaultedParameter(expression) => {
+                Some(self.defaulted_parameter_type(expression.ty, expression.default))
+            }
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
                     RawDestructureField::Index {
@@ -993,6 +1009,33 @@ impl<'db> ResolutionCtx<'db, '_> {
         self.type_without_undefined(ty)
     }
 
+    /// A parameter's default value replaces `undefined` in its declared type
+    /// `ty`, unless the type of `default` may be `undefined` itself or is
+    /// unknown.
+    fn defaulted_parameter_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        default: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let default = self.resolve_inferred_type(default);
+        let default_may_be_undefined = if let InferredTypeData::Union(union) = default {
+            union
+                .types(self.db)
+                .iter()
+                .any(|variant| self.resolve_inferred_type(*variant) == InferredTypeData::Undefined)
+        } else {
+            default == InferredTypeData::Undefined || default == InferredTypeData::Unknown
+        };
+        if default_may_be_undefined {
+            return ty;
+        }
+        let ty = self.resolve_inferred_type(ty);
+        if ty == InferredTypeData::Undefined {
+            return InferredTypeData::NeverKeyword;
+        }
+        self.type_without_undefined(ty)
+    }
+
     fn type_without_undefined(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
         let ty = self.resolve_inferred_type(ty);
         if ty == InferredTypeData::Undefined {
@@ -1277,7 +1320,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::VoidKeyword => None,
             });
         let constructed_ty = constructor
-            .and_then(|constructor| constructor.return_type(self.db))
+            .and_then(|constructor| {
+                let constructed_ty = constructor.return_type(self.db)?;
+                Some(self.instantiate_constructed_type(constructor, constructed_ty))
+            })
             .unwrap_or(class_ty);
         // Explicit class arguments replace the arguments of a declared self-instance return.
         // Wrapping that return instead would treat its concrete arguments as generic parameters.
@@ -1310,6 +1356,48 @@ impl<'db> ResolutionCtx<'db, '_> {
             constructed_ty,
             type_parameters,
         ))
+    }
+
+    /// Replaces the type parameters that a construct signature declares in the
+    /// type it constructs.
+    ///
+    /// A construct signature such as `new <T>(executor: Executor<T>): Promise<T>`
+    /// declares `T` for a single `new` expression. These parameters are not
+    /// inferred from the arguments, so each one is replaced by `Unknown`. The
+    /// constructed type then never refers to a parameter outside the signature
+    /// that declares it.
+    ///
+    /// A parameter's default is not used. A default only applies when the
+    /// arguments provide no candidate, which is indistinguishable here from an
+    /// argument that would have provided one.
+    fn instantiate_constructed_type(
+        &mut self,
+        constructor: InferredConstructor<'db>,
+        constructed_ty: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let substitutions: Vec<_> = constructor
+            .type_parameters(self.db)
+            .iter()
+            .filter_map(|type_parameter| type_parameter.as_generic_reference(self.db))
+            .flat_map(|generic| {
+                let generic = InferredTypeData::Generic(generic);
+                [
+                    InferredTypeData::instance_of(self.db, generic, Box::default()),
+                    generic,
+                ]
+            })
+            .map(
+                |generic| biome_js_type_info::interned_types::TypeSubstitution {
+                    generic,
+                    replacement: InferredTypeData::Unknown,
+                },
+            )
+            .collect();
+        if substitutions.is_empty() {
+            return constructed_ty;
+        }
+        let constructed_ty = self.resolve_inferred_type(constructed_ty);
+        apply_substitutions(self.db, constructed_ty, &substitutions)
     }
 
     fn infer_constructor_type_parameters(
@@ -1523,7 +1611,9 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn is_promise_like_target(&mut self, target: InferredTypeData<'db>) -> bool {
         match self.resolve_inferred_type(target) {
-            target if target.is_promise_class(self.db) => true,
+            target if target.is_promise_class(self.db) || target.is_promise_like_interface() => {
+                true
+            }
             InferredTypeData::Class(class) => class
                 .name(self.db)
                 .as_ref()
@@ -1697,7 +1787,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         match object {
             ty @ InferredTypeData::Class(_) => {
                 if ty.is_promise_class(self.db) && member_name == "resolve" {
-                    return Some(self.promise_resolve_type(ty));
+                    return Some(self.promise_resolve_type());
                 }
                 self.find_member_type_on_resolved_type(ty, member_name, MemberLookupMode::Class)
             }
@@ -1716,11 +1806,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 if target.is_promise_class(self.db)
                     && let Ok(method) = member_name.parse::<PromiseInstanceMethod>()
                 {
-                    let ty = self.promise_instance_method_type(
-                        target,
-                        instance.type_parameters(self.db),
-                        method,
-                    );
+                    let ty = self
+                        .promise_instance_method_type(instance.type_parameters(self.db), method);
                     return Some(self.member_type(ty, false));
                 }
                 let object = InferredTypeData::instance_of(
@@ -2014,6 +2101,50 @@ impl<'db> ResolutionCtx<'db, '_> {
         member_ty
     }
 
+    /// Returns the simplified method type for a `then`, `catch`, or `finally`
+    /// member that lookup found on the built-in `Promise` class.
+    ///
+    /// Lookup reaches these members through a type derived from `Promise`, such
+    /// as a subclass, an interface that extends `Promise<T>`, or a member of a
+    /// union. `substitutions` supplies the value type of the receiver. See
+    /// [`Self::promise_instance_method_type`] for why the declared member is not
+    /// used. Returns `None` for any other member.
+    fn inherited_promise_instance_method_type(
+        &self,
+        member_ty: InferredTypeData<'db>,
+        substitutions: &[biome_js_type_info::interned_types::TypeSubstitution<'db>],
+    ) -> Option<InferredTypeData<'db>> {
+        // The name rules out most members before the class is expanded.
+        let InferredTypeData::Function(function) = member_ty else {
+            return None;
+        };
+        let method = function
+            .name(self.db)
+            .as_ref()?
+            .text()
+            .parse::<PromiseInstanceMethod>()
+            .ok()?;
+        let target = InferredTypeData::promise_class().expand_canonical_global(self.db);
+        let InferredTypeData::Class(class) = target else {
+            return None;
+        };
+        class.members(self.db).iter().find(|member| {
+            !member.kind.is_static() && member.ty.expand_global_local(self.db) == member_ty
+        })?;
+        let receiver_value = class
+            .type_parameters(self.db)
+            .first()
+            .and_then(|type_parameter| {
+                substitutions
+                    .iter()
+                    .find(|substitution| substitution.generic == *type_parameter)
+            })
+            .map_or(InferredTypeData::Unknown, |substitution| {
+                substitution.replacement
+            });
+        Some(self.promise_instance_method_type(&[receiver_value], method))
+    }
+
     /// Builds the simplified `Promise` method type used by call inference.
     ///
     /// `V` is the receiver's first type argument, or `Unknown` when it has no
@@ -2031,9 +2162,16 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// The handler types default to `V` and `never`. Calls with an omitted
     /// handler therefore retain the receiver value type instead of leaving an
     /// unresolved generic in the result.
+    ///
+    /// The declared methods are not used because call inference can't infer a
+    /// handler's result through a parameter that is a union of the handler with
+    /// `null` and `undefined`.
+    ///
+    /// The returned `Promise` is an instance of the canonical `Promise` handle.
+    /// Call inference substitutes type arguments into the return type, and a
+    /// substitution visits every member of a class that is an instance target.
     fn promise_instance_method_type(
         &self,
-        target: InferredTypeData<'db>,
         receiver_type_parameters: &[InferredTypeData<'db>],
         method: PromiseInstanceMethod,
     ) -> InferredTypeData<'db> {
@@ -2074,7 +2212,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             )
         };
         let promise = |value| {
-            InferredTypeData::instance_of(self.db, target, Vec::from([value]).into_boxed_slice())
+            InferredTypeData::instance_of(
+                self.db,
+                InferredTypeData::promise_class(),
+                Vec::from([value]).into_boxed_slice(),
+            )
         };
 
         match method {
@@ -2146,8 +2288,13 @@ impl<'db> ResolutionCtx<'db, '_> {
     /// `Promise.resolve` call inference.
     ///
     /// This omits the overload and unwrapping details of the TypeScript library
-    /// declarations. The returned `Promise` is an instance of `target`.
-    fn promise_resolve_type(&self, target: InferredTypeData<'db>) -> InferredTypeData<'db> {
+    /// declarations, which return `Promise<Awaited<T>>`. Call inference does
+    /// not reliably evaluate `Awaited<T>` in a return type, so the declared
+    /// overloads are not used.
+    ///
+    /// The returned `Promise` is an instance of the canonical `Promise` handle,
+    /// for the reason given on [`Self::promise_instance_method_type`].
+    fn promise_resolve_type(&self) -> InferredTypeData<'db> {
         let value = InferredTypeData::Generic(InferredGenericTypeParameter::new(
             self.db,
             false,
@@ -2169,7 +2316,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             Vec::from([parameter]).into_boxed_slice(),
             InferredReturnType::Type(InferredTypeData::instance_of(
                 self.db,
-                target,
+                InferredTypeData::promise_class(),
                 Vec::from([value]).into_boxed_slice(),
             )),
             false,

@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function f(foo: number[]) {
+	return foo.reduce(fn);
+}
+function g(foo: Int32Array) {
+	return foo.reduce(fn);
+}
+const result = array.reduce<Result>((total, item) => transform(total, item), initialValue);
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:13 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f(foo: number[]) {
+  > 3 │ 	return foo.reduce(fn);
+      │ 	           ^^^^^^
+    4 │ }
+    5 │ function g(foo: Int32Array) {
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:13 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    4 │ }
+    5 │ function g(foo: Int32Array) {
+  > 6 │ 	return foo.reduce(fn);
+      │ 	           ^^^^^^
+    7 │ }
+    8 │ const result = array.reduce<Result>((total, item) => transform(total, item), initialValue);
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:22 lint/nursery/noArrayReduce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling reduce().
+  
+    6 │ 	return foo.reduce(fn);
+    7 │ }
+  > 8 │ const result = array.reduce<Result>((total, item) => transform(total, item), initialValue);
+      │                      ^^^^^^
+    9 │ 
+  
+  i The function passed to reduce() has to pass its result along to the next call, which makes it hard to see what the code computes.
+  
+  i Use a for...of loop, or methods such as map() and filter(), instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

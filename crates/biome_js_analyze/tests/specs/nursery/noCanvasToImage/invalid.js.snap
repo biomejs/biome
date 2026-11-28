@@ -1,0 +1,333 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+context.drawImage(loadImage(canvas.toDataURL()), 0, 0);
+context.drawImage(await loadImage(canvas.toDataURL()), 0, 0);
+context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+(context.drawImage)(await loadImage(canvas.toDataURL()), 0, 0);
+context.drawImage(await loadImage((canvas.toDataURL())), 0, 0);
+
+{
+	const image = await loadImage(canvas.toDataURL());
+	context.drawImage(image, 0, 0);
+}
+
+{
+	const image = loadImage(canvas.toDataURL("image/jpeg"));
+	context.drawImage(await image, 0, 0);
+}
+
+context.putImageData(context.getImageData(0, 0, width, height), 0, 0);
+context2.putImageData(context1.getImageData(0, 0, width, height), 0, 0);
+
+{
+	const imageData = context1.getImageData(0, 0, width, height);
+	context2.putImageData(imageData, 0, 0);
+}
+
+function draw() {
+	const imageData = context1.getImageData(0, 0, width, height);
+	return context2.putImageData(imageData, 0, 0);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ context.drawImage(loadImage(canvas.toDataURL()), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ context.drawImage(await loadImage(canvas.toDataURL()), 0, 0);
+    4 │ context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    1 │ /* should generate diagnostics */
+    2 │ context.drawImage(loadImage(canvas.toDataURL()), 0, 0);
+  > 3 │ context.drawImage(await loadImage(canvas.toDataURL()), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+    5 │ context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    2 │ context.drawImage(loadImage(canvas.toDataURL()), 0, 0);
+    3 │ context.drawImage(await loadImage(canvas.toDataURL()), 0, 0);
+  > 4 │ context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+    6 │ context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    3 │ context.drawImage(await loadImage(canvas.toDataURL()), 0, 0);
+    4 │ context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+  > 5 │ context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+    7 │ context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    4 │ context.drawImage(await loadImage(sourceCanvas.toDataURL()), 0, 0);
+    5 │ context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+  > 6 │ context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+    8 │ (context.drawImage)(await loadImage(canvas.toDataURL()), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    5 │ context.drawImage(await loadImage(this.canvas.toDataURL()), 0, 0);
+    6 │ context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+  > 7 │ context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ (context.drawImage)(await loadImage(canvas.toDataURL()), 0, 0);
+    9 │ context.drawImage(await loadImage((canvas.toDataURL())), 0, 0);
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:21 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+     6 │ context.drawImage(await loadImage(CANVAS.toDataURL("image/png")), 0, 0);
+     7 │ context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+   > 8 │ (context.drawImage)(await loadImage(canvas.toDataURL()), 0, 0);
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ context.drawImage(await loadImage((canvas.toDataURL())), 0, 0);
+    10 │ 
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:19 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+     7 │ context.drawImage((await loadImage((canvas).toDataURL())), 0, 0);
+     8 │ (context.drawImage)(await loadImage(canvas.toDataURL()), 0, 0);
+   > 9 │ context.drawImage(await loadImage((canvas.toDataURL())), 0, 0);
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ {
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:20 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    11 │ {
+    12 │ 	const image = await loadImage(canvas.toDataURL());
+  > 13 │ 	context.drawImage(image, 0, 0);
+       │ 	                  ^^^^^
+    14 │ }
+    15 │ 
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:20 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This image is loaded from a canvas only to be drawn with drawImage().
+  
+    16 │ {
+    17 │ 	const image = loadImage(canvas.toDataURL("image/jpeg"));
+  > 18 │ 	context.drawImage(await image, 0, 0);
+       │ 	                  ^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i Converting the canvas to a data URL and loading it as an image encodes and decodes every pixel, but drawImage() accepts the canvas itself.
+  
+  i Pass the canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:22 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These pixels are copied from a canvas with getImageData() only to be written to a canvas with putImageData().
+  
+    19 │ }
+    20 │ 
+  > 21 │ context.putImageData(context.getImageData(0, 0, width, height), 0, 0);
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ context2.putImageData(context1.getImageData(0, 0, width, height), 0, 0);
+    23 │ 
+  
+  i Copying pixels through getImageData() is slower than drawing one canvas onto another with drawImage().
+  
+  i Pass the source canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:23 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These pixels are copied from a canvas with getImageData() only to be written to a canvas with putImageData().
+  
+    21 │ context.putImageData(context.getImageData(0, 0, width, height), 0, 0);
+  > 22 │ context2.putImageData(context1.getImageData(0, 0, width, height), 0, 0);
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ {
+  
+  i Copying pixels through getImageData() is slower than drawing one canvas onto another with drawImage().
+  
+  i Pass the source canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:24 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These pixels are copied from a canvas with getImageData() only to be written to a canvas with putImageData().
+  
+    24 │ {
+    25 │ 	const imageData = context1.getImageData(0, 0, width, height);
+  > 26 │ 	context2.putImageData(imageData, 0, 0);
+       │ 	                      ^^^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i Copying pixels through getImageData() is slower than drawing one canvas onto another with drawImage().
+  
+  i Pass the source canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:31 lint/nursery/noCanvasToImage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These pixels are copied from a canvas with getImageData() only to be written to a canvas with putImageData().
+  
+    29 │ function draw() {
+    30 │ 	const imageData = context1.getImageData(0, 0, width, height);
+  > 31 │ 	return context2.putImageData(imageData, 0, 0);
+       │ 	                             ^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Copying pixels through getImageData() is slower than drawing one canvas onto another with drawImage().
+  
+  i Pass the source canvas to drawImage() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

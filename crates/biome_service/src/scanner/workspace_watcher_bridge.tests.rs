@@ -49,7 +49,7 @@ fn close_modified_file_from_client_before_watcher() {
         .expect("can open from client");
 
     ScannerWatcherBridge::new((&workspace.scanner, &workspace))
-        .index_file(project_key, file_path.clone())
+        .index_file(project_key, BiomePath::new(&file_path))
         .expect("can also index file");
 
     workspace
@@ -105,7 +105,7 @@ fn close_modified_file_from_client_before_watcher() {
     );
     // call the instruction handler manually for the sake of the test:
     ScannerWatcherBridge::new((&workspace.scanner, &workspace))
-        .index_file(project_key, file_path.clone())
+        .index_file(project_key, BiomePath::new(&file_path))
         .expect("path to be updated by us");
 
     let module_graph = workspace

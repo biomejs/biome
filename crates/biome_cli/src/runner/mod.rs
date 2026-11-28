@@ -294,10 +294,7 @@ pub(crate) trait CommandRunner {
 
         if let Some(stdin) = self.get_stdin(console, execution.as_ref())? {
             let (stdin_path, content) = stdin.into_parts();
-            // Biome path must starts_with(the project directory), which will have been
-            // joined to workdir. Otherwise we won't find nested settings.
-            let working_dir = fs.working_directory().unwrap_or_default();
-            let biome_path = BiomePath::new(working_dir.join(stdin_path));
+            let biome_path = fs.biome_path(&stdin_path);
             if biome_path.extension().is_none() {
                 console.error(markup! {
                     {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
@@ -486,7 +483,7 @@ pub(crate) trait CommandRunner {
 
         // Open the project
         let open_project_result = workspace.open_project(OpenProjectParams {
-            path: BiomePath::new(project_dir),
+            path: fs.biome_path(project_dir),
             open_uninitialized: true,
         })?;
 
@@ -498,23 +495,22 @@ pub(crate) trait CommandRunner {
             computed_scan_kind,
             stdin.as_deref(),
             &root_configuration_dir,
-            &working_dir,
+            fs,
             &configuration,
             self.minimal_scan_kind(),
         );
 
         // Scan the project
-        let scan_kind =
-            execution.compute_scan_kind(paths.as_slice(), working_dir.as_path(), scan_kind);
+        let scan_kind = execution.compute_scan_kind(paths.as_slice(), fs, scan_kind);
 
         // Update the settings of the project
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
-            workspace_directory: Some(BiomePath::new(project_dir)),
+            workspace_directory: Some(fs.biome_path(project_dir)),
             configuration,
             extended_configurations: extended_configurations
                 .into_iter()
-                .map(|(path, config)| (BiomePath::from(path), config))
+                .map(|(path, config)| (fs.biome_path(&path), config))
                 .collect(),
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         })?;

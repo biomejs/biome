@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: cycleA.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export * from "./cycleB.js";
+export const cycleA = 1;
+
+```

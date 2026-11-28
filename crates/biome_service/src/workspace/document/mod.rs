@@ -2,6 +2,7 @@ pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
 use crate::workspace::views::{ClientId, Views};
+use biome_configuration::Configuration;
 use std::sync::Arc;
 
 /// The views of a file that the workspace knows about. See
@@ -27,6 +28,9 @@ pub(crate) struct DocumentView {
     /// file sources of the database. Use `LanguageDb::source_from_index` to
     /// retrieve the file source.
     pub(crate) file_source_index: usize,
+
+    /// Request-scoped settings applied on top of the project configuration.
+    pub(crate) inline_config: Option<Arc<Configuration>>,
 
     /// The result of the parser (syntax tree + diagnostics).
     /// Types explained:

@@ -53,15 +53,15 @@ unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━�
      3    │ - → b:·1,
      4    │ - → //·Comment·a
      5    │ - → a:·1,
-     6    │ - → ...g,
-     7    │ - → ba:·2,
-     8    │ - → ab:·1,
         2 │ + → //·Comment·a
         3 │ + → a:·1,
         4 │ + → //·Comment·b
         5 │ + → b:·1,
-        6 │ + → ...g,
-     9  7 │     set aab(v) {
+     6  6 │     ...g,
+     7    │ - → ba:·2,
+     8    │ - → ab:·1,
+     9    │ - → set·aab(v)·{
+        7 │ + → set·aab(v)·{
     10  8 │       this._aab = v;
     11  9 │     },
     12    │ - → [getProp()]:·2,

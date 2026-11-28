@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidExportAll.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export * from "./exportAll/a.js";
+export * from "./exportAll/b.js";
+export * from "./exportAll/c.js";
+
+```
+
+# Diagnostics
+```
+invalidExportAll.js:3:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export * from "./exportAll/a.js";
+  > 3 │ export * from "./exportAll/b.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    4 │ export * from "./exportAll/c.js";
+    5 │ 
+  
+  i This module also exports the name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export * from "./exportAll/b.js";
+    4 │ export * from "./exportAll/c.js";
+  
+  i When two export * from statements export the same name from different declarations, the module doesn't export the name at all. Importing it fails, and TypeScript reports an error.
+  
+  i Replace one of the export * from statements with export { ... } from, listing only the names you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAll.js:3:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name f is exported more than once.
+  
+    1 │ /* should generate diagnostics */
+    2 │ export * from "./exportAll/a.js";
+  > 3 │ export * from "./exportAll/b.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    4 │ export * from "./exportAll/c.js";
+    5 │ 
+  
+  i This module also exports the name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export * from "./exportAll/b.js";
+    4 │ export * from "./exportAll/c.js";
+  
+  i When two export * from statements export the same name from different declarations, the module doesn't export the name at all. Importing it fails, and TypeScript reports an error.
+  
+  i Replace one of the export * from statements with export { ... } from, listing only the names you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAll.js:4:15 lint/nursery/noDuplicateExports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The name x is exported more than once.
+  
+    2 │ export * from "./exportAll/a.js";
+    3 │ export * from "./exportAll/b.js";
+  > 4 │ export * from "./exportAll/c.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i This module also exports the name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./exportAll/a.js";
+      │               ^^^^^^^^^^^^^^^^^^
+    3 │ export * from "./exportAll/b.js";
+    4 │ export * from "./exportAll/c.js";
+  
+  i When two export * from statements export the same name from different declarations, the module doesn't export the name at all. Importing it fails, and TypeScript reports an error.
+  
+  i Replace one of the export * from statements with export { ... } from, listing only the names you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,419 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+for (const item of items) {
+	for (const child of item.children) {
+		break;
+	}
+}
+
+for (const item of items) {
+	switch (item.type) {
+		case "child":
+			break;
+	}
+}
+
+for (let index = 0; index < items.length; index++) {
+	for (const child of items[index].children) {
+		break;
+	}
+}
+
+for (const key in items) {
+	do {
+		break;
+	} while (items[key].pending);
+}
+
+while (queue.length > 0) {
+	while (true) {
+		if (done) break;
+	}
+}
+
+// A `switch` statement between the inner loop and the outer loop.
+for (const a of b) {
+	switch (a) {
+		case 1:
+			for (const c of d) {
+				break;
+			}
+	}
+}
+
+// A labeled statement around the inner loop doesn't change the target.
+for (const item of items) {
+	inner: for (const child of item.children) {
+		break;
+	}
+}
+
+function f() {
+	for (const item of items) {
+		for (const child of item.children) {
+			break;
+		}
+	}
+}
+
+for (const group of groups) {
+	const processGroup = () => {
+		for (const item of group.items) {
+			for (const child of item.children) {
+				break;
+			}
+		}
+	};
+	processGroup();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    2 │ for (const item of items) {
+    3 │ 	for (const child of item.children) {
+  > 4 │ 		break;
+      │ 		^^^^^^
+    5 │ 	}
+    6 │ }
+  
+  i The break statement applies to this loop.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (const item of items) {
+  > 3 │ 	for (const child of item.children) {
+      │ 	^^^
+    4 │ 		break;
+    5 │ 	}
+  
+  i This is the outer loop.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (const item of items) {
+      │ ^^^
+    3 │ 	for (const child of item.children) {
+    4 │ 		break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:4 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a switch statement that is inside an outer loop.
+  
+     9 │ 	switch (item.type) {
+    10 │ 		case "child":
+  > 11 │ 			break;
+       │ 			^^^^^^
+    12 │ 	}
+    13 │ }
+  
+  i The break statement applies to this switch statement.
+  
+     8 │ for (const item of items) {
+   > 9 │ 	switch (item.type) {
+       │ 	^^^^^^
+    10 │ 		case "child":
+    11 │ 			break;
+  
+  i This is the outer loop.
+  
+     6 │ }
+     7 │ 
+   > 8 │ for (const item of items) {
+       │ ^^^
+     9 │ 	switch (item.type) {
+    10 │ 		case "child":
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner switch statement into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    15 │ for (let index = 0; index < items.length; index++) {
+    16 │ 	for (const child of items[index].children) {
+  > 17 │ 		break;
+       │ 		^^^^^^
+    18 │ 	}
+    19 │ }
+  
+  i The break statement applies to this loop.
+  
+    15 │ for (let index = 0; index < items.length; index++) {
+  > 16 │ 	for (const child of items[index].children) {
+       │ 	^^^
+    17 │ 		break;
+    18 │ 	}
+  
+  i This is the outer loop.
+  
+    13 │ }
+    14 │ 
+  > 15 │ for (let index = 0; index < items.length; index++) {
+       │ ^^^
+    16 │ 	for (const child of items[index].children) {
+    17 │ 		break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    21 │ for (const key in items) {
+    22 │ 	do {
+  > 23 │ 		break;
+       │ 		^^^^^^
+    24 │ 	} while (items[key].pending);
+    25 │ }
+  
+  i The break statement applies to this loop.
+  
+    21 │ for (const key in items) {
+  > 22 │ 	do {
+       │ 	^^
+    23 │ 		break;
+    24 │ 	} while (items[key].pending);
+  
+  i This is the outer loop.
+  
+    19 │ }
+    20 │ 
+  > 21 │ for (const key in items) {
+       │ ^^^
+    22 │ 	do {
+    23 │ 		break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:13 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    27 │ while (queue.length > 0) {
+    28 │ 	while (true) {
+  > 29 │ 		if (done) break;
+       │ 		          ^^^^^^
+    30 │ 	}
+    31 │ }
+  
+  i The break statement applies to this loop.
+  
+    27 │ while (queue.length > 0) {
+  > 28 │ 	while (true) {
+       │ 	^^^^^
+    29 │ 		if (done) break;
+    30 │ 	}
+  
+  i This is the outer loop.
+  
+    25 │ }
+    26 │ 
+  > 27 │ while (queue.length > 0) {
+       │ ^^^^^
+    28 │ 	while (true) {
+    29 │ 		if (done) break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:5 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    36 │ 		case 1:
+    37 │ 			for (const c of d) {
+  > 38 │ 				break;
+       │ 				^^^^^^
+    39 │ 			}
+    40 │ 	}
+  
+  i The break statement applies to this loop.
+  
+    35 │ 	switch (a) {
+    36 │ 		case 1:
+  > 37 │ 			for (const c of d) {
+       │ 			^^^
+    38 │ 				break;
+    39 │ 			}
+  
+  i This is the outer loop.
+  
+    33 │ // A `switch` statement between the inner loop and the outer loop.
+  > 34 │ for (const a of b) {
+       │ ^^^
+    35 │ 	switch (a) {
+    36 │ 		case 1:
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:3 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    44 │ for (const item of items) {
+    45 │ 	inner: for (const child of item.children) {
+  > 46 │ 		break;
+       │ 		^^^^^^
+    47 │ 	}
+    48 │ }
+  
+  i The break statement applies to this loop.
+  
+    43 │ // A labeled statement around the inner loop doesn't change the target.
+    44 │ for (const item of items) {
+  > 45 │ 	inner: for (const child of item.children) {
+       │ 	       ^^^
+    46 │ 		break;
+    47 │ 	}
+  
+  i This is the outer loop.
+  
+    43 │ // A labeled statement around the inner loop doesn't change the target.
+  > 44 │ for (const item of items) {
+       │ ^^^
+    45 │ 	inner: for (const child of item.children) {
+    46 │ 		break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:4 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    51 │ 	for (const item of items) {
+    52 │ 		for (const child of item.children) {
+  > 53 │ 			break;
+       │ 			^^^^^^
+    54 │ 		}
+    55 │ 	}
+  
+  i The break statement applies to this loop.
+  
+    50 │ function f() {
+    51 │ 	for (const item of items) {
+  > 52 │ 		for (const child of item.children) {
+       │ 		^^^
+    53 │ 			break;
+    54 │ 		}
+  
+  i This is the outer loop.
+  
+    50 │ function f() {
+  > 51 │ 	for (const item of items) {
+       │ 	^^^
+    52 │ 		for (const child of item.children) {
+    53 │ 			break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:5 lint/nursery/noBreakInNestedLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This break statement applies to a loop that is inside an outer loop.
+  
+    60 │ 		for (const item of group.items) {
+    61 │ 			for (const child of item.children) {
+  > 62 │ 				break;
+       │ 				^^^^^^
+    63 │ 			}
+    64 │ 		}
+  
+  i The break statement applies to this loop.
+  
+    59 │ 	const processGroup = () => {
+    60 │ 		for (const item of group.items) {
+  > 61 │ 			for (const child of item.children) {
+       │ 			^^^
+    62 │ 				break;
+    63 │ 			}
+  
+  i This is the outer loop.
+  
+    58 │ for (const group of groups) {
+    59 │ 	const processGroup = () => {
+  > 60 │ 		for (const item of group.items) {
+       │ 		^^^
+    61 │ 			for (const child of item.children) {
+    62 │ 				break;
+  
+  i When loops and switch statements are nested, it's easy to misread which one a break statement applies to.
+  
+  i Move the inner loop into a separate function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

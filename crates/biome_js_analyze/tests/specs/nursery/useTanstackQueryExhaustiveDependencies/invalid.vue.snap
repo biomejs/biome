@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+import { useQuery } from "@tanstack/vue-query";
+
+const id = 1;
+const userId = 1;
+const orgId = 2;
+
+useQuery({
+	queryKey: ["entity"],
+	queryFn: () => fetchEntity(id),
+});
+
+useQuery({
+	queryKey: ["users"],
+	queryFn: () => fetchUser(userId, orgId),
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:10:2 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+     9 │ useQuery({
+  > 10 │ 	queryKey: ["entity"],
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    11 │ 	queryFn: () => fetchEntity(id),
+    12 │ });
+  
+  i The query function uses id here, but the query key doesn't include it.
+  
+     9 │ useQuery({
+    10 │ 	queryKey: ["entity"],
+  > 11 │ 	queryFn: () => fetchEntity(id),
+       │ 	                           ^^
+    12 │ });
+    13 │ 
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    9 │ → queryKey:·["entity",·id],
+      │                      ++++  
+
+```
+
+```
+invalid.vue:15:2 lint/nursery/useTanstackQueryExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × This query key doesn't include all the values that the query function uses.
+  
+    14 │ useQuery({
+  > 15 │ 	queryKey: ["users"],
+       │ 	^^^^^^^^^^^^^^^^^^^
+    16 │ 	queryFn: () => fetchUser(userId, orgId),
+    17 │ });
+  
+  i The query function uses userId here, but the query key doesn't include it.
+  
+    14 │ useQuery({
+    15 │ 	queryKey: ["users"],
+  > 16 │ 	queryFn: () => fetchUser(userId, orgId),
+       │ 	                         ^^^^^^
+    17 │ });
+    18 │ </script>
+  
+  i The query function uses orgId here, but the query key doesn't include it.
+  
+    14 │ useQuery({
+    15 │ 	queryKey: ["users"],
+  > 16 │ 	queryFn: () => fetchUser(userId, orgId),
+       │ 	                                 ^^^^^
+    17 │ });
+    18 │ </script>
+  
+  i TanStack Query saves the result of a query under its key, and fetches the data again when the key changes. When one of these values changes, the query doesn't fetch new data and keeps returning the data that belongs to the old value.
+  
+  i Add the missing values to the query key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the missing values to the query key.
+  
+    14 │ → queryKey:·["users",·userId,·orgId],
+       │                     +++++++++++++++  
+
+```

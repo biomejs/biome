@@ -378,10 +378,18 @@ pub enum RootShape {
         target: u64,
         from_event: bool,
     },
-    /// `!operand`.
-    Not,
-    /// `a != b` or `a !== b`.
-    NotEqual,
+    /// `!operand`, where the operand is not itself a `!` expression.
+    /// `operator` is the range of `!` in the host document.
+    Not {
+        operator: TextRange,
+    },
+    /// `!!operand`, which converts the operand to a boolean.
+    DoubleNot,
+    /// `a != b` or `a !== b`. `operator` is the range of `!=` or `!==` in the
+    /// host document.
+    NotEqual {
+        operator: TextRange,
+    },
     Binary,
     Logical,
     Conditional,
@@ -638,10 +646,32 @@ pub enum EmitForm {
     TypeMember,
 }
 
+/// What an expression evaluates to, as far as the model needs to tell whether
+/// it is a function.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) enum ValueSource {
+    /// A value that is never a function: a literal, an object, an array, or
+    /// the result of an operator.
+    NotFunction,
+    /// A function or a class.
+    Function,
+    /// A member of the component instance: `this.name`.
+    Member(TokenText),
+    /// The result of calling a member of the component instance:
+    /// `this.name()`.
+    MemberCall(TokenText),
+    Unknown,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Detail {
     None,
     Prop(PropDetail),
+    Data {
+        /// What the member's value may be. More than one source for a value
+        /// such as `a ? b : c`.
+        value: Box<[ValueSource]>,
+    },
     Emit {
         /// The number of payload arguments, when the declaration says.
         payload_params: Option<u8>,
@@ -651,10 +681,15 @@ pub(crate) enum Detail {
     Method {
         params: u8,
         rest: bool,
+        /// What the method's `return` statements return.
+        returns: Box<[ValueSource]>,
     },
     Computed {
         getter: Option<JsNodeRef>,
         setter: Option<TextRange>,
+        /// What the getter's `return` statements return. `None` when the
+        /// getter is not a function the model can read.
+        returns: Option<Box<[ValueSource]>>,
     },
     /// A data property whose value is an object literal.
     Object {
@@ -683,6 +718,8 @@ pub(crate) struct SymbolData {
     /// The node of the whole declaration, for a declaration written in
     /// JavaScript.
     pub(crate) node: Option<JsNodeId>,
+    /// The node of the name, for a declaration made by a JavaScript binding.
+    pub(crate) name_node: Option<JsNodeId>,
 }
 
 /// Where a reference is written.
@@ -762,6 +799,8 @@ pub(crate) struct ReferenceData {
     pub(crate) access: Access,
     pub(crate) call_args: Option<u8>,
     pub(crate) resolution: Resolution,
+    /// The node `range` covers, for a reference written in JavaScript.
+    pub(crate) node: Option<JsNodeId>,
 }
 
 /// The syntax a component was defined with.
@@ -840,9 +879,24 @@ pub(crate) struct SemanticModelData {
     /// template, or by a `<script src>` block.
     pub(crate) template_ref_uses_open: bool,
     pub(crate) js_nodes: Vec<JsNodeData>,
-    /// The nodes of the host document that rows of the model point to, in
-    /// the coordinates of the host document.
-    pub(crate) html_nodes: Vec<SyntaxNodePtr<HtmlLanguage>>,
+    /// The nodes of the host document that rows of the model point to.
+    pub(crate) html_nodes: Vec<HtmlNodeData>,
+}
+
+/// A node of the host document that a row of the model points to.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct HtmlNodeData {
+    /// The node, in the coordinates of the host document.
+    pub(crate) ptr: SyntaxNodePtr<HtmlLanguage>,
+    /// The row the node stands for.
+    pub(crate) row: HtmlRow,
+}
+
+/// The row of the model that a node of the host document stands for.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum HtmlRow {
+    Element(ElementId),
+    Attr(AttrId),
 }
 
 /// A JavaScript syntax node a row of the model stands for, by its range in the
@@ -860,6 +914,8 @@ pub(crate) struct JsNodeData {
     pub(crate) snippet: Option<SnippetId>,
     /// The node, in the coordinates of its tree.
     pub(crate) ptr: SyntaxNodePtr<JsLanguage>,
+    /// The first reference written at the node, if any.
+    pub(crate) reference: Option<ReferenceId>,
 }
 
 impl SemanticModelData {
@@ -1120,43 +1176,6 @@ impl VueSemanticModel {
             .iter()
             .position(|snippet| snippet.offset == offset)
             .map(|index| self.snippet(SnippetId::new(index)))
-    }
-
-    /// Returns the innermost element whose range in the host document
-    /// contains `host_range`.
-    pub fn element_at(&self, host_range: TextRange) -> Option<Element> {
-        // Elements are stored parents first, so the last match is the innermost.
-        self.data
-            .elements
-            .iter()
-            .rposition(|element| element.range.contains_range(host_range))
-            .map(|index| self.element(ElementId::new(index)))
-    }
-
-    /// Returns the attribute or directive written at `host_range`.
-    ///
-    /// `host_range` must be the whole attribute without its surrounding
-    /// whitespace, such as the range of `:id="'foo'"`.
-    pub fn attr_at(&self, host_range: TextRange) -> Option<Attr> {
-        // Attributes are stored in source order and do not overlap.
-        let index = self
-            .data
-            .attrs
-            .partition_point(|attr| attr.range.start() < host_range.start());
-        let attr = self.data.attrs.get(index)?;
-        (attr.range == host_range).then(|| Attr {
-            data: self.data.clone(),
-            id: AttrId::new(index),
-        })
-    }
-
-    /// Returns the reference written at `host_range`.
-    pub fn reference_at(&self, host_range: TextRange) -> Option<Reference> {
-        self.data
-            .references
-            .iter()
-            .position(|reference| reference.range == host_range)
-            .map(|index| self.reference(ReferenceId::new(index)))
     }
 
     /// Returns the elements at the root of the template block.
@@ -1853,6 +1872,18 @@ impl Symbol {
         self.row().node
     }
 
+    /// The node of the name, the one [`Self::range`] covers, for a
+    /// declaration made by a JavaScript binding: a top-level binding of a
+    /// script block, or a parameter of `v-slot`.
+    ///
+    /// Returns `None` for every other declaration. The name of a prop, for
+    /// example, is part of the syntax of [`Self::js_node`].
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn name_node(&self) -> Option<JsNodeId> {
+        self.row().name_node
+    }
+
     /// The references that resolve to this symbol.
     pub fn uses(&self) -> impl Iterator<Item = Reference> + '_ {
         self.data.uses[self.id.index()].iter().map(|id| Reference {
@@ -1898,6 +1929,17 @@ impl Reference {
     /// The range of the reference in the host document.
     pub fn host_range(&self) -> TextRange {
         self.row().range
+    }
+
+    /// The node of the reference, the one [`Self::range`] covers, for a
+    /// reference written in JavaScript.
+    ///
+    /// Returns `None` for a reference written in the markup of the template,
+    /// whose [`Self::site`] names its element or attribute instead.
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn js_node(&self) -> Option<JsNodeId> {
+        self.row().node
     }
 
     pub fn snippet(&self) -> Option<Snippet> {
@@ -2176,6 +2218,12 @@ impl Method {
 }
 
 impl Computed {
+    /// Returns `symbol` as a computed property, or `None` when it is not one.
+    pub fn from_symbol(symbol: Symbol) -> Option<Self> {
+        (symbol.kind() == SymbolKind::Computed || symbol.origin() == Origin::Computed)
+            .then_some(Self(symbol))
+    }
+
     /// The range of the getter function, in the coordinates of the tree that
     /// declares the computed property.
     pub fn getter_range(&self) -> Option<TextRange> {
@@ -2204,6 +2252,146 @@ impl Computed {
                 ..
             }
         )
+    }
+
+    /// Whether the value of the computed property is a function.
+    ///
+    /// The model reads what the getter returns: literals and other values
+    /// that are never functions, functions, and members of the component
+    /// instance read as `this.name` or called as `this.name()`, which it
+    /// follows to their declarations. It answers [`Tri::Unknown`] as soon as
+    /// one returned value is something else, such as a variable or a call of
+    /// an imported function.
+    pub fn value_is_function(&self) -> Tri {
+        let mut budget = MAX_VALUE_LOOKUPS;
+        self.0.data.value_is_function(self.0.id, false, &mut budget)
+    }
+}
+
+/// How many declarations [`Computed::value_is_function`] follows before it
+/// gives up. Getters can refer to each other in cycles.
+const MAX_VALUE_LOOKUPS: u8 = 32;
+
+impl SemanticModelData {
+    /// Whether the value of `symbol` is a function, or with `called`, whether
+    /// calling `symbol` returns one.
+    fn value_is_function(&self, symbol: SymbolId, called: bool, budget: &mut u8) -> Tri {
+        if *budget == 0 {
+            return Tri::Unknown;
+        }
+        *budget -= 1;
+        let row = &self.symbols[symbol.index()];
+        match (&row.detail, called) {
+            (Detail::Method { returns, .. }, true) => {
+                self.sources_are_functions(returns, row.component, budget)
+            }
+            (Detail::Method { .. }, false) => Tri::Yes,
+            (_, false) if row.kind == SymbolKind::Method => Tri::Yes,
+            (Detail::Computed { returns, .. }, false) => {
+                returns.as_ref().map_or(Tri::Unknown, |returns| {
+                    self.sources_are_functions(returns, row.component, budget)
+                })
+            }
+            // Data can be replaced after it is initialized, as in
+            // `this.name = fn`, so its initializer only tells when nothing
+            // else is assigned to it.
+            (Detail::Data { value }, false) if !self.may_be_reassigned(symbol) => {
+                self.sources_are_functions(value, row.component, budget)
+            }
+            // Data initialized with an object literal.
+            (Detail::Object { .. }, false) if !self.may_be_reassigned(symbol) => Tri::No,
+            (Detail::Prop(prop), false) => {
+                if prop.types.is_empty() || prop.types.contains(PropType::Unknown) {
+                    Tri::Unknown
+                } else if prop.types == PropType::Function {
+                    Tri::Yes
+                } else if prop.types.contains(PropType::Function) {
+                    Tri::Unknown
+                } else {
+                    Tri::No
+                }
+            }
+            _ => Tri::Unknown,
+        }
+    }
+
+    /// Whether a value may be assigned to `symbol` itself, as in
+    /// `this.name = value`. Assigning to a member of it, as in
+    /// `this.name.key = value`, does not count.
+    ///
+    /// The answer is `true` when the model cannot see every use of `symbol`.
+    fn may_be_reassigned(&self, symbol: SymbolId) -> bool {
+        let row = &self.symbols[symbol.index()];
+        let uses_open = row.component.is_some_and(|component| {
+            self.components[component.index()].uses_open[row.namespace.index()]
+        });
+        uses_open
+            || self.uses[symbol.index()].iter().any(|reference| {
+                let reference = &self.references[reference.index()];
+                reference.access == Access::Write && reference.path.is_empty()
+            })
+    }
+
+    /// Combines what each of `sources` is: [`Tri::Yes`] or [`Tri::No`] when
+    /// all of them agree, [`Tri::No`] when there are none.
+    fn sources_are_functions(
+        &self,
+        sources: &[ValueSource],
+        component: Option<ComponentId>,
+        budget: &mut u8,
+    ) -> Tri {
+        let mut result = None;
+        for source in sources {
+            let is_function = match source {
+                ValueSource::NotFunction => Tri::No,
+                ValueSource::Function => Tri::Yes,
+                ValueSource::Member(name) | ValueSource::MemberCall(name) => {
+                    match self.instance_member(component, name.text()) {
+                        Some(member) => self.value_is_function(
+                            member,
+                            matches!(source, ValueSource::MemberCall(_)),
+                            budget,
+                        ),
+                        None => Tri::Unknown,
+                    }
+                }
+                ValueSource::Unknown => Tri::Unknown,
+            };
+            if is_function == Tri::Unknown || result.is_some_and(|result| result != is_function) {
+                return Tri::Unknown;
+            }
+            result = Some(is_function);
+        }
+        result.unwrap_or(Tri::No)
+    }
+
+    /// Finds what the instance of `component` exposes as `name`, including
+    /// what the plain `<script>` block merged into it declares.
+    ///
+    /// Returns `None` when the declarations may be incomplete, because the
+    /// name could then belong to a declaration the model cannot see.
+    fn instance_member(&self, component: Option<ComponentId>, name: &str) -> Option<SymbolId> {
+        let component = &self.components[component?.index()];
+        let components = std::iter::once(component).chain(
+            component
+                .merged
+                .map(|merged| &self.components[merged.index()]),
+        );
+        let mut found = None;
+        for component in components {
+            if !component.decl_open[Namespace::Binding.index()].is_empty() {
+                return None;
+            }
+            found = found.or_else(|| {
+                component.symbols.iter().copied().find(|id| {
+                    let symbol = &self.symbols[id.index()];
+                    symbol.namespace == Namespace::Binding
+                        && symbol.parent.is_none()
+                        && symbol.name.text() == name
+                })
+            });
+        }
+        found
     }
 }
 
@@ -2476,11 +2664,7 @@ impl Component {
     /// Computed properties, declared in the `computed` option or with
     /// `computed()` at the top level of `<script setup>`.
     pub fn computed(&self) -> impl Iterator<Item = Computed> + '_ {
-        self.declarations()
-            .filter(|symbol| {
-                symbol.kind() == SymbolKind::Computed || symbol.origin() == Origin::Computed
-            })
-            .map(Computed)
+        self.declarations().filter_map(Computed::from_symbol)
     }
 
     pub fn methods(&self) -> impl Iterator<Item = Method> + '_ {

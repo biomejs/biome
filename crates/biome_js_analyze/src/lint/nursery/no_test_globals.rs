@@ -11,13 +11,14 @@ use biome_js_syntax::{
     JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_package::PackageJson;
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::no_test_globals::NoTestGlobalsOptions;
 use camino::Utf8PathBuf;
 use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 use crate::{
     JsRuleAction, lint::style::use_import_type::add_module_items, services::semantic::Semantic,
+    utils::import::append_specifier,
 };
 
 declare_lint_rule! {
@@ -68,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTestGlobals {
-        version: "next",
+        version: "2.6.9",
         name: "noTestGlobals",
         language: "js",
         recommended: false,
@@ -302,33 +303,6 @@ fn named_value_specifiers(
         return None;
     }
     Some(clause.named_specifiers()?.specifiers())
-}
-
-/// Returns a copy of `specifiers` with `specifier` added after the last
-/// specifier.
-///
-/// The new specifier takes over the trailing trivia of the specifier it
-/// follows, and a trailing comma stays at the end of the list.
-fn append_specifier(
-    specifiers: &JsNamedImportSpecifierList,
-    specifier: AnyJsNamedImportSpecifier,
-) -> Option<JsNamedImportSpecifierList> {
-    let Some(last) = specifiers.last() else {
-        return Some(make::js_named_import_specifier_list([specifier], []));
-    };
-    let last = last.ok()?;
-    let index = last.syntax().index();
-    let specifier =
-        specifier.with_trailing_trivia_pieces(last.syntax().last_trailing_trivia()?.pieces())?;
-    let last = last.with_trailing_trivia_pieces([])?;
-    JsNamedImportSpecifierList::cast(specifiers.syntax().clone().splice_slots(
-        index..=index,
-        [
-            Some(last.into_syntax().into()),
-            Some(make::token(T![,]).with_trailing_space().into()),
-            Some(specifier.into_syntax().into()),
-        ],
-    ))
 }
 
 #[cfg(test)]

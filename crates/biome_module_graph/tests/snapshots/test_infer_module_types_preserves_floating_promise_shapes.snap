@@ -66,7 +66,7 @@ Binding sneakyObject "sneakyObject" => Object {
           params: []
           type_args: []
         }
-        returns: instanceof Promise
+        returns: instanceof Promise<unknown>
       }
   ]
 }
@@ -80,12 +80,12 @@ Expression "{ get something() { return new Promise((_, reject) => reject(\"value
           params: []
           type_args: []
         }
-        returns: instanceof Promise
+        returns: instanceof Promise<unknown>
       }
   ]
 }
 
-Expression "new Promise((_, reject) => reject(\"value\"))" => instanceof Promise
+Expression "new Promise((_, reject) => reject(\"value\"))" => instanceof Promise<unknown>
 
 Expression "Promise" => class "Promise" {
   extends: none
@@ -101,16 +101,40 @@ Expression "(_, reject) => reject(\"value\")" => sync Function {
     ]
     type_args: []
   }
-  returns: unknown
+  returns: void
 }
 
-Binding _ "_" => unknown
+Binding _ "_" => sync Function {
+  accepts: {
+    params: [
+      required value: T | instanceof PromiseLike<T>
+    ]
+    type_args: []
+  }
+  returns: void
+}
 
-Binding reject "reject" => unknown
+Binding reject "reject" => sync Function {
+  accepts: {
+    params: [
+      optional reason: any
+    ]
+    type_args: []
+  }
+  returns: void
+}
 
-Expression "reject" => unknown
+Expression "reject" => sync Function {
+  accepts: {
+    params: [
+      optional reason: any
+    ]
+    type_args: []
+  }
+  returns: void
+}
 
-Expression "reject(\"value\")" => unknown
+Expression "reject(\"value\")" => void
 
 Expression "\"value\"" => string: value
 
@@ -290,7 +314,7 @@ Expression "promiseLike" => async Function "promiseLike" {
 
 Expression "promiseLike()" => instanceof Cheating<number: 1>
 
-Binding getter "getter" => instanceof Promise
+Binding getter "getter" => instanceof Promise<unknown>
 
 Expression "sneakyObject" => Object {
   prototype: No prototype
@@ -301,12 +325,12 @@ Expression "sneakyObject" => Object {
           params: []
           type_args: []
         }
-        returns: instanceof Promise
+        returns: instanceof Promise<unknown>
       }
   ]
 }
 
-Expression "sneakyObject.something" => instanceof Promise
+Expression "sneakyObject.something" => instanceof Promise<unknown>
 
 Binding wrapped "wrapped" => instanceof Promise<void>
 
@@ -376,7 +400,7 @@ Expression "maybeDoWork" => typeof async Function "doWork" {
 
 Expression "maybeDoWork?.()" => instanceof Promise<void> | undefined
 
-Binding globalChain "globalChain" => instanceof Promise<unknown>
+Binding globalChain "globalChain" => instanceof Promise<never>
 
 Expression "globalThis" => globalThis
 
@@ -386,15 +410,17 @@ Expression "globalThis.Promise" => class "Promise" {
   type_args: [T]
 }
 
-Expression "globalThis.Promise.reject" => sync Function "Promise.reject" {
+Expression "globalThis.Promise.reject" => sync Function "reject" {
   accepts: {
-    params: []
-    type_args: []
+    params: [
+      optional reason: any
+    ]
+    type_args: [T = never]
   }
-  returns: instanceof Promise
+  returns: instanceof Promise<T = never>
 }
 
-Expression "globalThis.Promise.reject(\"value\")" => instanceof Promise
+Expression "globalThis.Promise.reject(\"value\")" => instanceof Promise<never>
 
 Expression "globalThis.Promise.reject(\"value\").finally" => sync Function "finally" {
   accepts: {
@@ -409,16 +435,16 @@ Expression "globalThis.Promise.reject(\"value\").finally" => sync Function "fina
     ]
     type_args: []
   }
-  returns: instanceof Promise<unknown>
+  returns: instanceof Promise<never>
 }
 
-Expression "globalThis.Promise.reject(\"value\").finally()" => instanceof Promise<unknown>
+Expression "globalThis.Promise.reject(\"value\").finally()" => instanceof Promise<never>
 
 Expression "\"value\"" => string: value
 
 Expression "await new Promise((resolve) => resolve(\"value\"))" => unknown
 
-Expression "new Promise((resolve) => resolve(\"value\"))" => instanceof Promise
+Expression "new Promise((resolve) => resolve(\"value\"))" => instanceof Promise<unknown>
 
 Expression "Promise" => class "Promise" {
   extends: none
@@ -433,14 +459,30 @@ Expression "(resolve) => resolve(\"value\")" => sync Function {
     ]
     type_args: []
   }
-  returns: unknown
+  returns: void
 }
 
-Binding resolve "resolve" => unknown
+Binding resolve "resolve" => sync Function {
+  accepts: {
+    params: [
+      required value: T | instanceof PromiseLike<T>
+    ]
+    type_args: []
+  }
+  returns: void
+}
 
-Expression "resolve" => unknown
+Expression "resolve" => sync Function {
+  accepts: {
+    params: [
+      required value: T | instanceof PromiseLike<T>
+    ]
+    type_args: []
+  }
+  returns: void
+}
 
-Expression "resolve(\"value\")" => unknown
+Expression "resolve(\"value\")" => void
 
 Expression "\"value\"" => string: value
 ```

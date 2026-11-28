@@ -36,6 +36,9 @@
 //! When a rule needs the syntax anyway, to build a fix or to read what the
 //! model does not describe, [`AnalyzedVueModel::node`] returns the node a row
 //! of the model stands for in constant time.
+//! When a rule matched the node of a name instead,
+//! [`AnalyzedVueModel::reference_of`] returns the reference written there,
+//! also in constant time.
 //!
 //! A query for another kind of declaration is one `define_vue_query!` call
 //! and one loop in [`VueSemanticVisitor`]. References have their own visitors,
@@ -596,5 +599,108 @@ impl EarlierCondition {
     /// [`is_same_condition`].
     pub fn is_same_condition(&self, expression: &AnyJsExpression) -> bool {
         is_same_condition(&self.0, expression)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::VueSemanticService;
+    use crate::services::semantic::SemanticModelBuilderVisitor;
+    use crate::suppression_action::JsSuppressionAction;
+    use crate::{JsSuppression, METADATA};
+    use biome_analyze::{
+        Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, MatchQueryParams, Phases,
+        QueryMatcher, ServiceBag, Visitor, VisitorContext, VisitorStartContext,
+    };
+    use biome_js_parser::JsParserOptions;
+    use biome_js_syntax::{JsLanguage, JsName, JsStringLiteralExpression, JsSyntaxNode};
+    use biome_languages::JsFileSource;
+    use biome_rowan::{AstNode, WalkEvent};
+    use std::cell::RefCell;
+    use std::ops::{ControlFlow, Deref};
+
+    const SOURCE: &str = r#"import { defineComponent } from "vue";
+export default defineComponent({
+  props: ["title"],
+  emits: ["change"],
+  methods: { rename() { this.$emit("change", this.title); } },
+});
+"#;
+
+    /// Looks up the reference written at each member name and string of the
+    /// analyzed tree through [`AnalyzedVueModel`](super::AnalyzedVueModel), as
+    /// a rule does.
+    struct ReferenceProbe<'a> {
+        references: &'a RefCell<Vec<(String, String)>>,
+    }
+
+    impl Visitor for ReferenceProbe<'_> {
+        type Language = JsLanguage;
+
+        fn start(&mut self, mut ctx: VisitorStartContext<JsLanguage>) {
+            VueSemanticService::insert_into(&mut ctx);
+            let service: &VueSemanticService = ctx.services.get_service().expect("a service");
+            let model = service.model();
+            for node in ctx.root.syntax().descendants() {
+                let reference = if let Some(name) = JsName::cast_ref(&node) {
+                    model.reference_of(&name)
+                } else if let Some(string) = JsStringLiteralExpression::cast_ref(&node) {
+                    model.reference_of(&string)
+                } else {
+                    None
+                };
+                let Some(reference) = reference else {
+                    continue;
+                };
+                assert_eq!(model.node(&reference), Some(node.clone()));
+                self.references.borrow_mut().push((
+                    node.text_trimmed().to_string(),
+                    reference.name().to_string(),
+                ));
+            }
+        }
+
+        fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
+    }
+
+    struct NoMatcher;
+
+    impl QueryMatcher<JsLanguage> for NoMatcher {
+        fn match_query(&mut self, _: MatchQueryParams<JsLanguage>) {}
+    }
+
+    #[test]
+    fn nodes_and_references_of_the_analyzed_tree_resolve_to_each_other() {
+        let source_type = JsFileSource::js_module();
+        let root = biome_js_parser::parse(SOURCE, source_type, JsParserOptions::default()).tree();
+        let mut services = ServiceBag::default();
+        services.insert_service(source_type);
+        let found = RefCell::new(Vec::new());
+        let mut emit = |_: &dyn AnalyzerSignal<JsLanguage>| ControlFlow::<()>::Continue(());
+        let mut analyzer = Analyzer::new(
+            METADATA.deref(),
+            NoMatcher,
+            Box::new(JsSuppression),
+            Box::new(JsSuppressionAction),
+            &mut emit,
+        );
+        analyzer.add_visitor(Phases::Syntax, Box::new(SemanticModelBuilderVisitor));
+        analyzer.add_visitor(
+            Phases::Semantic,
+            Box::new(ReferenceProbe { references: &found }),
+        );
+        analyzer.run(AnalyzerContext {
+            root,
+            services,
+            range: None,
+            options: &AnalyzerOptions::default(),
+        });
+        // The strings of `props` and `emits` declare names, and `$emit` is
+        // not a name of the component, so the model has no reference there.
+        assert_eq!(
+            found.into_inner(),
+            [("\"change\"", "change"), ("title", "title")]
+                .map(|(node, name)| (node.to_string(), name.to_string()))
+        );
     }
 }

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::FileSystem;
+use camino::Utf8Path;
 use crossbeam::channel::{Receiver, unbounded};
 use tokio::sync::watch;
 
@@ -29,6 +30,7 @@ pub fn setup_disposable_workspace_and_open_project(
 ) -> (LocalWorkspace, ProjectKey) {
     let (watcher_tx, _) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
+    let project_path = fs.biome_path(Utf8Path::new(project_path));
     let workspace = LocalWorkspace::new(
         Arc::new(fs),
         watcher_tx,
@@ -38,7 +40,7 @@ pub fn setup_disposable_workspace_and_open_project(
     );
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
-            path: BiomePath::new(project_path),
+            path: project_path,
             open_uninitialized: true,
         })
         .expect("can open project");
@@ -58,6 +60,7 @@ pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_recei
 ) -> (LocalWorkspace, ProjectKey, Receiver<WatcherInstruction>) {
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
+    let project_path = fs.biome_path(Utf8Path::new(project_path));
     let workspace = LocalWorkspace::new(
         Arc::new(fs),
         watcher_tx,
@@ -67,7 +70,7 @@ pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_recei
     );
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
-            path: BiomePath::new(project_path),
+            path: project_path,
             open_uninitialized: true,
         })
         .expect("can open project");

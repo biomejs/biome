@@ -306,7 +306,13 @@ impl FormatHtmlElement {
         if should_format_embedded_nodes {
             write!(f, [children.format()])?;
         } else if should_be_verbatim {
-            write!(f, [FormatHtmlVerbatimElementChildren(node)])?;
+            write!(
+                f,
+                [FormatHtmlVerbatimElementChildren {
+                    node,
+                    preserve_line_endings: has_embedded_content,
+                }]
+            )?;
         } else {
             // Use BestFitting layout to allow the formatter to choose between
             // flat and expanded versions. The `if_group_breaks`/`if_group_fits_on_line`

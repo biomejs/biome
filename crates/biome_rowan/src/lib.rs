@@ -45,11 +45,11 @@ pub use crate::{
     syntax::{
         AnySyntaxNode, BorrowedToken, BorrowedTokensIterator, BorrowedTokensWithCommentsIterator,
         BorrowedTriviaPiece, BorrowedTriviaPiecesIterator, ChainTriviaPiecesIterator,
-        EmbeddedSendNode, Language, SendNode, SyntaxElement, SyntaxElementChildren, SyntaxKind,
-        SyntaxList, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset,
-        SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken, SyntaxTokenWithOffset,
-        SyntaxTriviaPiece, SyntaxTriviaPieceComments, TriviaPiece, TriviaPieceKind,
-        VisitNodeSignal, chain_trivia_pieces, trim_leading_trivia_pieces,
+        EmbeddedSendNode, Language, RewriteSignal, SendNode, SyntaxElement, SyntaxElementChildren,
+        SyntaxKind, SyntaxList, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
+        SyntaxNodeWithOffset, SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken,
+        SyntaxTokenWithOffset, SyntaxTriviaPiece, SyntaxTriviaPieceComments, TriviaPiece,
+        TriviaPieceKind, VisitNodeSignal, chain_trivia_pieces, trim_leading_trivia_pieces,
         trim_trailing_trivia_pieces,
     },
     syntax_factory::*,
@@ -60,7 +60,7 @@ pub use crate::{
     utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent},
 };
 
-pub(crate) use crate::green::{GreenNode, GreenNodeData, GreenToken, GreenTokenData};
+pub(crate) use crate::green::{GreenNode, GreenNodeRef, GreenToken, GreenTokenRef};
 
 #[cfg(feature = "countme")]
 pub fn check_live() -> Option<String> {

@@ -115,7 +115,7 @@ impl Rule for UseDeprecatedDate {
             return Some((DeprecatedDateIssue::Invalid, node.clone()));
         }
 
-        let now = Timestamp::now().to_zoned(TimeZone::UTC).date();
+        let now = Timestamp::now().to_zoned_datetime(TimeZone::UTC).date();
 
         if now > due_date.ok()? {
             return Some((DeprecatedDateIssue::Due, node.clone()));

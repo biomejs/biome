@@ -768,26 +768,28 @@ fn fs_error_dereferenced_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
-        .unwrap()
-        .join("lint_rome_test_broken_symlink");
-    let subdir_path = root_path.join("prefix");
+    let temp_path = Utf8PathBuf::from_path_buf(temp_dir()).unwrap();
+    let root_path = temp_path.join("lint_rome_test_broken_symlink");
+    let target_path = temp_path.join("lint_rome_test_broken_symlink_target");
 
     let _ = remove_dir_all(&root_path);
+    let _ = remove_dir_all(&target_path);
     create_dir(&root_path).unwrap();
-    create_dir(subdir_path).unwrap();
+    create_dir(&target_path).unwrap();
 
     #[cfg(target_family = "unix")]
     {
-        symlink(root_path.join("null"), root_path.join("broken_symlink")).unwrap();
+        symlink(target_path.join("null"), target_path.join("broken_symlink")).unwrap();
+        symlink(&target_path, root_path.join("linked")).unwrap();
     }
 
     #[cfg(target_os = "windows")]
     {
         check_windows_symlink!(symlink_file(
-            root_path.join("null"),
-            root_path.join("broken_symlink")
+            target_path.join("null"),
+            target_path.join("broken_symlink")
         ));
+        check_windows_symlink!(symlink_dir(&target_path, root_path.join("linked")));
     }
 
     let result = run_cli_with_dyn_fs(
@@ -797,8 +799,17 @@ fn fs_error_dereferenced_symlink() {
     );
 
     remove_dir_all(root_path).unwrap();
+    remove_dir_all(target_path).unwrap();
 
     assert!(result.is_err(), "run_cli returned {result:?}");
+    let emitted = console
+        .out_buffer
+        .iter()
+        .map(|message| markup_to_string(markup!({ &message.content })))
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(emitted.contains("linked/broken_symlink"), "{emitted}");
+    assert!(!emitted.contains("broken_symlink_target"), "{emitted}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1215,6 +1226,85 @@ fn include_files_in_symlinked_subdir() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "include_files_in_symlinked_subdir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// The temporary directory on Windows is often spelled differently from its canonical path, for
+// example with a short 8.3 name. Every path below it is then an alias, so the direct path doesn't
+// take precedence and the snapshot would differ.
+#[cfg(target_family = "unix")]
+#[test]
+fn reports_file_reached_directly_and_through_symlinked_directory_once() {
+    let mut fs = TemporaryFs::new("reports_file_reached_directly_and_through_symlink_once");
+    let mut console = BufferConsole::default();
+    fs.create_file("biome.json", "{}");
+    fs.create_file("src/file.js", APPLY_SUGGESTED_BEFORE);
+    symlink(
+        fs.working_directory.join("src"),
+        fs.working_directory.join("linked"),
+    )
+    .unwrap();
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.working_directory.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_file_reached_directly_and_through_symlinked_directory_once",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn processes_extensionless_file_symlink_using_logical_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("processes_extensionless_file_symlink_using_logical_path");
+    let project_path = root_path.join("project");
+    let shared_path = root_path.join("shared");
+    let _ = remove_dir_all(&root_path);
+    create_dir_all(&project_path).unwrap();
+    create_dir_all(&shared_path).unwrap();
+
+    let target_path = shared_path.join("file.js");
+    File::create(&target_path)
+        .unwrap()
+        .write_all(NO_DEBUGGER.as_bytes())
+        .unwrap();
+    let symlink_path = project_path.join("script");
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(&target_path, &symlink_path).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(&target_path, &symlink_path));
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
+        &mut console,
+        Args::from(["lint", symlink_path.as_ref()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "processes_extensionless_file_symlink_using_logical_path",
         fs,
         console,
         result,

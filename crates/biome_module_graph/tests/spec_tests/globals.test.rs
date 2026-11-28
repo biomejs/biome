@@ -550,6 +550,105 @@ fn lowered_constructors_preserve_explicit_collection_arguments() {
 }
 
 #[test]
+fn promise_constructor_leaves_uninferred_value_type_unknown() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const promise = new Promise((resolve) => resolve("value"));
+        export const awaited = await new Promise((resolve) => resolve("value"));
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for (name, expected) in [
+        ("promise", "instanceof Promise<unknown>"),
+        ("awaited", "unknown"),
+    ] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = normalize_type(&db, module, value);
+        assert_eq!(format_inferred_type(&db, value), expected, "{name}");
+    }
+}
+
+#[test]
+fn promise_method_approximations_return_canonical_promise_instances() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const promise: Promise<number>;
+        interface Query<T> extends Promise<T> {}
+        declare const query: Query<number>;
+        export const resolve = Promise.resolve;
+        export const then = promise.then;
+        export const caught = promise.catch;
+        export const settled = promise.finally;
+        export const inherited = query.then;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    // Substituting into an instance visits every member of an expanded target
+    // class, so these return types must name `Promise` through its handle.
+    for name in ["resolve", "then", "caught", "settled", "inherited"] {
+        let returned = inferred_function_return_ty_by_name(&db, module, inferred, name).unwrap();
+        let InferredTypeData::InstanceOf(instance) = returned else {
+            panic!("{name} must return an instance, got {returned:?}")
+        };
+        assert_eq!(
+            instance.ty(&db),
+            InferredTypeData::promise_class(),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn promise_subtypes_infer_handler_results() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Query<T> extends Promise<T> {}
+        declare const query: Query<number>;
+        class Deferred<T> extends Promise<T> {}
+        declare const deferred: Deferred<number>;
+        declare const either: Promise<number> | Promise<string>;
+        interface Rows<Row> extends Promise<Row[]> {}
+        declare const rows: Rows<string>;
+        export const caughtRows = await rows.catch(() => null);
+        export const caughtQuery = await query.catch(() => null);
+        export const caughtDeferred = await deferred.catch(() => null);
+        export const caughtEither = await either.catch(() => null);
+        export const uncaught = await query.catch();
+        export const rejected = await query.then(undefined, () => null);
+        export const mapped = await query.then((value) => String(value));
+        export const settled = await query.finally(() => {});
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for (name, expected) in [
+        ("caughtRows", "instanceof Array<string> | null"),
+        ("caughtQuery", "number | null"),
+        ("caughtDeferred", "number | null"),
+        ("caughtEither", "number | null | string"),
+        ("uncaught", "number"),
+        ("rejected", "number | null"),
+        ("mapped", "string"),
+        ("settled", "number"),
+    ] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = normalize_type(&db, module, value);
+        assert_eq!(format_inferred_type(&db, value), expected, "{name}");
+    }
+}
+
+#[test]
 fn regexp_declarations_infer_results_and_constructor_calls() {
     let fs = MemoryFileSystem::default();
     fs.insert(

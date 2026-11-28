@@ -128,7 +128,7 @@ invalidComments.js:6:30 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  �
   i Unsafe fix: Await the value directly.
   
     6 │ const·b·=·(await·Promise.all([read(/*·keep·*/)]))[0];
-      │           -      -------------               --- --- 
+      │           -      -------------                ------ 
 
 ```
 

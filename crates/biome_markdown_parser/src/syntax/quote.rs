@@ -40,6 +40,7 @@ use biome_parser::{Parser, SyntaxFeature};
 use biome_rowan::TextSize;
 use std::rc::Rc;
 
+use crate::lexer::MarkdownReLexContext;
 use crate::parser::OpenQuote;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
@@ -266,6 +267,25 @@ fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
 
 fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
     force_relex_thematic_break_after_quote_prefix(p);
+    relex_blank_line_rest_after_quote_prefix(p);
+}
+
+/// After consuming a quote prefix, re-lexes a rest of the line made only of
+/// spaces and tabs as one whitespace `MD_TEXTUAL_LITERAL`, so the line reads
+/// as blank. Without this, two or more trailing spaces lex as an
+/// `MD_HARD_LINE_LITERAL` that also holds the newline.
+///
+/// Only the lexer can see where the whitespace run ends, but only the parser
+/// knows that the `>` before it is a quote marker rather than text, so the
+/// parser requests the re-lex. It runs only when the first token after the
+/// prefix is whitespace or a spaces-based `MD_HARD_LINE_LITERAL`.
+fn relex_blank_line_rest_after_quote_prefix(p: &mut MarkdownParser) {
+    // A backslash hard line break (`\` before a newline) is content.
+    let may_be_blank = (p.at(MD_HARD_LINE_LITERAL) && p.cur_text().starts_with(' '))
+        || (p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()));
+    if may_be_blank {
+        p.re_lex(MarkdownReLexContext::BlankLineRest);
+    }
 }
 
 /// Check if `text` could be a thematic break: all non-whitespace bytes must be
@@ -594,6 +614,19 @@ impl ParseNodeList for QuoteBlockList {
 
         if p.at(NEWLINE) {
             return self.handle_newline(p);
+        }
+
+        // A line with only spaces or tabs after the prefix is blank, like a
+        // bare `>` line, so it must not start an indented code block.
+        if p.at(MD_TEXTUAL_LITERAL)
+            && is_whitespace_only(p.cur_text())
+            && (p.nth_at(1, NEWLINE) || p.nth_at(1, T![EOF]))
+        {
+            p.consume_as_whitespace_trivia();
+            if p.at(NEWLINE) {
+                return self.handle_newline(p);
+            }
+            return Absent;
         }
 
         if at_quote_indented_code_start(p) {
@@ -973,6 +1006,7 @@ fn consume_quote_prefix_impl(
     if set_virtual_line_start {
         p.set_virtual_line_start();
     }
+    relex_blank_line_rest_after_quote_prefix(p);
 
     true
 }

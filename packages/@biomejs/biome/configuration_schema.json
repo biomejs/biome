@@ -548,6 +548,7 @@
 			]
 		},
 		"Bool": { "type": "boolean" },
+		"BooleanPropMode": { "type": "string", "enum": ["implicit", "explicit"] },
 		"BooleanPropStyle": {
 			"oneOf": [
 				{
@@ -2050,6 +2051,26 @@
 				}
 			]
 		},
+		"DefaultExportStyle": {
+			"description": "Where a default-exported function or class is declared.",
+			"oneOf": [
+				{
+					"description": "Require the declaration inside the `export default` statement. This is the default.",
+					"type": "string",
+					"const": "inline"
+				},
+				{
+					"description": "Require a separate declaration, followed by `export default` with its name.\nFunctions must be declared as `const` arrow functions.",
+					"type": "string",
+					"const": "separate"
+				},
+				{
+					"description": "Don't check this kind of declaration.",
+					"type": "string",
+					"const": "ignore"
+				}
+			]
+		},
 		"DefineEmitsDeclarationStyle": {
 			"oneOf": [
 				{
@@ -3526,6 +3547,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoAmdConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAmdOptions" }
+			]
+		},
+		"NoAmdOptions": { "type": "object", "additionalProperties": false },
 		"NoApproximativeNumericConstantConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3573,6 +3601,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArrayDeleteConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArrayDeleteOptions" }
+			]
+		},
+		"NoArrayDeleteOptions": { "type": "object", "additionalProperties": false },
 		"NoArrayForEachConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3603,6 +3638,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArrayReduceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArrayReduceOptions" }
+			]
+		},
+		"NoArrayReduceOptions": { "type": "object", "additionalProperties": false },
 		"NoArraySortForMinMaxConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3620,6 +3662,16 @@
 			]
 		},
 		"NoAssignInExpressionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroComponentDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroComponentDefaultExportOptions" }
+			]
+		},
+		"NoAstroComponentDefaultExportOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3790,6 +3842,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoBreakInNestedLoopConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBreakInNestedLoopOptions" }
+			]
+		},
+		"NoBreakInNestedLoopOptions": {
+			"type": "object",
+			"properties": {
+				"checkContinue": {
+					"description": "Also report `continue` statements without a label inside nested loops and inside\n`switch` statements in loops (default: false).",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoBufferConstructorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3807,6 +3875,16 @@
 			]
 		},
 		"NoBunModulesOptions": { "type": "object", "additionalProperties": false },
+		"NoCanvasToImageConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoCanvasToImageOptions" }
+			]
+		},
+		"NoCanvasToImageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoCatchAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4037,6 +4115,46 @@
 			]
 		},
 		"NoControlCharactersInRegexOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoConvexDuplicateIndexesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexDuplicateIndexesOptions" }
+			]
+		},
+		"NoConvexDuplicateIndexesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoConvexProcessEnvConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexProcessEnvOptions" }
+			]
+		},
+		"NoConvexProcessEnvOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoConvexQueryFilterConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexQueryFilterOptions" }
+			]
+		},
+		"NoConvexQueryFilterOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoConvexTopOfHourCronsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConvexTopOfHourCronsOptions" }
+			]
+		},
+		"NoConvexTopOfHourCronsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4390,6 +4508,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateExportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateExportsOptions" }
+			]
+		},
+		"NoDuplicateExportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateFieldDefinitionNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4427,6 +4555,16 @@
 			]
 		},
 		"NoDuplicateGraphqlOperationNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateIfBranchesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateIfBranchesOptions" }
+			]
+		},
+		"NoDuplicateIfBranchesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4995,6 +5133,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExpectToHaveBeenCalledOnceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExpectToHaveBeenCalledOnceOptions" }
+			]
+		},
+		"NoExpectToHaveBeenCalledOnceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoExplicitAnyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5236,6 +5384,16 @@
 			]
 		},
 		"NoImgElementOptions": { "type": "object", "additionalProperties": false },
+		"NoImmediateMutationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoImmediateMutationOptions" }
+			]
+		},
+		"NoImmediateMutationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoImplicitAnyLetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5847,6 +6005,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMutableExportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMutableExportsOptions" }
+			]
+		},
+		"NoMutableExportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNamespaceConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6121,6 +6289,16 @@
 		},
 		"NoOctalEscapeOptions": { "type": "object", "additionalProperties": false },
 		"NoOctalOptions": { "type": "object", "additionalProperties": false },
+		"NoOuterScopeInIsolatedFunctionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoOuterScopeInIsolatedFunctionsOptions" }
+			]
+		},
+		"NoOuterScopeInIsolatedFunctionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoParameterAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6740,6 +6918,16 @@
 			]
 		},
 		"NoScriptUrlOptions": { "type": "object", "additionalProperties": false },
+		"NoScssDeprecatedColorFunctionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoScssDeprecatedColorFunctionsOptions" }
+			]
+		},
+		"NoScssDeprecatedColorFunctionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoScssNullComparisonConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7214,6 +7402,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTailwindLegacyImportantConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindLegacyImportantOptions" }
+			]
+		},
+		"NoTailwindLegacyImportantOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTailwindLegacyUtilitiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7292,6 +7490,16 @@
 			]
 		},
 		"NoTanstackQueryRestDestructuringOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoTanstackQueryUnstableDepsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTanstackQueryUnstableDepsOptions" }
+			]
+		},
+		"NoTanstackQueryUnstableDepsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -7832,6 +8040,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeSqliteInterpolationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeSqliteInterpolationOptions" }
+			]
+		},
+		"NoUnsafeSqliteInterpolationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnsafeTypeAssertionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8135,6 +8353,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessDefaultAssignmentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessDefaultAssignmentOptions" }
+			]
+		},
+		"NoUselessDefaultAssignmentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessElseConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8251,6 +8479,16 @@
 			]
 		},
 		"NoUselessQualifierOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUselessReExportAllConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessReExportAllOptions" }
+			]
+		},
+		"NoUselessReExportAllOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -8526,6 +8764,26 @@
 			]
 		},
 		"NoVueComputedPropertiesInDataOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoVueComputedPropertyCallConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueComputedPropertyCallOptions" }
+			]
+		},
+		"NoVueComputedPropertyCallOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoVueContentOutsideBlockConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueContentOutsideBlockOptions" }
+			]
+		},
+		"NoVueContentOutsideBlockOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -8887,6 +9145,16 @@
 			]
 		},
 		"NoVueMutatingPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoVueNegationElseConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueNegationElseOptions" }
+			]
+		},
+		"NoVueNegationElseOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -9392,10 +9660,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noAmd": {
+					"description": "Disallow AMD require() and define() calls.\nSee https://biomejs.dev/linter/rules/no-amd",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAmdConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArgumentsCallerOrCallee": {
 					"description": "Disallow the use of arguments.caller and arguments.callee.\nSee https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoArgumentsCallerOrCalleeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noArrayDelete": {
+					"description": "Disallow using the delete operator on array elements.\nSee https://biomejs.dev/linter/rules/no-array-delete",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArrayDeleteConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9413,10 +9695,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noArrayReduce": {
+					"description": "Disallow the reduce() and reduceRight() array methods.\nSee https://biomejs.dev/linter/rules/no-array-reduce",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArrayReduceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArraySortForMinMax": {
 					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoArraySortForMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroComponentDefaultExport": {
+					"description": "Disallow runtime default exports in Astro component frontmatter.\nSee https://biomejs.dev/linter/rules/no-astro-component-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroComponentDefaultExportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9462,6 +9758,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBreakInNestedLoop": {
+					"description": "Disallow break statements inside nested loops and inside switch statements in loops.\nSee https://biomejs.dev/linter/rules/no-break-in-nested-loop",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBreakInNestedLoopConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBufferConstructor": {
 					"description": "Disallow the deprecated Buffer() constructor in Node.js.\nSee https://biomejs.dev/linter/rules/no-buffer-constructor",
 					"anyOf": [
@@ -9473,6 +9776,13 @@
 					"description": "Forbid the use of Bun builtin modules.\nSee https://biomejs.dev/linter/rules/no-bun-modules",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBunModulesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noCanvasToImage": {
+					"description": "Disallow converting a canvas to an image only to draw it onto another canvas.\nSee https://biomejs.dev/linter/rules/no-canvas-to-image",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoCanvasToImageConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9504,6 +9814,34 @@
 						{ "type": "null" }
 					]
 				},
+				"noConvexDuplicateIndexes": {
+					"description": "Disallow Convex database indexes whose fields are the first fields of another index on the same table.\nSee https://biomejs.dev/linter/rules/no-convex-duplicate-indexes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexDuplicateIndexesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConvexProcessEnv": {
+					"description": "Disallow process.env in Convex functions.\nSee https://biomejs.dev/linter/rules/no-convex-process-env",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexProcessEnvConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConvexQueryFilter": {
+					"description": "Disallow calling .filter() on a Convex database query.\nSee https://biomejs.dev/linter/rules/no-convex-query-filter",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexQueryFilterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConvexTopOfHourCrons": {
+					"description": "Disallow scheduling Convex cron jobs at the start of the hour.\nSee https://biomejs.dev/linter/rules/no-convex-top-of-hour-crons",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConvexTopOfHourCronsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDanglingUnderscore": {
 					"description": "Disallow names that start or end with an underscore.\nSee https://biomejs.dev/linter/rules/no-dangling-underscore",
 					"anyOf": [
@@ -9531,6 +9869,20 @@
 						{
 							"$ref": "#/$defs/NoDrizzleDbObjectInsideTransactionConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateExports": {
+					"description": "Disallow exporting the same name more than once.\nSee https://biomejs.dev/linter/rules/no-duplicate-exports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateExportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateIfBranches": {
+					"description": "Disallow two branches next to each other in an if statement from running the same code.\nSee https://biomejs.dev/linter/rules/no-duplicate-if-branches",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateIfBranchesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9597,6 +9949,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExpectToHaveBeenCalledOnce": {
+					"description": "Disallow toHaveBeenCalledOnce() in favor of toHaveBeenCalledTimes(1).\nSee https://biomejs.dev/linter/rules/no-expect-to-have-been-called-once",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExpectToHaveBeenCalledOnceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtendNative": {
 					"description": "Disallow extending the prototype of built-in objects.\nSee https://biomejs.dev/linter/rules/no-extend-native",
 					"anyOf": [
@@ -9608,6 +9967,13 @@
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoFloatingPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImmediateMutation": {
+					"description": "Disallow changing a value right after it is created.\nSee https://biomejs.dev/linter/rules/no-immediate-mutation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoImmediateMutationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9758,6 +10124,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMutableExports": {
+					"description": "Disallow exporting variables declared with let or var.\nSee https://biomejs.dev/linter/rules/no-mutable-exports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMutableExportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNegatedArrayPredicate": {
 					"description": "Disallow negating the result of Array#some() or Array#every().\nSee https://biomejs.dev/linter/rules/no-negated-array-predicate",
 					"anyOf": [
@@ -9856,6 +10229,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noOuterScopeInIsolatedFunctions": {
+					"description": "Disallow using variables, this, and super from outside an isolated function.\nSee https://biomejs.dev/linter/rules/no-outer-scope-in-isolated-functions",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoOuterScopeInIsolatedFunctionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPathConcat": {
 					"description": "Disallow building file paths and URLs by joining strings to __dirname, __filename, or import.meta values.\nSee https://biomejs.dev/linter/rules/no-path-concat",
 					"anyOf": [
@@ -9946,6 +10326,13 @@
 					"description": "Disallow return statements in tests.\nSee https://biomejs.dev/linter/rules/no-return-in-test",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noScssDeprecatedColorFunctions": {
+					"description": "Disallow the deprecated Sass functions that read one channel of a color.\nSee https://biomejs.dev/linter/rules/no-scss-deprecated-color-functions",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScssDeprecatedColorFunctionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10119,6 +10506,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTailwindLegacyImportant": {
+					"description": "Disallow the leading ! important modifier in Tailwind CSS classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-legacy-important",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindLegacyImportantConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noTailwindLegacyUtilities": {
 					"description": "Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.\nSee https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities",
 					"anyOf": [
@@ -10151,6 +10545,13 @@
 					"description": "Disallow rest destructuring and object spread on TanStack Query results.\nSee https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTanstackQueryRestDestructuringConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTanstackQueryUnstableDeps": {
+					"description": "Disallow using the result of a TanStack Query hook as a React hook dependency.\nSee https://biomejs.dev/linter/rules/no-tanstack-query-unstable-deps",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTanstackQueryUnstableDepsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10266,6 +10667,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnsafeSqliteInterpolation": {
+					"description": "Disallow inserting values into SQL strings passed to the exec() and prepare() methods of node:sqlite databases.\nSee https://biomejs.dev/linter/rules/no-unsafe-sqlite-interpolation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeSqliteInterpolationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafeTypeAssertion": {
 					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
 					"anyOf": [
@@ -10322,6 +10730,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessDefaultAssignment": {
+					"description": "Disallow default values that can never be used.\nSee https://biomejs.dev/linter/rules/no-useless-default-assignment",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessDefaultAssignmentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessFallbackInSpread": {
 					"description": "Disallow empty object fallbacks when spreading a value into an object.\nSee https://biomejs.dev/linter/rules/no-useless-fallback-in-spread",
 					"anyOf": [
@@ -10356,6 +10771,13 @@
 					"description": "Disallow unnecessary namespace and enum qualifiers.\nSee https://biomejs.dev/linter/rules/no-useless-qualifier",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessQualifierConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessReExportAll": {
+					"description": "Disallow export * from a module that has no named exports.\nSee https://biomejs.dev/linter/rules/no-useless-re-export-all",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessReExportAllConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10426,6 +10848,20 @@
 					"description": "Disallow using computed properties inside the data function of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueComputedPropertiesInDataConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueComputedPropertyCall": {
+					"description": "Disallow calling a Vue computed property whose value is not a function.\nSee https://biomejs.dev/linter/rules/no-vue-computed-property-call",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueComputedPropertyCallConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueContentOutsideBlock": {
+					"description": "Disallow content outside of the top-level blocks in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-content-outside-block",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueContentOutsideBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10640,6 +11076,13 @@
 					"description": "Disallow changing the props of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-mutating-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueMutatingPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueNegationElse": {
+					"description": "Disallow negated conditions in v-if and v-else-if when a v-else branch follows.\nSee https://biomejs.dev/linter/rules/no-vue-negation-else",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueNegationElseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10909,6 +11352,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useBiomeKindSets": {
+					"description": "Require kind sets instead of comparing kind names one by one in Biome JS plugins.\nSee https://biomejs.dev/linter/rules/use-biome-kind-sets",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBiomeKindSetsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useBiomeTopLevelTypes": {
+					"description": "Require kind sets in Biome JS plugins to be created at the top level of the module.\nSee https://biomejs.dev/linter/rules/use-biome-top-level-types",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBiomeTopLevelTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useBlockStatementOverIife": {
 					"description": "Prefer block statements over functions that are called immediately only to create a scope.\nSee https://biomejs.dev/linter/rules/use-block-statement-over-iife",
 					"anyOf": [
@@ -10948,6 +11405,27 @@
 					"description": "Require boolean names to start with a prefix such as is or has, and reserve those prefixes for booleans.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-name",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentBooleanNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentBooleanProps": {
+					"description": "Require a consistent style for JSX props with the value true.\nSee https://biomejs.dev/linter/rules/use-consistent-boolean-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBooleanPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentDefaultExportStyle": {
+					"description": "Enforce a consistent style for default-exported functions and classes.\nSee https://biomejs.dev/linter/rules/use-consistent-default-export-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentDefaultExportStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentExistenceIndexCheck": {
+					"description": "Enforce comparing with -1 when checking whether indexOf(), lastIndexOf(), findIndex(), or findLastIndex() found an element.\nSee https://biomejs.dev/linter/rules/use-consistent-existence-index-check",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentExistenceIndexCheckConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11021,6 +11499,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useConvexAccessControl": {
+					"description": "Require public Convex functions to call an access control function.\nSee https://biomejs.dev/linter/rules/use-convex-access-control",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConvexAccessControlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDescribeFunctionTitle": {
+					"description": "Require passing an imported function as a test suite title instead of a string with its name.\nSee https://biomejs.dev/linter/rules/use-describe-function-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDescribeFunctionTitleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDisposables": {
 					"description": "Detects a disposable object assigned to a variable without using or await using syntax.\nSee https://biomejs.dev/linter/rules/use-disposables",
 					"anyOf": [
@@ -11028,10 +11520,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useEarlyContinue": {
+					"description": "Require an early continue instead of an if statement that wraps the rest of a loop body.\nSee https://biomejs.dev/linter/rules/use-early-continue",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseEarlyContinueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useElseIf": {
+					"description": "Require else if when adjacent if statements compare the same value against different values.\nSee https://biomejs.dev/linter/rules/use-else-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveSwitchCasesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useExpectEqualityMatcher": {
+					"description": "Enforce using an equality matcher instead of comparing values with === or !== inside expect().\nSee https://biomejs.dev/linter/rules/use-expect-equality-matcher",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExpectEqualityMatcherConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11189,6 +11702,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNegativeIndex": {
+					"description": "Prefer negative indexes over subtracting from .length.\nSee https://biomejs.dev/linter/rules/use-negative-index",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNegativeIndexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNextScriptForGoogleAnalytics": {
 					"description": "Enforce the use of the @next/third-parties/google components to load Google Analytics and Google Tag Manager.\nSee https://biomejs.dev/linter/rules/use-next-script-for-google-analytics",
 					"anyOf": [
@@ -11288,6 +11808,13 @@
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseRegexpExecConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSetMethods": {
+					"description": "Prefer the methods of Set for combining and comparing Sets.\nSee https://biomejs.dev/linter/rules/use-set-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSetMethodsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11410,12 +11937,37 @@
 						{ "type": "null" }
 					]
 				},
+				"useTanstackQueryExhaustiveDependencies": {
+					"description": "Require query keys to include every value that the query function uses.\nSee https://biomejs.dev/linter/rules/use-tanstack-query-exhaustive-dependencies",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseTanstackQueryExhaustiveDependenciesConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useTanstackQueryInfiniteQueryPropertyOrder": {
 					"description": "Enforce a consistent property order in the options of TanStack Query infinite query functions.\nSee https://biomejs.dev/linter/rules/use-tanstack-query-infinite-query-property-order",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/UseTanstackQueryInfiniteQueryPropertyOrderConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useTanstackQueryMutationPropertyOrder": {
+					"description": "Enforce that onMutate comes before onError and onSettled in the options of TanStack Query mutations.\nSee https://biomejs.dev/linter/rules/use-tanstack-query-mutation-property-order",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseTanstackQueryMutationPropertyOrderConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"useTanstackQueryQueryOptions": {
+					"description": "Require TanStack Query options to be created with queryOptions().\nSee https://biomejs.dev/linter/rules/use-tanstack-query-query-options",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTanstackQueryQueryOptionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12609,6 +13161,8 @@
 			"type": "object",
 			"properties": {
 				"astro": { "$ref": "#/$defs/RuleDomainValue" },
+				"biomePlugin": { "$ref": "#/$defs/RuleDomainValue" },
+				"convex": { "$ref": "#/$defs/RuleDomainValue" },
 				"drizzle": { "$ref": "#/$defs/RuleDomainValue" },
 				"next": { "$ref": "#/$defs/RuleDomainValue" },
 				"playwright": { "$ref": "#/$defs/RuleDomainValue" },
@@ -12722,6 +13276,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoAmdOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAmdOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoApproximativeNumericConstantOptions": {
 			"type": "object",
 			"properties": {
@@ -12779,6 +13342,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoArrayDeleteOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArrayDeleteOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoArrayForEachOptions": {
 			"type": "object",
 			"properties": {
@@ -12806,6 +13382,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoArrayReduceOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArrayReduceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoArraySortForMinMaxOptions": {
 			"type": "object",
 			"properties": {
@@ -12824,6 +13409,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroComponentDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroComponentDefaultExportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12989,6 +13583,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoBreakInNestedLoopOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBreakInNestedLoopOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoBufferConstructorOptions": {
 			"type": "object",
 			"properties": {
@@ -13003,6 +13606,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBunModulesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoCanvasToImageOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoCanvasToImageOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13255,6 +13867,46 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoControlCharactersInRegexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexDuplicateIndexesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexDuplicateIndexesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexProcessEnvOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexProcessEnvOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexQueryFilterOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexQueryFilterOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConvexTopOfHourCronsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConvexTopOfHourCronsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13561,6 +14213,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDuplicateExportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateExportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDuplicateFieldDefinitionNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -13593,6 +14254,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateGraphqlOperationNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateIfBranchesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateIfBranchesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13953,6 +14623,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoExpectToHaveBeenCalledOnceOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExpectToHaveBeenCalledOnceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoExplicitAnyOptions": {
 			"type": "object",
 			"properties": {
@@ -14210,6 +14893,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoImgElementOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoImmediateMutationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoImmediateMutationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14790,6 +15486,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoMutableExportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMutableExportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoNamespaceImportOptions": {
 			"type": "object",
 			"properties": {
@@ -15095,6 +15800,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoOctalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoOuterScopeInIsolatedFunctionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoOuterScopeInIsolatedFunctionsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15673,6 +16387,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoScssDeprecatedColorFunctionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoScssDeprecatedColorFunctionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoScssNullComparisonOptions": {
 			"type": "object",
 			"properties": {
@@ -16114,6 +16837,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoTailwindLegacyImportantOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindLegacyImportantOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTailwindLegacyUtilitiesOptions": {
 			"type": "object",
 			"properties": {
@@ -16163,6 +16899,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTanstackQueryRestDestructuringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTanstackQueryUnstableDepsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTanstackQueryUnstableDepsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -16600,6 +17345,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUnsafeSqliteInterpolationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeSqliteInterpolationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUnsafeTypeAssertionOptions": {
 			"type": "object",
 			"properties": {
@@ -16850,6 +17604,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUselessDefaultAssignmentOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessDefaultAssignmentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUselessElseOptions": {
 			"type": "object",
 			"properties": {
@@ -17000,6 +17767,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessQualifierOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessReExportAllOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessReExportAllOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -17311,6 +18087,28 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueComputedPropertiesInDataOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueComputedPropertyCallOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueComputedPropertyCallOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueContentOutsideBlockOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueContentOutsideBlockOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -17632,6 +18430,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueMutatingPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueNegationElseOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueNegationElseOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -18269,6 +19080,24 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBiomeKindSetsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBiomeKindSetsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseBiomeTopLevelTypesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBiomeTopLevelTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBlockStatementOverIifeOptions": {
 			"type": "object",
 			"properties": {
@@ -18418,6 +19247,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentBooleanPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"properties": {
@@ -18446,11 +19288,37 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentDefaultExportStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentDefaultExportStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentEnumValueTypeOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentEnumValueTypeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentExistenceIndexCheckOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentExistenceIndexCheckOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -18652,6 +19520,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConvexAccessControlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConvexAccessControlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDateNowOptions": {
 			"type": "object",
 			"properties": {
@@ -18714,6 +19591,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDescribeFunctionTitleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDescribeFunctionTitleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDestructuringOptions": {
 			"type": "object",
 			"properties": {
@@ -18758,6 +19648,32 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseDomQuerySelectorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseEarlyContinueOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseEarlyContinueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseElseIfOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseElseIfOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -18815,6 +19731,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseExhaustiveSwitchCasesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseExpectEqualityMatcherOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseExpectEqualityMatcherOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -19565,6 +20494,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNegativeIndexOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNegativeIndexOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNextScriptForGoogleAnalyticsOptions": {
 			"type": "object",
 			"properties": {
@@ -19998,6 +20940,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSetMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSetMethodsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSetSizeOptions": {
 			"type": "object",
 			"properties": {
@@ -20318,6 +21273,21 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTanstackQueryExhaustiveDependenciesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseTanstackQueryExhaustiveDependenciesOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTanstackQueryInfiniteQueryPropertyOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -20329,6 +21299,30 @@
 				"options": {
 					"$ref": "#/$defs/UseTanstackQueryInfiniteQueryPropertyOrderOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTanstackQueryMutationPropertyOrderOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseTanstackQueryMutationPropertyOrderOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTanstackQueryQueryOptionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTanstackQueryQueryOptionsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -23998,6 +24992,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseBiomeKindSetsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBiomeKindSetsOptions" }
+			]
+		},
+		"UseBiomeKindSetsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBiomeTopLevelTypesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBiomeTopLevelTypesOptions" }
+			]
+		},
+		"UseBiomeTopLevelTypesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBlockStatementOverIifeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24206,6 +25220,22 @@
 			},
 			"additionalProperties": false
 		},
+		"UseConsistentBooleanPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentBooleanPropsOptions" }
+			]
+		},
+		"UseConsistentBooleanPropsOptions": {
+			"type": "object",
+			"properties": {
+				"mode": {
+					"description": "How to write JSX props whose value is `true`. Defaults to `explicit`.",
+					"anyOf": [{ "$ref": "#/$defs/BooleanPropMode" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24226,6 +25256,33 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConsistentDefaultExportStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentDefaultExportStyleOptions" }
+			]
+		},
+		"UseConsistentDefaultExportStyleOptions": {
+			"description": "Configures the required declaration style for default-exported functions and classes.",
+			"type": "object",
+			"properties": {
+				"classes": {
+					"description": "The declaration style for default-exported classes. Default: `\"inline\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DefaultExportStyle" },
+						{ "type": "null" }
+					]
+				},
+				"functions": {
+					"description": "The declaration style for default-exported functions. Default: `\"inline\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DefaultExportStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentEnumValueTypeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24233,6 +25290,16 @@
 			]
 		},
 		"UseConsistentEnumValueTypeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentExistenceIndexCheckConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentExistenceIndexCheckOptions" }
+			]
+		},
+		"UseConsistentExistenceIndexCheckOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -24520,6 +25587,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConvexAccessControlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConvexAccessControlOptions" }
+			]
+		},
+		"UseConvexAccessControlOptions": {
+			"type": "object",
+			"properties": {
+				"functions": {
+					"description": "Names of functions that count as access control functions, in addition to the names\nmatched by `prefixes`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"prefixes": {
+					"description": "Words that start the name of an access control function. A name matches a prefix when it's\nthe prefix on its own, or the prefix followed by an uppercase letter or `_`.\n\nSetting this option replaces the default prefixes: `assert`, `can`, `check`, `ensure`,\n`has` and `require`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseDateNowConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24575,6 +25664,16 @@
 			]
 		},
 		"UseDeprecatedReasonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDescribeFunctionTitleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDescribeFunctionTitleOptions" }
+			]
+		},
+		"UseDescribeFunctionTitleOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -24639,6 +25738,32 @@
 			},
 			"additionalProperties": false
 		},
+		"UseEarlyContinueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseEarlyContinueOptions" }
+			]
+		},
+		"UseEarlyContinueOptions": {
+			"type": "object",
+			"properties": {
+				"maximumStatements": {
+					"description": "The largest number of statements that an `if` statement at the end of a loop body can\ncontain before the rule reports it (default: 1).",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseElseIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseElseIfOptions" }
+			]
+		},
+		"UseElseIfOptions": { "type": "object", "additionalProperties": false },
 		"UseEnumInitializersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24723,6 +25848,16 @@
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
 				{ "$ref": "#/$defs/RuleWithUseExpectOptions" }
 			]
+		},
+		"UseExpectEqualityMatcherConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseExpectEqualityMatcherOptions" }
+			]
+		},
+		"UseExpectEqualityMatcherOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseExpectOptions": { "type": "object", "additionalProperties": false },
 		"UseExpectToContainConfiguration": {
@@ -25573,6 +26708,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseNegativeIndexConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNegativeIndexOptions" }
+			]
+		},
+		"UseNegativeIndexOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseNextScriptForGoogleAnalyticsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -26063,6 +27208,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSetMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSetMethodsOptions" }
+			]
+		},
+		"UseSetMethodsOptions": { "type": "object", "additionalProperties": false },
 		"UseSetSizeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -26466,6 +27618,30 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseTanstackQueryExhaustiveDependenciesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithUseTanstackQueryExhaustiveDependenciesOptions"
+				}
+			]
+		},
+		"UseTanstackQueryExhaustiveDependenciesOptions": {
+			"type": "object",
+			"properties": {
+				"ignoredTypes": {
+					"description": "Names of TypeScript types. The query function can use a variable or parameter declared\nwith one of these types, such as `client: ApiClient`, without adding it to the query key.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoredVariables": {
+					"description": "Names of variables that the query function can use without adding them to the query\nkey. This also covers the properties read from these variables.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseTanstackQueryInfiniteQueryPropertyOrderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -26475,6 +27651,28 @@
 			]
 		},
 		"UseTanstackQueryInfiniteQueryPropertyOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTanstackQueryMutationPropertyOrderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithUseTanstackQueryMutationPropertyOrderOptions"
+				}
+			]
+		},
+		"UseTanstackQueryMutationPropertyOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTanstackQueryQueryOptionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTanstackQueryQueryOptionsOptions" }
+			]
+		},
+		"UseTanstackQueryQueryOptionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

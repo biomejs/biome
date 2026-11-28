@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: attributes/class-style.astro
+---
+
+# Input
+
+```astro
+---
+const name = "active";
+---
+<div
+  class="
+    foo
+    bar
+  "
+  style="
+    color:red;
+    font-size:10px;
+  "
+></div>
+
+<Component
+  class="
+    padded
+    prop
+  "
+  style="
+    color:red;
+  "
+/>
+
+<div class=`foo ${name}`></div>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const name = "active";
+---
+
+<div class="foo bar" style="color: red; font-size: 10px;"></div>
+
+<Component
+	class="
+    padded
+    prop
+  "
+	style="
+    color:red;
+  "
+/>
+
+<div class=`foo ${name}`></div>
+
+```

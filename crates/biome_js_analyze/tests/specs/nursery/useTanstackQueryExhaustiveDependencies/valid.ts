@@ -1,0 +1,45 @@
+/* should not generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+type Result = {};
+
+function TypeArguments(dep: string) {
+	useQuery({ queryKey: ["foo", dep], queryFn: () => api.get<Result>(dep) });
+}
+
+function useThing<TData>() {
+	return useQuery({
+		queryKey: ["thing"],
+		queryFn: (): Promise<TData> => Promise.reject(new Error("nope")),
+	});
+}
+
+const useConstAssertion = (id: number) => {
+	useQuery({ queryKey: ["foo", id] as const, queryFn: async () => id });
+
+	const queryKey = ["foo", id];
+	useQuery({ queryKey: queryKey as const, queryFn: async () => id });
+
+	const assertedKey = ["foo", id] as const;
+	useQuery({ queryKey: assertedKey, queryFn: async () => id });
+};
+
+function NestedAssertion(dep: unknown) {
+	useQuery({ queryKey: ["thing", dep as string], queryFn: () => dep });
+}
+
+function useOptionalChain(data?: any) {
+	useQuery({ queryKey: ["query-name", data?.address], queryFn: async () => sendQuery(data.address) });
+	useQuery({ queryKey: ["query-name", data?.address], queryFn: async () => sendQuery(data!.address) });
+	useQuery({ queryKey: ["query-name", data?.address], queryFn: async () => sendQuery(data!.address!) });
+	useQuery({ queryKey: ["thing"], queryFn: () => data!.foo() });
+}
+
+function useKeyFactoryVariable(dep: string) {
+	function keyFactory(value: string) {
+		const x = ["foo", value] as const;
+		return x;
+	}
+	const queryKey = keyFactory(dep);
+	return useQuery({ queryKey, queryFn: () => Promise.resolve(dep) });
+}

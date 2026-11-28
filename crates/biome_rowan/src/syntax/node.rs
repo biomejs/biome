@@ -533,6 +533,77 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Rewrites the subtree rooted at the current node. Returns the rewritten subtree as a new tree
+    /// without a parent, or `None` when `rewrite` replaces no node.
+    ///
+    /// The method offers each node of a kind in `kinds` to `rewrite`, in preorder and starting with
+    /// the current node, like [Self::preorder_of_kinds]. It never offers tokens. Each offered node
+    /// belongs to the original tree, so its parent, siblings, tokens, and ranges are the ones
+    /// before any replacement. `rewrite` answers with a [RewriteSignal]:
+    ///
+    /// - [RewriteSignal::Replace] puts the given node in place of the offered node and continues
+    ///   after the offered node. The new tree takes only the content of the replacement, so the
+    ///   replacement can have any kind and belong to any tree. A replacement equal to the offered
+    ///   node leaves the tree unchanged.
+    /// - [RewriteSignal::Skip] keeps the offered node and continues after it.
+    /// - [RewriteSignal::Descend] keeps the offered node and continues with its descendants.
+    ///
+    /// The walk reads each node of the subtree at most once and copies each changed node once.
+    /// Like [Self::preorder_of_kinds], it allocates a [SyntaxNode] only for the offered nodes and
+    /// their ancestors. An empty `kinds` returns `None` without reading the tree.
+    ///
+    /// `rewrite` may call this method on a descendant of the offered node, for example to rewrite
+    /// an operand before building a replacement. It must then answer [RewriteSignal::Replace] or
+    /// [RewriteSignal::Skip], because [RewriteSignal::Descend] would offer the descendants that the
+    /// nested call already offered a second time.
+    ///
+    /// ```
+    /// # use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::{RewriteSignal, SyntaxKindSet};
+    /// let literal = |text: &str| {
+    ///     let mut builder = RawSyntaxTreeBuilder::new();
+    ///     builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    ///     builder.token(RawLanguageKind::NUMBER_TOKEN, text);
+    ///     builder.finish_node();
+    ///     builder.finish()
+    /// };
+    ///
+    /// let mut builder = RawSyntaxTreeBuilder::new();
+    /// builder.start_node(RawLanguageKind::ROOT);
+    /// builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+    /// for text in ["1", "2"] {
+    ///     builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    ///     builder.token(RawLanguageKind::NUMBER_TOKEN, text);
+    ///     builder.finish_node();
+    /// }
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// let root = builder.finish();
+    ///
+    /// let literals = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::LITERAL_EXPRESSION);
+    /// let rewritten = root.rewrite_of_kinds(literals, |node| {
+    ///     if node.text_trimmed() == "1" {
+    ///         RewriteSignal::Replace(literal("3"))
+    ///     } else {
+    ///         RewriteSignal::Skip
+    ///     }
+    /// });
+    /// assert_eq!(rewritten.unwrap().text_trimmed().to_string(), "32");
+    ///
+    /// // The original tree is unchanged, and a rewrite that replaces nothing returns `None`.
+    /// assert_eq!(root.text_trimmed().to_string(), "12");
+    /// assert!(root.rewrite_of_kinds(literals, |_| RewriteSignal::Skip).is_none());
+    /// ```
+    pub fn rewrite_of_kinds(
+        &self,
+        kinds: SyntaxKindSet<L>,
+        mut rewrite: impl FnMut(Self) -> RewriteSignal<L>,
+    ) -> Option<Self> {
+        self.raw
+            .rewrite_of_kinds(kinds, |node| rewrite(Self::from(node)))
+            .map(Self::from)
+    }
+
     /// Traverse the subtree rooted at the current node (including the current
     /// node) in preorder, including tokens.
     pub fn preorder_with_tokens(&self, direction: Direction) -> PreorderWithTokens<L> {
@@ -1177,8 +1248,9 @@ pub struct SendNode {
 impl SendNode {
     /// Consumes this node and returns its source text.
     pub fn into_source_text(self) -> String {
-        let mut source = String::with_capacity(self.green.text_len().into());
-        self.green.write_source_text(&mut source);
+        let green = self.green.as_ref();
+        let mut source = String::with_capacity(green.text_len().into());
+        green.write_source_text(&mut source);
         source
     }
 
@@ -1328,6 +1400,17 @@ impl<L: Language> Iterator for PreorderOfKinds<'_, L> {
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
     }
+}
+
+/// Tells [SyntaxNode::rewrite_of_kinds] what to do with the node that it offered.
+#[derive(Debug, Clone)]
+pub enum RewriteSignal<L: Language> {
+    /// Replaces the offered node with this node and continues after the offered node.
+    Replace(SyntaxNode<L>),
+    /// Keeps the offered node and continues with its descendants.
+    Descend,
+    /// Keeps the offered node and continues after it.
+    Skip,
 }
 
 pub struct PrunedDescendents<L: Language, P: Fn(&SyntaxNode<L>) -> bool> {

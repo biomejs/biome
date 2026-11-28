@@ -324,7 +324,9 @@ pub fn module_graph_for_test_file(
             else {
                 continue;
             };
-            let content = fs.read_file_from_path(path).expect("CSS test file exists");
+            let content = fs
+                .read_file_from_path(path.as_path())
+                .expect("CSS test file exists");
             let source_index = db.insert_source(file_source.into());
             let parsed_source = Source::new(
                 &db,
@@ -371,7 +373,9 @@ pub fn module_graph_for_css_test_file(
         else {
             continue;
         };
-        let content = fs.read_file_from_path(path).expect("CSS test file exists");
+        let content = fs
+            .read_file_from_path(path.as_path())
+            .expect("CSS test file exists");
         let source_index = db.insert_source(file_source.into());
         let parsed_source = Source::new(
             &db,
@@ -475,7 +479,7 @@ pub fn module_graph_for_html_test_file(
     // We pass document_file_source explicitly with experimental_full_html_support=true
     // so that .vue/.astro/.svelte files are correctly parsed as HTML-like.
     let files_with_sources = all_files.iter().map(|file_path| {
-        let biome_path = BiomePath::new(file_path.clone());
+        let biome_path = BiomePath::new(file_path);
         let document_file_source = DocumentFileSource::from_well_known(file_path.as_path(), true);
         (biome_path, document_file_source)
     });
@@ -540,16 +544,19 @@ pub fn get_added_js_paths<'a>(
                 return None;
             };
 
-            let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let parsed =
-                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                let diagnostics = parsed.diagnostics();
-                assert!(
-                    diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
-                );
-                parsed.try_tree()
-            })?;
+            let root = fs
+                .read_file_from_path(path.as_path())
+                .ok()
+                .and_then(|content| {
+                    let parsed =
+                        biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                    let diagnostics = parsed.diagnostics();
+                    assert!(
+                        diagnostics.is_empty(),
+                        "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                    );
+                    parsed.try_tree()
+                })?;
 
             // Build semantic model for the parsed root
             let semantic_model = biome_js_semantic::semantic_model(
@@ -576,7 +583,7 @@ pub fn get_css_added_paths<'a>(
             else {
                 return None;
             };
-            let root = fs.read_file_from_path(path).ok().map(|content| {
+            let root = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let options = if file_source.is_css_modules() {
                     CssParserOptions::default().allow_css_modules()
                 } else {
@@ -609,7 +616,7 @@ pub fn get_html_added_paths<'a>(
             else {
                 return None;
             };
-            let parse = fs.read_file_from_path(path).ok().map(|content| {
+            let parse = fs.read_file_from_path(path.as_path()).ok().map(|content| {
                 let parsed =
                     biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
@@ -668,8 +675,29 @@ pub fn project_layout_for_test_file(
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
     let pnpm_catalog = find_pnpm_workspace_catalog(&fs, input_file);
 
-    let package_json_file = input_file.with_extension("package.json");
-    if let Ok(json) = std::fs::read_to_string(&package_json_file) {
+    // A `<test>.package.json` file is the manifest of the test's directory.
+    // Without one, a test inside a `specs` directory uses the nearest
+    // `package.json` between its directory and `specs`, so it can sit in a
+    // subdirectory of its package.
+    let sidecar_file = input_file.with_extension("package.json");
+    let is_in_specs = input_file
+        .ancestors()
+        .any(|directory| directory.file_name() == Some("specs"));
+    let package_json_file = if sidecar_file.is_file() {
+        Some((sidecar_file, input_file.parent()))
+    } else if !is_in_specs {
+        None
+    } else {
+        input_file
+            .ancestors()
+            .skip(1)
+            .take_while(|directory| directory.file_name() != Some("specs"))
+            .map(|directory| (directory.join("package.json"), Some(directory)))
+            .find(|(file, _)| file.is_file())
+    };
+    if let Some((package_json_file, package_path)) = package_json_file
+        && let Ok(json) = std::fs::read_to_string(&package_json_file)
+    {
         let deserialized = PackageJson::read_manifest(&fs, &package_json_file);
         if deserialized.has_errors() {
             diagnostics.extend(
@@ -691,9 +719,7 @@ pub fn project_layout_for_test_file(
             }
 
             project_layout.insert_node_manifest(
-                input_file
-                    .parent()
-                    .map_or_default(|dir_path| dir_path.to_path_buf()),
+                package_path.map_or_default(|dir_path| dir_path.to_path_buf()),
                 manifest,
             );
         }
@@ -1149,7 +1175,7 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 
     let is_valid_test_file = match file_path.extension().unwrap_or_default() {
         // Excluded files types which cannot contain comment in the source code
-        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" => false,
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" | "md" | "mdx" => false,
         _ => {
             let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
             // We can't know all the valid file names, but this should catch most common cases.
@@ -1348,7 +1374,7 @@ pub fn analyze_with_workspace(
     let mut all_virtual_files = sidecar_paths;
     all_virtual_files.push(virtual_file_path.clone());
     let files_with_sources = all_virtual_files.iter().map(|path| {
-        let biome_path = BiomePath::new(path.clone());
+        let biome_path = BiomePath::new(path);
         let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
         (biome_path, doc_source)
     });

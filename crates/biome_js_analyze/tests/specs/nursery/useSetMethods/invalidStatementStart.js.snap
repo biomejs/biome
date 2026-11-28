@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementStart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = new Set([1, 2]);
+const b = new Set([2, 3]);
+let result
+result = 1
+;[...a].every((value) => b.has(value))
+foo
+new Set([...(cond ? a : b), ...b])
+
+```
+
+# Diagnostics
+```
+invalidStatementStart.js:6:2 lint/nursery/useSetMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code checks whether every value of a Set is also in another Set.
+  
+    4 │ let result
+    5 │ result = 1
+  > 6 │ ;[...a].every((value) => b.has(value))
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ foo
+    8 │ new Set([...(cond ? a : b), ...b])
+  
+  i Use the isSubsetOf() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use isSubsetOf() instead.
+  
+    4 4 │   let result
+    5 5 │   result = 1
+    6   │ - ;[...a].every((value)·=>·b.has(value))
+      6 │ + ;a.isSubsetOf(b)
+    7 7 │   foo
+    8 8 │   new Set([...(cond ? a : b), ...b])
+  
+
+```
+
+```
+invalidStatementStart.js:8:1 lint/nursery/useSetMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code spreads Sets into an array to combine them into a new Set.
+  
+    6 │ ;[...a].every((value) => b.has(value))
+    7 │ foo
+  > 8 │ new Set([...(cond ? a : b), ...b])
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Use the union() method instead. It does the same work in a single call, without creating a temporary array or Set.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

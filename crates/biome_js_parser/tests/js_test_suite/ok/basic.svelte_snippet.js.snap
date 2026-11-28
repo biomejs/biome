@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+row(item)
+
+```
+
+
+## AST
+
+```
+JsSvelteSnippetRoot {
+    name: JsIdentifierBinding {
+        name_token: IDENT@0..3 "row" [] [],
+    },
+    type_parameters: missing (optional),
+    parameters: JsParameters {
+        l_paren_token: L_PAREN@3..4 "(" [] [],
+        items: JsParameterList [
+            JsFormalParameter {
+                decorators: JsDecoratorList [],
+                binding: JsIdentifierBinding {
+                    name_token: IDENT@4..8 "item" [] [],
+                },
+                question_mark_token: missing (optional),
+                type_annotation: missing (optional),
+                initializer: missing (optional),
+            },
+        ],
+        r_paren_token: R_PAREN@8..9 ")" [] [],
+    },
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_SNIPPET_ROOT@0..10
+  0: JS_IDENTIFIER_BINDING@0..3
+    0: IDENT@0..3 "row" [] []
+  1: (empty)
+  2: JS_PARAMETERS@3..9
+    0: L_PAREN@3..4 "(" [] []
+    1: JS_PARAMETER_LIST@4..8
+      0: JS_FORMAL_PARAMETER@4..8
+        0: JS_DECORATOR_LIST@4..4
+        1: JS_IDENTIFIER_BINDING@4..8
+          0: IDENT@4..8 "item" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+    2: R_PAREN@8..9 ")" [] []
+  3: EOF@9..10 "" [Newline("\n")] []
+
+```

@@ -1,13 +1,10 @@
 use crate::{
-    GreenNodeData, NodeOrToken, TextSize,
-    green::{GreenNode, GreenToken, RawSyntaxKind},
+    NodeOrToken, TextSize,
+    green::{GreenNode, GreenNodeRef, GreenToken, GreenTokenRef, RawSyntaxKind},
 };
-use std::borrow::Cow;
-
-use super::GreenTokenData;
 
 pub(crate) type GreenElement = NodeOrToken<GreenNode, GreenToken>;
-pub(crate) type GreenElementRef<'a> = NodeOrToken<&'a GreenNodeData, &'a GreenTokenData>;
+pub(crate) type GreenElementRef<'a> = NodeOrToken<GreenNodeRef<'a>, GreenTokenRef<'a>>;
 
 impl From<GreenNode> for GreenElement {
     #[inline]
@@ -19,7 +16,7 @@ impl From<GreenNode> for GreenElement {
 impl<'a> From<&'a GreenNode> for GreenElementRef<'a> {
     #[inline]
     fn from(node: &'a GreenNode) -> Self {
-        NodeOrToken::Node(node)
+        NodeOrToken::Node(node.as_ref())
     }
 }
 
@@ -30,17 +27,10 @@ impl From<GreenToken> for GreenElement {
     }
 }
 
-impl From<Cow<'_, GreenNodeData>> for GreenElement {
-    #[inline]
-    fn from(cow: Cow<'_, GreenNodeData>) -> Self {
-        Self::Node(cow.into_owned())
-    }
-}
-
 impl<'a> From<&'a GreenToken> for GreenElementRef<'a> {
     #[inline]
     fn from(token: &'a GreenToken) -> Self {
-        NodeOrToken::Token(token)
+        NodeOrToken::Token(token.as_ref())
     }
 }
 
@@ -55,22 +45,25 @@ impl GreenElementRef<'_> {
 }
 
 impl GreenElement {
+    /// Borrows the element without incrementing its reference count.
+    #[inline]
+    pub(crate) fn as_ref(&self) -> GreenElementRef<'_> {
+        match self {
+            Self::Node(node) => NodeOrToken::Node(node.as_ref()),
+            Self::Token(token) => NodeOrToken::Token(token.as_ref()),
+        }
+    }
+
     /// Returns kind of this element.
     #[inline]
     pub fn kind(&self) -> RawSyntaxKind {
-        match self {
-            Self::Node(node) => node.kind(),
-            Self::Token(token) => token.kind(),
-        }
+        self.as_ref().kind()
     }
 
     /// Returns the length of the text covered by this element.
     #[inline]
     pub fn text_len(&self) -> TextSize {
-        match self {
-            Self::Token(token) => token.text_len(),
-            Self::Node(node) => node.text_len(),
-        }
+        self.as_ref().text_len()
     }
 }
 

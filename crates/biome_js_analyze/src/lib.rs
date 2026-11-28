@@ -17,7 +17,7 @@ use biome_analyze::{
     AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, InspectMatcher,
     LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
-    RuleRegistry, SnippetAnalyzer,
+    RuleExecutionContext, RuleRegistry, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
 use biome_db::Source;
@@ -71,6 +71,14 @@ pub struct JsAnalyzerServices {
     /// no longer matches `parsed_source`.
     document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
+    /// Whether the analyzed tree was edited after `document` was parsed, for
+    /// example by fixes applied to the tree without updating the document.
+    /// The framework model of `document` then describes the text before the
+    /// edits, and the embedded service stops answering from it.
+    tree_is_edited: bool,
+    /// The execution scopes of the rules that run on the analyzed source.
+    /// Every scope runs unless the source is embedded in a host document.
+    rule_execution: RuleExecutionContext,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
     project_layout: Arc<ProjectLayout>,
@@ -101,6 +109,8 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             parsed_source: None,
             document: None,
             embedded_data: None,
+            tree_is_edited: false,
+            rule_execution: RuleExecutionContext::default(),
             snippet_offset: None,
             project_layout,
             source_type,
@@ -116,6 +126,8 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             parsed_source: None,
             document: None,
             embedded_data: None,
+            tree_is_edited: false,
+            rule_execution: RuleExecutionContext::default(),
             snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -153,6 +165,19 @@ impl JsAnalyzerServices {
 
     pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
         self.embedded_data = embedded_data;
+        self
+    }
+
+    /// Sets whether the analyzed tree was edited after its host document was
+    /// parsed, for example by fixes applied to the tree without updating the
+    /// document.
+    pub fn with_tree_edited(mut self, tree_is_edited: bool) -> Self {
+        self.tree_is_edited = tree_is_edited;
+        self
+    }
+
+    pub fn with_rule_execution(mut self, rule_execution: RuleExecutionContext) -> Self {
+        self.rule_execution = rule_execution;
         self
     }
 
@@ -221,7 +246,8 @@ where
         snippet_inspector,
         snippets,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
+    let mut registry =
+        RuleRegistry::builder(&filter, root).with_execution_context(services.rule_execution);
     visit_registry(&mut registry);
 
     let JsAnalyzerServices {
@@ -230,6 +256,8 @@ where
         parsed_source,
         document,
         embedded_data,
+        tree_is_edited,
+        rule_execution: _,
         snippet_offset,
         project_layout,
         source_type,
@@ -315,12 +343,22 @@ where
     }
     let snippet_offset = snippet_offset.unwrap_or_default();
     if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data, snippet_offset));
+        services.insert_service(EmbeddedService::from_data(
+            embedded_data,
+            snippet_offset,
+            tree_is_edited,
+        ));
     } else if let Some(embedded_db) = embedded_db {
         // A path can have a different document for each client of the
         // workspace, so the embedded content comes from the analyzed document
         // rather than from its path.
-        services.insert_service(EmbeddedService::new(embedded_db, document, snippet_offset));
+        services.insert_service(EmbeddedService::new_with_globals(
+            embedded_db,
+            document,
+            snippet_offset,
+            tree_is_edited,
+            options.globals(),
+        ));
     }
 
     let ctx = AnalyzerContext {

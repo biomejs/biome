@@ -8,6 +8,7 @@
 //! No real watcher is instantiated in these tests.
 
 use std::str::FromStr;
+use std::sync::Arc;
 
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_configuration::{Configuration, FilesConfiguration};
@@ -20,8 +21,8 @@ use crate::scanner::IndexTrigger;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{
-    CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectParams,
-    UpdateSettingsParams,
+    CloseFileParams, FeatureName, FileContent, GetFileContentParams, IgnoreKind, OpenFileParams,
+    PathIsIgnoredParams, ScanProjectParams, UpdateSettingsParams,
 };
 use crate::{Workspace, WorkspaceError};
 
@@ -37,7 +38,11 @@ fn close_file_through_watcher_before_client() {
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
 
     workspace
-        .index_file(project_key, file_path.clone(), IndexTrigger::InitialScan)
+        .index_file(
+            project_key,
+            BiomePath::new(&file_path),
+            IndexTrigger::InitialScan,
+        )
         .expect("can index file");
 
     assert!(workspace.is_indexed(&file_path), "file should be indexed");
@@ -124,7 +129,11 @@ fn close_file_from_client_before_watcher() {
         .expect("can open from client");
 
     workspace
-        .index_file(project_key, file_path.clone(), IndexTrigger::Update)
+        .index_file(
+            project_key,
+            BiomePath::new(&file_path),
+            IndexTrigger::Update,
+        )
         .expect("can also index file");
 
     let content = workspace
@@ -248,6 +257,239 @@ fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
         .expect("can scan the project");
 
     assert!(!workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn nested_ignore_at_project_root_overrides_parent_vcs_root() {
+    let file_path = Utf8PathBuf::from("/repo/project/keep.js");
+    let dropped_path = Utf8PathBuf::from("/repo/project/drop.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(dropped_path.clone(), "import 'foo';");
+    fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "*.js\n");
+    fs.insert(Utf8PathBuf::from("/repo/project/.gitignore"), "!keep.js\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/repo/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/repo/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    root: Some("..".to_string()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&file_path));
+    assert!(!workspace.is_indexed(&dropped_path));
+}
+
+#[test]
+fn intermediate_ancestor_ignore_applies_to_nested_project() {
+    let file_path = Utf8PathBuf::from("/repo/packages/project/ignored.js");
+    let kept_path = Utf8PathBuf::from("/repo/packages/project/keep.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(kept_path.clone(), "import 'foo';");
+    fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "");
+    fs.insert(
+        Utf8PathBuf::from("/repo/packages/.gitignore"),
+        "ignored.js\n",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/repo/packages/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/repo/packages/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    root: Some("../..".to_string()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(&file_path));
+    assert!(workspace.is_indexed(&kept_path));
+}
+
+#[test]
+fn rescanning_replaces_and_removes_root_ignore_matcher() {
+    let file_path = Utf8PathBuf::from("/project/generated.js");
+    let ignore_path = Utf8PathBuf::from("/project/.gitignore");
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(ignore_path.clone(), "generated.js\n");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .expect("can scan the project");
+    };
+    let is_ignored = || {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(&file_path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+
+    scan();
+    assert!(is_ignored());
+
+    fs_handle.insert(ignore_path.clone(), "");
+    scan();
+    assert!(!is_ignored());
+
+    fs_handle.insert(ignore_path.clone(), "generated.js\n");
+    scan();
+    assert!(is_ignored());
+
+    fs_handle.remove(&ignore_path);
+    scan();
+    assert!(!is_ignored());
+}
+
+#[test]
+fn rescanning_replaces_and_removes_nested_ignore_matchers() {
+    let file_path = Utf8PathBuf::from("/repo/project/generated.js");
+    let ignore_path = Utf8PathBuf::from("/repo/project/.gitignore");
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert(Utf8PathBuf::from("/repo/.gitignore"), "");
+    fs.insert(ignore_path.clone(), "generated.js\n");
+    let fs_handle = fs.clone();
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/repo/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/repo/project")),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    root: Some("..".to_string()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .expect("can scan the project");
+    };
+    let is_ignored = || {
+        workspace
+            .is_path_ignored(PathIsIgnoredParams {
+                project_key,
+                path: BiomePath::new(&file_path),
+                is_dir: false,
+                features: FeatureName::default(),
+                ignore_kind: IgnoreKind::Path,
+            })
+            .unwrap()
+    };
+
+    scan();
+    assert!(is_ignored());
+
+    fs_handle.insert(ignore_path.clone(), "");
+    scan();
+    assert!(!is_ignored());
+
+    fs_handle.insert(ignore_path.clone(), "generated.js\n");
+    scan();
+    assert!(is_ignored());
+
+    fs_handle.remove(&ignore_path);
+    scan();
+    assert!(!is_ignored());
 }
 
 #[test]
@@ -436,6 +678,47 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
     let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
     let file_path = Utf8Path::new(fs.cli_path()).join(file_path);
 
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/dist").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(&file_path));
+}
+
+/// The in-memory file system never skips a folder before checking its files, so the initial scan
+/// must check the ancestors of each file against `files.includes`.
+#[test]
+fn should_not_index_inside_an_ignored_folder_inside_file_includes_in_memory() {
+    let file_path = Utf8PathBuf::from("/project/dist/minified.js");
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,

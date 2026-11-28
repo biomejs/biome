@@ -23,9 +23,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteEachBlock {
             opening_block: SvelteEachOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -82,23 +80,10 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@111..114 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@114..118 "cell" [] [],
-                    },
-                    index: SvelteEachIndex {
-                        comma_token: COMMA@118..120 "," [] [Whitespace(" ")],
-                        value: SvelteName {
-                            ident_token: IDENT@120..122 "i" [] [Whitespace(" ")],
-                        },
-                    },
-                    key: SvelteEachKey {
-                        l_paren_token: L_PAREN@122..123 "(" [] [],
-                        expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@123..124 "i" [] [],
-                        },
-                        r_paren_token: R_PAREN@124..125 ")" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@114..125 "cell, i (i)" [] [],
                     },
                 },
                 r_curly_token: R_CURLY@125..126 "}" [] [],
@@ -146,9 +131,7 @@ HtmlRoot {
 0: HTML_ROOT@0..161
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..160
+  2: HTML_ROOT_ITEM_LIST@0..160
     0: SVELTE_EACH_BLOCK@0..84
       0: SVELTE_EACH_OPENING_BLOCK@0..50
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -189,19 +172,10 @@ HtmlRoot {
         1: EACH_KW@88..92 "each" [] []
         2: HTML_TEXT_EXPRESSION@92..111
           0: HTML_LITERAL@92..111 " cells.slice(0, 3) " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@111..125
+        3: SVELTE_EACH_BINDING_CLAUSE@111..125
           0: AS_KW@111..114 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@114..118
-            0: IDENT@114..118 "cell" [] []
-          2: SVELTE_EACH_INDEX@118..122
-            0: COMMA@118..120 "," [] [Whitespace(" ")]
-            1: SVELTE_NAME@120..122
-              0: IDENT@120..122 "i" [] [Whitespace(" ")]
-          3: SVELTE_EACH_KEY@122..125
-            0: L_PAREN@122..123 "(" [] []
-            1: HTML_TEXT_EXPRESSION@123..124
-              0: HTML_LITERAL@123..124 "i" [] []
-            2: R_PAREN@124..125 ")" [] []
+          1: HTML_TEXT_EXPRESSION@114..125
+            0: HTML_LITERAL@114..125 "cell, i (i)" [] []
         4: R_CURLY@125..126 "}" [] []
       1: HTML_ELEMENT_LIST@126..152
         0: HTML_SELF_CLOSING_ELEMENT@126..152
@@ -225,6 +199,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] []
         1: EACH_KW@155..159 "each" [] []
         2: R_CURLY@159..160 "}" [] []
-  5: EOF@160..161 "" [Newline("\n")] []
+  3: EOF@160..161 "" [Newline("\n")] []
 
 ```

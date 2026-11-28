@@ -287,7 +287,7 @@ impl ServiceLanguage for JsLanguage {
                 .into(),
         };
 
-        overrides.apply_override_js_parser_options(path, &mut options);
+        overrides.apply_override_js_parser_options(path.as_path(), &mut options);
 
         options
     }
@@ -1269,6 +1269,7 @@ fn js_analyzer_services_for_fix(
     parsed_source: Option<&AnalyzedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
+    tree_is_edited: bool,
 ) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
@@ -1279,7 +1280,8 @@ fn js_analyzer_services_for_fix(
         params.project_layout.clone(),
         source_type,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_tree_edited(tree_is_edited);
     // The fixes change the analyzed tree but not its host document, so the
     // services keep reading the embedded content of the document.
     let services = match params.parsed_source.document() {
@@ -1348,7 +1350,7 @@ pub(super) fn lint_with_inspector(
                 &params.parsed_source,
                 params.language,
                 params.settings.as_ref(),
-                params.path,
+                params.path.as_path(),
                 &params.workspace_db,
             )
         {
@@ -1392,7 +1394,8 @@ pub(super) fn lint_with_inspector(
         params.project_layout.clone(),
         files_source,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_rule_execution(params.rule_execution);
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1572,6 +1575,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         super::ParsedOrigin::Workspace(source) => Some(source),
         super::ParsedOrigin::Interned { .. } => None,
     };
+    let mut tree_is_edited = false;
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1616,7 +1620,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+            let services = js_analyzer_services_for_fix(
+                &tree,
+                parsed_source,
+                &params,
+                file_source,
+                tree_is_edited,
+            );
 
             let mut pending_actions = Vec::new();
 
@@ -1641,6 +1651,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     None => return None,
                 };
                 parsed_source = None;
+                tree_is_edited = true;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -1662,7 +1673,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            tree_is_edited,
+        );
 
         let mut pending_actions = Vec::new();
 
@@ -1690,6 +1707,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 None => return None,
             };
             parsed_source = None;
+            tree_is_edited = true;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1707,6 +1725,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     let parse = biome_js_parser::parse(&new_text, file_source, options);
                     tree = parse.tree();
                     parsed_source = None;
+                    tree_is_edited = true;
                     continue;
                 }
             }
@@ -1717,7 +1736,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            tree_is_edited,
+        );
 
         let (_, _) = analyze(
             &tree,
@@ -1998,7 +2023,7 @@ impl EmbeddedSnippetFormatter<'_, '_> {
     fn format_interpolation(&self, range: TextRange) -> Option<Document> {
         let content = self.host_contents.get(&range)?;
         let mut document = Document::new(content.to_vec());
-        document.replace_embedded(&mut |range| self.format(range));
+        document.replace_embedded(&mut |range, _| self.format(range));
         Some(document)
     }
 }

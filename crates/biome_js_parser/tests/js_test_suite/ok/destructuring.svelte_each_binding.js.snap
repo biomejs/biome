@@ -1,0 +1,161 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ id: localId = fallback, list: [first, ...rest], [ids[0]]: computed }
+
+```
+
+
+## AST
+
+```
+JsSvelteEachBindingRoot {
+    context: JsObjectBindingPattern {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        properties: JsObjectBindingPatternPropertyList [
+            JsObjectBindingPatternProperty {
+                member: JsLiteralMemberName {
+                    value: IDENT@2..4 "id" [] [],
+                },
+                colon_token: COLON@4..6 ":" [] [Whitespace(" ")],
+                pattern: JsIdentifierBinding {
+                    name_token: IDENT@6..14 "localId" [] [Whitespace(" ")],
+                },
+                init: JsInitializerClause {
+                    eq_token: EQ@14..16 "=" [] [Whitespace(" ")],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@16..24 "fallback" [] [],
+                        },
+                    },
+                },
+            },
+            COMMA@24..26 "," [] [Whitespace(" ")],
+            JsObjectBindingPatternProperty {
+                member: JsLiteralMemberName {
+                    value: IDENT@26..30 "list" [] [],
+                },
+                colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                pattern: JsArrayBindingPattern {
+                    l_brack_token: L_BRACK@32..33 "[" [] [],
+                    elements: JsArrayBindingPatternElementList [
+                        JsArrayBindingPatternElement {
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@33..38 "first" [] [],
+                            },
+                            init: missing (optional),
+                        },
+                        COMMA@38..40 "," [] [Whitespace(" ")],
+                        JsArrayBindingPatternRestElement {
+                            dotdotdot_token: DOT3@40..43 "..." [] [],
+                            pattern: JsIdentifierBinding {
+                                name_token: IDENT@43..47 "rest" [] [],
+                            },
+                        },
+                    ],
+                    r_brack_token: R_BRACK@47..48 "]" [] [],
+                },
+                init: missing (optional),
+            },
+            COMMA@48..50 "," [] [Whitespace(" ")],
+            JsObjectBindingPatternProperty {
+                member: JsComputedMemberName {
+                    l_brack_token: L_BRACK@50..51 "[" [] [],
+                    expression: JsComputedMemberExpression {
+                        object: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@51..54 "ids" [] [],
+                            },
+                        },
+                        optional_chain_token: missing (optional),
+                        l_brack_token: L_BRACK@54..55 "[" [] [],
+                        member: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@55..56 "0" [] [],
+                        },
+                        r_brack_token: R_BRACK@56..57 "]" [] [],
+                    },
+                    r_brack_token: R_BRACK@57..58 "]" [] [],
+                },
+                colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                pattern: JsIdentifierBinding {
+                    name_token: IDENT@60..69 "computed" [] [Whitespace(" ")],
+                },
+                init: missing (optional),
+            },
+        ],
+        r_curly_token: R_CURLY@69..70 "}" [] [],
+    },
+    type_annotation: missing (optional),
+    index: missing (optional),
+    key: missing (optional),
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_EACH_BINDING_ROOT@0..71
+  0: JS_OBJECT_BINDING_PATTERN@0..70
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..69
+      0: JS_OBJECT_BINDING_PATTERN_PROPERTY@2..24
+        0: JS_LITERAL_MEMBER_NAME@2..4
+          0: IDENT@2..4 "id" [] []
+        1: COLON@4..6 ":" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_BINDING@6..14
+          0: IDENT@6..14 "localId" [] [Whitespace(" ")]
+        3: JS_INITIALIZER_CLAUSE@14..24
+          0: EQ@14..16 "=" [] [Whitespace(" ")]
+          1: JS_IDENTIFIER_EXPRESSION@16..24
+            0: JS_REFERENCE_IDENTIFIER@16..24
+              0: IDENT@16..24 "fallback" [] []
+      1: COMMA@24..26 "," [] [Whitespace(" ")]
+      2: JS_OBJECT_BINDING_PATTERN_PROPERTY@26..48
+        0: JS_LITERAL_MEMBER_NAME@26..30
+          0: IDENT@26..30 "list" [] []
+        1: COLON@30..32 ":" [] [Whitespace(" ")]
+        2: JS_ARRAY_BINDING_PATTERN@32..48
+          0: L_BRACK@32..33 "[" [] []
+          1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@33..47
+            0: JS_ARRAY_BINDING_PATTERN_ELEMENT@33..38
+              0: JS_IDENTIFIER_BINDING@33..38
+                0: IDENT@33..38 "first" [] []
+              1: (empty)
+            1: COMMA@38..40 "," [] [Whitespace(" ")]
+            2: JS_ARRAY_BINDING_PATTERN_REST_ELEMENT@40..47
+              0: DOT3@40..43 "..." [] []
+              1: JS_IDENTIFIER_BINDING@43..47
+                0: IDENT@43..47 "rest" [] []
+          2: R_BRACK@47..48 "]" [] []
+        3: (empty)
+      3: COMMA@48..50 "," [] [Whitespace(" ")]
+      4: JS_OBJECT_BINDING_PATTERN_PROPERTY@50..69
+        0: JS_COMPUTED_MEMBER_NAME@50..58
+          0: L_BRACK@50..51 "[" [] []
+          1: JS_COMPUTED_MEMBER_EXPRESSION@51..57
+            0: JS_IDENTIFIER_EXPRESSION@51..54
+              0: JS_REFERENCE_IDENTIFIER@51..54
+                0: IDENT@51..54 "ids" [] []
+            1: (empty)
+            2: L_BRACK@54..55 "[" [] []
+            3: JS_NUMBER_LITERAL_EXPRESSION@55..56
+              0: JS_NUMBER_LITERAL@55..56 "0" [] []
+            4: R_BRACK@56..57 "]" [] []
+          2: R_BRACK@57..58 "]" [] []
+        1: COLON@58..60 ":" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_BINDING@60..69
+          0: IDENT@60..69 "computed" [] [Whitespace(" ")]
+        3: (empty)
+    2: R_CURLY@69..70 "}" [] []
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: EOF@70..71 "" [Newline("\n")] []
+
+```

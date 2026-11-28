@@ -475,7 +475,7 @@ fn render_function_parameters(parameters: &[LoweredFunctionParameter]) -> String
     rendered
 }
 
-/// Preserves named bindings and uses pattern parameters for synthetic callback slots.
+/// Preserves named bindings and uses pattern parameters for destructured ones.
 fn render_function_parameter(parameter: &LoweredFunctionParameter) -> String {
     match parameter.binding() {
         LoweredFunctionParameterBinding::Named(name) => {

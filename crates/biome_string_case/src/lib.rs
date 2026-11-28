@@ -1496,6 +1496,9 @@ mod cmp_ignore_ascii_case_tests {
     use super::StrLikeExtension;
     use std::{cmp::Ordering, ffi::OsStr};
 
+    // Skipped under Miri. Comparing all 65,536 byte pairs takes several
+    // minutes there; the other tests in this module cover the same code.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn all_byte_pairs() {
         for a in 0..=u8::MAX {

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_nested_module.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare module "foo" {
+	function foo(): void;
+	export default foo;
+}
+
+```

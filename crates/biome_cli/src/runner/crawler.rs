@@ -4,7 +4,7 @@ use crate::runner::execution::Execution;
 use crate::runner::handler::Handler;
 use crate::runner::process_file::{ChangedFile, Message, MessageStat, ProcessFile};
 use biome_diagnostics::{Error, Severity};
-use biome_fs::{BiomePath, FileSystem, PathInterner, TraversalContext, TraversalScope};
+use biome_fs::{BiomePath, FileSystem, PathInterner, PathKind, TraversalContext, TraversalScope};
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{ChangeFileParams, FeaturesSupported};
@@ -14,7 +14,6 @@ use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::Mutex;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
@@ -24,6 +23,32 @@ pub enum CrawlPath {
     Path(Utf8PathBuf),
 }
 
+/// Records a processed path and whether the command wrote new content to it.
+#[derive(Clone, Debug)]
+pub(crate) struct EvaluatedPath {
+    /// The logical filesystem path that was processed.
+    path: BiomePath,
+    /// Whether processing wrote new content to the path.
+    was_written: bool,
+}
+
+impl EvaluatedPath {
+    /// Creates a processed-path result.
+    fn new(path: BiomePath, was_written: bool) -> Self {
+        Self { path, was_written }
+    }
+
+    /// Returns the processed logical path.
+    pub(crate) fn path(&self) -> &BiomePath {
+        &self.path
+    }
+
+    /// Returns whether processing wrote new content to the path.
+    pub(crate) fn was_written(&self) -> bool {
+        self.was_written
+    }
+}
+
 pub trait Crawler<Output> {
     type Handler: Handler;
     type ProcessFile: ProcessFile;
@@ -31,7 +56,7 @@ pub trait Crawler<Output> {
 
     fn output(
         collector_result: <Self::Collector as Collector>::Result,
-        evaluated_paths: Vec<BiomePath>,
+        evaluated_paths: Vec<EvaluatedPath>,
         duration: Duration,
     ) -> Output;
 
@@ -98,34 +123,36 @@ pub trait Crawler<Output> {
         Ok(Self::output(result, evaluated_paths, duration))
     }
 
-    /// Initiate the filesystem traversal tasks with the provided input paths and
-    /// run it to completion, returning the duration of the process and the evaluated paths
+    /// Walks the input paths and processes every selected file, returning the duration of the
+    /// process and the processed paths in processing order.
     fn crawl_inputs<'a>(
         fs: &'a dyn FileSystem,
         inputs: Vec<CrawlPath>,
         ctx: &'a CrawlerOptions<Self::Handler, Self::ProcessFile>,
-    ) -> (Duration, Vec<BiomePath>) {
+    ) -> (Duration, Vec<EvaluatedPath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
-                match input {
-                    CrawlPath::Path(input) => scope.evaluate(ctx, input),
-                    CrawlPath::String(input) => scope.evaluate(ctx, Utf8PathBuf::from(input)),
+                let input = match input {
+                    CrawlPath::Path(input) => input,
+                    CrawlPath::String(input) => Utf8PathBuf::from(input),
                 };
+                scope.evaluate_and_handle(ctx, input);
             }
         }));
 
-        let mut handle_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
-        handle_paths.sort_unstable();
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &handle_paths {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
-
-        // Re-collect after handle phase to capture was_written mutations
-        let mut evaluated_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
-        evaluated_paths.sort_unstable();
+        let written_paths = ctx.written_paths.pin();
+        let mut evaluated_paths: Vec<_> = ctx
+            .evaluated_paths()
+            .into_iter()
+            .cloned()
+            .map(|path| {
+                let was_written = written_paths.contains(&path);
+                EvaluatedPath::new(path, was_written)
+            })
+            .collect();
+        evaluated_paths
+            .sort_unstable_by(|left, right| left.path().cmp_processing_priority(right.path()));
 
         (start.elapsed(), evaluated_paths)
     }
@@ -154,20 +181,14 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     pub(crate) workspace: &'ctx dyn Workspace,
     /// Key of the project in which we're traversing.
     pub(crate) project_key: ProjectKey,
-    /// File paths interner cache used by the filesystem traversal
+    /// Logical path interner used by the filesystem traversal.
     interner: PathInterner,
-    /// Shared atomic counter storing the number of changed files
-    changed: AtomicUsize,
-    /// Shared atomic counter storing the number of unchanged files
-    unchanged: AtomicUsize,
-    /// Shared atomic counter storing the number of unchanged files
-    matches: AtomicUsize,
-    /// Shared atomic counter storing the number of skipped files
-    skipped: AtomicUsize,
     /// Channel sending messages to the display thread
     pub(crate) messages: Sender<Message>,
-    /// List of paths that should be processed
+    /// Paths handed to the processor by the traversal.
     pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
+    /// Paths whose contents were changed by processing.
+    pub(crate) written_paths: papaya::HashSet<BiomePath>,
     /// File features already computed during path evaluation.
     pub(crate) file_features: papaya::HashMap<BiomePath, FeaturesSupported>,
     /// Final contents written by crawler workers.
@@ -192,28 +213,22 @@ where
     P: ProcessFile,
 {
     fn increment_changed(&self, path: &BiomePath, changed_file: ChangedFile) {
-        self.changed.fetch_add(1, Ordering::Relaxed);
         if self.synchronize_workspace {
             self.changed_files.lock().unwrap().push(changed_file);
         }
-        let guard = self.evaluated_paths.pin();
-        guard.remove(path);
-        guard.insert(path.to_written());
+        self.written_paths.pin().insert(path.clone());
         self.push_message(Message::Stats(MessageStat::Changed));
     }
     fn increment_unchanged(&self) {
         self.push_message(Message::Stats(MessageStat::Unchanged));
-        self.unchanged.fetch_add(1, Ordering::Relaxed);
     }
 
     fn increment_matches(&self, num_matches: usize) {
         self.push_message(Message::Stats(MessageStat::Matches(num_matches)));
-        self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
     fn increment_skipped(&self) {
         self.push_message(Message::Stats(MessageStat::Skipped));
-        self.skipped.fetch_add(1, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -270,14 +285,11 @@ where
             interner,
             messages: sender,
             evaluated_paths: HashSet::default(),
+            written_paths: HashSet::default(),
             file_features: HashMap::default(),
             changed_files: Mutex::new(Vec::new()),
             synchronize_workspace,
             handler: I::default(),
-            changed: AtomicUsize::new(0),
-            unchanged: AtomicUsize::new(0),
-            matches: AtomicUsize::new(0),
-            skipped: AtomicUsize::new(0),
             execution,
             max_diagnostics,
             diagnostic_level,
@@ -312,11 +324,18 @@ where
     }
 
     #[instrument(level = "debug", skip(self, biome_path))]
-    fn can_handle(&self, biome_path: &BiomePath) -> bool {
-        self.handler.can_handle(biome_path, self)
+    fn can_handle_with_kind(
+        &self,
+        biome_path: &BiomePath,
+        path_kind: PathKind,
+        ancestors_checked: bool,
+    ) -> bool {
+        self.handler
+            .can_handle(biome_path, path_kind, ancestors_checked, self)
     }
 
     fn handle_path(&self, path: BiomePath) {
+        self.evaluated_paths.pin().insert(path.clone());
         self.handler.handle_path::<P, Self>(
             &path,
             self.max_diagnostics,

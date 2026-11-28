@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTypeImport.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type { DatabaseSync } from "node:sqlite";
+import { type DatabaseSync as Database } from "node:sqlite";
+import type * as sqlite from "node:sqlite";
+import sqliteRequire = require("node:sqlite");
+
+{
+	const database = new DatabaseSync(":memory:");
+	database.exec(`SELECT ${value}`);
+}
+
+{
+	const database = new Database(":memory:");
+	database.exec(`SELECT ${value}`);
+}
+
+{
+	const database = new sqlite.DatabaseSync(":memory:");
+	database.exec(`SELECT ${value}`);
+}
+
+{
+	const database = new sqliteRequire.DatabaseSync(":memory:");
+	database.exec(`SELECT ${value}`);
+}
+
+```

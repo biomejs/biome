@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --write --only=noVueNegationElse file.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<template>
+  <section v-if="outer" class="outer-else">
+    <span v-if="!nested" class="nested-if">Nested if</span>
+    <p v-else class="nested-else">Nested else</p>
+  </section>
+  <div v-else class="outer-if">
+    <span v-if="!inner" class="inner-if">Inner if</span>
+    <p v-else class="inner-else">Inner else</p>
+  </div>
+  <div v-if="a === b">Equal</div>
+  <div v-else>Not equal</div>
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

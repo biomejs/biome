@@ -960,21 +960,29 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
     // Check for Svelte blocks and classify them appropriately
     if let Some(svelte_block) = element.clone().as_svelte_block() {
         return match svelte_block {
-            // {@html ...} and {@render ...} are "tag" expressions that inject content inline
-            // They should be treated as inline elements for whitespace sensitivity purposes
-            AnySvelteBlock::SvelteHtmlBlock(_) | AnySvelteBlock::SvelteRenderBlock(_) => {
-                CssDisplay::Inline
-            }
-            // Control flow blocks ({#if}, {#each}, etc.) and other constructs are block-level
+            // Svelte keeps the whitespace between a tag or a block and its siblings as a text
+            // node, so line breaks around them render as a space, like around an inline element:
+            //
+            // ```svelte
+            // <p>Total:{#each items as item}<b>{item}</b>{/each}.</p>
+            // ```
+            //
+            // `{@html ...}`, `{@render ...}`, `{@const ...}`, `{let ...}` and `{@debug ...}` are
+            // tags without children.
+            AnySvelteBlock::SvelteHtmlBlock(_)
+            | AnySvelteBlock::SvelteRenderBlock(_)
+            | AnySvelteBlock::SvelteConstBlock(_)
+            | AnySvelteBlock::SvelteDeclarationBlock(_)
+            | AnySvelteBlock::SvelteDebugBlock(_) => CssDisplay::Inline,
+            // Svelte trims the whitespace at the start and end of a block's children, so a
+            // block is whitespace-sensitive on the outside but not on the inside, like an
+            // inline-block element.
             AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteEachBlock(_)
             | AnySvelteBlock::SvelteAwaitBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_)
-            | AnySvelteBlock::SvelteSnippetBlock(_)
-            | AnySvelteBlock::SvelteConstBlock(_)
-            | AnySvelteBlock::SvelteDeclarationBlock(_)
-            | AnySvelteBlock::SvelteDebugBlock(_)
-            | AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
+            | AnySvelteBlock::SvelteSnippetBlock(_) => CssDisplay::InlineBlock,
+            AnySvelteBlock::SvelteBogusBlock(_) => CssDisplay::Block,
         };
     }
 

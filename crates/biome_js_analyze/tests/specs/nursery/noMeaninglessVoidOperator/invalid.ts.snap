@@ -30,6 +30,10 @@ type Empty = void | undefined;
 declare function alias(): Empty;
 void alias();
 
+function withDefault(count: number = 0) {
+	void count;
+}
+
 ```
 
 # Diagnostics
@@ -504,6 +508,7 @@ invalid.ts:25:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━
   > 25 │ void alias();
        │ ^^^^^^^^^^^^
     26 │ 
+    27 │ function withDefault(count: number = 0) {
   
   i This call already returns void or undefined.
   
@@ -518,6 +523,36 @@ invalid.ts:25:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━
     25    │ - void·alias();
        25 │ + (alias());
     26 26 │   
+    27 27 │   function withDefault(count: number = 0) {
+  
+
+```
+
+```
+invalid.ts:28:2 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    27 │ function withDefault(count: number = 0) {
+  > 28 │ 	void count;
+       │ 	^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    26 26 │   
+    27 27 │   function withDefault(count: number = 0) {
+    28    │ - → void·count;
+       28 │ + → (count);
+    29 29 │   }
+    30 30 │   
   
 
 ```

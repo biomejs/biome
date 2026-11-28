@@ -3,6 +3,7 @@ pub mod specifiers_attributes;
 mod util;
 
 use crate::JsRuleAction;
+use crate::utils::trivia::{attached_trivia, detached_trivia};
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
     context::RuleContext, declare_source_rule,
@@ -24,7 +25,7 @@ use specifiers_attributes::{
     merge_import_specifiers, sort_attributes, sort_export_from_specifiers, sort_export_specifiers,
     sort_import_specifiers,
 };
-use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
+use util::{has_detached_leading_comment, leading_newlines};
 
 declare_source_rule! {
     /// Organize imports and exports in JavaScript and TypeScript files.

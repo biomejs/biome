@@ -5,3 +5,4 @@ Promise.allSettled(promises);
 Promise.any(promises);
 Promise.race(promises);
 Promise.try(() => 1);
+Promise.withResolvers().promise;

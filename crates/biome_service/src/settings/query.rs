@@ -136,6 +136,27 @@ impl SettingsQuery {
         }
     }
 
+    /// Creates a query that selects project settings without path-matched overrides.
+    pub(crate) fn new_without_overrides(
+        project: ProjectInput,
+        project_selection: SettingsSelectionKey,
+        inline_settings: Option<Settings>,
+    ) -> Self {
+        let selection = SettingsQuerySelection {
+            selection: project_selection,
+            override_indices: Box::default(),
+        };
+        let inline = inline_settings.map(|settings| InlineSettingsQuery {
+            settings: SettingsIdentity::from(Arc::new(settings)),
+            override_indices: Box::default(),
+        });
+        Self {
+            project,
+            selection,
+            inline,
+        }
+    }
+
     pub(crate) fn project(&self) -> ProjectInput {
         self.project
     }
@@ -146,6 +167,10 @@ impl SettingsQuery {
 
     pub(crate) fn inline_settings(&self) -> Option<&SettingsIdentity> {
         self.inline.as_ref().map(|inline| &inline.settings)
+    }
+
+    pub(crate) fn effective_settings<'a>(&'a self, settings: &'a Settings) -> &'a Settings {
+        self.inline_settings().map_or(settings, AsRef::as_ref)
     }
 
     pub(crate) fn override_indices(&self) -> &[usize] {

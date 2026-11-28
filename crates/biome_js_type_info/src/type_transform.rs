@@ -6,7 +6,6 @@
 //! callers use semantic operations such as generic substitution.
 
 use crate::TypeOperator;
-use crate::generated::global_types::ids::AWAITED_ID_GLOBAL_TYPE_ID;
 use crate::interned_types::{InternedTypeInstance, TypeData, TypeDataSlotRebuilder, TypeDb};
 use crate::type_operations::{indexed_access, keyof, mapped_type};
 use crate::type_relation::{
@@ -542,6 +541,10 @@ struct TypeNormalizer<'a, R> {
     resolve: &'a mut R,
     /// Remaining conditional instantiations, shared with nested normalizations.
     remaining_instantiations: &'a mut usize,
+    /// Whether generic parameters are kept as they are instead of having their
+    /// constraints and defaults normalized. See
+    /// [`TypeData::normalize_nested_types_keeping_generics`].
+    keep_generics: bool,
 }
 
 impl<'db, R> TypeNormalizer<'_, R>
@@ -564,61 +567,10 @@ where
                 &mut TypeNormalizer {
                     resolve: &mut *self.resolve,
                     remaining_instantiations: &mut *self.remaining_instantiations,
+                    keep_generics: self.keep_generics,
                 },
             )
             .map_or(ty, |ty| ty)
-    }
-
-    /// Unwraps the promises passed to the built-in `Awaited`.
-    ///
-    /// `Awaited<T>` matches `T` against `{ then(onfulfilled: infer F): any }`.
-    /// Built-in promises are modeled without the parameters of `then`, so this
-    /// evaluates `Awaited<Promise<X>>` as `Awaited<X>` directly. Other
-    /// arguments use the conditional in the declaration of `Awaited`.
-    fn instantiate_awaited(
-        &mut self,
-        db: &'db dyn TypeDb,
-        instance: InternedTypeInstance<'db>,
-    ) -> Option<TypeData<'db>> {
-        let awaited = TypeData::GlobalType(AWAITED_ID_GLOBAL_TYPE_ID);
-        let [argument] = instance.type_parameters(db).as_ref() else {
-            return None;
-        };
-        // `Awaited` is referenced either through its handle or, once a type
-        // reference has expanded it, through its alias declaration, which is
-        // itself an instance. Expanding the handle to compare with the
-        // declaration is costly, so cheaper checks rule out other instances,
-        // such as `Promise<T>`, first.
-        let target = instance.ty(db);
-        if target != awaited && !matches!(target, TypeData::InstanceOf(_)) {
-            return None;
-        }
-        let members = match (self.resolve)(*argument) {
-            TypeData::Union(union) => union.types(db).to_vec(),
-            argument => Vec::from([argument]),
-        };
-        if !members.iter().any(|member| member.is_promise_instance(db)) {
-            return None;
-        }
-        if target != awaited && target != awaited.expand_canonical_global(db) {
-            return None;
-        }
-
-        let members = members
-            .into_iter()
-            .map(|member| {
-                let member = match member {
-                    TypeData::InstanceOf(promise) if member.is_promise_instance(db) => promise
-                        .type_parameters(db)
-                        .first()
-                        .copied()
-                        .unwrap_or(TypeData::Unknown),
-                    member => member,
-                };
-                TypeData::instance_of(db, awaited, Box::new([member]))
-            })
-            .collect();
-        Some(self.normalize_instantiation(db, TypeData::union_from_types(db, members)))
     }
 
     /// Returns whether instantiating an alias body can evaluate a conditional.
@@ -730,11 +682,8 @@ where
 {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         let ty = (self.resolve)(ty);
-        // This runs before the instance's target is expanded to its declaration.
-        if let TypeData::InstanceOf(instance) = ty
-            && let Some(awaited) = self.instantiate_awaited(db, instance)
-        {
-            return TypeTransformAction::Replace(awaited);
+        if self.keep_generics && matches!(ty, TypeData::Generic(_)) {
+            return TypeTransformAction::Replace(ty);
         }
         // A conditional whose check type is generic can't be evaluated yet,
         // and it is normalized again once instantiated. Its operands are often
@@ -769,11 +718,8 @@ where
             {
                 instance.ty(db)
             }
-            // An alias of a promise is only recognized as a promise once the
-            // arguments are normalized, so `Awaited` is checked here as well.
             TypeData::InstanceOf(instance) => self
-                .instantiate_awaited(db, instance)
-                .or_else(|| self.instantiate_conditional_alias(db, instance))
+                .instantiate_conditional_alias(db, instance)
                 .unwrap_or(ty),
             TypeData::Extends(extends) => match evaluate_extends(db, extends, self.resolve) {
                 Some(evaluated) if evaluated.needs_normalization => {
@@ -825,7 +771,37 @@ impl<'db> TypeData<'db> {
     pub fn normalize_nested_types(
         self,
         db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        self.normalize_nested_types_with(db, resolve, false)
+    }
+
+    /// Resolves nested type handles and simplifies structural wrappers while
+    /// keeping generic parameters, including their constraints and defaults,
+    /// unchanged.
+    ///
+    /// Member lookup uses this normalization because member lookup normalizes a
+    /// member type every time it finds the member. Member types often declare
+    /// generic parameters with large constraints, such as
+    /// `RE extends ReferenceExpression<DB, TB>`. Keeping the parameters avoids
+    /// normalizing those constraints on every lookup.
+    ///
+    /// Analyzers read a parameter's normalized constraint, so they use
+    /// [`Self::normalize_nested_types`] instead. For example, a value of type
+    /// `T` is always truthy when `T extends "a" | "b"`.
+    pub fn normalize_nested_types_keeping_generics(
+        self,
+        db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        self.normalize_nested_types_with(db, resolve, true)
+    }
+
+    fn normalize_nested_types_with(
+        self,
+        db: &'db dyn TypeDb,
         mut resolve: impl FnMut(Self) -> Self,
+        keep_generics: bool,
     ) -> TypeTransformResult<Self> {
         let mut remaining_instantiations = MAX_CONDITIONAL_INSTANTIATIONS;
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
@@ -834,6 +810,7 @@ impl<'db> TypeData<'db> {
             &mut TypeNormalizer {
                 resolve: &mut resolve,
                 remaining_instantiations: &mut remaining_instantiations,
+                keep_generics,
             },
         )
     }
@@ -1217,6 +1194,42 @@ mod tests {
             source.substitute_types(&db, &substitutions),
             TypeTransformResult::LimitExceeded
         );
+    }
+
+    #[test]
+    fn normalization_keeping_generics_preserves_generic_parameter_identity() {
+        let db = TestDb::default();
+        let constraint = TypeData::TypeofType(InternedTypeofType::new(&db, TypeData::String));
+        let u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(constraint),
+            None,
+            Text::from("U"),
+        ));
+        let function = TypeData::Function(InternedFunction::new(
+            &db,
+            vec![u].into_boxed_slice(),
+            Box::default(),
+            ReturnType::Type(u),
+            false,
+            None,
+        ));
+        assert_eq!(
+            function
+                .normalize_nested_types_keeping_generics(&db, |ty| ty)
+                .unwrap(),
+            function
+        );
+        // Without keeping generics, the constraint normalizes to `string`.
+        let normalized = function.normalize_nested_types(&db, |ty| ty).unwrap();
+        let TypeData::Function(normalized) = normalized else {
+            panic!("expected a function, got {normalized:?}");
+        };
+        let [TypeData::Generic(parameter)] = normalized.type_parameters(&db).as_ref() else {
+            panic!("expected one generic parameter");
+        };
+        assert_eq!(parameter.constraint(&db), Some(TypeData::String));
     }
 
     #[test]

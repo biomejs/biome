@@ -10,7 +10,15 @@
 			"version": "latest"
 		}
 	},
+	"containerEnv": {
+		// Avoid retaining incremental compiler caches, which can consume substantial disk space.
+		"CARGO_INCREMENTAL": "0",
+		// Omit test-profile debug information to keep test build artifacts smaller.
+		"CARGO_PROFILE_TEST_DEBUG": "0",
+		// Keep the large Cargo build tree off persistent workspace storage when /tmp is separate.
+		"CARGO_TARGET_DIR": "/tmp/biome-target"
+	},
 	"hostRequirements": {
-		"storage": "64gb"
+		"storage": "48gb"
 	}
 }

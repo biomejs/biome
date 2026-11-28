@@ -2,6 +2,7 @@
 //! case that affects many commands
 
 mod assist;
+mod astro_stability;
 mod biome_json_support;
 mod config_extends;
 mod config_path;
@@ -29,6 +30,7 @@ mod json_parsing;
 mod linter_domains;
 mod linter_groups_plain;
 mod markdown;
+mod mdx;
 mod migrate_v2;
 mod monorepo;
 mod multiple_reporters;

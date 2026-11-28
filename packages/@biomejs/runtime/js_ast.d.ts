@@ -1985,6 +1985,43 @@ export interface JsSvelteDeclarationRoot extends JsAstNode {
 	token(field: "semicolonToken" | "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsSvelteEachBindingRoot extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_BINDING_ROOT";
+	readonly context: AnyJsBindingPattern | undefined;
+	withContext(value: AnyJsBindingPattern): JsSvelteEachBindingRoot;
+	readonly typeAnnotation: TsTypeAnnotation | undefined;
+	withTypeAnnotation(
+		value: TsTypeAnnotation | undefined,
+	): JsSvelteEachBindingRoot;
+	readonly index: JsSvelteEachIndex | undefined;
+	withIndex(value: JsSvelteEachIndex | undefined): JsSvelteEachBindingRoot;
+	readonly key: JsSvelteEachKey | undefined;
+	withKey(value: JsSvelteEachKey | undefined): JsSvelteEachBindingRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsSvelteEachBindingRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsSvelteEachIndex extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_INDEX";
+	readonly commaToken: string | undefined;
+	withCommaToken(value: JsAstToken): JsSvelteEachIndex;
+	readonly binding: AnyJsBinding | undefined;
+	withBinding(value: AnyJsBinding): JsSvelteEachIndex;
+	token(field: "commaToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsSvelteEachKey extends JsAstNode {
+	readonly kind: "JS_SVELTE_EACH_KEY";
+	readonly lParenToken: string | undefined;
+	withLParenToken(value: JsAstToken): JsSvelteEachKey;
+	readonly expression: AnyJsExpression | undefined;
+	withExpression(value: AnyJsExpression): JsSvelteEachKey;
+	readonly rParenToken: string | undefined;
+	withRParenToken(value: JsAstToken): JsSvelteEachKey;
+	token(field: "lParenToken" | "rParenToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsSvelteLegacyConstRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_LEGACY_CONST_ROOT";
 	readonly declarator: AnyJsSvelteLegacyConstDeclarator | undefined;
@@ -2000,8 +2037,10 @@ export interface JsSvelteSnippetRoot extends JsAstNode {
 	readonly kind: "JS_SVELTE_SNIPPET_ROOT";
 	readonly name: AnyJsBinding | undefined;
 	withName(value: AnyJsBinding): JsSvelteSnippetRoot;
-	readonly parameters: JsParameters | undefined;
-	withParameters(value: JsParameters): JsSvelteSnippetRoot;
+	readonly typeParameters: TsTypeParameters | undefined;
+	withTypeParameters(value: TsTypeParameters | undefined): JsSvelteSnippetRoot;
+	readonly parameters: AnyJsSvelteSnippetParameters | undefined;
+	withParameters(value: AnyJsSvelteSnippetParameters): JsSvelteSnippetRoot;
 	readonly eofToken: string | undefined;
 	withEofToken(value: JsAstToken): JsSvelteSnippetRoot;
 	token(field: "eofToken"): JsAstToken | undefined;
@@ -2403,6 +2442,15 @@ export interface JsxShorthandAttribute extends JsAstNode {
 	readonly rCurlyToken: string | undefined;
 	withRCurlyToken(value: JsAstToken): JsxShorthandAttribute;
 	token(field: "lCurlyToken" | "rCurlyToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
+export interface JsxSingleTagRoot extends JsAstNode {
+	readonly kind: "JSX_SINGLE_TAG_ROOT";
+	readonly tag: AnyJsxSingleTag | undefined;
+	withTag(value: AnyJsxSingleTag): JsxSingleTagRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsxSingleTagRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
 export interface JsxSpreadAttribute extends JsAstNode {
@@ -4205,10 +4253,12 @@ export type AnyJsRoot =
 	| JsModule
 	| JsScript
 	| JsSvelteDeclarationRoot
+	| JsSvelteEachBindingRoot
 	| JsSvelteLegacyConstRoot
 	| JsSvelteSnippetRoot
 	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
+	| JsxSingleTagRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
 	| JsBlockStatement
@@ -4248,6 +4298,7 @@ export type AnyJsSvelteDeclaration =
 	| JsBogusVariableDeclaration
 	| JsVariableDeclaration;
 export type AnyJsSvelteLegacyConstDeclarator = JsBogus | JsVariableDeclarator;
+export type AnyJsSvelteSnippetParameters = JsBogus | JsParameters;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
 export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
@@ -4281,6 +4332,13 @@ export type AnyJsxObjectName =
 	| JsxMemberName
 	| JsxNamespaceName
 	| JsxReferenceIdentifier;
+export type AnyJsxSingleTag =
+	| JsBogus
+	| JsxClosingElement
+	| JsxClosingFragment
+	| JsxOpeningElement
+	| JsxOpeningFragment
+	| JsxSelfClosingElement;
 export type AnyJsxTag =
 	| AstroImplicitFragment
 	| JsxElement
@@ -4530,6 +4588,9 @@ export interface JsNodeByKind {
 	readonly JS_STRING_LITERAL_EXPRESSION: JsStringLiteralExpression;
 	readonly JS_SUPER_EXPRESSION: JsSuperExpression;
 	readonly JS_SVELTE_DECLARATION_ROOT: JsSvelteDeclarationRoot;
+	readonly JS_SVELTE_EACH_BINDING_ROOT: JsSvelteEachBindingRoot;
+	readonly JS_SVELTE_EACH_INDEX: JsSvelteEachIndex;
+	readonly JS_SVELTE_EACH_KEY: JsSvelteEachKey;
 	readonly JS_SVELTE_LEGACY_CONST_ROOT: JsSvelteLegacyConstRoot;
 	readonly JS_SVELTE_SNIPPET_ROOT: JsSvelteSnippetRoot;
 	readonly JS_SWITCH_STATEMENT: JsSwitchStatement;
@@ -4567,6 +4628,7 @@ export interface JsNodeByKind {
 	readonly JSX_REFERENCE_IDENTIFIER: JsxReferenceIdentifier;
 	readonly JSX_SELF_CLOSING_ELEMENT: JsxSelfClosingElement;
 	readonly JSX_SHORTHAND_ATTRIBUTE: JsxShorthandAttribute;
+	readonly JSX_SINGLE_TAG_ROOT: JsxSingleTagRoot;
 	readonly JSX_SPREAD_ATTRIBUTE: JsxSpreadAttribute;
 	readonly JSX_SPREAD_CHILD: JsxSpreadChild;
 	readonly JSX_STRING: JsxString;

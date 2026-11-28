@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/vue-query";
+import { useQuery as usePreactQuery } from "@tanstack/preact-query";
+
+function Component() {
+	const query = useQuery({ queryKey: ["a"], queryFn }) as unknown;
+	const mutation = useMutation({ mutationFn })!;
+	const preactQuery = usePreactQuery({ queryKey: ["a"], queryFn });
+
+	useEffect(() => {}, [query as unknown, mutation!, preactQuery satisfies unknown]);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:11:23 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+     9 │ 	const preactQuery = usePreactQuery({ queryKey: ["a"], queryFn });
+    10 │ 
+  > 11 │ 	useEffect(() => {}, [query as unknown, mutation!, preactQuery satisfies unknown]);
+       │ 	                     ^^^^^
+    12 │ }
+    13 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:41 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useMutation is a dependency of useEffect.
+  
+     9 │ 	const preactQuery = usePreactQuery({ queryKey: ["a"], queryFn });
+    10 │ 
+  > 11 │ 	useEffect(() => {}, [query as unknown, mutation!, preactQuery satisfies unknown]);
+       │ 	                                       ^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:52 lint/nursery/noTanstackQueryUnstableDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The object returned by useQuery is a dependency of useEffect.
+  
+     9 │ 	const preactQuery = usePreactQuery({ queryKey: ["a"], queryFn });
+    10 │ 
+  > 11 │ 	useEffect(() => {}, [query as unknown, mutation!, preactQuery satisfies unknown]);
+       │ 	                                                  ^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i This object can be a new object on every render, even when none of its values have changed. Because of this, useEffect treats its dependencies as changed on every render.
+  
+  i Take the values that you need out of this object, and list those values as dependencies instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

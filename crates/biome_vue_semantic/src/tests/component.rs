@@ -1159,3 +1159,267 @@ fn option_functions_and_runtime_types_point_to_their_nodes() {
     );
     assert_eq!(text_of(component.setup_function_node()), "setup(props) {}");
 }
+
+/// Returns, for each computed property of the first component, its name and
+/// whether its value is a function.
+fn computed_values(code: &str, source: JsFileSource) -> Vec<(String, Tri)> {
+    let model = js_model(code, source);
+    let component = model.components().next().expect("a component");
+    component
+        .computed()
+        .map(|computed| (computed.name().to_string(), computed.value_is_function()))
+        .collect()
+}
+
+#[test]
+fn computed_values_follow_what_the_getter_returns() {
+    let values = computed_values(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  props: { label: String, onPick: Function, either: [String, Function], loose: null },
+  data() { return { text: "", handler() {}, form: { name: "" }, validator: null }; },
+  computed: {
+    literal() { return 42; },
+    empty() { return; },
+    object: { get: () => ({}) },
+    arrow: () => "a",
+    fromData() { return this.text; },
+    fromDataFunction() { return this.handler; },
+    fromObjectData() { return this.form; },
+    fromProp() { return this.label; },
+    fromFunctionProp() { return this.onPick; },
+    fromMixedProp() { return this.either; },
+    fromUntypedProp() { return this.loose; },
+    fromMethod() { return this.go; },
+    fromMethodCall() { return this.go(); },
+    fromComputed() { return this.literal; },
+    fromComputedCall() { return this.literal(); },
+    branches() { return this.ok ? "a" : 1; },
+    mixed() { return this.text || (() => {}); },
+    returnsFunction() { return () => {}; },
+    variable() { const value = "a"; return value; },
+    reassigned() { let value = "a"; value = foo; return value; },
+    unknownCall() { return foo(); },
+    arrowThis: () => this.text,
+    cycle() { return this.cycle; },
+    reassignedData() { return this.validator; },
+  },
+  methods: { go() { return 1; }, setValidator(fn) { this.validator = fn; } },
+});"#,
+        JsFileSource::js_module(),
+    );
+    let values: Vec<_> = values
+        .iter()
+        .map(|(name, value)| (name.as_str(), *value))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("literal", Tri::No),
+            ("empty", Tri::No),
+            ("object", Tri::No),
+            ("arrow", Tri::No),
+            ("fromData", Tri::No),
+            ("fromDataFunction", Tri::Yes),
+            ("fromObjectData", Tri::No),
+            ("fromProp", Tri::No),
+            ("fromFunctionProp", Tri::Yes),
+            ("fromMixedProp", Tri::Unknown),
+            ("fromUntypedProp", Tri::Unknown),
+            ("fromMethod", Tri::Yes),
+            ("fromMethodCall", Tri::No),
+            ("fromComputed", Tri::No),
+            ("fromComputedCall", Tri::Unknown),
+            ("branches", Tri::No),
+            ("mixed", Tri::Unknown),
+            ("returnsFunction", Tri::Yes),
+            ("variable", Tri::No),
+            ("reassigned", Tri::Unknown),
+            ("unknownCall", Tri::Unknown),
+            ("arrowThis", Tri::Unknown),
+            ("cycle", Tri::Unknown),
+            ("reassignedData", Tri::Unknown),
+        ]
+    );
+}
+
+#[test]
+fn data_values_are_unknown_when_uses_are_incomplete() {
+    // A script block read without its template may have its data assigned
+    // from the template.
+    let values = computed_values(
+        r#"export default {
+  data() { return { text: "" }; },
+  computed: { fromData() { return this.text; } },
+}"#,
+        JsFileSource::vue(),
+    );
+    assert_eq!(values, [("fromData".to_string(), Tri::Unknown)]);
+}
+
+#[test]
+fn computed_values_of_open_components_are_unknown() {
+    let values = computed_values(
+        r#"export default {
+  mixins: [other],
+  computed: { fromMember() { return this.text; }, literal() { return 1; } },
+}"#,
+        JsFileSource::vue(),
+    );
+    assert_eq!(
+        values,
+        [
+            ("fromMember".to_string(), Tri::Unknown),
+            ("literal".to_string(), Tri::No),
+        ]
+    );
+}
+
+#[test]
+fn computed_values_in_script_setup() {
+    let values = computed_values(
+        r#"import { computed } from "vue";
+const count = computed(() => 1);
+const label = computed({ get: () => "a", set: (value) => {} });
+const handler = computed(() => () => {});
+const unknown = computed(() => count.value);
+const fromThis = computed(function () { return this.count; });"#,
+        setup_ts(),
+    );
+    let values: Vec<_> = values
+        .iter()
+        .map(|(name, value)| (name.as_str(), *value))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("count", Tri::No),
+            ("label", Tri::No),
+            ("handler", Tri::Yes),
+            ("unknown", Tri::Unknown),
+            ("fromThis", Tri::Unknown),
+        ]
+    );
+}
+
+#[test]
+fn references_point_to_the_node_of_their_name() {
+    let source = JsFileSource::vue();
+    let code = r#"import { useTemplateRef } from "vue";
+export default {
+  props: ["title"],
+  emits: ["change"],
+  watch: { title: "onTitle" },
+  expose: ["reset"],
+  setup() { useTemplateRef("input"); },
+  methods: {
+    onTitle() { this.$emit("change", this.title); },
+    reset() { this.$refs.input.focus(); this.title = ""; },
+  },
+};"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+
+    let mut references: Vec<_> = model
+        .references()
+        .map(|reference| {
+            let id = reference.js_node().expect("a node");
+            let node = nodes.get(id).expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), reference.range());
+            // The node leads back to the reference.
+            assert_eq!(nodes.id(node), Some(id));
+            assert_eq!(
+                model.data.js_nodes[id.index()].reference,
+                Some(reference.id())
+            );
+            (
+                reference.range().start(),
+                node.text_trimmed().to_string(),
+                reference.site(),
+                node.kind(),
+            )
+        })
+        .collect();
+    references.sort_by_key(|(start, ..)| *start);
+    let references: Vec<_> = references
+        .into_iter()
+        .map(|(_, text, site, kind)| (text, site, kind))
+        .collect();
+    assert_eq!(
+        references,
+        [
+            (
+                "title".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_LITERAL_MEMBER_NAME
+            ),
+            (
+                "\"onTitle\"".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"reset\"".into(),
+                RefSite::OptionName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"input\"".into(),
+                RefSite::TemplateRefKey,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            (
+                "\"change\"".into(),
+                RefSite::EventName,
+                JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
+            ),
+            ("title".into(), RefSite::Identifier, JsSyntaxKind::JS_NAME),
+            (
+                "input".into(),
+                RefSite::TemplateRefKey,
+                JsSyntaxKind::JS_NAME
+            ),
+            ("title".into(), RefSite::Identifier, JsSyntaxKind::JS_NAME),
+        ]
+    );
+}
+
+#[test]
+fn bindings_point_to_the_node_of_their_name() {
+    let source = setup_ts();
+    let code = r#"import { ref } from "vue";
+const props = defineProps<{ title: string }>();
+function reset() {}"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+
+    let component = model.components().next().expect("a component");
+    let names: Vec<_> = component
+        .setup_bindings()
+        .map(|symbol| {
+            let node = nodes
+                .get(symbol.name_node().expect("a name node"))
+                .expect("a resolved node");
+            assert_eq!(node.text_trimmed_range(), symbol.range());
+            (symbol.name().to_string(), node.kind())
+        })
+        .collect();
+    assert_eq!(
+        names,
+        [
+            ("ref".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+            ("props".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+            ("reset".into(), JsSyntaxKind::JS_IDENTIFIER_BINDING),
+        ]
+    );
+
+    // The name of a prop is part of the syntax of its declaration.
+    let title = component.props().next().expect("a prop");
+    assert_eq!(title.name_node(), None);
+}

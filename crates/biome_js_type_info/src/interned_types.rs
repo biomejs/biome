@@ -20,8 +20,8 @@ use crate::{
     generated::global_types::ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
         DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, MAP_ID_GLOBAL_TYPE_ID,
-        PROMISE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        PROMISE_ID_GLOBAL_TYPE_ID, PROMISE_LIKE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID,
+        SET_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     globals_ids::GlobalTypeId,
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
@@ -728,6 +728,15 @@ impl<'db> TypeData<'db> {
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Promise")
+    }
+
+    /// Returns whether this is the handle of the built-in `PromiseLike`
+    /// interface.
+    ///
+    /// Built-in declarations refer to `PromiseLike` through this handle, as in
+    /// the return type of `AsyncDisposable[Symbol.asyncDispose]`.
+    pub fn is_promise_like_interface(self) -> bool {
+        self == Self::GlobalType(PROMISE_LIKE_ID_GLOBAL_TYPE_ID)
     }
 
     /// Recognizes built-in classes whose instances are non-primitive values.
@@ -1528,6 +1537,9 @@ impl<'db> TypeDataSlots<'db> {
                 self.slots
                     .extend([expression.test, expression.consequent, expression.alternate]);
             }
+            TypeofExpression::DefaultedParameter(expression) => {
+                self.slots.extend([expression.ty, expression.default]);
+            }
             TypeofExpression::Destructure(expression) => self.slots.push(expression.ty),
             TypeofExpression::Index(expression)
             | TypeofExpression::OptionalChainIndex(expression) => {
@@ -2019,6 +2031,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     alternate: self.take_type()?,
                 })
             }
+            TypeofExpression::DefaultedParameter(_) => {
+                TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                    ty: self.take_type()?,
+                    default: self.take_type()?,
+                })
+            }
             TypeofExpression::Destructure(expression) => {
                 TypeofExpression::Destructure(TypeofDestructureExpression {
                     ty: self.take_type()?,
@@ -2479,6 +2497,7 @@ pub enum TypeofExpression<'db> {
     CallArgument(TypeofCallArgumentExpression<'db>),
     ComputedMember(TypeofComputedMemberExpression<'db>),
     Conditional(TypeofConditionalExpression<'db>),
+    DefaultedParameter(TypeofDefaultedParameterExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
     OptionalChainIndex(TypeofIndexExpression<'db>),
@@ -2531,6 +2550,12 @@ pub struct TypeofParameterExpression<'db> {
     pub function: TypeData<'db>,
     pub index: u16,
     pub has_initializer: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct TypeofDefaultedParameterExpression<'db> {
+    pub ty: TypeData<'db>,
+    pub default: TypeData<'db>,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
@@ -3200,6 +3225,12 @@ fn convert_typeof_expression<'db>(
                 test: resolve_reference(&expression.test),
                 consequent: resolve_reference(&expression.consequent),
                 alternate: resolve_reference(&expression.alternate),
+            })
+        }
+        raw::TypeofExpression::DefaultedParameter(expression) => {
+            TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                ty: resolve_reference(&expression.ty),
+                default: resolve_reference(&expression.default),
             })
         }
         raw::TypeofExpression::Destructure(expression) => {
@@ -3938,6 +3969,15 @@ mod tests {
             typeof_type(
                 &db,
                 TypeofExpression::Await(TypeofAwaitExpression { argument: s.next() }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::DefaultedParameter(TypeofDefaultedParameterExpression {
+                    ty: s.next(),
+                    default: s.next(),
+                }),
             )
         });
         assert_identity(&db, |s| {

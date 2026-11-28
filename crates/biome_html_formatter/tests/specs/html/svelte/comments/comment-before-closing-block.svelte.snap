@@ -135,8 +135,7 @@ info: svelte/comments/comment-before-closing-block.svelte
 	{#if a}
 		{#if b}
 			<span>b</span>
-		{/if}
-		<!-- after nested block -->
+		{/if}<!-- after nested block -->
 	{/if}
 </div>
 

@@ -9,12 +9,13 @@ use biome_configuration::{Configuration, FormatterConfiguration, LinterConfigura
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
-    FileContent, FileExistsParams, GetFileContentParams, GetModuleGraphParams,
-    GetModuleGraphResult, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult,
-    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind,
-    ScanProjectParams, ScanProjectResult,
+    FeatureName, FeaturesBuilder, FileContent, FileExistsParams, GetFileContentParams,
+    GetModuleGraphParams, GetModuleGraphResult, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
+    PathIsIgnoredParams, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
+    ScanProjectResult, SupportsFeatureParams,
 };
-use biome_service::{Watcher, WatcherOptions};
+use biome_service::{Watcher, WatcherOptions, Workspace};
 use futures::channel::mpsc::channel;
 use serde_json::from_value;
 use std::collections::{BTreeMap, HashMap};
@@ -24,15 +25,17 @@ use std::time::Duration;
 use tokio::task::spawn_blocking;
 use tokio::time::sleep;
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
-    CodeActionOrCommand, CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
+    self as lsp, ClientCapabilities, CodeAction, CodeActionCapabilityResolveSupport,
+    CodeActionClientCapabilities, CodeActionContext, CodeActionKind, CodeActionOrCommand,
+    CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
     DiagnosticRelatedInformation, DiagnosticSeverity, DidChangeConfigurationParams,
-    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
-    DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, InitializeParams,
-    InitializeResult, Location, MessageType, NumberOrString, PartialResultParams, Position,
-    PublishDiagnosticsParams, Range, ShowMessageParams, TextDocumentContentChangeEvent,
-    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit,
-    WorkspaceFolder,
+    DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams, DidCloseTextDocumentParams,
+    DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentFormattingParams,
+    DocumentRangeFormattingParams, FormattingOptions, InitializeParams, InitializeResult, Location,
+    MessageType, NumberOrString, PartialResultParams, Position, PublishDiagnosticsParams, Range,
+    ShowMessageParams, TextDocumentClientCapabilities, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, VersionedTextDocumentIdentifier,
+    WorkDoneProgressParams, WorkspaceEdit, WorkspaceFolder, WorkspaceFoldersChangeEvent,
 };
 
 #[test]
@@ -227,7 +230,8 @@ async fn document_lifecycle() -> Result<()> {
             "get_syntax_tree",
             GetSyntaxTreeParams {
                 project_key,
-                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+                path: BiomePath::from_platform_path(uri!("document.js").to_file_path().unwrap())
+                    .unwrap(),
             },
         )
         .await?
@@ -287,7 +291,10 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
                 "get_syntax_tree",
                 GetSyntaxTreeParams {
                     project_key,
-                    path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+                    path: BiomePath::from_platform_path(
+                        uri!("document.js").to_file_path().unwrap(),
+                    )
+                    .unwrap(),
                 },
             )
             .await?
@@ -332,7 +339,10 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
                 "get_syntax_tree",
                 GetSyntaxTreeParams {
                     project_key,
-                    path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+                    path: BiomePath::from_platform_path(
+                        uri!("document.js").to_file_path().unwrap(),
+                    )
+                    .unwrap(),
                 },
             )
             .await;
@@ -473,6 +483,88 @@ async fn document_range_formatting() -> Result<()> {
         res.context("formatting did not return an edit list")?,
         vec![TextEdit::new(
             Range::new(Position::new(1, 12), Position::new(1, 12)),
+            ";".to_string()
+        )]
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn legacy_embedded_range_formatting_maps_ranges_to_the_script() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.vue"),
+                    language_id: String::from("vue"),
+                    version: 0,
+                    text: String::from(
+                        "<template>\n  <div></div>\n</template>\n<script>\nformatHere()\n</script>\n",
+                    ),
+                },
+            },
+        )
+        .await?;
+
+    let format_range = |range| DocumentRangeFormattingParams {
+        text_document: TextDocumentIdentifier {
+            uri: uri!("document.vue"),
+        },
+        range,
+        options: FormattingOptions {
+            tab_size: 4,
+            insert_spaces: false,
+            properties: HashMap::default(),
+            trim_trailing_whitespace: None,
+            insert_final_newline: None,
+            trim_final_newlines: None,
+        },
+        work_done_progress_params: WorkDoneProgressParams {
+            work_done_token: None,
+        },
+    };
+
+    let template_edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            format_range(Range::new(Position::new(1, 0), Position::new(2, 0))),
+        )
+        .await?
+        .context("formatting returned None")?;
+    assert!(
+        template_edits.as_ref().is_none_or(Vec::is_empty),
+        "a selection before the script must not format it: {template_edits:?}"
+    );
+
+    let script_edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            format_range(Range::new(Position::new(4, 0), Position::new(5, 0))),
+        )
+        .await?
+        .context("formatting returned None")?;
+    assert_eq!(
+        script_edits.context("formatting did not return an edit list")?,
+        vec![TextEdit::new(
+            Range::new(Position::new(4, 12), Position::new(4, 12)),
             ";".to_string()
         )]
     );
@@ -807,6 +899,1218 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
 
     server.shutdown().await?;
     reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn untitled_document_uses_workspace_project() -> Result<()> {
+    let mut fs = TemporaryFs::new("untitled_document_uses_workspace_project");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "formatter": { "enabled": false },
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+    fs.create_file("project/.gitignore", "dist/\n");
+
+    let project_path = fs.working_directory.join("project");
+    let project_uri = Uri::from_str(
+        url::Url::from_file_path(&project_path)
+            .expect("project path should convert to a URL")
+            .as_str(),
+    )?;
+    let untitled_uri = Uri::from_str("untitled:Untitled-1")?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_root(project_uri).await?;
+    server.initialized().await?;
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: untitled_uri.clone(),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from("statement(   );"),
+                },
+            },
+        )
+        .await?;
+
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier { uri: untitled_uri },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response")?;
+
+    assert!(
+        edits.is_none(),
+        "the untitled document should use the workspace configuration"
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn non_file_root_uri_does_not_create_project() -> Result<()> {
+    let fs = TemporaryFs::new("non_file_root_uri_does_not_create_project");
+    let root_uri = Uri::from_str("untitled:Workspace")?;
+    let document_uri = Uri::from_str("untitled:Untitled-1")?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(root_uri),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: None,
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned no response")?;
+    server.initialized().await?;
+    server
+        .open_named_document("statement();", document_uri.clone(), "javascript")
+        .await?;
+
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .expect("the session should be registered")
+        .clone();
+    assert!(session.primary_project_path().is_none());
+    assert!(session.document(&document_uri).is_none());
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn virtual_framework_documents_use_full_html_support() -> Result<()> {
+    for (language, invalid, valid) in [
+        (
+            "astro",
+            "<div>",
+            "---\nconst value=1\n---\n<div>marker</div>",
+        ),
+        (
+            "vue",
+            "<template><div></template>",
+            "<template><div>marker</div></template><script>const value=1</script>",
+        ),
+        (
+            "svelte",
+            "<div>",
+            "<div>marker</div><script>const value=1</script>",
+        ),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            to_utf8_file_path_buf(uri!("biome.json")),
+            r#"{
+                "html": {
+                    "experimentalFullSupportEnabled": true,
+                    "formatter": { "enabled": true }
+                },
+                "linter": { "enabled": false }
+            }"#,
+        );
+
+        let factory = ServerFactory::new_with_fs(Arc::new(fs));
+        let (service, client) = factory.create().into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+        let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+        server.initialize().await?;
+        server.initialized().await?;
+        server.load_configuration().await?;
+
+        let document_uri = Uri::from_str(&format!("untitled:{language}-1"))?;
+        server
+            .open_named_document(invalid, document_uri.clone(), language)
+            .await?;
+
+        let notification = wait_for_notification(&mut receiver, |notification| {
+            matches!(
+                notification,
+                ServerNotification::PublishDiagnostics(params) if params.uri == document_uri
+            )
+        })
+        .await;
+        let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+            panic!("expected diagnostics for virtual {language} document");
+        };
+        assert!(
+            !params.diagnostics.is_empty(),
+            "expected full HTML diagnostics for virtual {language} document"
+        );
+
+        server
+            .notify(
+                "textDocument/didChange",
+                DidChangeTextDocumentParams {
+                    text_document: VersionedTextDocumentIdentifier {
+                        uri: document_uri.clone(),
+                        version: 1,
+                    },
+                    content_changes: vec![TextDocumentContentChangeEvent {
+                        range: None,
+                        range_length: None,
+                        text: valid.to_string(),
+                    }],
+                },
+            )
+            .await?;
+
+        let edits: Option<Vec<TextEdit>> = server
+            .request(
+                "textDocument/formatting",
+                "formatting",
+                DocumentFormattingParams {
+                    text_document: TextDocumentIdentifier {
+                        uri: document_uri.clone(),
+                    },
+                    options: FormattingOptions {
+                        tab_size: 4,
+                        insert_spaces: true,
+                        properties: HashMap::default(),
+                        trim_trailing_whitespace: None,
+                        insert_final_newline: None,
+                        trim_final_newlines: None,
+                    },
+                    work_done_progress_params: WorkDoneProgressParams {
+                        work_done_token: None,
+                    },
+                },
+            )
+            .await?
+            .context("formatting returned no response")?;
+        let edits =
+            edits.with_context(|| format!("formatting returned no edits for {language}"))?;
+        let changes = edits
+            .into_iter()
+            .rev()
+            .map(|edit| TextDocumentContentChangeEvent {
+                range: Some(edit.range),
+                range_length: None,
+                text: edit.new_text,
+            })
+            .collect();
+        let output = crate::utils::apply_document_changes(
+            biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+            valid.to_string(),
+            changes,
+        );
+        assert!(output.contains("marker"), "{language}: {output}");
+        assert!(output.contains("const value = 1;"), "{language}: {output}");
+
+        server
+            .notify(
+                "textDocument/didClose",
+                DidCloseTextDocumentParams {
+                    text_document: TextDocumentIdentifier { uri: document_uri },
+                },
+            )
+            .await?;
+        server.shutdown().await?;
+        reader.abort();
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn virtual_svg_document_uses_uri_extension() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        to_utf8_file_path_buf(uri!("biome.json")),
+        r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+    );
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+
+    let document_uri = Uri::from_str("untitled:image.svg")?;
+    server
+        .open_named_document("<svg><path></svg>", document_uri.clone(), "xml")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |notification| {
+        matches!(
+            notification,
+            ServerNotification::PublishDiagnostics(params) if params.uri == document_uri
+        )
+    })
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected diagnostics for virtual SVG document");
+    };
+    assert!(!params.diagnostics.is_empty());
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn untitled_document_uses_standalone_file_project() -> Result<()> {
+    let mut fs = TemporaryFs::new("untitled_document_uses_standalone_file_project");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "formatter": { "enabled": false }
+        }"#,
+    );
+    let file_path = fs.create_file("project/file.js", "statement();");
+    let file_uri = Uri::from_str(
+        url::Url::from_file_path(file_path)
+            .expect("file path should convert to a URL")
+            .as_str(),
+    )?;
+    let untitled_uri = Uri::from_str("untitled:Untitled-1")?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: None,
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned no response")?;
+    server.initialized().await?;
+    server
+        .open_named_document("statement();", file_uri.clone(), "javascript")
+        .await?;
+    server
+        .open_named_document("statement(   );", untitled_uri.clone(), "javascript")
+        .await?;
+
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .expect("the session should be registered")
+        .clone();
+    let file_document = session
+        .document(&file_uri)
+        .expect("the standalone file should be open");
+    let untitled_document = session
+        .document(&untitled_uri)
+        .expect("the untitled document should be open");
+    assert_eq!(untitled_document.project_key, file_document.project_key);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn untitled_document_survives_workspace_folder_remove_and_readd() -> Result<()> {
+    let mut fs = TemporaryFs::new("untitled_document_survives_workspace_folder_remove_and_readd");
+    fs.create_file("project/biome.json", r#"{"formatter":{"enabled":true}}"#);
+    let project_path = fs.working_directory.join("project");
+    let project_uri = Uri::from_str(
+        url::Url::from_file_path(&project_path)
+            .expect("project path should convert to a URL")
+            .as_str(),
+    )?;
+    let untitled_uri = Uri::from_str("untitled:Untitled-1")?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![WorkspaceFolder {
+                    uri: project_uri.clone(),
+                    name: String::from("project"),
+                }]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned no response")?;
+    server.initialized().await?;
+    server
+        .open_named_document("statement();", untitled_uri.clone(), "javascript")
+        .await?;
+
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .expect("the session should be registered")
+        .clone();
+    let project_key = session
+        .document(&untitled_uri)
+        .expect("the untitled document should be open")
+        .project_key;
+
+    server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: project_uri.clone(),
+                        name: String::from("project"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    assert!(session.detached_project_keys().contains(&project_key));
+
+    server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: vec![WorkspaceFolder {
+                        uri: project_uri,
+                        name: String::from("project"),
+                    }],
+                    removed: Vec::new(),
+                },
+            },
+        )
+        .await?;
+    assert!(session.is_project_registered(project_key));
+    assert!(!session.detached_project_keys().contains(&project_key));
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: untitled_uri },
+            },
+        )
+        .await?;
+    session.workspace().scan_project(ScanProjectParams {
+        project_key,
+        watch: false,
+        force: true,
+        scan_kind: ScanKind::KnownFiles,
+        verbose: false,
+    })?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn untitled_document_rebinds_after_workspace_folder_removal() -> Result<()> {
+    let mut fs = TemporaryFs::new("untitled_document_rebinds_after_workspace_folder_removal");
+    fs.create_file(
+        "first/biome.json",
+        r#"{
+            "formatter": { "enabled": false },
+            "linter": { "enabled": true, "rules": { "recommended": true } }
+        }"#,
+    );
+    fs.create_file(
+        "second/biome.json",
+        r#"{
+            "formatter": { "enabled": true },
+            "html": {
+                "experimentalFullSupportEnabled": true,
+                "formatter": { "enabled": true }
+            },
+            "linter": { "enabled": true, "rules": { "recommended": true } }
+        }"#,
+    );
+
+    let first_path = fs.working_directory.join("first");
+    let second_path = fs.working_directory.join("second");
+    let first_uri = Uri::from_str(
+        url::Url::from_file_path(&first_path)
+            .expect("first project path should convert to a URL")
+            .as_str(),
+    )?;
+    let second_uri = Uri::from_str(
+        url::Url::from_file_path(&second_path)
+            .expect("second project path should convert to a URL")
+            .as_str(),
+    )?;
+    let untitled_uri = Uri::from_str("untitled:Untitled-1")?;
+    let vue_uri = Uri::from_str("untitled:Component-1")?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    text_document: Some(TextDocumentClientCapabilities {
+                        code_action: Some(CodeActionClientCapabilities {
+                            resolve_support: Some(CodeActionCapabilityResolveSupport {
+                                properties: vec!["edit".to_string()],
+                            }),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        uri: first_uri.clone(),
+                        name: String::from("first"),
+                    },
+                    WorkspaceFolder {
+                        uri: second_uri.clone(),
+                        name: String::from("second"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned no response")?;
+    server.initialized().await?;
+    server
+        .open_named_document("if(a === -0) {}", untitled_uri.clone(), "javascript")
+        .await?;
+    let vue_source = "<template><div>marker</div></template><script>const value=1</script>";
+    server
+        .open_named_document(vue_source, vue_uri.clone(), "vue")
+        .await?;
+
+    let actions: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "code-actions-before-removal",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned no response before removal")?;
+    let unresolved_action = match actions.into_iter().next() {
+        Some(CodeActionOrCommand::CodeAction(action)) => action,
+        _ => anyhow::bail!("expected an unresolved code action"),
+    };
+    assert!(unresolved_action.edit.is_none());
+
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting-before-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response before removal")?;
+    assert!(edits.is_none());
+
+    server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: first_uri,
+                        name: String::from("first"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    server
+        .notify(
+            "textDocument/didChange",
+            DidChangeTextDocumentParams {
+                text_document: VersionedTextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: String::from("if(a === -0) {}"),
+                }],
+            },
+        )
+        .await?;
+
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .expect("the session should be registered")
+        .clone();
+    let vue_document = session
+        .document(&vue_uri)
+        .expect("the Vue document should be open");
+    let vue_features = session.workspace().file_features(SupportsFeatureParams {
+        project_key: vue_document.project_key,
+        path: vue_document.path.clone(),
+        features: FeaturesBuilder::new().with_formatter().build(),
+        inline_config: session.inline_config(),
+        skip_ignore_check: true,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
+        ignore_kind: IgnoreKind::Ancestors,
+    })?;
+    assert!(
+        vue_features.features_supported.supports_full_html_support(),
+        "the rebound Vue document should use full HTML support"
+    );
+    assert!(
+        vue_features.features_supported.supports_format(),
+        "the rebound Vue document should support formatting"
+    );
+
+    let vue_edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "vue-formatting-after-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: vue_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: true,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("Vue formatting returned no response after removal")?;
+    let vue_edits = vue_edits.context("Vue formatting returned no edits after removal")?;
+    let vue_changes = vue_edits
+        .into_iter()
+        .rev()
+        .map(|edit| TextDocumentContentChangeEvent {
+            range: Some(edit.range),
+            range_length: None,
+            text: edit.new_text,
+        })
+        .collect();
+    let vue_output = crate::utils::apply_document_changes(
+        biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+        vue_source.to_string(),
+        vue_changes,
+    );
+    assert!(vue_output.contains("<script>"), "{vue_output}");
+    assert!(vue_output.contains("const value = 1;"), "{vue_output}");
+
+    let resolved_action: CodeAction = server
+        .request(
+            "codeAction/resolve",
+            "resolve-code-action-after-removal",
+            unresolved_action,
+        )
+        .await?
+        .context("codeAction/resolve returned no response after removal")?;
+    assert!(resolved_action.edit.is_some());
+
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting-after-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response after removal")?;
+    assert!(edits.is_some_and(|edits| !edits.is_empty()));
+
+    server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: second_uri,
+                        name: String::from("second"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    server
+        .notify(
+            "textDocument/didChange",
+            DidChangeTextDocumentParams {
+                text_document: VersionedTextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                    version: 2,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: String::from("if(a === -0) { }"),
+                }],
+            },
+        )
+        .await?;
+    let notification = wait_for_notification(&mut receiver, |notification| {
+        matches!(
+            notification,
+            ServerNotification::PublishDiagnostics(params)
+                if params.uri == untitled_uri && params.version == Some(2)
+        )
+    })
+    .await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected diagnostics for the detached untitled document");
+    };
+    assert!(params.diagnostics.iter().any(|diagnostic| {
+        matches!(
+            &diagnostic.code,
+            Some(NumberOrString::String(code)) if code == "lint/suspicious/noCompareNegZero"
+        )
+    }));
+
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting-after-all-removals",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: untitled_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response after all removals")?;
+    assert!(edits.is_some_and(|edits| !edits.is_empty()));
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: untitled_uri },
+            },
+        )
+        .await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn removing_one_workspace_folder_keeps_shared_project_loaded() -> Result<()> {
+    let mut fs = TemporaryFs::new("removing_one_workspace_folder_keeps_shared_project_loaded");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "formatter": { "enabled": true }
+        }"#,
+    );
+    fs.create_file("project/first/placeholder.js", "statement();");
+    let file_path = fs.create_file("project/second/file.js", "statement(   );");
+    let first_path = fs.working_directory.join("project/first");
+    let second_path = fs.working_directory.join("project/second");
+    let first_uri = Uri::from_str(
+        url::Url::from_file_path(&first_path)
+            .expect("first workspace path should convert to a URL")
+            .as_str(),
+    )?;
+    let second_uri = Uri::from_str(
+        url::Url::from_file_path(&second_path)
+            .expect("second workspace path should convert to a URL")
+            .as_str(),
+    )?;
+    let file_uri = Uri::from_str(
+        url::Url::from_file_path(file_path)
+            .expect("file path should convert to a URL")
+            .as_str(),
+    )?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        uri: first_uri.clone(),
+                        name: String::from("first"),
+                    },
+                    WorkspaceFolder {
+                        uri: second_uri,
+                        name: String::from("second"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned no response")?;
+    server.initialized().await?;
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .cloned()
+        .context("server session not found")?;
+    let project_key = session
+        .project_for_path(second_path.as_path())
+        .context("shared project not found")?;
+
+    server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: first_uri,
+                        name: String::from("first"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    assert!(session.is_project_registered(project_key));
+    server
+        .open_named_document("statement(   );", file_uri.clone(), "javascript")
+        .await?;
+    assert_eq!(
+        session
+            .document(&file_uri)
+            .context("document not open")?
+            .project_key,
+        project_key
+    );
+
+    let edits: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting-after-shared-folder-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier { uri: file_uri },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response after shared folder removal")?;
+    assert!(edits.is_some_and(|edits| !edits.is_empty()));
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn filesystem_document_survives_workspace_folder_removal_across_clients() -> Result<()> {
+    let mut fs =
+        TemporaryFs::new("filesystem_document_survives_workspace_folder_removal_across_clients");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "formatter": { "enabled": true }
+        }"#,
+    );
+    let file_path = fs.create_file("project/file.js", "statement(   );");
+    let project_path = fs.working_directory.join("project");
+    let project_uri = Uri::from_str(
+        url::Url::from_file_path(&project_path)
+            .expect("project path should convert to a URL")
+            .as_str(),
+    )?;
+    let file_uri = Uri::from_str(
+        url::Url::from_file_path(file_path)
+            .expect("file path should convert to a URL")
+            .as_str(),
+    )?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (first_service, first_client) = factory.create().into_inner();
+    let (first_stream, first_sink) = first_client.split();
+    let mut first_server = Server::new(first_service);
+    let (first_sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let first_reader = tokio::spawn(client_handler(first_stream, first_sink, first_sender));
+
+    let (second_service, second_client) = factory.create().into_inner();
+    let (second_stream, second_sink) = second_client.split();
+    let mut second_server = Server::new(second_service);
+    let (second_sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let second_reader = tokio::spawn(client_handler(second_stream, second_sink, second_sender));
+
+    for server in [&mut first_server, &mut second_server] {
+        let _result: InitializeResult = server
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: None,
+                    initialization_options: None,
+                    capabilities: ClientCapabilities::default(),
+                    trace: None,
+                    workspace_folders: Some(vec![WorkspaceFolder {
+                        uri: project_uri.clone(),
+                        name: String::from("project"),
+                    }]),
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned no response")?;
+        server.initialized().await?;
+    }
+
+    second_server
+        .open_named_document("statement(   );", file_uri.clone(), "javascript")
+        .await?;
+
+    first_server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: project_uri.clone(),
+                        name: String::from("project"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    second_server
+        .notify(
+            "textDocument/didChange",
+            DidChangeTextDocumentParams {
+                text_document: VersionedTextDocumentIdentifier {
+                    uri: file_uri.clone(),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: String::from("statement(   );"),
+                }],
+            },
+        )
+        .await?;
+    let edits: Option<Vec<TextEdit>> = second_server
+        .request(
+            "textDocument/formatting",
+            "formatting-after-other-client-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: file_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response after other client removal")?;
+    assert!(edits.is_some_and(|edits| !edits.is_empty()));
+
+    second_server
+        .notify(
+            "workspace/didChangeWorkspaceFolders",
+            DidChangeWorkspaceFoldersParams {
+                event: WorkspaceFoldersChangeEvent {
+                    added: Vec::new(),
+                    removed: vec![WorkspaceFolder {
+                        uri: project_uri,
+                        name: String::from("project"),
+                    }],
+                },
+            },
+        )
+        .await?;
+    second_server
+        .notify(
+            "textDocument/didChange",
+            DidChangeTextDocumentParams {
+                text_document: VersionedTextDocumentIdentifier {
+                    uri: file_uri.clone(),
+                    version: 2,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: String::from("statement(    );"),
+                }],
+            },
+        )
+        .await?;
+    let edits: Option<Vec<TextEdit>> = second_server
+        .request(
+            "textDocument/formatting",
+            "formatting-after-own-removal",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: file_uri.clone(),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response after own removal")?;
+    assert!(edits.is_some_and(|edits| !edits.is_empty()));
+
+    second_server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: file_uri },
+            },
+        )
+        .await?;
+    first_server.shutdown().await?;
+    second_server.shutdown().await?;
+    first_reader.abort();
+    second_reader.abort();
 
     Ok(())
 }
@@ -3722,7 +5026,8 @@ isSpreadAssignment;
             "get_file_content",
             GetFileContentParams {
                 project_key,
-                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+                path: BiomePath::from_platform_path(uri!("document.js").to_file_path().unwrap())
+                    .unwrap(),
             },
         )
         .await?
@@ -6196,7 +7501,8 @@ async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
 
     let config = r#"{
-        "plugins": ["./noFoo.grit"]
+        "plugins": ["./noFoo.grit"],
+        "html": { "experimentalFullSupportEnabled": true }
     }"#;
 
     let plugin = br#"language js;
@@ -6277,6 +7583,38 @@ const foo = 'bad'
                     },
                 },
                 "plugin diagnostic should point to 'foo' on line 14 of the full Vue file"
+            );
+        }
+        other => panic!("expected PublishDiagnostics, got {other:?}"),
+    }
+
+    let virtual_uri = Uri::from_str("untitled:Vue-1")?;
+    server
+        .open_named_document(vue_file, virtual_uri.clone(), "vue")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    match &notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => {
+            assert_eq!(params.uri, virtual_uri);
+            let plugin_diag = params
+                .diagnostics
+                .iter()
+                .find(|d| d.message.contains("Avoid using 'foo'"))
+                .expect("expected a plugin diagnostic for 'foo'");
+            assert_eq!(
+                plugin_diag.range,
+                Range {
+                    start: Position {
+                        line: 14,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 14,
+                        character: 9,
+                    },
+                },
+                "plugin diagnostic should use full Vue document coordinates"
             );
         }
         other => panic!("expected PublishDiagnostics, got {other:?}"),
@@ -6928,7 +8266,8 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
             "get_file_content",
             GetFileContentParams {
                 project_key,
-                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+                path: BiomePath::from_platform_path(uri!("document.js").to_file_path().unwrap())
+                    .unwrap(),
             },
         )
         .await?
@@ -7167,6 +8506,330 @@ async fn registers_string_watched_files_without_relative_pattern_support() -> Re
 }
 
 #[tokio::test]
+#[expect(deprecated)]
+async fn watched_ancestor_ignore_changes_reload_workspace_folder_without_root_uri() -> Result<()> {
+    let mut fs = TemporaryFs::new(
+        "watched_ancestor_ignore_changes_reload_workspace_folder_without_root_uri",
+    );
+    fs.create_file(
+        "repository/packages/project/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": "../.."
+            },
+            "formatter": { "enabled": true }
+        }"#,
+    );
+    fs.create_file("repository/.git/HEAD", "ref: refs/heads/main\n");
+    let root_ignore_path = fs.create_file("repository/.gitignore", "");
+    let ignore_path = fs.create_file("repository/packages/.gitignore", "file.js\n");
+    let file_path = fs.create_file("repository/packages/project/file.js", "let value= 1\n");
+    let project_path = file_path.parent().unwrap();
+    let project_uri = Uri::from_str(
+        url::Url::from_directory_path(project_path)
+            .expect("project path should convert to a URL")
+            .as_str(),
+    )?;
+    let file_uri = Uri::from_str(
+        url::Url::from_file_path(&file_path)
+            .expect("file path should convert to a URL")
+            .as_str(),
+    )?;
+    let ignore_uri = Uri::from_str(
+        url::Url::from_file_path(&ignore_path)
+            .expect("ignore path should convert to a URL")
+            .as_str(),
+    )?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    workspace: Some(lsp::WorkspaceClientCapabilities {
+                        did_change_watched_files: Some(
+                            lsp::DidChangeWatchedFilesClientCapabilities {
+                                dynamic_registration: Some(true),
+                                relative_pattern_support: Some(true),
+                            },
+                        ),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: Some(vec![WorkspaceFolder {
+                    uri: project_uri,
+                    name: "project".to_string(),
+                }]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+    server.initialized().await?;
+
+    let registration = wait_for_notification(&mut receiver, |notification| {
+        matches!(notification, ServerNotification::RegisterCapability(_))
+    })
+    .await;
+    let Some(ServerNotification::RegisterCapability(params)) = registration else {
+        panic!("expected watched-file registration");
+    };
+    let registration = params
+        .registrations
+        .into_iter()
+        .find(|registration| registration.id == "biome_did_change_watched_files")
+        .context("watched-file registration not found")?;
+    let options: lsp::DidChangeWatchedFilesRegistrationOptions = from_value(
+        registration
+            .register_options
+            .context("watched-file registration has no options")?,
+    )?;
+    for ignore_path in [&root_ignore_path, &ignore_path] {
+        let ignore_pattern = super::escape_string_glob_base(ignore_path.as_str());
+        assert!(options.watchers.iter().any(|watcher| {
+            watcher.glob_pattern == lsp::GlobPattern::String(ignore_pattern.clone())
+        }));
+    }
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: file_uri.clone(),
+                    language_id: "javascript".to_string(),
+                    version: 1,
+                    text: "let value= 1\n".to_string(),
+                },
+            },
+        )
+        .await?;
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .cloned()
+        .context("server session not found")?;
+    let file_path = session.document_path(&file_uri);
+    let project_key = session
+        .project_for_path(file_path.as_path())
+        .context("project not found for open document")?;
+    assert!(session.workspace().is_path_ignored(PathIsIgnoredParams {
+        project_key,
+        path: file_path.clone(),
+        is_dir: false,
+        features: FeatureName::default(),
+        ignore_kind: IgnoreKind::Path,
+    })?);
+
+    std::fs::write(&ignore_path, "")?;
+    server
+        .notify(
+            "workspace/didChangeWatchedFiles",
+            lsp::DidChangeWatchedFilesParams {
+                changes: vec![lsp::FileEvent {
+                    uri: ignore_uri,
+                    typ: lsp::FileChangeType::CHANGED,
+                }],
+            },
+        )
+        .await?;
+
+    assert!(!session.workspace().is_path_ignored(PathIsIgnoredParams {
+        project_key,
+        path: file_path,
+        is_dir: false,
+        features: FeatureName::default(),
+        ignore_kind: IgnoreKind::Path,
+    })?);
+
+    server.shutdown().await?;
+    reader.abort();
+    Ok(())
+}
+
+#[tokio::test]
+#[expect(deprecated)]
+async fn git_info_exclude_changes_are_watched_and_reloaded() -> Result<()> {
+    let mut fs = TemporaryFs::new("git_info_exclude_changes_are_watched_and_reloaded");
+    fs.create_file(
+        "project/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            },
+            "formatter": { "enabled": true }
+        }"#,
+    );
+    let git_directory = fs.working_directory.join("git-dir");
+    fs.create_file("git-dir/commondir", "../common\n");
+    fs.create_file("project/.git", &format!("gitdir: {git_directory}\n"));
+    let exclude_path = fs.create_file("common/info/exclude", "file.js\n");
+    let file_path = fs.create_file("project/file.js", "let value= 1\n");
+    let project_path = file_path.parent().unwrap();
+    let project_uri = Uri::from_str(
+        url::Url::from_directory_path(project_path)
+            .expect("project path should convert to a URL")
+            .as_str(),
+    )?;
+    let file_uri = Uri::from_str(
+        url::Url::from_file_path(&file_path)
+            .expect("file path should convert to a URL")
+            .as_str(),
+    )?;
+    let exclude_uri = Uri::from_str(
+        url::Url::from_file_path(&exclude_path)
+            .expect("exclude path should convert to a URL")
+            .as_str(),
+    )?;
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs.create_os()));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _result: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: None,
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    workspace: Some(lsp::WorkspaceClientCapabilities {
+                        did_change_watched_files: Some(
+                            lsp::DidChangeWatchedFilesClientCapabilities {
+                                dynamic_registration: Some(true),
+                                relative_pattern_support: Some(true),
+                            },
+                        ),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: Some(vec![WorkspaceFolder {
+                    uri: project_uri,
+                    name: "project".to_string(),
+                }]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+    server.initialized().await?;
+
+    let registration = wait_for_notification(&mut receiver, |notification| {
+        matches!(notification, ServerNotification::RegisterCapability(_))
+    })
+    .await;
+    let Some(ServerNotification::RegisterCapability(params)) = registration else {
+        panic!("expected watched-file registration");
+    };
+    let registration = params
+        .registrations
+        .into_iter()
+        .find(|registration| registration.id == "biome_did_change_watched_files")
+        .context("watched-file registration not found")?;
+    let options: lsp::DidChangeWatchedFilesRegistrationOptions = from_value(
+        registration
+            .register_options
+            .context("watched-file registration has no options")?,
+    )?;
+    let exclude_pattern = super::escape_string_glob_base(exclude_path.as_str());
+    assert!(options.watchers.iter().any(|watcher| {
+        watcher.glob_pattern == lsp::GlobPattern::String(exclude_pattern.clone())
+    }));
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: file_uri.clone(),
+                    language_id: "javascript".to_string(),
+                    version: 1,
+                    text: "let value= 1\n".to_string(),
+                },
+            },
+        )
+        .await?;
+    let session = factory
+        .sessions
+        .lock()
+        .unwrap()
+        .values()
+        .next()
+        .cloned()
+        .context("server session not found")?;
+    let file_path = session.document_path(&file_uri);
+    let project_key = session
+        .project_for_path(file_path.as_path())
+        .context("project not found for open document")?;
+    assert!(session.workspace().is_path_ignored(PathIsIgnoredParams {
+        project_key,
+        path: file_path.clone(),
+        is_dir: false,
+        features: FeatureName::default(),
+        ignore_kind: IgnoreKind::Path,
+    })?);
+
+    std::fs::write(&exclude_path, "")?;
+    server
+        .notify(
+            "workspace/didChangeWatchedFiles",
+            lsp::DidChangeWatchedFilesParams {
+                changes: vec![lsp::FileEvent {
+                    uri: exclude_uri,
+                    typ: lsp::FileChangeType::CHANGED,
+                }],
+            },
+        )
+        .await?;
+
+    assert!(!session.workspace().is_path_ignored(PathIsIgnoredParams {
+        project_key,
+        path: file_path,
+        is_dir: false,
+        features: FeatureName::default(),
+        ignore_kind: IgnoreKind::Path,
+    })?);
+
+    server.shutdown().await?;
+    reader.abort();
+    Ok(())
+}
+
+#[tokio::test]
 async fn escapes_workspace_paths_in_string_watched_files() -> Result<()> {
     let folder_uri = Uri::from_str(if cfg!(windows) {
         "file:///z%3A/workspace/%5Btest%5D"
@@ -7222,7 +8885,7 @@ async fn connections_keep_their_own_content() -> Result<()> {
     other.initialized().await?;
     editor.open_document(EDITOR_CONTENT).await?;
 
-    let path = BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap();
+    let path = BiomePath::from_platform_path(uri!("document.js").to_file_path().unwrap()).unwrap();
     let OpenProjectResult { project_key } = other
         .request(
             "biome/open_project",

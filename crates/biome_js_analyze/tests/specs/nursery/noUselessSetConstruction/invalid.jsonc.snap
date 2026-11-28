@@ -1663,7 +1663,7 @@ invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━
   i Unsafe fix: Remove the unnecessary copy.
   
     2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set((condition·?·other·:·selected)))
-      │                                                                                                                          ------- -                            -  
+      │                                                                                                                          --------                             -  
 
 ```
 
@@ -1692,7 +1692,7 @@ invalid.jsonc:2:107 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━
   i Unsafe fix: Remove the unnecessary copy.
   
     2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·new·Set((condition·?·other·:·selected)).union(records)
-      │                                                                                                           ------- -                            -                
+      │                                                                                                           --------                             -                
 
 ```
 
@@ -1721,7 +1721,7 @@ invalid.jsonc:2:122 lint/nursery/noUselessSetConstruction  FIXABLE  ━━━━
   i Unsafe fix: Remove the unnecessary copy.
   
     2 │ const·selected·=·new·Set([1,·2]);·const·other·=·new·Set([2,·3]);·const·records·=·new·Map([[2,·"value"]]);·selected.union(new·Set(((records)).keys()))
-      │                                                                                                                          -------  -       --------   
+      │                                                                                                                          --------         --------   
 
 ```
 

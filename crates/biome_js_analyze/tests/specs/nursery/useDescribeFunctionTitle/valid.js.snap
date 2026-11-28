@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { myFunction } from "./myFunction";
+import * as utils from "./utils";
+
+describe();
+
+describe("myFunction");
+
+describe.todo("myFunction");
+
+describe.each("myFunction", () => {});
+
+describe(() => {});
+
+describe(myFunction, () => {});
+
+describe("other", () => {});
+
+describe(otherFunction.name, () => {});
+
+describe(myFunction.length, () => {});
+
+describe(myFunction["name"], () => {});
+
+describe(`myFunction`, () => {});
+
+describe("utils", () => {});
+
+describe(utils.name, () => {});
+
+it("myFunction", () => {});
+
+test("myFunction", () => {});
+
+test.describe("myFunction", () => {});
+
+notDescribe("myFunction", () => {});
+
+notDescribe(myFunction.name, () => {});
+
+function shadowed() {
+	const myFunction = () => {};
+	describe("myFunction", () => {});
+	describe(myFunction.name, () => {});
+}
+
+const localFunction = () => {};
+describe("localFunction", () => {});
+describe(localFunction.name, () => {});
+
+test.describe.only("myFunction", () => {});
+
+test.each([[1]])("myFunction", (value) => {});
+
+describe.skipIf("myFunction", () => {});
+
+describe.unknown("myFunction", () => {});
+
+describe(true)("myFunction", () => {});
+
+```

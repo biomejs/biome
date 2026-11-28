@@ -108,7 +108,7 @@ declare_lint_rule! {
     ///
     /// - If you want to require `interface` or `type` for object types, see [`useConsistentTypeDefinitions`](https://biomejs.dev/linter/rules/use-consistent-type-definitions/).
     pub UseConsistentIndexedObjectStyle {
-        version: "next",
+        version: "2.6.9",
         name: "useConsistentIndexedObjectStyle",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-indexed-object-style").same()],

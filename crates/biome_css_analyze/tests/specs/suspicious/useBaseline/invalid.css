@@ -1,28 +1,32 @@
 /* should generate diagnostics */
 
-/* Limited/newly available properties - flagged with default "widely" */
-a { accent-color: bar; backdrop-filter: auto }
+/* The flagged features are limited and not expected to become Baseline soon.
+   Avoid newly available features here: they become widely available within 30
+   months. If a data update makes a feature pass, replace it with a limited one. */
+
+/* Limited properties - flagged with default "widely" */
+a { ime-mode: bar; speak: auto }
 
 /* @supports not (negated) - NOT suppressed */
-@supports not (accent-color: auto) { a { accent-color: auto } }
+@supports not (ime-mode: auto) { a { ime-mode: auto } }
 
 /* Outer @supports does not protect inner non-matching rule */
-@supports (accent-color: auto) {
-    @supports (backdrop-filter: auto) {
-        a { accent-color: red; }
+@supports (ime-mode: auto) {
+    @supports (speak: auto) {
+        a { ime-mode: active; }
     }
-    a { backdrop-filter: auto; }
+    a { speak: auto; }
 }
 
 /* Property value not yet widely available */
 @supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
 
 /* Function not yet widely available */
-a { width: abs(20% - 100px); }
-a { color: light-dark(black, white); }
+a { background-image: paint(checkerboard); }
+a { background-image: element(#foo); }
 
 /* Function inside @supports, but @supports condition uses different feature */
-@supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
+@supports (ime-mode: auto) { a { background-image: paint(checkerboard); } }
 
 /* Media conditions not widely available */
 @media (inverted-colors: inverted) { a { color: red; } }
@@ -45,4 +49,4 @@ h1:has(+ h2) { margin: 0 0 0.25rem 0; }
 }
 
 /* Pseudo-element not yet widely available */
-details::details-content { background-color: #a29bfe; }
+p::grammar-error { background-color: #a29bfe; }

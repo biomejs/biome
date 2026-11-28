@@ -23,9 +23,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteEachBlock {
             opening_block: SvelteEachOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -33,13 +31,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@6..15 " classes " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@18..23 "class" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@18..23 "class" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@23..24 "}" [] [],
             },
@@ -94,13 +90,11 @@ HtmlRoot {
                 list: HtmlTextExpression {
                     html_literal_token: HTML_LITERAL@68..81 " async_tasks " [] [],
                 },
-                item: SvelteEachAsKeyedItem {
+                item: SvelteEachBindingClause {
                     as_token: AS_KW@81..84 "as" [] [Whitespace(" ")],
-                    name: SvelteName {
-                        ident_token: IDENT@84..88 "task" [] [],
+                    clause: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@84..88 "task" [] [],
                     },
-                    index: missing (optional),
-                    key: missing (optional),
                 },
                 r_curly_token: R_CURLY@88..89 "}" [] [],
             },
@@ -151,21 +145,17 @@ HtmlRoot {
 0: HTML_ROOT@0..118
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..117
+  2: HTML_ROOT_ITEM_LIST@0..117
     0: SVELTE_EACH_BLOCK@0..60
       0: SVELTE_EACH_OPENING_BLOCK@0..24
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..15
           0: HTML_LITERAL@6..15 " classes " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@15..23
+        3: SVELTE_EACH_BINDING_CLAUSE@15..23
           0: AS_KW@15..18 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@18..23
-            0: IDENT@18..23 "class" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@18..23
+            0: HTML_LITERAL@18..23 "class" [] []
         4: R_CURLY@23..24 "}" [] []
       1: HTML_ELEMENT_LIST@24..52
         0: HTML_ELEMENT@24..52
@@ -203,12 +193,10 @@ HtmlRoot {
         1: EACH_KW@64..68 "each" [] []
         2: HTML_TEXT_EXPRESSION@68..81
           0: HTML_LITERAL@68..81 " async_tasks " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@81..88
+        3: SVELTE_EACH_BINDING_CLAUSE@81..88
           0: AS_KW@81..84 "as" [] [Whitespace(" ")]
-          1: SVELTE_NAME@84..88
-            0: IDENT@84..88 "task" [] []
-          2: (empty)
-          3: (empty)
+          1: HTML_TEXT_EXPRESSION@84..88
+            0: HTML_LITERAL@84..88 "task" [] []
         4: R_CURLY@88..89 "}" [] []
       1: HTML_ELEMENT_LIST@89..109
         0: HTML_ELEMENT@89..109
@@ -235,6 +223,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@109..112 "{/" [Newline("\n")] []
         1: EACH_KW@112..116 "each" [] []
         2: R_CURLY@116..117 "}" [] []
-  5: EOF@117..118 "" [Newline("\n")] []
+  3: EOF@117..118 "" [Newline("\n")] []
 
 ```

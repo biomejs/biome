@@ -1,0 +1,315 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+export const listByAuthor = query({
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("messages")
+			.filter((q) => q.eq(q.field("author"), args.author))
+			.collect();
+	},
+});
+
+async function chained(ctx) {
+	await ctx.db
+		.query("messages")
+		.withIndex("by_channel", (q) => q.eq("channel", "general"))
+		.order("desc")
+		.filter((q) => q.eq(q.field("deleted"), false))
+		.take(10);
+}
+
+async function withDb(db) {
+	await db.query("messages").filter((q) => q.eq(q.field("read"), false)).first();
+}
+
+async function privateSystem(ctx, db) {
+	await db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+	await ctx.db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+}
+
+async function optionalChaining(ctx) {
+	await ctx?.db?.query("messages")?.filter((q) => q.eq(q.field("read"), false)).collect();
+}
+
+async function computedMember(ctx) {
+	await ctx["db"].query("messages")["filter"]((q) => q.eq(q.field("read"), false)).collect();
+}
+
+async function parenthesized(ctx) {
+	await (ctx.db.query("messages")).filter((q) => q.eq(q.field("read"), false)).collect();
+}
+
+async function storedInVariable(ctx) {
+	const messages = ctx.db.query("messages");
+	await messages.filter((q) => q.eq(q.field("read"), false)).collect();
+}
+
+async function storedInVariableChain(ctx) {
+	const base = ctx.db.query("messages");
+	const ordered = base.order("desc");
+	await ordered.filter((q) => q.eq(q.field("read"), false)).collect();
+}
+
+async function repeatedFilter(ctx) {
+	await ctx.db
+		.query("messages")
+		.filter((q) => q.eq(q.field("read"), false))
+		.filter((q) => q.eq(q.field("deleted"), false))
+		.collect();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:7:5 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    5 │ 		return await ctx.db
+    6 │ 			.query("messages")
+  > 7 │ 			.filter((q) => q.eq(q.field("author"), args.author))
+      │ 			 ^^^^^^
+    8 │ 			.collect();
+    9 │ 	},
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:4 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    15 │ 		.withIndex("by_channel", (q) => q.eq("channel", "general"))
+    16 │ 		.order("desc")
+  > 17 │ 		.filter((q) => q.eq(q.field("deleted"), false))
+       │ 		 ^^^^^^
+    18 │ 		.take(10);
+    19 │ }
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:29 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    21 │ async function withDb(db) {
+  > 22 │ 	await db.query("messages").filter((q) => q.eq(q.field("read"), false)).first();
+       │ 	                           ^^^^^^
+    23 │ }
+    24 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:43 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    25 │ async function privateSystem(ctx, db) {
+  > 26 │ 	await db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+       │ 	                                         ^^^^^^
+    27 │ 	await ctx.db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+    28 │ }
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:47 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    25 │ async function privateSystem(ctx, db) {
+    26 │ 	await db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+  > 27 │ 	await ctx.db.privateSystem.query("_storage").filter((q) => q.eq(q.field("size"), 0)).collect();
+       │ 	                                             ^^^^^^
+    28 │ }
+    29 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:36 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    30 │ async function optionalChaining(ctx) {
+  > 31 │ 	await ctx?.db?.query("messages")?.filter((q) => q.eq(q.field("read"), false)).collect();
+       │ 	                                  ^^^^^^
+    32 │ }
+    33 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:36 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    34 │ async function computedMember(ctx) {
+  > 35 │ 	await ctx["db"].query("messages")["filter"]((q) => q.eq(q.field("read"), false)).collect();
+       │ 	                                  ^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:35 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    38 │ async function parenthesized(ctx) {
+  > 39 │ 	await (ctx.db.query("messages")).filter((q) => q.eq(q.field("read"), false)).collect();
+       │ 	                                 ^^^^^^
+    40 │ }
+    41 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:17 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    42 │ async function storedInVariable(ctx) {
+    43 │ 	const messages = ctx.db.query("messages");
+  > 44 │ 	await messages.filter((q) => q.eq(q.field("read"), false)).collect();
+       │ 	               ^^^^^^
+    45 │ }
+    46 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:16 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    48 │ 	const base = ctx.db.query("messages");
+    49 │ 	const ordered = base.order("desc");
+  > 50 │ 	await ordered.filter((q) => q.eq(q.field("read"), false)).collect();
+       │ 	              ^^^^^^
+    51 │ }
+    52 │ 
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:4 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    55 │ 		.query("messages")
+    56 │ 		.filter((q) => q.eq(q.field("read"), false))
+  > 57 │ 		.filter((q) => q.eq(q.field("deleted"), false))
+       │ 		 ^^^^^^
+    58 │ 		.collect();
+    59 │ }
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:4 lint/nursery/noConvexQueryFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid calling .filter() on a Convex database query.
+  
+    54 │ 	await ctx.db
+    55 │ 		.query("messages")
+  > 56 │ 		.filter((q) => q.eq(q.field("read"), false))
+       │ 		 ^^^^^^
+    57 │ 		.filter((q) => q.eq(q.field("deleted"), false))
+    58 │ 		.collect();
+  
+  i The database reads every document in the query before .filter() drops the ones that don't match, so the query gets slower as the table grows.
+  
+  i Use .withIndex() to read only the matching documents, or collect the results and filter them in your code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

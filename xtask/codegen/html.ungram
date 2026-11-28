@@ -48,10 +48,14 @@ VueBogusDirectiveArgument = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	frontmatter: AnyAstroFrontmatterElement?
-	processing_instruction: HtmlProcessingInstruction?
-	directive: HtmlDirective?
-	html: HtmlElementList
+	items: HtmlRootItemList
 	eof: 'EOF'
+
+HtmlRootItemList = AnyHtmlRootItem*
+
+AnyHtmlRootItem =
+	AnyHtmlElement
+	| HtmlDirective
 
 // <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN">
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -429,63 +433,14 @@ SvelteEachOpeningBlock =
 	'}'
 
 AnySvelteBlockItem =
-	SvelteEachAsKeyedItem
+	SvelteEachBindingClause
 	| SvelteEachKeyedItem
-
 
 // {#each items as item, index (key)} ... {/each}
 //              ^^^^^^^^^^^^^^^^^^^^
-SvelteEachAsKeyedItem =
+SvelteEachBindingClause =
 	'as'
-	name: AnySvelteEachName
-	index: SvelteEachIndex?
-	key: SvelteEachKey?
-
-
-AnySvelteEachName =
-		SvelteName
-		| AnySvelteDestructuredName
-		| HtmlTextExpression
-
-
-AnySvelteDestructuredName =
-	SvelteCurlyDestructuredName
-	| SvelteSquareDestructuredName
-
-// {#each items as { foo, bar } }
-//                 ^^^^^^^^^^^^
-SvelteCurlyDestructuredName =
-	'{'
-	names: SvelteBindingAssignmentBindingList
-	'}'
-
-// {#each items as [ foo, bar ] }
-//                 ^^^^^^^^^^^^
-SvelteSquareDestructuredName =
-	'['
-	names: SvelteBindingAssignmentBindingList
-	']'
-
-SvelteBindingAssignmentBindingList = (AnySvelteBindingAssignmentBinding (',' AnySvelteBindingAssignmentBinding)*)
-
-AnySvelteBindingAssignmentBinding =
-	SvelteName
-	| AnySvelteDestructuredName
-	| SvelteRestBinding
-	| SvelteRenameBinding
-
-/// { ...rest }
-///   ^^^^^^^
-SvelteRestBinding =
- '...'
- name: SvelteName
-
-/// { component: Filter }
-///   ^^^^^^^^^^^^^^^^^^
-SvelteRenameBinding =
- key: SvelteName
- ':'
- name: AnySvelteBindingAssignmentBinding
+	clause: HtmlTextExpression
 
 // {#each items, index} ... {/each}
 //             ^^^^^^^^
@@ -497,13 +452,6 @@ SvelteEachKeyedItem =
 SvelteEachIndex =
 	','
 	value: SvelteName
-
-// {#each items as item, item (key)} ... {/each}
-//                            ^^^^^
-SvelteEachKey =
-	'('
-	expression: HtmlTextExpression
-	')'
 
 // {#each ... as item, i} ... {/each}
 //                            ^^^^^^^

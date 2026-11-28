@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidImportedSuite.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { describe } from "vitest";
+import { myFunction } from "./myFunction";
+
+describe("myFunction", () => {});
+
+describe.each([[1]])("myFunction", (value) => {});
+
+```
+
+# Diagnostics
+```
+invalidImportedSuite.js:5:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    3 │ import { myFunction } from "./myFunction";
+    4 │ 
+  > 5 │ describe("myFunction", () => {});
+      │          ^^^^^^^^^^^^
+    6 │ 
+    7 │ describe.each([[1]])("myFunction", (value) => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    5 │ describe("myFunction",·()·=>·{});
+      │          -          -            
+
+```
+
+```
+invalidImportedSuite.js:7:22 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    5 │ describe("myFunction", () => {});
+    6 │ 
+  > 7 │ describe.each([[1]])("myFunction", (value) => {});
+      │                      ^^^^^^^^^^^^
+    8 │ 
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    7 │ describe.each([[1]])("myFunction",·(value)·=>·{});
+      │                      -          -                 
+
+```

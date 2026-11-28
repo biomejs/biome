@@ -1,11 +1,11 @@
 use crate::{
     Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
-    green::{GreenNodeData, Slot},
+    green::{GreenNodeRef, GreenTokensForRange},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
-use std::{cmp::Ordering, fmt, slice};
+use std::{cmp::Ordering, fmt};
 
 #[derive(Clone)]
 pub struct SyntaxNodeText {
@@ -218,36 +218,17 @@ impl SyntaxNodeText {
 /// visiting them.
 struct GreenChunks<'a> {
     range: TextRange,
-    /// For each node the walk has entered, outermost first: its children that
-    /// haven't been visited yet, and the offset where the node starts.
-    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    tokens: GreenTokensForRange<'a>,
 }
 
 impl<'a> GreenChunks<'a> {
     /// Creates the iterator for `range` of `node`, whose text starts at
     /// `offset`. `range` must lie inside the node's text.
-    fn new(node: &'a GreenNodeData, offset: TextSize, range: TextRange) -> Self {
+    fn new(node: GreenNodeRef<'a>, offset: TextSize, range: TextRange) -> Self {
         Self {
             range,
-            pending_children: vec![(Self::children_from(node, offset, range.start()), offset)],
+            tokens: GreenTokensForRange::new(node, offset, range),
         }
-    }
-
-    /// Returns the children of `node`, whose text starts at `offset`, that a
-    /// range starting at `start` can overlap. A node that starts before
-    /// `start` drops the children that end at or before it, which a binary
-    /// search finds because child ends never decrease.
-    fn children_from(
-        node: &'a GreenNodeData,
-        offset: TextSize,
-        start: TextSize,
-    ) -> slice::Iter<'a, Slot> {
-        let slots = node.slice();
-        if offset >= start {
-            return slots.iter();
-        }
-        let first = slots.partition_point(|slot| offset + slot.rel_range().end() <= start);
-        slots[first..].iter()
     }
 }
 
@@ -256,36 +237,15 @@ impl<'a> Iterator for GreenChunks<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let (slots, node_offset) = self.pending_children.last_mut()?;
-            let Some(slot) = slots.next() else {
-                self.pending_children.pop();
-                continue;
-            };
-
-            let start = *node_offset + slot.rel_offset();
-            if start >= self.range.end() {
-                self.pending_children.clear();
-                return None;
-            }
-
-            match slot {
-                Slot::Token { token, .. } => {
-                    let token_range = TextRange::at(start, token.text_len());
-                    if let Some(range) = token_range.intersect(self.range) {
-                        // Slicing before the emptiness check panics on an
-                        // empty range inside a character, as the red token
-                        // walk does.
-                        let text = &token.text()[range - start];
-                        if !text.is_empty() {
-                            return Some(text);
-                        }
-                    }
+            let token = self.tokens.next()?;
+            let token_range = TextRange::at(token.offset, token.green.text_len());
+            if let Some(range) = token_range.intersect(self.range) {
+                // Slicing before the emptiness check panics on an empty range
+                // inside a character, as the red token walk does.
+                let text = &token.green.text()[range - token.offset];
+                if !text.is_empty() {
+                    return Some(text);
                 }
-                Slot::Node { node, .. } => {
-                    let children = Self::children_from(node, start, self.range.start());
-                    self.pending_children.push((children, start));
-                }
-                Slot::Empty { .. } => {}
             }
         }
     }
@@ -1022,10 +982,10 @@ mod tests {
             shared[0].text_range_with_trivia().start(),
             shared[1].text_range_with_trivia().start()
         );
-        assert!(std::ptr::eq(
-            shared[0].text_with_trivia().node.green(),
-            shared[1].text_with_trivia().node.green()
-        ));
+        assert_eq!(
+            shared[0].text_with_trivia().node.green().as_ptr(),
+            shared[1].text_with_trivia().node.green().as_ptr()
+        );
     }
 
     #[test]
@@ -1040,6 +1000,9 @@ mod tests {
         check_methods(&text.slice(..), "");
     }
 
+    // Skipped under Miri. Comparing every slice of every node with every
+    // slice of the root takes tens of minutes there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn methods_on_every_range() {
         let root = build_edge_case_tree();

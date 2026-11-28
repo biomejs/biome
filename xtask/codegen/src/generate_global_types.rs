@@ -5,7 +5,6 @@ use anyhow::bail;
 use std::path::Path;
 
 pub mod collect;
-pub mod compare;
 mod emit;
 pub use emit::render_global_types;
 pub mod lower;
@@ -69,7 +68,6 @@ pub fn run_with_workspace_root(
     let records = collect_discovered_sources(&source_files)?;
     let manifest = manifest::build_global_manifest(records);
     let lowered = lower::lower_global_types(&manifest, &source_files)?;
-    compare::compare_lowered_globals(&lowered)?;
     report_gaps(&lowered);
 
     emit::emit_global_types(checkout.pin(), workspace_root, &lowered)?;

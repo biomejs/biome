@@ -1,0 +1,803 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(a === b).toBe(true);
+expect(a === b,).toBe(true,);
+expect(a === b).toBe(false);
+expect(a === b).not.toBe(true);
+expect(a === b).not.toBe(false);
+expect(a !== b).toBe(true);
+expect(a !== b).toBe(false);
+expect(a !== b).not.toBe(true);
+expect(a !== b).not.toBe(false);
+expect(a === b).toEqual(true);
+expect(a === b).toStrictEqual(false);
+expect(a === b)["toBe"](true);
+expect(a === b)["not"].toBe(true);
+expect(a === b).resolves.toBe(true);
+expect(a === b).resolves.toBe(false);
+expect(a === b).rejects.not.toBe(true);
+expect(a === b).resolves.not.toBe(false);
+expect(a === b)["resolves"].not.toBe(false);
+expect(a === b)["resolves"]["not"]["toBe"](false);
+expect(a.b() === c.d).toBe(true);
+expect(a === b, "custom message").toBe(true);
+
+expect((a === b)).toBe(true);
+expect(a === b).toBe((false));
+
+test("comments around the assertion are kept", () => {
+	// leading comment
+	expect(a === b).toBe(true); // trailing comment
+});
+
+test("no fix when comments would be removed", () => {
+	expect(a /* left */ === b).toBe(true);
+	expect(a === b).not /* negated */.toBe(false);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(a === b).toBe(true);
+      │                 ^^^^
+    3 │ expect(a === b,).toBe(true,);
+    4 │ expect(a === b).toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(a·===·b).toBe(true);
+        2 │ + expect(a).toBe(b);
+     3  3 │   expect(a === b,).toBe(true,);
+     4  4 │   expect(a === b).toBe(false);
+  
+
+```
+
+```
+invalid.js:3:18 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(a === b).toBe(true);
+  > 3 │ expect(a === b,).toBe(true,);
+      │                  ^^^^
+    4 │ expect(a === b).toBe(false);
+    5 │ expect(a === b).not.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(a === b).toBe(true);
+     3    │ - expect(a·===·b,).toBe(true,);
+        3 │ + expect(a,).toBe(b,);
+     4  4 │   expect(a === b).toBe(false);
+     5  5 │   expect(a === b).not.toBe(true);
+  
+
+```
+
+```
+invalid.js:4:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    2 │ expect(a === b).toBe(true);
+    3 │ expect(a === b,).toBe(true,);
+  > 4 │ expect(a === b).toBe(false);
+      │                 ^^^^
+    5 │ expect(a === b).not.toBe(true);
+    6 │ expect(a === b).not.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     2  2 │   expect(a === b).toBe(true);
+     3  3 │   expect(a === b,).toBe(true,);
+     4    │ - expect(a·===·b).toBe(false);
+        4 │ + expect(a).not.toBe(b);
+     5  5 │   expect(a === b).not.toBe(true);
+     6  6 │   expect(a === b).not.toBe(false);
+  
+
+```
+
+```
+invalid.js:5:21 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    3 │ expect(a === b,).toBe(true,);
+    4 │ expect(a === b).toBe(false);
+  > 5 │ expect(a === b).not.toBe(true);
+      │                     ^^^^
+    6 │ expect(a === b).not.toBe(false);
+    7 │ expect(a !== b).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     3  3 │   expect(a === b,).toBe(true,);
+     4  4 │   expect(a === b).toBe(false);
+     5    │ - expect(a·===·b).not.toBe(true);
+        5 │ + expect(a).not.toBe(b);
+     6  6 │   expect(a === b).not.toBe(false);
+     7  7 │   expect(a !== b).toBe(true);
+  
+
+```
+
+```
+invalid.js:6:21 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    4 │ expect(a === b).toBe(false);
+    5 │ expect(a === b).not.toBe(true);
+  > 6 │ expect(a === b).not.toBe(false);
+      │                     ^^^^
+    7 │ expect(a !== b).toBe(true);
+    8 │ expect(a !== b).toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     4  4 │   expect(a === b).toBe(false);
+     5  5 │   expect(a === b).not.toBe(true);
+     6    │ - expect(a·===·b).not.toBe(false);
+        6 │ + expect(a).toBe(b);
+     7  7 │   expect(a !== b).toBe(true);
+     8  8 │   expect(a !== b).toBe(false);
+  
+
+```
+
+```
+invalid.js:7:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a !== comparison is checked against a boolean.
+  
+    5 │ expect(a === b).not.toBe(true);
+    6 │ expect(a === b).not.toBe(false);
+  > 7 │ expect(a !== b).toBe(true);
+      │                 ^^^^
+    8 │ expect(a !== b).toBe(false);
+    9 │ expect(a !== b).not.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     5  5 │   expect(a === b).not.toBe(true);
+     6  6 │   expect(a === b).not.toBe(false);
+     7    │ - expect(a·!==·b).toBe(true);
+        7 │ + expect(a).not.toBe(b);
+     8  8 │   expect(a !== b).toBe(false);
+     9  9 │   expect(a !== b).not.toBe(true);
+  
+
+```
+
+```
+invalid.js:8:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a !== comparison is checked against a boolean.
+  
+     6 │ expect(a === b).not.toBe(false);
+     7 │ expect(a !== b).toBe(true);
+   > 8 │ expect(a !== b).toBe(false);
+       │                 ^^^^
+     9 │ expect(a !== b).not.toBe(true);
+    10 │ expect(a !== b).not.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     6  6 │   expect(a === b).not.toBe(false);
+     7  7 │   expect(a !== b).toBe(true);
+     8    │ - expect(a·!==·b).toBe(false);
+        8 │ + expect(a).toBe(b);
+     9  9 │   expect(a !== b).not.toBe(true);
+    10 10 │   expect(a !== b).not.toBe(false);
+  
+
+```
+
+```
+invalid.js:9:21 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a !== comparison is checked against a boolean.
+  
+     7 │ expect(a !== b).toBe(true);
+     8 │ expect(a !== b).toBe(false);
+   > 9 │ expect(a !== b).not.toBe(true);
+       │                     ^^^^
+    10 │ expect(a !== b).not.toBe(false);
+    11 │ expect(a === b).toEqual(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     7  7 │   expect(a !== b).toBe(true);
+     8  8 │   expect(a !== b).toBe(false);
+     9    │ - expect(a·!==·b).not.toBe(true);
+        9 │ + expect(a).toBe(b);
+    10 10 │   expect(a !== b).not.toBe(false);
+    11 11 │   expect(a === b).toEqual(true);
+  
+
+```
+
+```
+invalid.js:10:21 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a !== comparison is checked against a boolean.
+  
+     8 │ expect(a !== b).toBe(false);
+     9 │ expect(a !== b).not.toBe(true);
+  > 10 │ expect(a !== b).not.toBe(false);
+       │                     ^^^^
+    11 │ expect(a === b).toEqual(true);
+    12 │ expect(a === b).toStrictEqual(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     8  8 │   expect(a !== b).toBe(false);
+     9  9 │   expect(a !== b).not.toBe(true);
+    10    │ - expect(a·!==·b).not.toBe(false);
+       10 │ + expect(a).not.toBe(b);
+    11 11 │   expect(a === b).toEqual(true);
+    12 12 │   expect(a === b).toStrictEqual(false);
+  
+
+```
+
+```
+invalid.js:11:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+     9 │ expect(a !== b).not.toBe(true);
+    10 │ expect(a !== b).not.toBe(false);
+  > 11 │ expect(a === b).toEqual(true);
+       │                 ^^^^^^^
+    12 │ expect(a === b).toStrictEqual(false);
+    13 │ expect(a === b)["toBe"](true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+     9  9 │   expect(a !== b).not.toBe(true);
+    10 10 │   expect(a !== b).not.toBe(false);
+    11    │ - expect(a·===·b).toEqual(true);
+       11 │ + expect(a).toBe(b);
+    12 12 │   expect(a === b).toStrictEqual(false);
+    13 13 │   expect(a === b)["toBe"](true);
+  
+
+```
+
+```
+invalid.js:12:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    10 │ expect(a !== b).not.toBe(false);
+    11 │ expect(a === b).toEqual(true);
+  > 12 │ expect(a === b).toStrictEqual(false);
+       │                 ^^^^^^^^^^^^^
+    13 │ expect(a === b)["toBe"](true);
+    14 │ expect(a === b)["not"].toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    10 10 │   expect(a !== b).not.toBe(false);
+    11 11 │   expect(a === b).toEqual(true);
+    12    │ - expect(a·===·b).toStrictEqual(false);
+       12 │ + expect(a).not.toBe(b);
+    13 13 │   expect(a === b)["toBe"](true);
+    14 14 │   expect(a === b)["not"].toBe(true);
+  
+
+```
+
+```
+invalid.js:13:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    11 │ expect(a === b).toEqual(true);
+    12 │ expect(a === b).toStrictEqual(false);
+  > 13 │ expect(a === b)["toBe"](true);
+       │                 ^^^^^^
+    14 │ expect(a === b)["not"].toBe(true);
+    15 │ expect(a === b).resolves.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    11 11 │   expect(a === b).toEqual(true);
+    12 12 │   expect(a === b).toStrictEqual(false);
+    13    │ - expect(a·===·b)["toBe"](true);
+       13 │ + expect(a).toBe(b);
+    14 14 │   expect(a === b)["not"].toBe(true);
+    15 15 │   expect(a === b).resolves.toBe(true);
+  
+
+```
+
+```
+invalid.js:14:24 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    12 │ expect(a === b).toStrictEqual(false);
+    13 │ expect(a === b)["toBe"](true);
+  > 14 │ expect(a === b)["not"].toBe(true);
+       │                        ^^^^
+    15 │ expect(a === b).resolves.toBe(true);
+    16 │ expect(a === b).resolves.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    12 12 │   expect(a === b).toStrictEqual(false);
+    13 13 │   expect(a === b)["toBe"](true);
+    14    │ - expect(a·===·b)["not"].toBe(true);
+       14 │ + expect(a).not.toBe(b);
+    15 15 │   expect(a === b).resolves.toBe(true);
+    16 16 │   expect(a === b).resolves.toBe(false);
+  
+
+```
+
+```
+invalid.js:15:26 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    13 │ expect(a === b)["toBe"](true);
+    14 │ expect(a === b)["not"].toBe(true);
+  > 15 │ expect(a === b).resolves.toBe(true);
+       │                          ^^^^
+    16 │ expect(a === b).resolves.toBe(false);
+    17 │ expect(a === b).rejects.not.toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    13 13 │   expect(a === b)["toBe"](true);
+    14 14 │   expect(a === b)["not"].toBe(true);
+    15    │ - expect(a·===·b).resolves.toBe(true);
+       15 │ + expect(a).resolves.toBe(b);
+    16 16 │   expect(a === b).resolves.toBe(false);
+    17 17 │   expect(a === b).rejects.not.toBe(true);
+  
+
+```
+
+```
+invalid.js:16:26 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    14 │ expect(a === b)["not"].toBe(true);
+    15 │ expect(a === b).resolves.toBe(true);
+  > 16 │ expect(a === b).resolves.toBe(false);
+       │                          ^^^^
+    17 │ expect(a === b).rejects.not.toBe(true);
+    18 │ expect(a === b).resolves.not.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    14 14 │   expect(a === b)["not"].toBe(true);
+    15 15 │   expect(a === b).resolves.toBe(true);
+    16    │ - expect(a·===·b).resolves.toBe(false);
+       16 │ + expect(a).resolves.not.toBe(b);
+    17 17 │   expect(a === b).rejects.not.toBe(true);
+    18 18 │   expect(a === b).resolves.not.toBe(false);
+  
+
+```
+
+```
+invalid.js:17:29 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    15 │ expect(a === b).resolves.toBe(true);
+    16 │ expect(a === b).resolves.toBe(false);
+  > 17 │ expect(a === b).rejects.not.toBe(true);
+       │                             ^^^^
+    18 │ expect(a === b).resolves.not.toBe(false);
+    19 │ expect(a === b)["resolves"].not.toBe(false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    15 15 │   expect(a === b).resolves.toBe(true);
+    16 16 │   expect(a === b).resolves.toBe(false);
+    17    │ - expect(a·===·b).rejects.not.toBe(true);
+       17 │ + expect(a).rejects.not.toBe(b);
+    18 18 │   expect(a === b).resolves.not.toBe(false);
+    19 19 │   expect(a === b)["resolves"].not.toBe(false);
+  
+
+```
+
+```
+invalid.js:18:30 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    16 │ expect(a === b).resolves.toBe(false);
+    17 │ expect(a === b).rejects.not.toBe(true);
+  > 18 │ expect(a === b).resolves.not.toBe(false);
+       │                              ^^^^
+    19 │ expect(a === b)["resolves"].not.toBe(false);
+    20 │ expect(a === b)["resolves"]["not"]["toBe"](false);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    16 16 │   expect(a === b).resolves.toBe(false);
+    17 17 │   expect(a === b).rejects.not.toBe(true);
+    18    │ - expect(a·===·b).resolves.not.toBe(false);
+       18 │ + expect(a).resolves.toBe(b);
+    19 19 │   expect(a === b)["resolves"].not.toBe(false);
+    20 20 │   expect(a === b)["resolves"]["not"]["toBe"](false);
+  
+
+```
+
+```
+invalid.js:19:33 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    17 │ expect(a === b).rejects.not.toBe(true);
+    18 │ expect(a === b).resolves.not.toBe(false);
+  > 19 │ expect(a === b)["resolves"].not.toBe(false);
+       │                                 ^^^^
+    20 │ expect(a === b)["resolves"]["not"]["toBe"](false);
+    21 │ expect(a.b() === c.d).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    17 17 │   expect(a === b).rejects.not.toBe(true);
+    18 18 │   expect(a === b).resolves.not.toBe(false);
+    19    │ - expect(a·===·b)["resolves"].not.toBe(false);
+       19 │ + expect(a).resolves.toBe(b);
+    20 20 │   expect(a === b)["resolves"]["not"]["toBe"](false);
+    21 21 │   expect(a.b() === c.d).toBe(true);
+  
+
+```
+
+```
+invalid.js:20:36 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    18 │ expect(a === b).resolves.not.toBe(false);
+    19 │ expect(a === b)["resolves"].not.toBe(false);
+  > 20 │ expect(a === b)["resolves"]["not"]["toBe"](false);
+       │                                    ^^^^^^
+    21 │ expect(a.b() === c.d).toBe(true);
+    22 │ expect(a === b, "custom message").toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    18 18 │   expect(a === b).resolves.not.toBe(false);
+    19 19 │   expect(a === b)["resolves"].not.toBe(false);
+    20    │ - expect(a·===·b)["resolves"]["not"]["toBe"](false);
+       20 │ + expect(a).resolves.toBe(b);
+    21 21 │   expect(a.b() === c.d).toBe(true);
+    22 22 │   expect(a === b, "custom message").toBe(true);
+  
+
+```
+
+```
+invalid.js:21:23 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    19 │ expect(a === b)["resolves"].not.toBe(false);
+    20 │ expect(a === b)["resolves"]["not"]["toBe"](false);
+  > 21 │ expect(a.b() === c.d).toBe(true);
+       │                       ^^^^
+    22 │ expect(a === b, "custom message").toBe(true);
+    23 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    19 19 │   expect(a === b)["resolves"].not.toBe(false);
+    20 20 │   expect(a === b)["resolves"]["not"]["toBe"](false);
+    21    │ - expect(a.b()·===·c.d).toBe(true);
+       21 │ + expect(a.b()).toBe(c.d);
+    22 22 │   expect(a === b, "custom message").toBe(true);
+    23 23 │   
+  
+
+```
+
+```
+invalid.js:22:35 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    20 │ expect(a === b)["resolves"]["not"]["toBe"](false);
+    21 │ expect(a.b() === c.d).toBe(true);
+  > 22 │ expect(a === b, "custom message").toBe(true);
+       │                                   ^^^^
+    23 │ 
+    24 │ expect((a === b)).toBe(true);
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    20 20 │   expect(a === b)["resolves"]["not"]["toBe"](false);
+    21 21 │   expect(a.b() === c.d).toBe(true);
+    22    │ - expect(a·===·b,·"custom·message").toBe(true);
+       22 │ + expect(a,·"custom·message").toBe(b);
+    23 23 │   
+    24 24 │   expect((a === b)).toBe(true);
+  
+
+```
+
+```
+invalid.js:24:19 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    22 │ expect(a === b, "custom message").toBe(true);
+    23 │ 
+  > 24 │ expect((a === b)).toBe(true);
+       │                   ^^^^
+    25 │ expect(a === b).toBe((false));
+    26 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    22 22 │   expect(a === b, "custom message").toBe(true);
+    23 23 │   
+    24    │ - expect((a·===·b)).toBe(true);
+       24 │ + expect(a).toBe(b);
+    25 25 │   expect(a === b).toBe((false));
+    26 26 │   
+  
+
+```
+
+```
+invalid.js:25:17 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    24 │ expect((a === b)).toBe(true);
+  > 25 │ expect(a === b).toBe((false));
+       │                 ^^^^
+    26 │ 
+    27 │ test("comments around the assertion are kept", () => {
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to a negated equality matcher such as .not.toBe(), .not.toEqual(), or .not.toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    23 23 │   
+    24 24 │   expect((a === b)).toBe(true);
+    25    │ - expect(a·===·b).toBe((false));
+       25 │ + expect(a).not.toBe(b);
+    26 26 │   
+    27 27 │   test("comments around the assertion are kept", () => {
+  
+
+```
+
+```
+invalid.js:29:18 lint/nursery/useExpectEqualityMatcher  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    27 │ test("comments around the assertion are kept", () => {
+    28 │ 	// leading comment
+  > 29 │ 	expect(a === b).toBe(true); // trailing comment
+       │ 	                ^^^^
+    30 │ });
+    31 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use toBe() instead.
+  
+    27 27 │   test("comments around the assertion are kept", () => {
+    28 28 │     // leading comment
+    29    │ - → expect(a·===·b).toBe(true);·//·trailing·comment
+       29 │ + → expect(a).toBe(b);·//·trailing·comment
+    30 30 │   });
+    31 31 │   
+  
+
+```
+
+```
+invalid.js:33:29 lint/nursery/useExpectEqualityMatcher ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    32 │ test("no fix when comments would be removed", () => {
+  > 33 │ 	expect(a /* left */ === b).toBe(true);
+       │ 	                           ^^^^
+    34 │ 	expect(a === b).not /* negated */.toBe(false);
+    35 │ });
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:36 lint/nursery/useExpectEqualityMatcher ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of a === comparison is checked against a boolean.
+  
+    32 │ test("no fix when comments would be removed", () => {
+    33 │ 	expect(a /* left */ === b).toBe(true);
+  > 34 │ 	expect(a === b).not /* negated */.toBe(false);
+       │ 	                                  ^^^^
+    35 │ });
+    36 │ 
+  
+  i When this check fails, the error message only shows that a boolean didn't match, not the values that were compared.
+  
+  i Pass the left value to expect() and the right value to an equality matcher such as toBe(), toEqual(), or toStrictEqual().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

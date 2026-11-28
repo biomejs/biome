@@ -526,10 +526,14 @@ impl JsModuleInfoCollector {
                 {
                     return ty;
                 }
-                return self
+                let ty = self
                     .function_parameters
                     .get(param.syntax())
                     .map_or_default(|param| param.binding_type(binding_name));
+                if self.has_writable_reference(semantic_model, binding.range) {
+                    return ty;
+                }
+                return self.defaulted_parameter_binding_type(scope_id, &param, ty);
             } else if let Some(param) = JsRestParameter::cast_ref(&ancestor) {
                 return self
                     .function_parameters
@@ -585,6 +589,33 @@ impl JsModuleInfoCollector {
             return Some(RawTypeId::Local(self.optional(ty)).into());
         }
         Some(ty)
+    }
+
+    /// Binding type of a parameter declared as `name: T = default`, whose
+    /// default replaces `undefined` in `ty`. Returns `ty` for any other
+    /// parameter.
+    ///
+    /// The caller must keep `ty` for a parameter that is reassigned, since an
+    /// assignment can bring `undefined` back.
+    fn defaulted_parameter_binding_type(
+        &mut self,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+        ty: TypeReference,
+    ) -> TypeReference {
+        let Some(default) = param
+            .initializer()
+            .and_then(|initializer| initializer.expression().ok())
+        else {
+            return ty;
+        };
+        if param.type_annotation().is_none()
+            || !matches!(param.binding(), Ok(AnyJsBindingPattern::AnyJsBinding(_)))
+        {
+            return ty;
+        }
+        let data = TypeData::from_defaulted_parameter(self, scope_id, ty, &default);
+        self.reference_to_owned_data(data)
     }
 
     /// Widen the type of binding from its writable references.

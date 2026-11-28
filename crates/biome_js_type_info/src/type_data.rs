@@ -1382,6 +1382,7 @@ pub enum TypeofExpression {
     CallArgument(TypeofCallArgumentExpression),
     ComputedMember(TypeofComputedMemberExpression),
     Conditional(TypeofConditionalExpression),
+    DefaultedParameter(TypeofDefaultedParameterExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
     OptionalChainIndex(TypeofIndexExpression),
@@ -1444,6 +1445,17 @@ pub struct TypeofParameterExpression {
     pub function: TypeReference,
     pub index: u16,
     pub has_initializer: bool,
+}
+
+/// Type of a parameter that has a default value, inside its function. The
+/// default replaces a missing argument, so the type is `ty`, the declared type
+/// of the parameter, without `undefined`. The type of `default` only decides
+/// whether `undefined` is removed: it stays when the default may be
+/// `undefined` itself.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofDefaultedParameterExpression {
+    pub ty: TypeReference,
+    pub default: TypeReference,
 }
 
 /// Represents the type of a ternary expression.

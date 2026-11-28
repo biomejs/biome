@@ -165,6 +165,52 @@ fn test_normalize_type_projections() {
 }
 
 #[test]
+fn test_member_type_normalization_is_shared_across_modules() {
+    // Both modules read `value` on the same imported instance, so the second
+    // module reuses the member type normalized for the first.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/lib.ts".into(),
+        r#"
+        export interface Box<T> { value(): T }
+        export declare const box: Box<string>;
+    "#,
+    );
+    for path in ["/src/first.ts", "/src/second.ts"] {
+        fs.insert(
+            path.into(),
+            r#"
+            import { box } from "./lib";
+            export const value = box.value();
+        "#,
+        );
+    }
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/lib.ts", "/src/first.ts", "/src/second.ts"],
+        true,
+    );
+    let first = db.module_for_path(Utf8Path::new("/src/first.ts")).unwrap();
+    let second = db.module_for_path(Utf8Path::new("/src/second.ts")).unwrap();
+
+    db.clear_salsa_events();
+    let inferred = infer_module_types(&db, first).expect("types must be inferred");
+    let ty = inferred_binding_ty_by_name(&db, first, inferred, "value").unwrap();
+    assert_eq!(format_inferred_type(&db, ty), "string");
+    let events = db.take_salsa_events();
+    assert!(function_query_will_execute_count_by_name(&db, "normalize_member_type", &events) > 0);
+
+    let inferred = infer_module_types(&db, second).expect("types must be inferred");
+    let ty = inferred_binding_ty_by_name(&db, second, inferred, "value").unwrap();
+    assert_eq!(format_inferred_type(&db, ty), "string");
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "normalize_member_type", &events),
+        0
+    );
+}
+
+#[test]
 fn test_type_projections_track_imports_without_whole_module_inference() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -1286,7 +1332,8 @@ fn test_conditional_compares_builtin_members() {
         &[
             // Iterator members use symbol keys, which can't be compared.
             "defaultedArguments",
-            // The generated signatures of `Promise` methods are simplified.
+            // `then` is generic. A mismatch with a generic method is not conclusive,
+            // and the method can't be read through an indexed access.
             "promiseThenMismatch",
             "promiseThenParameters",
         ],
@@ -1619,4 +1666,39 @@ fn test_expressions_select_the_branch_of_a_conditional_operand() {
         ],
         &[],
     );
+}
+
+#[test]
+fn test_conditional_types_compare_user_generic_instances_structurally() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Box<T> { value: T }
+        type IsNumBox<T> = T extends Box<number> ? true : false;
+        interface ListNode<T> { next: ListNode<T>; value: T }
+        class Holder<T> { constructor(public held: T) {} }
+        declare const stringBox: IsNumBox<Box<string>>;
+        declare const numberBox: IsNumBox<Box<number>>;
+        declare const recursiveMismatch: ListNode<string> extends ListNode<number> ? 1 : 2;
+        declare const classMismatch: Holder<string> extends Holder<number> ? 1 : 2;
+        interface Handler<T> { handle(value: T): void }
+        interface Overloaded<T> { get(key: string): string; get(key: number): number; value: T }
+        declare const methodMismatch: Handler<string> extends Handler<number> ? 1 : 2;
+        declare const overloadedMismatch: Overloaded<string> extends Overloaded<number> ? 1 : 2;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (name, expected) in [
+        ("stringBox", "bool: false"),
+        ("numberBox", "bool: true"),
+        ("recursiveMismatch", "number: 2"),
+        ("classMismatch", "number: 2"),
+        ("methodMismatch", "number: 2"),
+        ("overloadedMismatch", "number: 2"),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
 }

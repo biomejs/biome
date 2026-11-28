@@ -1,0 +1,147 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+if (foo) {
+	bar();
+} else {
+	baz();
+}
+
+if (foo) {
+	bar();
+}
+
+if (foo) {
+} else {
+}
+
+if (foo) {
+	;
+} else {
+	;
+}
+
+if (foo) {
+} else {
+	;
+}
+
+if (foo);
+else;
+
+if (foo) {
+	// TODO
+} else {
+	// TODO
+}
+
+if (foo) {
+	bar();
+} else if (baz) {
+	qux();
+} else {
+	quux();
+}
+
+if (foo) {
+	bar();
+} else if (baz) {
+	bar(1);
+}
+
+// Branches with the same code that aren't next to each other.
+if (format === "json") {
+	parseJson();
+} else if (format === "yaml") {
+	parseYaml();
+} else {
+	parseJson();
+}
+
+if (foo) {
+	foo.bar();
+} else {
+	foo["bar"]();
+}
+
+class Unicorn {
+	#value;
+
+	method() {
+		if (foo) {
+			this.#value;
+		} else {
+			this.value;
+		}
+	}
+}
+
+if (foo) {
+	a++;
+	b;
+} else {
+	a;
+	++b;
+}
+
+if (foo) {
+	if (bar) {
+		baz();
+	}
+} else if (qux) {
+	baz();
+}
+
+function separateStatements() {
+	if (foo) {
+		return;
+	}
+
+	if (bar) {
+		return;
+	}
+}
+
+// A line break after `return` ends the statement, so the first branch returns nothing.
+if (a) {
+	callback = () => {
+		return
+		42;
+	};
+} else {
+	callback = () => {
+		return 42;
+	};
+}
+
+if (foo) {
+	bar();
+	baz();
+} else {
+	bar();
+}
+
+if (foo) {
+	value = `a`;
+} else {
+	value = "a";
+}
+
+// The semicolons in a `for` statement decide which part of the header each expression is in.
+if (bounded) {
+	for (; i < n; i++) step();
+} else {
+	for (i < n; ; i++) step();
+}
+
+if (bounded) {
+	for (;; i++) step();
+} else {
+	for (; i++;) step();
+}
+
+```

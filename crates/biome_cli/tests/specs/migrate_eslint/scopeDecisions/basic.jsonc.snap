@@ -204,6 +204,7 @@ expression: basic.jsonc
 			},
 			"nursery": {
 				"noSvelteLegacyConst": "error",
+				"noTailwindLegacyImportant": "error",
 				"noVueRestrictedVOn": "error",
 				"useControlLabel": "error",
 				"usePromiseRejectErrors": "error",

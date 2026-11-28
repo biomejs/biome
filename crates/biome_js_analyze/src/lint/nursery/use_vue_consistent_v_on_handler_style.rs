@@ -20,7 +20,7 @@ use biome_rowan::{
 use biome_rule_options::use_vue_consistent_v_on_handler_style::{
     UseVueConsistentVOnHandlerStyleOptions, VueVOnHandlerStyle,
 };
-use biome_vue_semantic::{ScopeKind, Snippet};
+use biome_vue_semantic::{AnalyzedVueModel, ScopeKind, Snippet};
 
 declare_lint_rule! {
     /// Enforce a consistent style for event handlers in Vue `v-on` directives.
@@ -265,7 +265,7 @@ impl Rule for UseVueConsistentVOnHandlerStyle {
             }
             let fix = call
                 .filter(|_| forwards_arguments && !snippet.has_comments() && !handler.is_generator())
-                .and_then(|call| method_fix(snippet, &call));
+                .and_then(|call| method_fix(ctx.vue_model(), &call));
             return Some(HandlerStyleViolation {
                 handler,
                 preferred,
@@ -699,15 +699,14 @@ fn is_quoted(snippet: &Snippet) -> bool {
 ///
 /// Returns `None` when the number of parameters is unknown, as for a function declared in
 /// `<script setup>`, because Vue could then pass the event to a parameter with a default value.
-fn method_fix(snippet: &Snippet, call: &JsCallExpression) -> Option<HandlerFix> {
+fn method_fix(
+    vue_model: &AnalyzedVueModel<JsLanguage>,
+    call: &JsCallExpression,
+) -> Option<HandlerFix> {
     let callee = call.callee().ok()?.omit_parentheses();
     let callee = callee.as_js_identifier_expression()?;
     let argument_count = call.arguments().ok()?.args().len();
-    let range = callee.range();
-    let symbol = snippet
-        .references()
-        .find(|reference| reference.range() == range)?
-        .symbol()?;
+    let symbol = vue_model.reference_of(&callee.name().ok()?)?.symbol()?;
     let method = symbol
         .component()?
         .methods()

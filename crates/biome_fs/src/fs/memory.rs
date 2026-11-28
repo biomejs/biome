@@ -9,7 +9,8 @@ use std::path::PathBuf;
 use std::str;
 use std::sync::Arc;
 
-use crate::fs::OpenOptions;
+use crate::fs::{OpenOptions, context_id};
+use crate::utils::normalize_path_buf;
 use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
@@ -99,17 +100,23 @@ impl MemoryFileSystem {
     /// Create or update a file in the filesystem
     pub fn insert(&self, path: Utf8PathBuf, content: impl Into<Vec<u8>>) {
         let mut files = self.files.0.write();
-        files.insert(path, Arc::new(Mutex::new(content.into())));
+        files.insert(
+            normalize_path_buf(path),
+            Arc::new(Mutex::new(content.into())),
+        );
     }
 
     /// Create or update an error in the filesystem
     pub fn insert_error(&mut self, path: Utf8PathBuf, kind: ErrorEntry) {
-        self.errors.insert(path, kind);
+        self.errors.insert(normalize_path_buf(path), kind);
     }
 
     /// Remove a file from the filesystem
     pub fn remove(&self, path: &Utf8Path) {
-        self.files.0.write().remove(path);
+        self.files
+            .0
+            .write()
+            .remove(&normalize_path_buf(path.to_path_buf()));
     }
 
     pub fn set_on_get_changed_files(
@@ -142,6 +149,9 @@ impl FileSystem for MemoryFileSystem {
             ));
         }
 
+        // Keys are stored normalized, matching the paths emitted by traversal.
+        let path = normalize_path_buf(path.to_path_buf());
+        let path = path.as_path();
         let mut inner = if options.create || options.create_new {
             // Acquire write access to the files map if the file may need to be created
             let mut files = self.files.0.write();
@@ -193,7 +203,25 @@ impl FileSystem for MemoryFileSystem {
         }))
     }
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
-        func(&MemoryTraversalScope { fs: self })
+        let scope = MemoryTraversalScope {
+            fs: self,
+            selected_files: Mutex::default(),
+        };
+        func(&scope);
+
+        // Handling the selected files one at a time, in processing order, after every input was
+        // walked keeps the results of in-memory traversals deterministic.
+        let mut selected_files = scope.selected_files.into_inner();
+        selected_files.sort_unstable_by(|(left_context, left), (right_context, right)| {
+            left.cmp_processing_priority(right)
+                .then_with(|| context_id(*left_context).cmp(&context_id(*right_context)))
+        });
+        selected_files.dedup_by(|(left_context, left), (right_context, right)| {
+            context_id(*left_context) == context_id(*right_context) && left == right
+        });
+        for (context, path) in selected_files {
+            context.handle_path(path);
+        }
     }
 
     fn working_directory(&self) -> Option<Utf8PathBuf> {
@@ -202,14 +230,18 @@ impl FileSystem for MemoryFileSystem {
 
     fn path_exists(&self, path: &Utf8Path) -> bool {
         let files = self.files.0.read();
-        files.contains_key(path)
+        files.contains_key(&normalize_path_buf(path.to_path_buf()))
     }
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         let files = self.files.0.read();
-        match files.get(path) {
+        let normalized_path = normalize_path_buf(path.to_path_buf());
+        match files.get(&normalized_path) {
             Some(_) => Ok(PathKind::File { is_symlink: false }),
-            None if files.iter().any(|file_path| file_path.0.starts_with(path)) => {
+            None if files
+                .iter()
+                .any(|file_path| file_path.0.starts_with(&normalized_path)) =>
+            {
                 Ok(PathKind::Directory { is_symlink: false })
             }
             None => Err(FileSystemDiagnostic {
@@ -301,30 +333,78 @@ impl File for MemoryFile {
 
 pub struct MemoryTraversalScope<'scope> {
     fs: &'scope MemoryFileSystem,
+    /// Files selected by [TraversalScope::evaluate_and_handle], handled when the traversal ends.
+    selected_files: Mutex<Vec<(&'scope dyn TraversalContext, BiomePath)>>,
 }
 
 impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
     fn evaluate(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf) {
+        self.walk(ctx, base, false);
+    }
+
+    fn evaluate_and_handle(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf) {
+        self.walk(ctx, base, true);
+    }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath) {
+        context.handle_path(path);
+    }
+}
+
+impl<'scope> MemoryTraversalScope<'scope> {
+    /// Walks the files under `base`, storing the selected files or, when `handle_files` is
+    /// `true`, recording them to be handled when the traversal ends.
+    fn walk(&self, ctx: &'scope dyn TraversalContext, base: Utf8PathBuf, handle_files: bool) {
         // Traversal is implemented by iterating on all keys, and matching on
-        // those that are prefixed with the provided `base` path
+        // those that are prefixed with the provided `base` path. Keys are normalized on insertion,
+        // so the base must be normalized too.
+        let base = normalize_path_buf(base);
         {
             let files = &self.fs.files.0.read();
-            for path in files.keys() {
-                let should_process_file = if base.starts_with(".") || base.starts_with("./") {
-                    // we simulate absolute paths, so we can correctly strips out the base path from the path
-                    let absolute_base = Utf8PathBuf::from("/").join(&base);
-                    let absolute_path = Utf8Path::new("/").join(path);
-                    absolute_path.strip_prefix(&absolute_base).is_ok()
-                } else {
-                    path.strip_prefix(&base).is_ok()
-                };
+            let is_under_base = |path: &Utf8Path| path.strip_prefix(&base).is_ok();
+            let matching_files: Vec<_> = files
+                .keys()
+                .filter(|path| is_under_base(path))
+                .cloned()
+                .collect();
 
-                if should_process_file {
-                    let _ = ctx.interner().intern_path(path.into());
+            if ctx.should_store_dirs() {
+                let mut directories: Vec<_> = matching_files
+                    .iter()
+                    .flat_map(|path| path.ancestors().skip(1))
+                    .filter(|path| is_under_base(path))
+                    .map(Utf8Path::to_path_buf)
+                    .collect();
+                directories.sort();
+                directories.dedup();
+
+                for path in directories {
+                    let _ = ctx.interner().intern_path(path.clone());
                     let biome_path = BiomePath::new(path);
-                    if !ctx.can_handle(&biome_path) {
-                        continue;
+                    if ctx.can_handle_with_kind(
+                        &biome_path,
+                        PathKind::Directory { is_symlink: false },
+                        false,
+                    ) {
+                        ctx.store_path(biome_path);
                     }
+                }
+            }
+
+            for path in matching_files {
+                let _ = ctx.interner().intern_path(path.clone());
+                let biome_path = BiomePath::new(path);
+                // Directories aren't checked before their files, so ancestors are never verified.
+                if !ctx.can_handle_with_kind(
+                    &biome_path,
+                    PathKind::File { is_symlink: false },
+                    false,
+                ) {
+                    continue;
+                }
+                if handle_files {
+                    self.selected_files.lock().push((ctx, biome_path));
+                } else {
                     ctx.store_path(biome_path);
                 }
             }
@@ -347,15 +427,13 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
             }
         }
     }
-
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf) {
-        context.handle_path(BiomePath::new(path));
-    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
+    use crate::{
+        BiomePath, FileSystem, MemoryFileSystem, PathInterner, PathKind, TraversalContext,
+    };
     use crate::{OpenOptions, fs::FileSystemExt};
     use biome_diagnostics::Error;
     use camino::{Utf8Path, Utf8PathBuf};
@@ -516,6 +594,74 @@ mod tests {
         }
     }
 
+    struct TestContext {
+        interner: PathInterner,
+        visited: HashSet<BiomePath>,
+    }
+
+    impl TraversalContext for TestContext {
+        fn interner(&self) -> &PathInterner {
+            &self.interner
+        }
+
+        fn push_diagnostic(&self, err: Error) {
+            panic!("unexpected error {err:?}")
+        }
+
+        fn can_handle(&self, _: &BiomePath) -> bool {
+            true
+        }
+
+        fn handle_path(&self, path: BiomePath) {
+            self.visited.pin().insert(path);
+        }
+
+        fn store_path(&self, path: BiomePath) {
+            self.visited.pin().insert(path);
+        }
+
+        fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+            self.visited.pin()
+        }
+    }
+
+    impl TestContext {
+        fn new() -> Self {
+            let (interner, _) = PathInterner::new();
+            Self {
+                interner,
+                visited: HashSet::default(),
+            }
+        }
+    }
+
+    #[test]
+    fn traversal_and_lookups_use_normalized_paths() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("dir/sub/../file.js"), "statement();");
+
+        let ctx = TestContext::new();
+        fs.traversal(Box::new(|scope| {
+            scope.evaluate(&ctx, Utf8PathBuf::from("./dir"));
+        }));
+
+        let file = BiomePath::new("dir/file.js");
+        assert_eq!(ctx.visited.len(), 1);
+        assert!(ctx.visited.pin().contains(&file));
+        assert!(fs.path_exists(file.as_path()));
+        assert!(
+            fs.path_kind(Utf8Path::new("dir/sub/.."))
+                .is_ok_and(PathKind::is_dir)
+        );
+        assert_eq!(
+            fs.read_file_from_path(file.as_path()).unwrap(),
+            "statement();"
+        );
+
+        fs.remove(Utf8Path::new("dir/./file.js"));
+        assert!(!fs.path_exists(file.as_path()));
+    }
+
     #[test]
     fn traversal() {
         let fs = MemoryFileSystem::default();
@@ -525,42 +671,7 @@ mod tests {
         fs.insert(Utf8PathBuf::from("dir2/file1"), "dir2/file1".as_bytes());
         fs.insert(Utf8PathBuf::from("dir2/file2"), "dir2/file1".as_bytes());
 
-        struct TestContext {
-            interner: PathInterner,
-            visited: HashSet<BiomePath>,
-        }
-
-        impl TraversalContext for TestContext {
-            fn interner(&self) -> &PathInterner {
-                &self.interner
-            }
-
-            fn push_diagnostic(&self, err: Error) {
-                panic!("unexpected error {err:?}")
-            }
-
-            fn can_handle(&self, _: &BiomePath) -> bool {
-                true
-            }
-
-            fn handle_path(&self, path: BiomePath) {
-                self.visited.pin().insert(path.to_written());
-            }
-
-            fn store_path(&self, path: BiomePath) {
-                self.visited.pin().insert(path);
-            }
-
-            fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
-                self.visited.pin()
-            }
-        }
-
-        let (interner, _) = PathInterner::new();
-        let mut ctx = TestContext {
-            interner,
-            visited: HashSet::default(),
-        };
+        let mut ctx = TestContext::new();
 
         // Traverse a directory
         fs.traversal(Box::new(|scope| {

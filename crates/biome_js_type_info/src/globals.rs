@@ -3,8 +3,8 @@ use std::sync::OnceLock;
 use biome_rowan::Text;
 
 use crate::{
-    Function, GenericTypeParameter, Literal, RawTypeId, ReturnType, TypeData, TypeReference,
-    TypeReferenceQualifier, Union, interned_types::TypeData as InferredTypeData,
+    Function, Literal, RawTypeId, ReturnType, TypeData, TypeReference, TypeReferenceQualifier,
+    Union, interned_types::TypeData as InferredTypeData,
 };
 
 use crate::generated::global_types::{
@@ -73,19 +73,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ]))))
         }
-        T_ID_GLOBAL_TYPE_ID => TypeData::from(GenericTypeParameter {
-            is_const: false,
-            name: Text::new_static("T"),
-            constraint: TypeReference::unknown(),
-            default: TypeReference::unknown(),
-        }),
-        VOID_CALLBACK_ID_GLOBAL_TYPE_ID => TypeData::from(Function {
-            is_async: false,
-            type_parameters: Default::default(),
-            name: Some(Text::new_static(VOID_CALLBACK_ID_NAME)),
-            parameters: Default::default(),
-            return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
-        }),
         FETCH_ID_GLOBAL_TYPE_ID => TypeData::from(Function {
             is_async: false,
             type_parameters: Default::default(),
@@ -107,9 +94,6 @@ fn predefined_type_data(id: GlobalTypeId) -> TypeData {
         }
         INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID => {
             TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID))
-        }
-        INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID => {
-            TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID))
         }
         INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID => {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))

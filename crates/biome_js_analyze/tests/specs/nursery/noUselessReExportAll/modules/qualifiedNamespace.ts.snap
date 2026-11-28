@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: qualifiedNamespace.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import "./named.js";
+export namespace A.B {
+	export const c = 1;
+}
+
+```

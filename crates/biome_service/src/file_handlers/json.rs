@@ -202,7 +202,7 @@ impl ServiceLanguage for JsonLanguage {
                 ),
             };
 
-            overrides.apply_override_json_parser_options(path, &mut options);
+            overrides.apply_override_json_parser_options(path.as_path(), &mut options);
 
             options
         }

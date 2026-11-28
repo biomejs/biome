@@ -10,14 +10,10 @@
 //! The operands must already be normalized, as with the operations in
 //! [`crate::type_operations`].
 
+use crate::TypeOperator;
 use crate::generated::global_types::ids::{
     BOOLEAN_ID_GLOBAL_TYPE_ID, NUMBER_ID_GLOBAL_TYPE_ID, OBJECT_ID_GLOBAL_TYPE_ID,
-    PROMISE_ALL_ID_GLOBAL_TYPE_ID, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
-    PROMISE_ANY_ID_GLOBAL_TYPE_ID, PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
-    PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID, PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
-    PROMISE_RACE_ID_GLOBAL_TYPE_ID, PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
-    PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, PROMISE_THEN_ID_GLOBAL_TYPE_ID,
-    PROMISE_TRY_ID_GLOBAL_TYPE_ID, STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
+    STRING_ID_GLOBAL_TYPE_ID, SYMBOL_ID_GLOBAL_TYPE_ID,
 };
 use crate::interned_types::{
     FunctionParameter, InternedClass, InternedConstructor, InternedExtendsType, InternedFunction,
@@ -28,7 +24,6 @@ use crate::interned_types::{
 use crate::literal::StringLiteral;
 use crate::type_operations::keyof;
 use crate::type_transform::TypeSubstitution;
-use crate::{GlobalTypeId, TypeOperator};
 use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use rustc_hash::FxHashSet;
 
@@ -46,24 +41,6 @@ const MAX_UNDETERMINED_TYPE_STEPS: usize = 64;
 
 /// Maximum number of members compared structurally for one pair of types.
 const MAX_STRUCTURAL_MEMBERS: usize = 64;
-
-/// Built-in methods whose generated signatures are simplified stand-ins, such
-/// as `Promise.prototype.then`, which is declared without parameters.
-/// Comparing a stand-in with another signature would give wrong answers, so
-/// such comparisons stay undetermined.
-const SIMPLIFIED_SIGNATURES: [GlobalTypeId; 11] = [
-    PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID,
-    PROMISE_CATCH_ID_GLOBAL_TYPE_ID,
-    PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
-    PROMISE_THEN_ID_GLOBAL_TYPE_ID,
-    PROMISE_ALL_ID_GLOBAL_TYPE_ID,
-    PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
-    PROMISE_ANY_ID_GLOBAL_TYPE_ID,
-    PROMISE_RACE_ID_GLOBAL_TYPE_ID,
-    PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
-    PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID,
-    PROMISE_TRY_ID_GLOBAL_TYPE_ID,
-];
 
 /// Resolves local handles and structural globals in a normalized type.
 pub(crate) type TypeResolver<'db, 'a> = dyn FnMut(TypeData<'db>) -> TypeData<'db> + 'a;
@@ -237,16 +214,15 @@ fn boolean_literals(db: &dyn TypeDb) -> [TypeData<'_>; 2] {
 /// Returns the generic referenced by `ty`.
 ///
 /// References to a generic `T` are represented either as `T` itself or as an
-/// instance of `T` without type arguments. Built-in types refer to their
-/// generics through global handles.
+/// instance of `T` without type arguments.
 pub(crate) fn referenced_generic<'db>(
     db: &'db dyn TypeDb,
     ty: TypeData<'db>,
 ) -> Option<InternedGenericTypeParameter<'db>> {
-    match ty.expand_canonical_global(db) {
+    match ty {
         TypeData::Generic(generic) => Some(generic),
         TypeData::InstanceOf(instance) if instance.type_parameters(db).is_empty() => {
-            match instance.ty(db).expand_canonical_global(db) {
+            match instance.ty(db) {
                 TypeData::Generic(generic) => Some(generic),
                 _ => None,
             }
@@ -371,9 +347,6 @@ pub(crate) fn generic_substitutions<'db>(
 
 /// Returns the substitutions replacing a declared type parameter with
 /// `replacement`, together with the parameter's generic.
-///
-/// Built-in types declare their type parameters as canonical global handles,
-/// which their members also use to refer to them.
 pub(crate) fn type_parameter_substitutions<'db>(
     db: &'db dyn TypeDb,
     type_parameter: TypeData<'db>,
@@ -383,17 +356,7 @@ pub(crate) fn type_parameter_substitutions<'db>(
     Vec<TypeSubstitution<'db>>,
 )> {
     let generic = referenced_generic(db, type_parameter)?;
-    let mut substitutions = generic_substitutions(db, generic, replacement).to_vec();
-    if matches!(type_parameter, TypeData::GlobalType(_)) {
-        substitutions.push(TypeSubstitution {
-            generic: TypeData::instance_of(db, type_parameter, Box::default()),
-            replacement,
-        });
-        substitutions.push(TypeSubstitution {
-            generic: type_parameter,
-            replacement,
-        });
-    }
+    let substitutions = generic_substitutions(db, generic, replacement).to_vec();
     Some((generic, substitutions))
 }
 
@@ -558,6 +521,8 @@ struct AssignabilityCheck<'db, 'a> {
     /// comparison. Such a generic is in a parameter, which is contravariant
     /// unless the parameter belongs to a method.
     parameter_position: InferencePosition,
+    /// Instance pairs whose members are being compared, outermost first.
+    structural_instances: Vec<(InternedTypeInstance<'db>, InternedTypeInstance<'db>)>,
     remaining_steps: usize,
 }
 
@@ -576,6 +541,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 .collect(),
             candidates: Vec::new(),
             parameter_position: InferencePosition::Contravariant,
+            structural_instances: Vec::new(),
             remaining_steps: MAX_RELATION_STEPS,
         }
     }
@@ -747,8 +713,6 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         self.remaining_steps -= 1;
 
-        // Resolving a simplified signature loses the handle that identifies it.
-        let is_simplified = is_simplified_signature(source) || is_simplified_signature(target);
         let source = self.resolve(source);
         let target = self.resolve(target);
         if let Some(generic) = self.infer_type(target) {
@@ -761,9 +725,6 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         }
         if source == target && !may_contain_undetermined_type(self.db, source) {
             return Assignability::Assignable;
-        }
-        if is_simplified && !matches!(target, TypeData::AnyKeyword | TypeData::UnknownKeyword) {
-            return Assignability::Undetermined;
         }
 
         match (source, target) {
@@ -1408,10 +1369,7 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
                 .iter()
                 .any(|argument| !may_refer_to_free_generic(self.db, *argument, &[]))
         {
-            return self.is_structurally_assignable(
-                TypeData::InstanceOf(source),
-                TypeData::InstanceOf(target),
-            );
+            return self.are_instance_members_assignable(source, target);
         }
         let pairs = source
             .type_parameters(self.db)
@@ -1423,6 +1381,27 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
             Assignability::NotAssignable if !is_builtin => Assignability::Undetermined,
             result => result,
         }
+    }
+
+    /// Compares the members of two instances structurally.
+    ///
+    /// A recursive type such as `interface List<T> { next: List<T> }` compares
+    /// the same pair of instances again through its members. That nested
+    /// comparison is left undetermined, so the outcome depends on the
+    /// remaining members.
+    fn are_instance_members_assignable(
+        &mut self,
+        source: InternedTypeInstance<'db>,
+        target: InternedTypeInstance<'db>,
+    ) -> Assignability {
+        if self.structural_instances.contains(&(source, target)) {
+            return Assignability::Undetermined;
+        }
+        self.structural_instances.push((source, target));
+        let result = self
+            .is_structurally_assignable(TypeData::InstanceOf(source), TypeData::InstanceOf(target));
+        self.structural_instances.pop();
+        result
     }
 
     fn is_tuple_assignable(
@@ -1794,6 +1773,16 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
 
         let target_is_weak = target_members.is_weak();
 
+        // Overloads would have to be compared as sets of signatures, so
+        // overloaded members are only checked for presence.
+        let mut seen = FxHashSet::default();
+        let overloaded = target_members
+            .named
+            .iter()
+            .filter(|(name, ..)| !seen.insert(name.text()))
+            .map(|(name, ..)| name.clone())
+            .collect::<Vec<_>>();
+
         // Look for a missing member first, since that is conclusive without
         // comparing any member types.
         let mut found = Vec::with_capacity(target_members.named.len());
@@ -1804,6 +1793,9 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         };
         for (name, target_ty, target_is_optional) in target_members.named {
             match self.find_apparent_member(source, &name) {
+                MemberLookup::Found { .. } if overloaded.contains(&name) => {
+                    result = Assignability::Undetermined;
+                }
                 MemberLookup::Found {
                     ty: source_ty,
                     is_optional: source_is_optional,
@@ -1920,9 +1912,6 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         target: TypeData<'db>,
         name: &str,
     ) -> Assignability {
-        if is_simplified_signature(source) || is_simplified_signature(target) {
-            return self.is_assignable(source, target);
-        }
         let source = self.resolve(source);
         let target = self.resolve(target);
         if let Some(target_method) = self.optional_function(target).filter(|function| {
@@ -2107,10 +2096,14 @@ impl<'db, 'a> AssignabilityCheck<'db, 'a> {
         else {
             return MemberLookup::Unknown;
         };
-        let member = members
+        let mut matching = members
             .iter()
-            .find(|member| !member.kind.is_static() && member.kind.has_name(name));
-        if let Some(member) = member {
+            .filter(|member| !member.kind.is_static() && member.kind.has_name(name));
+        if let Some(member) = matching.next() {
+            // Overloads would have to be compared as a set of signatures.
+            if matching.next().is_some() {
+                return MemberLookup::Unknown;
+            }
             return match substitute_all(self.db, member_type(self.db, member), substitutions) {
                 Some(ty) => MemberLookup::Found {
                     ty,
@@ -2423,11 +2416,6 @@ pub(crate) fn intersect_primitives<'db>(
 /// member also accepts.
 fn with_undefined<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
     TypeData::union_from_types(db, vec![ty, TypeData::Undefined])
-}
-
-/// Returns whether `ty` is a handle to one of the [`SIMPLIFIED_SIGNATURES`].
-fn is_simplified_signature(ty: TypeData) -> bool {
-    matches!(ty, TypeData::GlobalType(id) if SIMPLIFIED_SIGNATURES.contains(&id))
 }
 
 fn primitive_kind<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<PrimitiveKind> {

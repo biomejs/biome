@@ -111,6 +111,8 @@ pub fn parse_suppression_comment_with_line_prefix(
         base.split_at(1)
     } else if base.starts_with("<!--") {
         base.split_at(4)
+    } else if base.starts_with("{/*") {
+        base.split_at(3)
     } else {
         base.split_at(2)
     };
@@ -127,6 +129,11 @@ pub fn parse_suppression_comment_with_line_prefix(
         "#" => false,
         "<!--" => {
             comment = comment.strip_suffix("-->").unwrap_or(comment);
+            true
+        }
+        // `{/* ... */}`, the comment syntax of MDX
+        "{/*" => {
+            comment = comment.strip_suffix("*/}").unwrap_or(comment);
             true
         }
         token => panic!("comment with unknown opening token {token:?}, from {comment}"),
@@ -506,6 +513,20 @@ mod tests_suppression_kinds {
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15)),
                 reason_range: TextRange::new(TextSize::from(29), TextSize::from(40))
+            })],
+        );
+    }
+
+    #[test]
+    fn mdx_expression_comment() {
+        assert_eq!(
+            parse_suppression_comment("{/* biome-ignore lint: explanation */}").collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("lint"), None, None)],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(4), TextSize::from(16)),
+                reason_range: TextRange::new(TextSize::from(23), TextSize::from(34))
             })],
         );
     }

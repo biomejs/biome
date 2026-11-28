@@ -1,0 +1,464 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import {
+	defineRule,
+	nodeKinds,
+	nodeKinds as kinds,
+	tokenKinds,
+} from "@biomejs/runtime/plugin";
+import * as plugin from "@biomejs/runtime/plugin";
+
+const CALLS = nodeKinds("JS_CALL_EXPRESSION");
+const IMPORTS = nodeKinds("JS_IMPORT_CALL_EXPRESSION");
+const BOTH = CALLS.union(IMPORTS);
+
+export const rule = defineRule({
+	run(node) {
+		const local = nodeKinds("JS_CALL_EXPRESSION");
+		tokenKinds("EQ2", "NEQ");
+		kinds("JS_NEW_EXPRESSION");
+		plugin.nodeKinds("JS_NEW_EXPRESSION");
+		CALLS.union(IMPORTS);
+		BOTH.union(IMPORTS);
+		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+		nodeKinds("JS_CALL_EXPRESSION").union(IMPORTS);
+		local.union(IMPORTS);
+	},
+});
+
+function helper() {
+	return nodeKinds("JS_CALL_EXPRESSION");
+}
+const arrow = () => tokenKinds("IDENT");
+(function () {
+	nodeKinds("JS_CALL_EXPRESSION");
+})();
+function withDefault(set = nodeKinds("JS_CALL_EXPRESSION")) {}
+
+class Visitor {
+	kinds = nodeKinds("JS_CALL_EXPRESSION");
+	constructor() {
+		this.other = nodeKinds("JS_NEW_EXPRESSION");
+	}
+	get calls() {
+		return nodeKinds("JS_CALL_EXPRESSION");
+	}
+	static create() {
+		return nodeKinds("JS_CALL_EXPRESSION");
+	}
+}
+const object = {
+	method() {
+		return nodeKinds("JS_CALL_EXPRESSION");
+	},
+};
+function makeClass() {
+	return class {
+		static KINDS = nodeKinds("JS_CALL_EXPRESSION");
+	};
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:16:17 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    14 │ export const rule = defineRule({
+    15 │ 	run(node) {
+  > 16 │ 		const local = nodeKinds("JS_CALL_EXPRESSION");
+       │ 		              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 		tokenKinds("EQ2", "NEQ");
+    18 │ 		kinds("JS_NEW_EXPRESSION");
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This tokenKinds() call creates a new kind set every time it runs.
+  
+    15 │ 	run(node) {
+    16 │ 		const local = nodeKinds("JS_CALL_EXPRESSION");
+  > 17 │ 		tokenKinds("EQ2", "NEQ");
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 		kinds("JS_NEW_EXPRESSION");
+    19 │ 		plugin.nodeKinds("JS_NEW_EXPRESSION");
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    16 │ 		const local = nodeKinds("JS_CALL_EXPRESSION");
+    17 │ 		tokenKinds("EQ2", "NEQ");
+  > 18 │ 		kinds("JS_NEW_EXPRESSION");
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 		plugin.nodeKinds("JS_NEW_EXPRESSION");
+    20 │ 		CALLS.union(IMPORTS);
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    17 │ 		tokenKinds("EQ2", "NEQ");
+    18 │ 		kinds("JS_NEW_EXPRESSION");
+  > 19 │ 		plugin.nodeKinds("JS_NEW_EXPRESSION");
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 		CALLS.union(IMPORTS);
+    21 │ 		BOTH.union(IMPORTS);
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This union() call creates a new kind set every time it runs.
+  
+    18 │ 		kinds("JS_NEW_EXPRESSION");
+    19 │ 		plugin.nodeKinds("JS_NEW_EXPRESSION");
+  > 20 │ 		CALLS.union(IMPORTS);
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    21 │ 		BOTH.union(IMPORTS);
+    22 │ 		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This union() call creates a new kind set every time it runs.
+  
+    19 │ 		plugin.nodeKinds("JS_NEW_EXPRESSION");
+    20 │ 		CALLS.union(IMPORTS);
+  > 21 │ 		BOTH.union(IMPORTS);
+       │ 		^^^^^^^^^^^^^^^^^^^
+    22 │ 		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+    23 │ 		nodeKinds("JS_CALL_EXPRESSION").union(IMPORTS);
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This union() call creates a new kind set every time it runs.
+  
+    20 │ 		CALLS.union(IMPORTS);
+    21 │ 		BOTH.union(IMPORTS);
+  > 22 │ 		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 		nodeKinds("JS_CALL_EXPRESSION").union(IMPORTS);
+    24 │ 		local.union(IMPORTS);
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This union() call creates a new kind set every time it runs.
+  
+    21 │ 		BOTH.union(IMPORTS);
+    22 │ 		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+  > 23 │ 		nodeKinds("JS_CALL_EXPRESSION").union(IMPORTS);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 		local.union(IMPORTS);
+    25 │ 	},
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This union() call creates a new kind set every time it runs.
+  
+    22 │ 		CALLS.union(nodeKinds("JS_NEW_EXPRESSION"));
+    23 │ 		nodeKinds("JS_CALL_EXPRESSION").union(IMPORTS);
+  > 24 │ 		local.union(IMPORTS);
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    25 │ 	},
+    26 │ });
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:9 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    28 │ function helper() {
+  > 29 │ 	return nodeKinds("JS_CALL_EXPRESSION");
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ }
+    31 │ const arrow = () => tokenKinds("IDENT");
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:21 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This tokenKinds() call creates a new kind set every time it runs.
+  
+    29 │ 	return nodeKinds("JS_CALL_EXPRESSION");
+    30 │ }
+  > 31 │ const arrow = () => tokenKinds("IDENT");
+       │                     ^^^^^^^^^^^^^^^^^^^
+    32 │ (function () {
+    33 │ 	nodeKinds("JS_CALL_EXPRESSION");
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:2 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    31 │ const arrow = () => tokenKinds("IDENT");
+    32 │ (function () {
+  > 33 │ 	nodeKinds("JS_CALL_EXPRESSION");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ })();
+    35 │ function withDefault(set = nodeKinds("JS_CALL_EXPRESSION")) {}
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:28 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    33 │ 	nodeKinds("JS_CALL_EXPRESSION");
+    34 │ })();
+  > 35 │ function withDefault(set = nodeKinds("JS_CALL_EXPRESSION")) {}
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ class Visitor {
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:10 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    37 │ class Visitor {
+  > 38 │ 	kinds = nodeKinds("JS_CALL_EXPRESSION");
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 	constructor() {
+    40 │ 		this.other = nodeKinds("JS_NEW_EXPRESSION");
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:16 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    38 │ 	kinds = nodeKinds("JS_CALL_EXPRESSION");
+    39 │ 	constructor() {
+  > 40 │ 		this.other = nodeKinds("JS_NEW_EXPRESSION");
+       │ 		             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 	}
+    42 │ 	get calls() {
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:10 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    41 │ 	}
+    42 │ 	get calls() {
+  > 43 │ 		return nodeKinds("JS_CALL_EXPRESSION");
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 	}
+    45 │ 	static create() {
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:10 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    44 │ 	}
+    45 │ 	static create() {
+  > 46 │ 		return nodeKinds("JS_CALL_EXPRESSION");
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	}
+    48 │ }
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:10 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    49 │ const object = {
+    50 │ 	method() {
+  > 51 │ 		return nodeKinds("JS_CALL_EXPRESSION");
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 	},
+    53 │ };
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:18 lint/nursery/useBiomeTopLevelTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This nodeKinds() call creates a new kind set every time it runs.
+  
+    54 │ function makeClass() {
+    55 │ 	return class {
+  > 56 │ 		static KINDS = nodeKinds("JS_CALL_EXPRESSION");
+       │ 		               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 	};
+    58 │ }
+  
+  i This code can run many times, for example once for every node that the run() function of a rule checks, or once for every new instance of a class, so the same set is created again each time.
+  
+  i Create the set once in a top-level constant, and use that constant here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

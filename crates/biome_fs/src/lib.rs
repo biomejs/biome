@@ -11,5 +11,5 @@ pub use fs::{
     PathKind, TemporaryFs, TraversalContext, TraversalScope,
 };
 pub use interner::{PathInterner, PathInternerSet};
-pub use path::{BiomePath, is_node_modules_path};
+pub use path::{BiomePath, FileRole, PathRelation, is_node_modules_path};
 pub use utils::*;

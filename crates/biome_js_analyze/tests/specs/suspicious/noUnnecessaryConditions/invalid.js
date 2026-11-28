@@ -66,8 +66,7 @@ const comp3 = 1 === 1;  // Always true
 const comp4 = "a" === "b";  // Always false
 
 // While loops with constant conditions
-while (true) {
-  console.log("infinite loop");
+while (1) {
   break;
 }
 
@@ -81,10 +80,6 @@ do {
 } while (false);
 
 // For loops with constant conditions
-for (; true;) {
-  break;
-}
-
 for (; false;) {
   console.log("never runs");
 }

@@ -469,6 +469,9 @@ mod tests {
 
     use biome_rowan::TextSize;
 
+    // Skipped under Miri. Parsing an expression nested 50,000 levels deep
+    // takes more than half an hour there.
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn deeply_nested_expression_reports_error() {
         let source = format!("{}a;", "a+".repeat(50_000));

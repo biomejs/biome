@@ -18,3 +18,4 @@ await syncValues();
 await directValues;
 await await asyncValues();
 await values;
+await Promise.resolve(values);

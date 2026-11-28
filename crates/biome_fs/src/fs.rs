@@ -105,6 +105,37 @@ impl PathKind {
 }
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
+    /// Creates a logical Biome path from filesystem input.
+    ///
+    /// Relative input is anchored to this filesystem's working directory before `.` and `..`
+    /// components are normalized. Empty input resolves to the working directory. Construction
+    /// does not access the filesystem or resolve symbolic links.
+    fn biome_path(&self, input: &Utf8Path) -> BiomePath {
+        if let Some(path) = BiomePath::from_virtual_path(input) {
+            path
+        } else if input.is_absolute() {
+            BiomePath::new(input)
+        } else {
+            let working_directory = self.working_directory().unwrap_or_default();
+            BiomePath::new(working_directory.join(input))
+        }
+    }
+
+    /// Creates a logical Biome path relative to `base`.
+    ///
+    /// Absolute input does not use `base`. Relative input, including empty input, is joined to
+    /// `base` before lexical normalization. Construction does not access the filesystem or resolve
+    /// symbolic links.
+    fn biome_path_from(&self, base: &BiomePath, input: &Utf8Path) -> BiomePath {
+        if let Some(path) = BiomePath::from_virtual_path(input) {
+            path
+        } else if input.is_absolute() {
+            BiomePath::new(input)
+        } else {
+            BiomePath::new(base.join(input))
+        }
+    }
+
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
     -> io::Result<Box<dyn File>>;
@@ -432,21 +463,30 @@ impl<T: FileSystem + ?Sized> FileSystemExt for T {}
 type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) + Send + 'fs>;
 
 pub trait TraversalScope<'scope> {
-    /// Spawn a new filesystem read task.
+    /// Walks `path` and collects every file the context accepts with
+    /// [TraversalContext::store_path].
     ///
-    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_path)
-    /// method of the provided [TraversalContext] will be called. If it's a
-    /// directory, it will be recursively traversed and all the files the
-    /// [TraversalContext::can_handle] method of the context
-    /// returns true for will be handled as well
+    /// Directories are walked recursively, and only entries accepted by
+    /// [TraversalContext::can_handle_with_kind] are stored or descended into. When several logical
+    /// paths lead to the same physical file, for example through symbolic links, only one of them
+    /// is stored. A path spelled exactly like the physical file is stored as soon as it is found.
+    /// Any other path is stored when the traversal ends, once all the paths to the file are known.
     fn evaluate(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
+
+    /// Walks `path` like [TraversalScope::evaluate], but hands every selected file to
+    /// [TraversalContext::handle_path] instead of storing it.
+    ///
+    /// The order and the threads that files are handled on depend on the file system. The OS
+    /// file system handles each file in parallel with the rest of the walk, so processing starts
+    /// before the walk ends.
+    fn evaluate_and_handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
 
     /// Spawn a new filesystem read task.
     ///
     /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
     ///
     /// This method will call [TraversalContext::handle_path].
-    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
+    fn handle(&self, context: &'scope dyn TraversalContext, path: BiomePath);
 }
 
 pub trait TraversalContext: Sync {
@@ -460,15 +500,35 @@ pub trait TraversalContext: Sync {
 
     /// Checks if the traversal context can handle a particular path, used as
     /// an optimization to bail out of scheduling a file handler if it wouldn't
-    /// be able to process the file anyway
-    fn can_handle(&self, path: &BiomePath) -> bool;
+    /// be able to process the file anyway.
+    fn can_handle(&self, _path: &BiomePath) -> bool {
+        true
+    }
 
-    /// This method will be called by the traversal for each file it finds
-    /// where [TraversalContext::can_handle] returned true
+    /// Checks whether the traversal context can handle a path with the given entry kind.
+    ///
+    /// `ancestors_checked` is `true` when the traversal reached `path` by descending from a
+    /// directory this method accepted. Every directory between the traversal input and `path`
+    /// was then accepted by this method too, so the context can skip checking them again. It is
+    /// `false` for traversal inputs, and for traversals that don't check directories before
+    /// descending into them.
+    ///
+    /// The default preserves the behavior of implementations that only inspect the path.
+    fn can_handle_with_kind(
+        &self,
+        path: &BiomePath,
+        _kind: PathKind,
+        _ancestors_checked: bool,
+    ) -> bool {
+        self.can_handle(path)
+    }
+
+    /// Processes a file selected by [TraversalScope::evaluate_and_handle] or passed to
+    /// [TraversalScope::handle].
     fn handle_path(&self, path: BiomePath);
 
-    /// This method will be called by the traversal for each file it finds
-    /// where [TraversalContext::store_path] returned true
+    /// Stores a file selected by [TraversalScope::evaluate], and each accepted directory when
+    /// [Self::should_store_dirs] returns `true`.
     fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
@@ -479,6 +539,15 @@ pub trait TraversalContext: Sync {
     fn should_store_dirs(&self) -> bool {
         false
     }
+}
+
+/// Identifies a traversal context while a traversal is running.
+///
+/// The identifier is the address of the context. Contexts that are alive at the same time and
+/// aren't zero-sized have distinct addresses, so a traversal can keep per-context state, such as
+/// the owner of each physical file, without borrowing the contexts.
+pub(crate) fn context_id(context: &dyn TraversalContext) -> usize {
+    std::ptr::from_ref(context).cast::<()>().addr()
 }
 
 impl<T> FileSystem for Arc<T>

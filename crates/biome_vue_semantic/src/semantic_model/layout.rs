@@ -37,7 +37,7 @@ pub(crate) struct Layout {
 
 pub(crate) fn collect_layout(builder: &mut ModelBuilder, root: &HtmlRoot) -> Layout {
     let mut layout = Layout::default();
-    visit_children(builder, &mut layout, &root.html(), None);
+    visit_children(builder, &mut layout, root.elements(), None);
     layout
 }
 
@@ -99,11 +99,11 @@ impl Tag {
 fn visit_children(
     builder: &mut ModelBuilder,
     layout: &mut Layout,
-    children: &HtmlElementList,
+    children: impl IntoIterator<Item = AnyHtmlElement>,
     parent: Option<ElementId>,
 ) {
     let mut chain: Vec<(ElementId, BranchKind, Option<AttrId>)> = Vec::new();
-    for child in children.iter() {
+    for child in children {
         let Some(tag) = Tag::from_element(&child) else {
             // Whitespace between two branches does not break a chain. Any
             // other content does.
@@ -211,7 +211,7 @@ fn visit_tag(
 
     let parent_scope = parent.map(|parent| builder.data.elements[parent.index()].scope);
     let scope = builder.add_scope(ScopeKind::Element(id), parent_scope);
-    let node = builder.add_html_node(&tag.node);
+    let node = builder.add_html_node(&tag.node, HtmlRow::Element(id));
 
     builder.data.elements.push(ElementData {
         range: tag.range,
@@ -242,7 +242,7 @@ fn visit_tag(
     // The content of `<script>` and `<style>` is not HTML, so the parser
     // gives those elements no element children.
     if let Some(children) = &tag.children {
-        visit_children(builder, layout, children, Some(id));
+        visit_children(builder, layout, children.iter(), Some(id));
     }
     id
 }
@@ -341,7 +341,8 @@ fn visit_attribute(
                     _ => {}
                 }
             }
-            let node = builder.add_html_node(attribute.syntax());
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,
@@ -380,7 +381,8 @@ fn visit_attribute(
                 }
                 Some(_) => (AttrValueData::Unparsed, None),
             };
-            let node = builder.add_html_node(attribute.syntax());
+            let row = HtmlRow::Attr(AttrId::new(builder.data.attrs.len()));
+            let node = builder.add_html_node(attribute.syntax(), row);
             builder.data.attrs.push(AttrData {
                 element,
                 range,

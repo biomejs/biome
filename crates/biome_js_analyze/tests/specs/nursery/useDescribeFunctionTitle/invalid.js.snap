@@ -1,0 +1,611 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { myFunction } from "./myFunction";
+import { parse as parseJson } from "./parse";
+import defaultFunction from "./defaultFunction";
+
+describe("myFunction", () => {});
+
+describe(myFunction.name, () => {});
+
+describe('myFunction', function () {});
+
+describe("parseJson", () => {});
+
+describe("defaultFunction", () => {});
+
+describe.only("myFunction", () => {});
+
+describe.skip(myFunction.name, () => {});
+
+describe.concurrent("myFunction", () => {});
+
+suite("myFunction", () => {});
+
+describe(/* before */ "myFunction" /* after */, () => {});
+
+if (process.env.CI) {
+	describe("myFunction", () => {});
+}
+
+describe("outer", () => {
+	describe("myFunction", () => {});
+});
+
+describe.shuffle("myFunction", () => {});
+
+describe.only.concurrent("myFunction", () => {});
+
+xdescribe("myFunction", () => {});
+
+fdescribe("myFunction", () => {});
+
+describe.each([[1]])("myFunction", (value) => {});
+
+describe.for([[1]])(myFunction.name, ([value]) => {});
+
+describe.skipIf(process.env.CI)("myFunction", () => {});
+
+describe.runIf(process.env.CI)("myFunction", () => {});
+
+describe.each`
+	value
+	${1}
+`("myFunction", ({ value }) => {});
+
+describe.only.each([[1]])("myFunction", (value) => {});
+
+describe.skip.each`
+	value
+	${1}
+`("myFunction", ({ value }) => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    4 │ import defaultFunction from "./defaultFunction";
+    5 │ 
+  > 6 │ describe("myFunction", () => {});
+      │          ^^^^^^^^^^^^
+    7 │ 
+    8 │ describe(myFunction.name, () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    6 │ describe("myFunction",·()·=>·{});
+      │          -          -            
+
+```
+
+```
+invalid.js:8:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+     6 │ describe("myFunction", () => {});
+     7 │ 
+   > 8 │ describe(myFunction.name, () => {});
+       │          ^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ describe('myFunction', function () {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+     6  6 │   describe("myFunction", () => {});
+     7  7 │   
+     8    │ - describe(myFunction.name,·()·=>·{});
+        8 │ + describe(myFunction,·()·=>·{});
+     9  9 │   
+    10 10 │   describe('myFunction', function () {});
+  
+
+```
+
+```
+invalid.js:10:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+     8 │ describe(myFunction.name, () => {});
+     9 │ 
+  > 10 │ describe('myFunction', function () {});
+       │          ^^^^^^^^^^^^
+    11 │ 
+    12 │ describe("parseJson", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    10 │ describe('myFunction',·function·()·{});
+       │          -          -                  
+
+```
+
+```
+invalid.js:12:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported parseJson.
+  
+    10 │ describe('myFunction', function () {});
+    11 │ 
+  > 12 │ describe("parseJson", () => {});
+       │          ^^^^^^^^^^^
+    13 │ 
+    14 │ describe("defaultFunction", () => {});
+  
+  i Passing parseJson itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use parseJson as the title.
+  
+    12 │ describe("parseJson",·()·=>·{});
+       │          -         -            
+
+```
+
+```
+invalid.js:14:10 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported defaultFunction.
+  
+    12 │ describe("parseJson", () => {});
+    13 │ 
+  > 14 │ describe("defaultFunction", () => {});
+       │          ^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ describe.only("myFunction", () => {});
+  
+  i Passing defaultFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use defaultFunction as the title.
+  
+    14 │ describe("defaultFunction",·()·=>·{});
+       │          -               -            
+
+```
+
+```
+invalid.js:16:15 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    14 │ describe("defaultFunction", () => {});
+    15 │ 
+  > 16 │ describe.only("myFunction", () => {});
+       │               ^^^^^^^^^^^^
+    17 │ 
+    18 │ describe.skip(myFunction.name, () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    16 │ describe.only("myFunction",·()·=>·{});
+       │               -          -            
+
+```
+
+```
+invalid.js:18:15 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    16 │ describe.only("myFunction", () => {});
+    17 │ 
+  > 18 │ describe.skip(myFunction.name, () => {});
+       │               ^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ describe.concurrent("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    16 16 │   describe.only("myFunction", () => {});
+    17 17 │   
+    18    │ - describe.skip(myFunction.name,·()·=>·{});
+       18 │ + describe.skip(myFunction,·()·=>·{});
+    19 19 │   
+    20 20 │   describe.concurrent("myFunction", () => {});
+  
+
+```
+
+```
+invalid.js:20:21 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    18 │ describe.skip(myFunction.name, () => {});
+    19 │ 
+  > 20 │ describe.concurrent("myFunction", () => {});
+       │                     ^^^^^^^^^^^^
+    21 │ 
+    22 │ suite("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    20 │ describe.concurrent("myFunction",·()·=>·{});
+       │                     -          -            
+
+```
+
+```
+invalid.js:22:7 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    20 │ describe.concurrent("myFunction", () => {});
+    21 │ 
+  > 22 │ suite("myFunction", () => {});
+       │       ^^^^^^^^^^^^
+    23 │ 
+    24 │ describe(/* before */ "myFunction" /* after */, () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    22 │ suite("myFunction",·()·=>·{});
+       │       -          -            
+
+```
+
+```
+invalid.js:24:23 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    22 │ suite("myFunction", () => {});
+    23 │ 
+  > 24 │ describe(/* before */ "myFunction" /* after */, () => {});
+       │                       ^^^^^^^^^^^^
+    25 │ 
+    26 │ if (process.env.CI) {
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    24 │ describe(/*·before·*/·"myFunction"·/*·after·*/,·()·=>·{});
+       │                       -          -                        
+
+```
+
+```
+invalid.js:27:11 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    26 │ if (process.env.CI) {
+  > 27 │ 	describe("myFunction", () => {});
+       │ 	         ^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    27 │ → describe("myFunction",·()·=>·{});
+       │            -          -            
+
+```
+
+```
+invalid.js:31:11 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    30 │ describe("outer", () => {
+  > 31 │ 	describe("myFunction", () => {});
+       │ 	         ^^^^^^^^^^^^
+    32 │ });
+    33 │ 
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    31 │ → describe("myFunction",·()·=>·{});
+       │            -          -            
+
+```
+
+```
+invalid.js:34:18 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    32 │ });
+    33 │ 
+  > 34 │ describe.shuffle("myFunction", () => {});
+       │                  ^^^^^^^^^^^^
+    35 │ 
+    36 │ describe.only.concurrent("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    34 │ describe.shuffle("myFunction",·()·=>·{});
+       │                  -          -            
+
+```
+
+```
+invalid.js:36:26 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    34 │ describe.shuffle("myFunction", () => {});
+    35 │ 
+  > 36 │ describe.only.concurrent("myFunction", () => {});
+       │                          ^^^^^^^^^^^^
+    37 │ 
+    38 │ xdescribe("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    36 │ describe.only.concurrent("myFunction",·()·=>·{});
+       │                          -          -            
+
+```
+
+```
+invalid.js:38:11 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    36 │ describe.only.concurrent("myFunction", () => {});
+    37 │ 
+  > 38 │ xdescribe("myFunction", () => {});
+       │           ^^^^^^^^^^^^
+    39 │ 
+    40 │ fdescribe("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    38 │ xdescribe("myFunction",·()·=>·{});
+       │           -          -            
+
+```
+
+```
+invalid.js:40:11 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    38 │ xdescribe("myFunction", () => {});
+    39 │ 
+  > 40 │ fdescribe("myFunction", () => {});
+       │           ^^^^^^^^^^^^
+    41 │ 
+    42 │ describe.each([[1]])("myFunction", (value) => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    40 │ fdescribe("myFunction",·()·=>·{});
+       │           -          -            
+
+```
+
+```
+invalid.js:42:22 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    40 │ fdescribe("myFunction", () => {});
+    41 │ 
+  > 42 │ describe.each([[1]])("myFunction", (value) => {});
+       │                      ^^^^^^^^^^^^
+    43 │ 
+    44 │ describe.for([[1]])(myFunction.name, ([value]) => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    42 │ describe.each([[1]])("myFunction",·(value)·=>·{});
+       │                      -          -                 
+
+```
+
+```
+invalid.js:44:21 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    42 │ describe.each([[1]])("myFunction", (value) => {});
+    43 │ 
+  > 44 │ describe.for([[1]])(myFunction.name, ([value]) => {});
+       │                     ^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ describe.skipIf(process.env.CI)("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    42 42 │   describe.each([[1]])("myFunction", (value) => {});
+    43 43 │   
+    44    │ - describe.for([[1]])(myFunction.name,·([value])·=>·{});
+       44 │ + describe.for([[1]])(myFunction,·([value])·=>·{});
+    45 45 │   
+    46 46 │   describe.skipIf(process.env.CI)("myFunction", () => {});
+  
+
+```
+
+```
+invalid.js:46:33 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    44 │ describe.for([[1]])(myFunction.name, ([value]) => {});
+    45 │ 
+  > 46 │ describe.skipIf(process.env.CI)("myFunction", () => {});
+       │                                 ^^^^^^^^^^^^
+    47 │ 
+    48 │ describe.runIf(process.env.CI)("myFunction", () => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    46 │ describe.skipIf(process.env.CI)("myFunction",·()·=>·{});
+       │                                 -          -            
+
+```
+
+```
+invalid.js:48:32 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    46 │ describe.skipIf(process.env.CI)("myFunction", () => {});
+    47 │ 
+  > 48 │ describe.runIf(process.env.CI)("myFunction", () => {});
+       │                                ^^^^^^^^^^^^
+    49 │ 
+    50 │ describe.each`
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    48 │ describe.runIf(process.env.CI)("myFunction",·()·=>·{});
+       │                                -          -            
+
+```
+
+```
+invalid.js:53:3 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    51 │ 	value
+    52 │ 	${1}
+  > 53 │ `("myFunction", ({ value }) => {});
+       │   ^^^^^^^^^^^^
+    54 │ 
+    55 │ describe.only.each([[1]])("myFunction", (value) => {});
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    53 │ `("myFunction",·({·value·})·=>·{});
+       │   -          -                     
+
+```
+
+```
+invalid.js:55:27 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    53 │ `("myFunction", ({ value }) => {});
+    54 │ 
+  > 55 │ describe.only.each([[1]])("myFunction", (value) => {});
+       │                           ^^^^^^^^^^^^
+    56 │ 
+    57 │ describe.skip.each`
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    55 │ describe.only.each([[1]])("myFunction",·(value)·=>·{});
+       │                           -          -                 
+
+```
+
+```
+invalid.js:60:3 lint/nursery/useDescribeFunctionTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test suite title repeats the name of the imported myFunction.
+  
+    58 │ 	value
+    59 │ 	${1}
+  > 60 │ `("myFunction", ({ value }) => {});
+       │   ^^^^^^^^^^^^
+    61 │ 
+  
+  i Passing myFunction itself as the title keeps the title correct when the function is renamed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use myFunction as the title.
+  
+    60 │ `("myFunction",·({·value·})·=>·{});
+       │   -          -                     
+
+```

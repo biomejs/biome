@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: validFunctions.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { query } from "./_generated/server";
+
+export const listed = query({
+	args: {},
+	handler: async (ctx) => {
+		await getCurrentUserOrThrow(ctx);
+	},
+});
+
+// The default prefixes still apply.
+export const defaultPrefix = query({
+	args: {},
+	handler: async (ctx) => {
+		await requireUser(ctx);
+	},
+});
+
+```

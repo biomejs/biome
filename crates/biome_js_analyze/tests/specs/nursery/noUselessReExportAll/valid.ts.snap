@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export * from "./modules/typesOnly";
+export * from "./modules/declaration";
+// The module graph doesn't record these exports.
+export * from "./modules/importEquals";
+export * from "./modules/qualifiedNamespace";
+
+```

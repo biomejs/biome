@@ -5,9 +5,25 @@ use biome_analyze::{Rule, RuleFilter, RuleGroup};
 use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noAstroComponentDefaultExport"),
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
+    ]
+});
+static BIOMEPLUGIN_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "useBiomeKindSets"),
+        RuleFilter::Rule("nursery", "useBiomeTopLevelTypes"),
+    ]
+});
+static CONVEX_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![
+        RuleFilter::Rule("nursery", "noConvexDuplicateIndexes"),
+        RuleFilter::Rule("nursery", "noConvexProcessEnv"),
+        RuleFilter::Rule("nursery", "noConvexQueryFilter"),
+        RuleFilter::Rule("nursery", "noConvexTopOfHourCrons"),
+        RuleFilter::Rule("nursery", "useConvexAccessControl"),
     ]
 });
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -58,6 +74,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noDuplicateExports"),
         RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
@@ -65,6 +82,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("nursery", "noUnresolvedDefaultImport"),
+        RuleFilter::Rule("nursery", "noUselessReExportAll"),
         RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
         RuleFilter::Rule("nursery", "useValidNamespaceImports"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
@@ -164,6 +182,7 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
         RuleFilter::Rule("nursery", "noTailwindConflictingClasses"),
+        RuleFilter::Rule("nursery", "noTailwindLegacyImportant"),
         RuleFilter::Rule("nursery", "noTailwindLegacyUtilities"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestrictedClasses"),
@@ -177,18 +196,25 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTanstackQueryRestDestructuring"),
+        RuleFilter::Rule("nursery", "noTanstackQueryUnstableDeps"),
         RuleFilter::Rule("nursery", "noTanstackQueryVoidQueryFn"),
+        RuleFilter::Rule("nursery", "useTanstackQueryExhaustiveDependencies"),
         RuleFilter::Rule("nursery", "useTanstackQueryInfiniteQueryPropertyOrder"),
+        RuleFilter::Rule("nursery", "useTanstackQueryMutationPropertyOrder"),
+        RuleFilter::Rule("nursery", "useTanstackQueryQueryOptions"),
         RuleFilter::Rule("nursery", "useTanstackQueryStableQueryClient"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
+        RuleFilter::Rule("nursery", "noExpectToHaveBeenCalledOnce"),
         RuleFilter::Rule("nursery", "noReturnInTest"),
         RuleFilter::Rule("nursery", "noTestGlobals"),
         RuleFilter::Rule("nursery", "noTestHooks"),
         RuleFilter::Rule("nursery", "useCalledWith"),
+        RuleFilter::Rule("nursery", "useDescribeFunctionTitle"),
+        RuleFilter::Rule("nursery", "useExpectEqualityMatcher"),
         RuleFilter::Rule("nursery", "useExpectToContain"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalled"),
         RuleFilter::Rule("nursery", "useExpectToHaveBeenCalledTimes"),
@@ -215,6 +241,7 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "useArrayFind"),
+        RuleFilter::Rule("nursery", "noArrayDelete"),
         RuleFilter::Rule("nursery", "noBaseToString"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noMeaninglessVoidOperator"),
@@ -225,6 +252,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
         RuleFilter::Rule("nursery", "noUnsafeReturn"),
         RuleFilter::Rule("nursery", "noUnsafeUnaryMinus"),
+        RuleFilter::Rule("nursery", "noUselessDefaultAssignment"),
         RuleFilter::Rule("nursery", "noUselessTypeAssertion"),
         RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
@@ -268,6 +296,8 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueBooleanDefault"),
         RuleFilter::Rule("nursery", "noVueChildContent"),
         RuleFilter::Rule("nursery", "noVueComputedPropertiesInData"),
+        RuleFilter::Rule("nursery", "noVueComputedPropertyCall"),
+        RuleFilter::Rule("nursery", "noVueContentOutsideBlock"),
         RuleFilter::Rule("nursery", "noVueDefineModelDefault"),
         RuleFilter::Rule("nursery", "noVueDeprecatedConfigKeyCodes"),
         RuleFilter::Rule("nursery", "noVueDeprecatedDeleteSet"),
@@ -298,6 +328,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueMultipleObjectsInClass"),
         RuleFilter::Rule("nursery", "noVueMultipleSlotArgs"),
         RuleFilter::Rule("nursery", "noVueMutatingProps"),
+        RuleFilter::Rule("nursery", "noVueNegationElse"),
         RuleFilter::Rule("nursery", "noVueRefObjectReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
         RuleFilter::Rule("nursery", "noVueRestrictedCallAfterAwait"),
@@ -387,6 +418,8 @@ impl DomainSelector {
     pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
         match self.0 {
             "astro" => ASTRO_FILTERS.clone(),
+            "biomePlugin" => BIOMEPLUGIN_FILTERS.clone(),
+            "convex" => CONVEX_FILTERS.clone(),
             "drizzle" => DRIZZLE_FILTERS.clone(),
             "next" => NEXT_FILTERS.clone(),
             "playwright" => PLAYWRIGHT_FILTERS.clone(),
@@ -414,6 +447,12 @@ impl DomainSelector {
     pub(crate) fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self.0 {
             "astro" => ASTRO_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "biomePlugin" => BIOMEPLUGIN_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "convex" => CONVEX_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "drizzle" => DRIZZLE_FILTERS

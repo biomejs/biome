@@ -7,14 +7,14 @@ use biome_console::{Console, ConsoleExt};
 use biome_diagnostics::{
     DiagnosticExt, DiagnosticTags, Error, PrintDiagnostic, Severity, category,
 };
-use biome_fs::{BiomePath, File, OpenOptions};
+use biome_fs::{BiomePath, File, FileSystem, OpenOptions, resolve_symbolic_link_target};
 use biome_languages::DocumentFileSource;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::FileGuard;
 use biome_service::workspace::{
-    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, OpenFileParams,
-    SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, IgnoreKind,
+    OpenFileParams, SupportKind, SupportsFeatureParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 
@@ -123,6 +123,23 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) skip_ignore_check: bool,
 }
 
+pub(crate) fn document_file_source(
+    fs: &dyn FileSystem,
+    biome_path: &BiomePath,
+) -> DocumentFileSource {
+    let source = DocumentFileSource::from_path(biome_path.as_path(), false);
+    if source != DocumentFileSource::Unknown {
+        return source;
+    }
+
+    resolve_symbolic_link_target(fs, biome_path.as_path())
+        .ok()
+        .flatten()
+        .map_or(source, |target| {
+            DocumentFileSource::from_path(&target, false)
+        })
+}
+
 pub(crate) fn print_stdin_diagnostics(
     console: &mut dyn Console,
     cli_options: &CliOptions,
@@ -180,6 +197,7 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
                     inline_config: None,
                     skip_ignore_check: false,
                     not_requested_features: ctx.execution().not_requested_features(),
+                    ignore_kind: IgnoreKind::Ancestors,
                 })
                 .with_file_path_and_code_and_tags(
                     biome_path.to_string(),
@@ -193,7 +211,9 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
         // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
         if file_features.is_ignored() || file_features.is_not_enabled() {
             return Ok(FileStatus::Ignored);
-        } else if file_features.is_not_supported() || !DocumentFileSource::can_read(biome_path) {
+        } else if file_features.is_not_supported()
+            || !document_file_source(ctx.fs(), biome_path).is_readable()
+        {
             return Err(Message::from(
                 UnhandledDiagnostic.with_file_path(biome_path.to_string()),
             ));
@@ -341,7 +361,8 @@ mod tests {
     use biome_console::MarkupBuf;
     use biome_diagnostics::{Category, Error, Severity, category};
     use biome_fs::{
-        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, TraversalContext,
+        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, PathKind,
+        TraversalContext,
     };
     use biome_service::Workspace;
     use biome_service::projects::ProjectKey;
@@ -455,7 +476,12 @@ mod tests {
 
         fn push_diagnostic(&self, _error: Error) {}
 
-        fn can_handle(&self, _path: &BiomePath) -> bool {
+        fn can_handle_with_kind(
+            &self,
+            _path: &BiomePath,
+            _path_kind: PathKind,
+            _ancestors_checked: bool,
+        ) -> bool {
             true
         }
 

@@ -1,0 +1,331 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { action, mutation, query as convexQuery } from "./_generated/server";
+
+export const send = mutation({
+	args: {},
+	handler: async (ctx) => {
+		await ctx.db.insert("messages", { body: "hello" });
+	},
+});
+
+export const list = convexQuery({
+	args: {},
+	handler: async (ctx) => {
+		return await ctx.db.query("messages").collect();
+	},
+});
+
+export const run = action({
+	args: {},
+	async handler(ctx) {
+		await fetch("https://example.com");
+	},
+});
+
+// The old syntax passes the handler directly.
+export const legacy = mutation(async (ctx) => {
+	await ctx.db.insert("messages", { body: "hello" });
+});
+
+// A check inside an `if` body or a `try` block isn't detected.
+export const nested = mutation({
+	args: {},
+	handler: async (ctx) => {
+		if (ctx) {
+			await requireUser(ctx);
+		}
+		try {
+			await requireUser(ctx);
+		} catch {}
+	},
+});
+
+// A check inside a nested function isn't detected.
+export const nestedFunction = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const verify = async () => {
+			await requireUser(ctx);
+		};
+		await verify();
+	},
+});
+
+// Names that only start with an access control word don't count.
+export const similarNames = mutation({
+	args: {},
+	handler: async (ctx) => {
+		await canister(ctx);
+		await requirement(ctx);
+		await ctx.has(ctx);
+		const mod = require("./auth");
+	},
+});
+
+// A check passed as an argument isn't a top-level call.
+export const argument = mutation({
+	args: {},
+	handler: async (ctx) => {
+		await log(requireUser(ctx));
+	},
+});
+
+// In an `if` condition, a check nested in another call or a ternary isn't detected.
+export const ifConditionCall = mutation({
+	args: {},
+	handler: async (ctx) => {
+		if (log(await canEditNote(ctx))) {
+			throw new Error("Unauthorized");
+		}
+		if (ctx ? await canEditNote(ctx) : false) {
+			throw new Error("Unauthorized");
+		}
+	},
+});
+
+const exportedLater = convexQuery({
+	args: {},
+	handler: async (ctx) => {},
+});
+export { exportedLater, exportedLater as renamed };
+
+const exportedAsDefault = mutation({
+	args: {},
+	handler: async (ctx) => {},
+});
+export default exportedAsDefault;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:21 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    2 │ import { action, mutation, query as convexQuery } from "./_generated/server";
+    3 │ 
+  > 4 │ export const send = mutation({
+      │                     ^^^^^^^^
+    5 │ 	args: {},
+    6 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:21 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex query doesn't call an access control function.
+  
+     9 │ });
+    10 │ 
+  > 11 │ export const list = convexQuery({
+       │                     ^^^^^^^^^^^
+    12 │ 	args: {},
+    13 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalQuery instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:20 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex action doesn't call an access control function.
+  
+    16 │ });
+    17 │ 
+  > 18 │ export const run = action({
+       │                    ^^^^^^
+    19 │ 	args: {},
+    20 │ 	async handler(ctx) {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalAction instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:23 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    25 │ // The old syntax passes the handler directly.
+  > 26 │ export const legacy = mutation(async (ctx) => {
+       │                       ^^^^^^^^
+    27 │ 	await ctx.db.insert("messages", { body: "hello" });
+    28 │ });
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:23 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    30 │ // A check inside an `if` body or a `try` block isn't detected.
+  > 31 │ export const nested = mutation({
+       │                       ^^^^^^^^
+    32 │ 	args: {},
+    33 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:31 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    43 │ // A check inside a nested function isn't detected.
+  > 44 │ export const nestedFunction = mutation({
+       │                               ^^^^^^^^
+    45 │ 	args: {},
+    46 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:29 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    54 │ // Names that only start with an access control word don't count.
+  > 55 │ export const similarNames = mutation({
+       │                             ^^^^^^^^
+    56 │ 	args: {},
+    57 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:25 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    65 │ // A check passed as an argument isn't a top-level call.
+  > 66 │ export const argument = mutation({
+       │                         ^^^^^^^^
+    67 │ 	args: {},
+    68 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:74:32 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    73 │ // In an `if` condition, a check nested in another call or a ternary isn't detected.
+  > 74 │ export const ifConditionCall = mutation({
+       │                                ^^^^^^^^
+    75 │ 	args: {},
+    76 │ 	handler: async (ctx) => {
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:23 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex query doesn't call an access control function.
+  
+    84 │ });
+    85 │ 
+  > 86 │ const exportedLater = convexQuery({
+       │                       ^^^^^^^^^^^
+    87 │ 	args: {},
+    88 │ 	handler: async (ctx) => {},
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalQuery instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:92:27 lint/nursery/useConvexAccessControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This public Convex mutation doesn't call an access control function.
+  
+    90 │ export { exportedLater, exportedLater as renamed };
+    91 │ 
+  > 92 │ const exportedAsDefault = mutation({
+       │                           ^^^^^^^^
+    93 │ 	args: {},
+    94 │ 	handler: async (ctx) => {},
+  
+  i Anyone on the internet can call this function, so without an access control check, any user can read or change data they shouldn't have access to.
+  
+  i Call an access control function, such as requireUser(ctx) or canEditNote(ctx), at the top level of the handler. If this function shouldn't be callable from outside, use internalMutation instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

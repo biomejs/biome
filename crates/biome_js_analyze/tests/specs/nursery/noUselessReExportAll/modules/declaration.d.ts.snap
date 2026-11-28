@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: declaration.d.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const a: number;
+export default a;
+
+```

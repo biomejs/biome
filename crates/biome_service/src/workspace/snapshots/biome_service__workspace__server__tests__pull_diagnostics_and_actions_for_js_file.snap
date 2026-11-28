@@ -29,7 +29,11 @@ PullDiagnosticsAndActionsResult {
                     advices: [],
                 },
                 location: Location {
-                    path: None,
+                    path: Some(
+                        File(
+                            "/project/file.js",
+                        ),
+                    ),
                     span: Some(
                         0..8,
                     ),

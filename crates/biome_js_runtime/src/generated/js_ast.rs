@@ -185,6 +185,11 @@ impl JsAstNode {
                 js_string!("JS_EXPRESSION_TEMPLATE_ROOT")
             }
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => js_string!("JS_SVELTE_SNIPPET_ROOT"),
+            JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => {
+                js_string!("JS_SVELTE_EACH_BINDING_ROOT")
+            }
+            JsSyntaxKind::JS_SVELTE_EACH_INDEX => js_string!("JS_SVELTE_EACH_INDEX"),
+            JsSyntaxKind::JS_SVELTE_EACH_KEY => js_string!("JS_SVELTE_EACH_KEY"),
             JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
                 js_string!("JS_SVELTE_DECLARATION_ROOT")
             }
@@ -193,6 +198,7 @@ impl JsAstNode {
             }
             JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => js_string!("JS_VUE_SLOT_PROPS_ROOT"),
             JsSyntaxKind::JS_VUE_GENERIC_ROOT => js_string!("JS_VUE_GENERIC_ROOT"),
+            JsSyntaxKind::JSX_SINGLE_TAG_ROOT => js_string!("JSX_SINGLE_TAG_ROOT"),
             JsSyntaxKind::JS_DIRECTIVE => js_string!("JS_DIRECTIVE"),
             JsSyntaxKind::JS_DIRECTIVE_LIST => js_string!("JS_DIRECTIVE_LIST"),
             JsSyntaxKind::JS_STATEMENT_LIST => js_string!("JS_STATEMENT_LIST"),
@@ -1019,6 +1025,20 @@ impl JsAstNode {
             _ => return None,
         })
     }
+    /// Resolves a token kind that only appears in parsed source, which
+    /// `factory.token()` can't construct, by its exact native enum name.
+    pub(crate) fn source_only_token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
+        Some(match name {
+            "ERROR_TOKEN" => JsSyntaxKind::ERROR_TOKEN,
+            "NEWLINE" => JsSyntaxKind::NEWLINE,
+            "WHITESPACE" => JsSyntaxKind::WHITESPACE,
+            "COMMENT" => JsSyntaxKind::COMMENT,
+            "MULTILINE_COMMENT" => JsSyntaxKind::MULTILINE_COMMENT,
+            "EOF" => JsSyntaxKind::EOF,
+            "UNICODE_BOM" => JsSyntaxKind::UNICODE_BOM,
+            _ => return None,
+        })
+    }
     /// Resolves a syntax kind from the name used in the plugin API type definitions,
     /// e.g. `"JS_CALL_EXPRESSION"`.
     pub(crate) fn syntax_kind_from_ast_name(name: &str) -> Option<JsSyntaxKind> {
@@ -1192,6 +1212,9 @@ impl JsAstNode {
             "JS_STRING_LITERAL_EXPRESSION" => JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION,
             "JS_SUPER_EXPRESSION" => JsSyntaxKind::JS_SUPER_EXPRESSION,
             "JS_SVELTE_DECLARATION_ROOT" => JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+            "JS_SVELTE_EACH_BINDING_ROOT" => JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT,
+            "JS_SVELTE_EACH_INDEX" => JsSyntaxKind::JS_SVELTE_EACH_INDEX,
+            "JS_SVELTE_EACH_KEY" => JsSyntaxKind::JS_SVELTE_EACH_KEY,
             "JS_SVELTE_LEGACY_CONST_ROOT" => JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
             "JS_SVELTE_SNIPPET_ROOT" => JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
             "JS_SWITCH_STATEMENT" => JsSyntaxKind::JS_SWITCH_STATEMENT,
@@ -1229,6 +1252,7 @@ impl JsAstNode {
             "JSX_REFERENCE_IDENTIFIER" => JsSyntaxKind::JSX_REFERENCE_IDENTIFIER,
             "JSX_SELF_CLOSING_ELEMENT" => JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
             "JSX_SHORTHAND_ATTRIBUTE" => JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
+            "JSX_SINGLE_TAG_ROOT" => JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
             "JSX_SPREAD_ATTRIBUTE" => JsSyntaxKind::JSX_SPREAD_ATTRIBUTE,
             "JSX_SPREAD_CHILD" => JsSyntaxKind::JSX_SPREAD_CHILD,
             "JSX_STRING" => JsSyntaxKind::JSX_STRING,
@@ -1612,6 +1636,9 @@ impl JsAstNode {
             JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => &JS_STRING_LITERAL_EXPRESSION_FIELDS,
             JsSyntaxKind::JS_SUPER_EXPRESSION => &JS_SUPER_EXPRESSION_FIELDS,
             JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => &JS_SVELTE_DECLARATION_ROOT_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => &JS_SVELTE_EACH_BINDING_ROOT_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_INDEX => &JS_SVELTE_EACH_INDEX_FIELDS,
+            JsSyntaxKind::JS_SVELTE_EACH_KEY => &JS_SVELTE_EACH_KEY_FIELDS,
             JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT => &JS_SVELTE_LEGACY_CONST_ROOT_FIELDS,
             JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => &JS_SVELTE_SNIPPET_ROOT_FIELDS,
             JsSyntaxKind::JS_SWITCH_STATEMENT => &JS_SWITCH_STATEMENT_FIELDS,
@@ -1651,6 +1678,7 @@ impl JsAstNode {
             JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => &JSX_REFERENCE_IDENTIFIER_FIELDS,
             JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => &JSX_SELF_CLOSING_ELEMENT_FIELDS,
             JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => &JSX_SHORTHAND_ATTRIBUTE_FIELDS,
+            JsSyntaxKind::JSX_SINGLE_TAG_ROOT => &JSX_SINGLE_TAG_ROOT_FIELDS,
             JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => &JSX_SPREAD_ATTRIBUTE_FIELDS,
             JsSyntaxKind::JSX_SPREAD_CHILD => &JSX_SPREAD_CHILD_FIELDS,
             JsSyntaxKind::JSX_STRING => &JSX_STRING_FIELDS,
@@ -6906,6 +6934,114 @@ static JS_SVELTE_DECLARATION_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
         },
     ],
 };
+static JS_SVELTE_EACH_BINDING_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT,
+    name: "JsSvelteEachBindingRoot",
+    fields: &[
+        JsAstField {
+            property: "context",
+            updater: "withContext",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "index",
+            updater: "withIndex",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsSvelteEachIndex",
+                can_cast: JsSvelteEachIndex::can_cast,
+            },
+        },
+        JsAstField {
+            property: "key",
+            updater: "withKey",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsSvelteEachKey",
+                can_cast: JsSvelteEachKey::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SVELTE_EACH_INDEX_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_INDEX,
+    name: "JsSvelteEachIndex",
+    fields: &[
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_SVELTE_EACH_KEY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_EACH_KEY,
+    name: "JsSvelteEachKey",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
 static JS_SVELTE_LEGACY_CONST_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
     kind: JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT,
     name: "JsSvelteLegacyConstRoot",
@@ -6944,12 +7080,21 @@ static JS_SVELTE_SNIPPET_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
             },
         },
         JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
             property: "parameters",
             updater: "withParameters",
             optional: false,
             value: JsAstFieldValue::Node {
-                ty: "JsParameters",
-                can_cast: JsParameters::can_cast,
+                ty: "AnyJsSvelteSnippetParameters",
+                can_cast: AnyJsSvelteSnippetParameters::can_cast,
             },
         },
         JsAstField {
@@ -8097,6 +8242,30 @@ static JSX_SHORTHAND_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
             value: JsAstFieldValue::Token {
                 kinds: &[T!['}']],
                 expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_SINGLE_TAG_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
+    name: "JsxSingleTagRoot",
+    fields: &[
+        JsAstField {
+            property: "tag",
+            updater: "withTag",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxSingleTag",
+                can_cast: AnyJsxSingleTag::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
             },
         },
     ],

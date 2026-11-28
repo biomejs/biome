@@ -528,6 +528,22 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     ])]
                 )
             }
+            Self::DefaultedParameter(parameter) => {
+                write!(
+                    f,
+                    [&format_args![
+                        token("DefaultedParameter"),
+                        token("("),
+                        group(&soft_block_indent(&format_args![
+                            &parameter.ty,
+                            token(","),
+                            soft_line_break_or_space(),
+                            &parameter.default
+                        ])),
+                        token(")")
+                    ]]
+                )
+            }
             Self::Destructure(destructure) => match &destructure.destructure_field {
                 DestructureField::Index { index, .. } => {
                     write!(

@@ -1,0 +1,631 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+expect(fn).toBeCalledOnce();
+expect(fn).toHaveBeenCalledOnce();
+
+// Modifiers
+expect(fn).not.toBeCalledOnce();
+expect(fn).not.toHaveBeenCalledOnce();
+expect(fn).resolves.toBeCalledOnce();
+expect(fn).resolves.toHaveBeenCalledOnce();
+await expect(fn).rejects.not.toHaveBeenCalledOnce();
+
+// Variants of `expect`
+expect.soft(fn).toHaveBeenCalledOnce();
+expect.poll(() => fn).toHaveBeenCalledOnce();
+
+// Computed member access
+expect(fn)["toBeCalledOnce"]();
+expect(fn)[`toHaveBeenCalledOnce`]();
+expect(fn)["not"].toHaveBeenCalledOnce();
+
+// Parentheses and comments
+(expect(fn)).toHaveBeenCalledOnce();
+(expect(fn).toHaveBeenCalledOnce)();
+expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+expect(fn).toHaveBeenCalledOnce(/* inside */);
+expect(fn)
+	.toBeCalledOnce();
+
+// Arguments are ignored by these matchers, so there is no fix
+expect(fn).toHaveBeenCalledOnce(sideEffect());
+
+// Inside tests
+test("calls the function", () => {
+	const mock = vi.fn();
+	mock("foo");
+	expect(mock).toBeCalledOnce();
+	expect(mock).toHaveBeenCalledOnce();
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:12 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ expect(fn).toBeCalledOnce();
+      │            ^^^^^^^^^^^^^^
+    3 │ expect(fn).toHaveBeenCalledOnce();
+    4 │ 
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - expect(fn).toBeCalledOnce();
+        2 │ + expect(fn).toBeCalledTimes(1);
+     3  3 │   expect(fn).toHaveBeenCalledOnce();
+     4  4 │   
+  
+
+```
+
+```
+invalid.js:3:12 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    1 │ /* should generate diagnostics */
+    2 │ expect(fn).toBeCalledOnce();
+  > 3 │ expect(fn).toHaveBeenCalledOnce();
+      │            ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ // Modifiers
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   expect(fn).toBeCalledOnce();
+     3    │ - expect(fn).toHaveBeenCalledOnce();
+        3 │ + expect(fn).toHaveBeenCalledTimes(1);
+     4  4 │   
+     5  5 │   // Modifiers
+  
+
+```
+
+```
+invalid.js:6:16 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+    5 │ // Modifiers
+  > 6 │ expect(fn).not.toBeCalledOnce();
+      │                ^^^^^^^^^^^^^^
+    7 │ expect(fn).not.toHaveBeenCalledOnce();
+    8 │ expect(fn).resolves.toBeCalledOnce();
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+     4  4 │   
+     5  5 │   // Modifiers
+     6    │ - expect(fn).not.toBeCalledOnce();
+        6 │ + expect(fn).not.toBeCalledTimes(1);
+     7  7 │   expect(fn).not.toHaveBeenCalledOnce();
+     8  8 │   expect(fn).resolves.toBeCalledOnce();
+  
+
+```
+
+```
+invalid.js:7:16 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    5 │ // Modifiers
+    6 │ expect(fn).not.toBeCalledOnce();
+  > 7 │ expect(fn).not.toHaveBeenCalledOnce();
+      │                ^^^^^^^^^^^^^^^^^^^^
+    8 │ expect(fn).resolves.toBeCalledOnce();
+    9 │ expect(fn).resolves.toHaveBeenCalledOnce();
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+     5  5 │   // Modifiers
+     6  6 │   expect(fn).not.toBeCalledOnce();
+     7    │ - expect(fn).not.toHaveBeenCalledOnce();
+        7 │ + expect(fn).not.toHaveBeenCalledTimes(1);
+     8  8 │   expect(fn).resolves.toBeCalledOnce();
+     9  9 │   expect(fn).resolves.toHaveBeenCalledOnce();
+  
+
+```
+
+```
+invalid.js:8:21 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+     6 │ expect(fn).not.toBeCalledOnce();
+     7 │ expect(fn).not.toHaveBeenCalledOnce();
+   > 8 │ expect(fn).resolves.toBeCalledOnce();
+       │                     ^^^^^^^^^^^^^^
+     9 │ expect(fn).resolves.toHaveBeenCalledOnce();
+    10 │ await expect(fn).rejects.not.toHaveBeenCalledOnce();
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+     6  6 │   expect(fn).not.toBeCalledOnce();
+     7  7 │   expect(fn).not.toHaveBeenCalledOnce();
+     8    │ - expect(fn).resolves.toBeCalledOnce();
+        8 │ + expect(fn).resolves.toBeCalledTimes(1);
+     9  9 │   expect(fn).resolves.toHaveBeenCalledOnce();
+    10 10 │   await expect(fn).rejects.not.toHaveBeenCalledOnce();
+  
+
+```
+
+```
+invalid.js:9:21 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+     7 │ expect(fn).not.toHaveBeenCalledOnce();
+     8 │ expect(fn).resolves.toBeCalledOnce();
+   > 9 │ expect(fn).resolves.toHaveBeenCalledOnce();
+       │                     ^^^^^^^^^^^^^^^^^^^^
+    10 │ await expect(fn).rejects.not.toHaveBeenCalledOnce();
+    11 │ 
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+     7  7 │   expect(fn).not.toHaveBeenCalledOnce();
+     8  8 │   expect(fn).resolves.toBeCalledOnce();
+     9    │ - expect(fn).resolves.toHaveBeenCalledOnce();
+        9 │ + expect(fn).resolves.toHaveBeenCalledTimes(1);
+    10 10 │   await expect(fn).rejects.not.toHaveBeenCalledOnce();
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:10:30 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+     8 │ expect(fn).resolves.toBeCalledOnce();
+     9 │ expect(fn).resolves.toHaveBeenCalledOnce();
+  > 10 │ await expect(fn).rejects.not.toHaveBeenCalledOnce();
+       │                              ^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Variants of `expect`
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+     8  8 │   expect(fn).resolves.toBeCalledOnce();
+     9  9 │   expect(fn).resolves.toHaveBeenCalledOnce();
+    10    │ - await·expect(fn).rejects.not.toHaveBeenCalledOnce();
+       10 │ + await·expect(fn).rejects.not.toHaveBeenCalledTimes(1);
+    11 11 │   
+    12 12 │   // Variants of `expect`
+  
+
+```
+
+```
+invalid.js:13:17 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    12 │ // Variants of `expect`
+  > 13 │ expect.soft(fn).toHaveBeenCalledOnce();
+       │                 ^^^^^^^^^^^^^^^^^^^^
+    14 │ expect.poll(() => fn).toHaveBeenCalledOnce();
+    15 │ 
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    11 11 │   
+    12 12 │   // Variants of `expect`
+    13    │ - expect.soft(fn).toHaveBeenCalledOnce();
+       13 │ + expect.soft(fn).toHaveBeenCalledTimes(1);
+    14 14 │   expect.poll(() => fn).toHaveBeenCalledOnce();
+    15 15 │   
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    12 │ // Variants of `expect`
+    13 │ expect.soft(fn).toHaveBeenCalledOnce();
+  > 14 │ expect.poll(() => fn).toHaveBeenCalledOnce();
+       │                       ^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Computed member access
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    12 12 │   // Variants of `expect`
+    13 13 │   expect.soft(fn).toHaveBeenCalledOnce();
+    14    │ - expect.poll(()·=>·fn).toHaveBeenCalledOnce();
+       14 │ + expect.poll(()·=>·fn).toHaveBeenCalledTimes(1);
+    15 15 │   
+    16 16 │   // Computed member access
+  
+
+```
+
+```
+invalid.js:17:12 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+    16 │ // Computed member access
+  > 17 │ expect(fn)["toBeCalledOnce"]();
+       │            ^^^^^^^^^^^^^^^^
+    18 │ expect(fn)[`toHaveBeenCalledOnce`]();
+    19 │ expect(fn)["not"].toHaveBeenCalledOnce();
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+    15 15 │   
+    16 16 │   // Computed member access
+    17    │ - expect(fn)["toBeCalledOnce"]();
+       17 │ + expect(fn)["toBeCalledTimes"](1);
+    18 18 │   expect(fn)[`toHaveBeenCalledOnce`]();
+    19 19 │   expect(fn)["not"].toHaveBeenCalledOnce();
+  
+
+```
+
+```
+invalid.js:18:13 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    16 │ // Computed member access
+    17 │ expect(fn)["toBeCalledOnce"]();
+  > 18 │ expect(fn)[`toHaveBeenCalledOnce`]();
+       │             ^^^^^^^^^^^^^^^^^^^^
+    19 │ expect(fn)["not"].toHaveBeenCalledOnce();
+    20 │ 
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    16 16 │   // Computed member access
+    17 17 │   expect(fn)["toBeCalledOnce"]();
+    18    │ - expect(fn)[`toHaveBeenCalledOnce`]();
+       18 │ + expect(fn)["toHaveBeenCalledTimes"](1);
+    19 19 │   expect(fn)["not"].toHaveBeenCalledOnce();
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:19 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    17 │ expect(fn)["toBeCalledOnce"]();
+    18 │ expect(fn)[`toHaveBeenCalledOnce`]();
+  > 19 │ expect(fn)["not"].toHaveBeenCalledOnce();
+       │                   ^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Parentheses and comments
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    17 17 │   expect(fn)["toBeCalledOnce"]();
+    18 18 │   expect(fn)[`toHaveBeenCalledOnce`]();
+    19    │ - expect(fn)["not"].toHaveBeenCalledOnce();
+       19 │ + expect(fn)["not"].toHaveBeenCalledTimes(1);
+    20 20 │   
+    21 21 │   // Parentheses and comments
+  
+
+```
+
+```
+invalid.js:22:14 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    21 │ // Parentheses and comments
+  > 22 │ (expect(fn)).toHaveBeenCalledOnce();
+       │              ^^^^^^^^^^^^^^^^^^^^
+    23 │ (expect(fn).toHaveBeenCalledOnce)();
+    24 │ expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    20 20 │   
+    21 21 │   // Parentheses and comments
+    22    │ - (expect(fn)).toHaveBeenCalledOnce();
+       22 │ + (expect(fn)).toHaveBeenCalledTimes(1);
+    23 23 │   (expect(fn).toHaveBeenCalledOnce)();
+    24 24 │   expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+  
+
+```
+
+```
+invalid.js:23:13 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    21 │ // Parentheses and comments
+    22 │ (expect(fn)).toHaveBeenCalledOnce();
+  > 23 │ (expect(fn).toHaveBeenCalledOnce)();
+       │             ^^^^^^^^^^^^^^^^^^^^
+    24 │ expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+    25 │ expect(fn).toHaveBeenCalledOnce(/* inside */);
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    21 21 │   // Parentheses and comments
+    22 22 │   (expect(fn)).toHaveBeenCalledOnce();
+    23    │ - (expect(fn).toHaveBeenCalledOnce)();
+       23 │ + (expect(fn).toHaveBeenCalledTimes)(1);
+    24 24 │   expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+    25 25 │   expect(fn).toHaveBeenCalledOnce(/* inside */);
+  
+
+```
+
+```
+invalid.js:24:26 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    22 │ (expect(fn)).toHaveBeenCalledOnce();
+    23 │ (expect(fn).toHaveBeenCalledOnce)();
+  > 24 │ expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+       │                          ^^^^^^^^^^^^^^^^^^^^
+    25 │ expect(fn).toHaveBeenCalledOnce(/* inside */);
+    26 │ expect(fn)
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    22 22 │   (expect(fn)).toHaveBeenCalledOnce();
+    23 23 │   (expect(fn).toHaveBeenCalledOnce)();
+    24    │ - expect(fn)·/*·before·*/·.toHaveBeenCalledOnce·/*·after·*/·();
+       24 │ + expect(fn)·/*·before·*/·.toHaveBeenCalledTimes·/*·after·*/·(1);
+    25 25 │   expect(fn).toHaveBeenCalledOnce(/* inside */);
+    26 26 │   expect(fn)
+  
+
+```
+
+```
+invalid.js:25:12 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    23 │ (expect(fn).toHaveBeenCalledOnce)();
+    24 │ expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+  > 25 │ expect(fn).toHaveBeenCalledOnce(/* inside */);
+       │            ^^^^^^^^^^^^^^^^^^^^
+    26 │ expect(fn)
+    27 │ 	.toBeCalledOnce();
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    23 23 │   (expect(fn).toHaveBeenCalledOnce)();
+    24 24 │   expect(fn) /* before */ .toHaveBeenCalledOnce /* after */ ();
+    25    │ - expect(fn).toHaveBeenCalledOnce(/*·inside·*/);
+       25 │ + expect(fn).toHaveBeenCalledTimes(/*·inside·*/1);
+    26 26 │   expect(fn)
+    27 27 │   	.toBeCalledOnce();
+  
+
+```
+
+```
+invalid.js:27:3 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+    25 │ expect(fn).toHaveBeenCalledOnce(/* inside */);
+    26 │ expect(fn)
+  > 27 │ 	.toBeCalledOnce();
+       │ 	 ^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // Arguments are ignored by these matchers, so there is no fix
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+    25 25 │   expect(fn).toHaveBeenCalledOnce(/* inside */);
+    26 26 │   expect(fn)
+    27    │ - → .toBeCalledOnce();
+       27 │ + → .toBeCalledTimes(1);
+    28 28 │   
+    29 29 │   // Arguments are ignored by these matchers, so there is no fix
+  
+
+```
+
+```
+invalid.js:30:12 lint/nursery/noExpectToHaveBeenCalledOnce ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    29 │ // Arguments are ignored by these matchers, so there is no fix
+  > 30 │ expect(fn).toHaveBeenCalledOnce(sideEffect());
+       │            ^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ // Inside tests
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:15 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toBeCalledOnce() is used to check that a function was called exactly once.
+  
+    34 │ 	const mock = vi.fn();
+    35 │ 	mock("foo");
+  > 36 │ 	expect(mock).toBeCalledOnce();
+       │ 	             ^^^^^^^^^^^^^^
+    37 │ 	expect(mock).toHaveBeenCalledOnce();
+    38 │ });
+  
+  i toBeCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toBeCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toBeCalledTimes(1) instead.
+  
+    34 34 │     const mock = vi.fn();
+    35 35 │     mock("foo");
+    36    │ - → expect(mock).toBeCalledOnce();
+       36 │ + → expect(mock).toBeCalledTimes(1);
+    37 37 │     expect(mock).toHaveBeenCalledOnce();
+    38 38 │   });
+  
+
+```
+
+```
+invalid.js:37:15 lint/nursery/noExpectToHaveBeenCalledOnce  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i toHaveBeenCalledOnce() is used to check that a function was called exactly once.
+  
+    35 │ 	mock("foo");
+    36 │ 	expect(mock).toBeCalledOnce();
+  > 37 │ 	expect(mock).toHaveBeenCalledOnce();
+       │ 	             ^^^^^^^^^^^^^^^^^^^^
+    38 │ });
+    39 │ 
+  
+  i toHaveBeenCalledTimes() makes the same check and works for any number of calls, so all checks of a call count look the same.
+  
+  i Use toHaveBeenCalledTimes(1) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use toHaveBeenCalledTimes(1) instead.
+  
+    35 35 │     mock("foo");
+    36 36 │     expect(mock).toBeCalledOnce();
+    37    │ - → expect(mock).toHaveBeenCalledOnce();
+       37 │ + → expect(mock).toHaveBeenCalledTimes(1);
+    38 38 │   });
+    39 39 │   
+  
+
+```

@@ -605,6 +605,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSvelteDeclarationRoot::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_BINDING_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteEachBindingRoot::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_INDEX => {
+                    let $pattern = unsafe { $crate::JsSvelteEachIndex::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_SVELTE_EACH_KEY => {
+                    let $pattern = unsafe { $crate::JsSvelteEachKey::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SVELTE_LEGACY_CONST_ROOT => {
                     let $pattern = unsafe { $crate::JsSvelteLegacyConstRoot::new_unchecked(node) };
                     $body
@@ -754,6 +766,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::JsxShorthandAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JSX_SINGLE_TAG_ROOT => {
+                    let $pattern = unsafe { $crate::JsxSingleTagRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {
@@ -1514,4 +1530,3 @@ macro_rules! map_syntax_node {
         }
     };
 }
-pub(crate) use map_syntax_node;

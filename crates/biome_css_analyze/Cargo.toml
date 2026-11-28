@@ -21,6 +21,7 @@ name    = "css_analyzer"
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_analyze_macros     = { workspace = true }
+biome_astro_semantic     = { workspace = true }
 biome_console            = { workspace = true }
 biome_css_factory        = { workspace = true }
 biome_css_semantic       = { workspace = true }
@@ -58,9 +59,6 @@ criterion    = { workspace = true }
 insta        = { workspace = true, features = ["glob"] }
 salsa        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
-
-[build-dependencies]
-filetime = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

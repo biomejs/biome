@@ -1,0 +1,1287 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import {
+	QueryClient,
+	QueryClient as Client,
+	useInfiniteQuery,
+	useIsFetching,
+	usePrefetchInfiniteQuery,
+	usePrefetchQuery,
+	useQueries,
+	useQuery,
+	useQuery as useData,
+	useQueryClient,
+	useQueryClient as getClient,
+	useSuspenseInfiniteQuery,
+	useSuspenseQueries,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useQuery as useVueQuery } from "@tanstack/vue-query";
+
+// Options written in a hook.
+function Hooks({ id, queryKey, queryFn }) {
+	useQuery({
+		queryKey: ["todo", id],
+		queryFn: () => fetchTodo(id),
+	});
+	useQuery({ queryKey: ["todos"] });
+	useQuery({ queryFn: () => fetchTodos() });
+	useQuery({ queryKey, queryFn });
+	useQuery({
+		queryKey: ["todos"],
+		queryFn() {
+			return fetchTodos();
+		},
+	});
+	useQuery({ "queryKey": ["todos"], "queryFn": fetchTodos });
+	useQuery({ ...options, queryKey: ["override"] });
+	useQuery({ ...options, queryFn: () => fetchOverride() });
+	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	usePrefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	useInfiniteQuery({
+		queryKey: ["todos"],
+		queryFn: ({ pageParam }) => fetchTodos(pageParam),
+		initialPageParam: 0,
+		getNextPageParam: (lastPage) => lastPage.nextCursor,
+	});
+	useSuspenseInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	usePrefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+}
+
+// Options written in a list of queries.
+function Lists({ ids, isEnabled }) {
+	useQueries({
+		queries: [
+			{ queryKey: ["todos"], queryFn: fetchTodos },
+			userOptions,
+			{ queryKey: ["users"], queryFn: fetchUsers },
+		],
+	});
+	useSuspenseQueries({
+		queries: [{ queryKey: ["todos"], queryFn: fetchTodos }],
+	});
+	useQueries({
+		queries: ids.map((id) => ({
+			queryKey: ["todo", id],
+			queryFn: () => fetchTodo(id),
+		})),
+	});
+	useSuspenseQueries({
+		queries: ids.map(function (id) {
+			return { queryKey: ["todo", id], queryFn: () => fetchTodo(id) };
+		}),
+	});
+	useQueries({
+		queries: ids.map((id) => {
+			if (!id) {
+				return { queryKey: ["todo", "none"], queryFn: () => null };
+			}
+			return isEnabled
+				? { queryKey: ["todo", id], queryFn: () => fetchTodo(id) }
+				: disabledOptions;
+		}),
+	});
+	useQueries({
+		queries: ids.map(
+			(id) => cachedOptions[id] ?? { queryKey: ["todo", id], queryFn: fetchTodo },
+		),
+	});
+}
+
+// Options written in a method of the query client.
+function ClientOptions() {
+	const queryClient = useQueryClient();
+	queryClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	queryClient.prefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	queryClient.prefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+	queryClient.ensureInfiniteQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+}
+
+// A query key written in a method of the query client.
+function ClientKeys() {
+	const queryClient = useQueryClient();
+	queryClient.getQueryData(["todos"]);
+	queryClient.setQueryData(["todos"], []);
+	queryClient.getQueryState(["todos"]);
+	queryClient.setQueryDefaults(["todos"], { staleTime: 1000 });
+	queryClient.getQueryDefaults(["todos"]);
+}
+
+// A query key written in filters.
+function Filters() {
+	const queryClient = useQueryClient();
+	queryClient.invalidateQueries({ queryKey: ["todos"] });
+	queryClient.invalidateQueries({ queryKey: ["todos"], exact: true });
+	queryClient.cancelQueries({ queryKey: ["todos"] });
+	queryClient.refetchQueries({ queryKey: ["todos"] });
+	queryClient.removeQueries({ queryKey: ["todos"] });
+	queryClient.resetQueries({ queryKey: ["todos"] });
+	queryClient.isFetching({ queryKey: ["todos"] });
+	queryClient.getQueriesData({ queryKey: ["todos"] });
+	queryClient.setQueriesData({ queryKey: ["todos"] }, []);
+	useIsFetching({ queryKey: ["todos"] });
+}
+
+// The ways to get a query client.
+function Clients() {
+	const client = getClient();
+	client.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+	const alias = client;
+	alias.getQueryData(["todos"]);
+	alias?.invalidateQueries({ queryKey: ["todos"] });
+	alias["getQueryState"](["todos"]);
+
+	useQueryClient().getQueryData(["todos"]);
+	new QueryClient().getQueryData(["todos"]);
+}
+
+const sharedClient = new Client();
+sharedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+function usesLaterClient() {
+	laterClient.getQueryData(["todos"]);
+}
+const laterClient = new QueryClient();
+
+```
+
+# Diagnostics
+```
+invalid.js:22:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    20 │ // Options written in a hook.
+    21 │ function Hooks({ id, queryKey, queryFn }) {
+  > 22 │ 	useQuery({
+       │ 	         ^
+  > 23 │ 		queryKey: ["todo", id],
+  > 24 │ 		queryFn: () => fetchTodo(id),
+  > 25 │ 	});
+       │ 	^
+    26 │ 	useQuery({ queryKey: ["todos"] });
+    27 │ 	useQuery({ queryFn: () => fetchTodos() });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    24 │ 		queryFn: () => fetchTodo(id),
+    25 │ 	});
+  > 26 │ 	useQuery({ queryKey: ["todos"] });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	useQuery({ queryFn: () => fetchTodos() });
+    28 │ 	useQuery({ queryKey, queryFn });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    25 │ 	});
+    26 │ 	useQuery({ queryKey: ["todos"] });
+  > 27 │ 	useQuery({ queryFn: () => fetchTodos() });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	useQuery({ queryKey, queryFn });
+    29 │ 	useQuery({
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    26 │ 	useQuery({ queryKey: ["todos"] });
+    27 │ 	useQuery({ queryFn: () => fetchTodos() });
+  > 28 │ 	useQuery({ queryKey, queryFn });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^
+    29 │ 	useQuery({
+    30 │ 		queryKey: ["todos"],
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    27 │ 	useQuery({ queryFn: () => fetchTodos() });
+    28 │ 	useQuery({ queryKey, queryFn });
+  > 29 │ 	useQuery({
+       │ 	         ^
+  > 30 │ 		queryKey: ["todos"],
+  > 31 │ 		queryFn() {
+  > 32 │ 			return fetchTodos();
+  > 33 │ 		},
+  > 34 │ 	});
+       │ 	^
+    35 │ 	useQuery({ "queryKey": ["todos"], "queryFn": fetchTodos });
+    36 │ 	useQuery({ ...options, queryKey: ["override"] });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    33 │ 		},
+    34 │ 	});
+  > 35 │ 	useQuery({ "queryKey": ["todos"], "queryFn": fetchTodos });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 	useQuery({ ...options, queryKey: ["override"] });
+    37 │ 	useQuery({ ...options, queryFn: () => fetchOverride() });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    34 │ 	});
+    35 │ 	useQuery({ "queryKey": ["todos"], "queryFn": fetchTodos });
+  > 36 │ 	useQuery({ ...options, queryKey: ["override"] });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 	useQuery({ ...options, queryFn: () => fetchOverride() });
+    38 │ 	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    35 │ 	useQuery({ "queryKey": ["todos"], "queryFn": fetchTodos });
+    36 │ 	useQuery({ ...options, queryKey: ["override"] });
+  > 37 │ 	useQuery({ ...options, queryFn: () => fetchOverride() });
+       │ 	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+    39 │ 	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:12 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    36 │ 	useQuery({ ...options, queryKey: ["override"] });
+    37 │ 	useQuery({ ...options, queryFn: () => fetchOverride() });
+  > 38 │ 	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+       │ 	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+    40 │ 	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:10 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    37 │ 	useQuery({ ...options, queryFn: () => fetchOverride() });
+    38 │ 	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+  > 39 │ 	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    41 │ 	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:14 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    38 │ 	useQuery(({ queryKey: ["todos"], queryFn: fetchTodos }));
+    39 │ 	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 40 │ 	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    42 │ 	usePrefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:19 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    39 │ 	useData({ queryKey: ["todos"], queryFn: fetchTodos });
+    40 │ 	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 41 │ 	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	usePrefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    43 │ 	useInfiniteQuery({
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:19 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    40 │ 	useVueQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    41 │ 	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 42 │ 	usePrefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	useInfiniteQuery({
+    44 │ 		queryKey: ["todos"],
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:19 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    41 │ 	useSuspenseQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    42 │ 	usePrefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 43 │ 	useInfiniteQuery({
+       │ 	                 ^
+  > 44 │ 		queryKey: ["todos"],
+  > 45 │ 		queryFn: ({ pageParam }) => fetchTodos(pageParam),
+  > 46 │ 		initialPageParam: 0,
+  > 47 │ 		getNextPageParam: (lastPage) => lastPage.nextCursor,
+  > 48 │ 	});
+       │ 	^
+    49 │ 	useSuspenseInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    50 │ 	usePrefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    47 │ 		getNextPageParam: (lastPage) => lastPage.nextCursor,
+    48 │ 	});
+  > 49 │ 	useSuspenseInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	usePrefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    51 │ }
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    48 │ 	});
+    49 │ 	useSuspenseInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 50 │ 	usePrefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ }
+    52 │ 
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:4 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    55 │ 	useQueries({
+    56 │ 		queries: [
+  > 57 │ 			{ queryKey: ["todos"], queryFn: fetchTodos },
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ 			userOptions,
+    59 │ 			{ queryKey: ["users"], queryFn: fetchUsers },
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:4 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    57 │ 			{ queryKey: ["todos"], queryFn: fetchTodos },
+    58 │ 			userOptions,
+  > 59 │ 			{ queryKey: ["users"], queryFn: fetchUsers },
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 		],
+    61 │ 	});
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:13 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    61 │ 	});
+    62 │ 	useSuspenseQueries({
+  > 63 │ 		queries: [{ queryKey: ["todos"], queryFn: fetchTodos }],
+       │ 		          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ 	});
+    65 │ 	useQueries({
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:29 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    64 │ 	});
+    65 │ 	useQueries({
+  > 66 │ 		queries: ids.map((id) => ({
+       │ 		                          ^
+  > 67 │ 			queryKey: ["todo", id],
+  > 68 │ 			queryFn: () => fetchTodo(id),
+  > 69 │ 		})),
+       │ 		^
+    70 │ 	});
+    71 │ 	useSuspenseQueries({
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:11 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    71 │ 	useSuspenseQueries({
+    72 │ 		queries: ids.map(function (id) {
+  > 73 │ 			return { queryKey: ["todo", id], queryFn: () => fetchTodo(id) };
+       │ 			       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 		}),
+    75 │ 	});
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:12 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    77 │ 		queries: ids.map((id) => {
+    78 │ 			if (!id) {
+  > 79 │ 				return { queryKey: ["todo", "none"], queryFn: () => null };
+       │ 				       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 			}
+    81 │ 			return isEnabled
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:82:7 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    80 │ 			}
+    81 │ 			return isEnabled
+  > 82 │ 				? { queryKey: ["todo", id], queryFn: () => fetchTodo(id) }
+       │ 				  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ 				: disabledOptions;
+    84 │ 		}),
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:33 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    86 │ 	useQueries({
+    87 │ 		queries: ids.map(
+  > 88 │ 			(id) => cachedOptions[id] ?? { queryKey: ["todo", id], queryFn: fetchTodo },
+       │ 			                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 		),
+    90 │ 	});
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:96:25 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    94 │ function ClientOptions() {
+    95 │ 	const queryClient = useQueryClient();
+  > 96 │ 	queryClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    97 │ 	queryClient.prefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    98 │ 	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:97:28 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    95 │ 	const queryClient = useQueryClient();
+    96 │ 	queryClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 97 │ 	queryClient.prefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+       │ 	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    98 │ 	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+    99 │ 	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:30 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+     96 │ 	queryClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+     97 │ 	queryClient.prefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+   > 98 │ 	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+        │ 	                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     99 │ 	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    100 │ 	queryClient.prefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:99:33 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+     97 │ 	queryClient.prefetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+     98 │ 	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+   > 99 │ 	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+        │ 	                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ 	queryClient.prefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    101 │ 	queryClient.ensureInfiniteQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:100:36 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+     98 │ 	queryClient.ensureQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+     99 │ 	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 100 │ 	queryClient.prefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+        │ 	                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    101 │ 	queryClient.ensureInfiniteQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+    102 │ }
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:101:38 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+     99 │ 	queryClient.fetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+    100 │ 	queryClient.prefetchInfiniteQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+  > 101 │ 	queryClient.ensureInfiniteQueryData({ queryKey: ["todos"], queryFn: fetchTodos });
+        │ 	                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    102 │ }
+    103 │ 
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with infiniteQueryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:107:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    105 │ function ClientKeys() {
+    106 │ 	const queryClient = useQueryClient();
+  > 107 │ 	queryClient.getQueryData(["todos"]);
+        │ 	                         ^^^^^^^^^
+    108 │ 	queryClient.setQueryData(["todos"], []);
+    109 │ 	queryClient.getQueryState(["todos"]);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:108:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    106 │ 	const queryClient = useQueryClient();
+    107 │ 	queryClient.getQueryData(["todos"]);
+  > 108 │ 	queryClient.setQueryData(["todos"], []);
+        │ 	                         ^^^^^^^^^
+    109 │ 	queryClient.getQueryState(["todos"]);
+    110 │ 	queryClient.setQueryDefaults(["todos"], { staleTime: 1000 });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:109:28 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    107 │ 	queryClient.getQueryData(["todos"]);
+    108 │ 	queryClient.setQueryData(["todos"], []);
+  > 109 │ 	queryClient.getQueryState(["todos"]);
+        │ 	                          ^^^^^^^^^
+    110 │ 	queryClient.setQueryDefaults(["todos"], { staleTime: 1000 });
+    111 │ 	queryClient.getQueryDefaults(["todos"]);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:110:31 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    108 │ 	queryClient.setQueryData(["todos"], []);
+    109 │ 	queryClient.getQueryState(["todos"]);
+  > 110 │ 	queryClient.setQueryDefaults(["todos"], { staleTime: 1000 });
+        │ 	                             ^^^^^^^^^
+    111 │ 	queryClient.getQueryDefaults(["todos"]);
+    112 │ }
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:111:31 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    109 │ 	queryClient.getQueryState(["todos"]);
+    110 │ 	queryClient.setQueryDefaults(["todos"], { staleTime: 1000 });
+  > 111 │ 	queryClient.getQueryDefaults(["todos"]);
+        │ 	                             ^^^^^^^^^
+    112 │ }
+    113 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:117:44 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    115 │ function Filters() {
+    116 │ 	const queryClient = useQueryClient();
+  > 117 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] });
+        │ 	                                          ^^^^^^^^^
+    118 │ 	queryClient.invalidateQueries({ queryKey: ["todos"], exact: true });
+    119 │ 	queryClient.cancelQueries({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:118:44 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    116 │ 	const queryClient = useQueryClient();
+    117 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] });
+  > 118 │ 	queryClient.invalidateQueries({ queryKey: ["todos"], exact: true });
+        │ 	                                          ^^^^^^^^^
+    119 │ 	queryClient.cancelQueries({ queryKey: ["todos"] });
+    120 │ 	queryClient.refetchQueries({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:119:40 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    117 │ 	queryClient.invalidateQueries({ queryKey: ["todos"] });
+    118 │ 	queryClient.invalidateQueries({ queryKey: ["todos"], exact: true });
+  > 119 │ 	queryClient.cancelQueries({ queryKey: ["todos"] });
+        │ 	                                      ^^^^^^^^^
+    120 │ 	queryClient.refetchQueries({ queryKey: ["todos"] });
+    121 │ 	queryClient.removeQueries({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:120:41 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    118 │ 	queryClient.invalidateQueries({ queryKey: ["todos"], exact: true });
+    119 │ 	queryClient.cancelQueries({ queryKey: ["todos"] });
+  > 120 │ 	queryClient.refetchQueries({ queryKey: ["todos"] });
+        │ 	                                       ^^^^^^^^^
+    121 │ 	queryClient.removeQueries({ queryKey: ["todos"] });
+    122 │ 	queryClient.resetQueries({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:121:40 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    119 │ 	queryClient.cancelQueries({ queryKey: ["todos"] });
+    120 │ 	queryClient.refetchQueries({ queryKey: ["todos"] });
+  > 121 │ 	queryClient.removeQueries({ queryKey: ["todos"] });
+        │ 	                                      ^^^^^^^^^
+    122 │ 	queryClient.resetQueries({ queryKey: ["todos"] });
+    123 │ 	queryClient.isFetching({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:122:39 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    120 │ 	queryClient.refetchQueries({ queryKey: ["todos"] });
+    121 │ 	queryClient.removeQueries({ queryKey: ["todos"] });
+  > 122 │ 	queryClient.resetQueries({ queryKey: ["todos"] });
+        │ 	                                     ^^^^^^^^^
+    123 │ 	queryClient.isFetching({ queryKey: ["todos"] });
+    124 │ 	queryClient.getQueriesData({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:123:37 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    121 │ 	queryClient.removeQueries({ queryKey: ["todos"] });
+    122 │ 	queryClient.resetQueries({ queryKey: ["todos"] });
+  > 123 │ 	queryClient.isFetching({ queryKey: ["todos"] });
+        │ 	                                   ^^^^^^^^^
+    124 │ 	queryClient.getQueriesData({ queryKey: ["todos"] });
+    125 │ 	queryClient.setQueriesData({ queryKey: ["todos"] }, []);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:124:41 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    122 │ 	queryClient.resetQueries({ queryKey: ["todos"] });
+    123 │ 	queryClient.isFetching({ queryKey: ["todos"] });
+  > 124 │ 	queryClient.getQueriesData({ queryKey: ["todos"] });
+        │ 	                                       ^^^^^^^^^
+    125 │ 	queryClient.setQueriesData({ queryKey: ["todos"] }, []);
+    126 │ 	useIsFetching({ queryKey: ["todos"] });
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:125:41 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    123 │ 	queryClient.isFetching({ queryKey: ["todos"] });
+    124 │ 	queryClient.getQueriesData({ queryKey: ["todos"] });
+  > 125 │ 	queryClient.setQueriesData({ queryKey: ["todos"] }, []);
+        │ 	                                       ^^^^^^^^^
+    126 │ 	useIsFetching({ queryKey: ["todos"] });
+    127 │ }
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:126:28 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    124 │ 	queryClient.getQueriesData({ queryKey: ["todos"] });
+    125 │ 	queryClient.setQueriesData({ queryKey: ["todos"] }, []);
+  > 126 │ 	useIsFetching({ queryKey: ["todos"] });
+        │ 	                          ^^^^^^^^^
+    127 │ }
+    128 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:132:20 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    130 │ function Clients() {
+    131 │ 	const client = getClient();
+  > 132 │ 	client.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+        │ 	                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 
+    134 │ 	const alias = client;
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:135:21 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    134 │ 	const alias = client;
+  > 135 │ 	alias.getQueryData(["todos"]);
+        │ 	                   ^^^^^^^^^
+    136 │ 	alias?.invalidateQueries({ queryKey: ["todos"] });
+    137 │ 	alias["getQueryState"](["todos"]);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:136:39 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    134 │ 	const alias = client;
+    135 │ 	alias.getQueryData(["todos"]);
+  > 136 │ 	alias?.invalidateQueries({ queryKey: ["todos"] });
+        │ 	                                     ^^^^^^^^^
+    137 │ 	alias["getQueryState"](["todos"]);
+    138 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:137:25 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    135 │ 	alias.getQueryData(["todos"]);
+    136 │ 	alias?.invalidateQueries({ queryKey: ["todos"] });
+  > 137 │ 	alias["getQueryState"](["todos"]);
+        │ 	                       ^^^^^^^^^
+    138 │ 
+    139 │ 	useQueryClient().getQueryData(["todos"]);
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:139:32 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    137 │ 	alias["getQueryState"](["todos"]);
+    138 │ 
+  > 139 │ 	useQueryClient().getQueryData(["todos"]);
+        │ 	                              ^^^^^^^^^
+    140 │ 	new QueryClient().getQueryData(["todos"]);
+    141 │ }
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:140:33 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    139 │ 	useQueryClient().getQueryData(["todos"]);
+  > 140 │ 	new QueryClient().getQueryData(["todos"]);
+        │ 	                               ^^^^^^^^^
+    141 │ }
+    142 │ 
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:144:25 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The options of this query are written where the query is used.
+  
+    143 │ const sharedClient = new Client();
+  > 144 │ sharedClient.fetchQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    145 │ 
+    146 │ function usesLaterClient() {
+  
+  i When queryKey and queryFn are written again in each place that uses the query, the same key can end up with two different functions. One place then receives the data that the other one fetched.
+  
+  i Create the options once with queryOptions(), and pass the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:147:27 lint/nursery/useTanstackQueryQueryOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This query key is written by hand.
+  
+    146 │ function usesLaterClient() {
+  > 147 │ 	laterClient.getQueryData(["todos"]);
+        │ 	                         ^^^^^^^^^
+    148 │ }
+    149 │ const laterClient = new QueryClient();
+  
+  i A key that is written again can differ from the key of the query, for example after one of them is changed. This call then no longer finds the query.
+  
+  i Create the options of the query with queryOptions(), and read the queryKey property of the result here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

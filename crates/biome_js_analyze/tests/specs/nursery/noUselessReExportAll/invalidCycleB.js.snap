@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidCycleB.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export * from "./invalidCycleA.js";
+
+```
+
+# Diagnostics
+```
+invalidCycleB.js:2:15 lint/nursery/noUselessReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The module ./invalidCycleA.js has no named exports, so this statement exports nothing.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export * from "./invalidCycleA.js";
+      │               ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i export * from doesn't re-export the default export.
+  
+  i Re-export the default export with export { default } from, or remove this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
